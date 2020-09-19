@@ -1,0 +1,16 @@
+[package]
+name = "mcprogedit"
+version = "0.1.0"
+authors = ["Terje Schjelderup <terjesc@pvv.org>"]
+edition = "2018"
+description = "Programmatically edit Minecraft savefiles and schematics."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bounded-integer = "0.2.1"
+hematite-nbt = "0.5.0"
+ndarray = "0.13.1"
+serde_derive = "1.0"
+serde_json = "1.0"
+static_assertions = "1.1.0"
