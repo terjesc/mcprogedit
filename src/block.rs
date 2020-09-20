@@ -381,10 +381,10 @@ pub enum VerticalPosition {
 /// flagged for update so that it will be automatically corrected in-game.
 #[derive(Clone, PartialEq)]
 pub struct Stair {
-    material: StairMaterial,
-    position: VerticalPosition,
-    facing: Facing,
-    waterlogged: bool,
+    pub material: StairMaterial,
+    pub position: VerticalPosition,
+    pub facing: Facing,
+    pub waterlogged: bool,
 }
 
 #[derive(Clone, PartialEq)]
@@ -516,12 +516,12 @@ pub enum CoralMaterial {
 // TODO consider using BitSet here
 #[derive(Clone, PartialEq)]
 pub struct DirectionFlags6 {
-    east: bool,
-    down: bool,
-    north: bool,
-    south: bool,
-    up: bool,
-    west: bool,
+    pub east: bool,
+    pub down: bool,
+    pub north: bool,
+    pub south: bool,
+    pub up: bool,
+    pub west: bool,
 }
 
 pub type ChorusPlantConnections = DirectionFlags6;
@@ -547,9 +547,9 @@ pub enum CommandBlockVariant {
 
 #[derive(Clone, PartialEq)]
 pub struct CommandBlock {
-    variant: CommandBlockVariant,
-    conditional: bool,
-    facing: Facing6,
+    pub variant: CommandBlockVariant,
+    pub conditional: bool,
+    pub facing: Facing6,
 }
 
 #[derive(Clone, PartialEq)]
@@ -561,9 +561,9 @@ pub enum ChestVariant {
 
 #[derive(Clone, PartialEq)]
 pub struct Chest {
-    facing: Facing,
-    variant: ChestVariant,
-    waterlogged: bool,
+    pub facing: Facing,
+    pub variant: ChestVariant,
+    pub waterlogged: bool,
 }
 
 #[derive(Clone, PartialEq)]
@@ -578,9 +578,9 @@ pub enum HeadVariant {
 
 #[derive(Clone, PartialEq)]
 pub struct Head {
-    variant: HeadVariant,
-    facing: WallFloorFacing,
-    waterlogged: bool,
+    pub variant: HeadVariant,
+    pub facing: WallFloorFacing,
+    pub waterlogged: bool,
 }
 
 #[derive(Clone, PartialEq)]
