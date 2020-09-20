@@ -6,4 +6,5 @@ extern crate static_assertions;
 pub mod block;
 pub mod canvas;
 pub mod coordinates;
+pub mod material;
 pub mod region_file;

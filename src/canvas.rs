@@ -28,7 +28,8 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::block::{Log, Material};
+    use crate::block::Log;
+    use crate::material::WoodMaterial;
 
     #[test]
     fn test_basic_functionality() {
@@ -48,7 +49,7 @@ mod tests {
             &mut test_canvas,
             (0, 2, 0),
             Block::Log(Log {
-                material: Material::Oak,
+                material: WoodMaterial::Oak,
                 alignment: None,
                 stripped: false,
             }),

@@ -19,6 +19,7 @@ pub enum Colour {
 }
 
 pub type Color = Colour;
+use crate::material::*;
 
 /// Where in its 1x1x1 m space a block is positioned. E.g. a Lever
 /// with Ceiling Face is mounted on the bottom side of the block
@@ -87,143 +88,6 @@ pub enum DoorHalf {
 pub enum Hinge {
     Left,
     Right,
-}
-
-// "Wooden blocks": Button, Door, Fence, FenceGate, Log, PressurePlate, Sign, Trapdoor
-#[derive(Clone, PartialEq)]
-pub enum Material {
-    Stone,              // Button, PressurePlate
-    Oak,                // Wooden blocks, Leaves
-    Spruce,             // Wooden blocks, Leaves
-    Birch,              // Wooden blocks, Leaves
-    Jungle,             // Wooden blocks, Leaves
-    Acacia,             // Wooden blocks, Leaves
-    DarkOak,            // Wooden blocks, Leaves
-    Crimson,            // Wooden blocks
-    Warped,             // Wooden blocks
-    PolishedBlackstone, // Button, PressurePlate
-    Iron,               // Door, PressurePlate, Trapdoor
-    NetherBrick,        // Fence
-    Gold,               // PressurePlate
-}
-
-#[derive(Clone, PartialEq)]
-pub enum SaplingMaterial {
-    Acacia,
-    Bamboo,
-    Birch,
-    DarkOak,
-    Jungle,
-    Oak,
-    Spruce,
-}
-
-#[derive(Clone, PartialEq)]
-pub enum SlabMaterial {
-    Acacia,
-    Andesite,
-    Birch,
-    Blackstone,
-    Brick,
-    Cobblestone,
-    Crimson,
-    CutRedSandstone,
-    CutSandstone,
-    DarkOak,
-    DarkPrismarine,
-    Diorite,
-    EndStone,
-    Granite,
-    Jungle,
-    MossyCobblestone,
-    MossyStoneBrick,
-    NetherBrick,
-    Oak,
-    /// Only available for slabs and in creative. Slabs of this material are
-    /// mined using a pickaxe. Probably exists for compatibility with old
-    /// versions, where all slabs were mined using pickaxe.
-    PetrifiedOak,
-    PolishedAndesite,
-    PolishedBlackstone,
-    PolishedBlackstoneBrick,
-    PolishedDiorite,
-    PolishedGranite,
-    Prismarine,
-    PrismarineBrick,
-    Purpur,
-    Quartz,
-    RedNetherBrick,
-    RedSandstone,
-    Sandstone,
-    SmoothQuartz,
-    SmoothRedSandstone,
-    SmoothSandstone,
-    SmoothStone,
-    Spruce,
-    Stone,
-    StoneBrick,
-    Warped,
-}
-
-#[derive(Clone, PartialEq)]
-pub enum StairMaterial {
-    Acacia,
-    Andesite,
-    Birch,
-    Blackstone,
-    Brick,
-    Cobblestone,
-    Crimson,
-    DarkOak,
-    DarkPrismarine,
-    Diorite,
-    EndStone,
-    Granite,
-    Jungle,
-    MossyCobblestone,
-    MossyStoneBrick,
-    NetherBrick,
-    Oak,
-    PolishedAndesite,
-    PolishedBlackstone,
-    PolishedBlackstoneBrick,
-    PolishedDiorite,
-    PolishedGranite,
-    Prismarine,
-    PrismarineBrick,
-    Purpur,
-    Quartz,
-    RedNetherBrick,
-    RedSandstone,
-    Sandstone,
-    SmoothQuartz,
-    SmoothRedSandstone,
-    SmoothSandstone,
-    Spruce,
-    Stone,
-    StoneBrick,
-    Warped,
-}
-
-#[derive(Clone, PartialEq)]
-pub enum WallMaterial {
-    Andesite,
-    Blackstone,
-    Brick,
-    Cobblestone,
-    Diorite,
-    EndStone,
-    Granite,
-    MossyCobblestone,
-    MossyStoneBrick,
-    NetherBrick,
-    PolishedBlackstone,
-    PolishedBlackstoneBrick,
-    Prismarine,
-    RedNetherBrick,
-    RedSandstone,
-    Sandstone,
-    StoneBrick,
 }
 
 bounded_integer! {
@@ -342,7 +206,7 @@ pub enum WallFloorFacing {
 
 #[derive(Clone, PartialEq)]
 pub struct Sign {
-    material: Material,
+    material: WoodMaterial,
     facing: WallFloorFacing,
     waterlogged: bool,
     colour: Colour,
@@ -479,7 +343,7 @@ pub enum BambooLeaves {
 
 #[derive(Clone, PartialEq)]
 pub struct Log {
-    pub material: Material,
+    pub material: WoodMaterial,
     /// Logs with no alignment have bark (or stripped pattern) on all sides.
     pub alignment: Option<Axis>,
     pub stripped: bool,
@@ -502,15 +366,6 @@ pub enum BellMounting {
 pub enum BedEnd {
     Foot,
     Head,
-}
-
-#[derive(Clone, PartialEq)]
-pub enum CoralMaterial {
-    Bubble,
-    Brain,
-    Fire,
-    Horn,
-    Tube,
 }
 
 // TODO consider using BitSet here
@@ -809,7 +664,7 @@ pub enum Block {
     BubbleColumn {
         drag_direction: BubbleDirection,
     }, // Is this even needed?
-    Button(Material, Face, Facing),
+    Button(ButtonMaterial, Face, Facing),
     Cactus {
         age: Age16,
     },
@@ -905,7 +760,7 @@ pub enum Block {
         facing: Facing6,
     }, // TODO add block entity
     Door {
-        material: Material,
+        material: DoorMaterial,
         facing: Facing,
         half: DoorHalf,
         hinge: Hinge,
@@ -937,11 +792,11 @@ pub enum Block {
         wetness: Wetness,
     },
     Fence {
-        material: Material,
+        material: FenceMaterial,
         waterlogged: bool,
     },
     FenceGate {
-        material: Material,
+        material: WoodMaterial,
         facing: Facing,
         open: bool,
     },
@@ -1022,7 +877,7 @@ pub enum Block {
     LapisLazuliOre,
     LavaSource, // TODO handle magic (that is, the "flowing" state)
     Leaves {
-        material: Material,
+        material: LeavesMaterial,
         distance_to_trunk: DistanceToTrunk,
         persistent: bool,
     },
@@ -1070,7 +925,7 @@ pub enum Block {
         facing: Facing,
     }, // TODO consider adding "extended" field and PistonHead block.
     Planks {
-        material: Material,
+        material: WoodMaterial,
     },
     Podzol,
     PolishedAndesite,
@@ -1085,7 +940,7 @@ pub enum Block {
         growth_stage: Age8,
     },
     PressurePlate {
-        material: Material,
+        material: PressurePlateMaterial,
     },
     Prismarine,
     PrismarineBricks,
@@ -1217,7 +1072,7 @@ pub enum Block {
         facing: Facing5,
     },
     Trapdoor {
-        material: Material,
+        material: DoorMaterial,
         position: VerticalPosition,
         facing: Facing,
         open: bool,
