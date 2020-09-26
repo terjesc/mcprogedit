@@ -76,7 +76,7 @@ fn main() {
     );
     println!(
         "WallFloorFacing size is {}",
-        std::mem::size_of::<mcprogedit::block::WallFloorFacing>()
+        std::mem::size_of::<mcprogedit::positioning::WallOrRotatedOnFloor>()
     );
     println!(
         "Age16 size is {}",

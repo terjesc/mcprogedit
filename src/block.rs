@@ -20,57 +20,7 @@ pub enum Colour {
 
 pub type Color = Colour;
 use crate::material::*;
-
-/// Where in its 1x1x1 m space a block is positioned. E.g. a Lever
-/// with Ceiling Face is mounted on the bottom side of the block
-/// above it, and a Button with Floor Face is mounted on top of the
-/// block below it.
-#[derive(Clone, PartialEq)]
-pub enum Face {
-    Ceiling,
-    Floor,
-    Wall,
-}
-
-/// What direction a block is facing. For blocks mounted on walls,
-/// the Facing is in the opposite direction of the block on which
-/// they are mounted. E.g. a Button Facing East is mounted on the
-/// block to its West. Using this terminology, Doors are "mounted"
-/// on the block that they touch with their full width when closed.
-/// Stairs are facing towards the full-block side. Trapdoors are
-/// hinged on the mounted side. For beds, what end the pillow is in.
-#[derive(Clone, PartialEq)]
-pub enum Facing {
-    East,
-    North,
-    South,
-    West,
-}
-
-/// What direction a block is facing, 5 possible directions.
-/// For Coral Fans, this is the direction they are growing out of the,
-/// neighbouring block, e.g. Facing5 Up means it grows on the floor.
-/// For Hopper, Up means output is down, otherwise output is towards
-/// the direction indicated.
-#[derive(Clone, PartialEq)]
-pub enum Facing5 {
-    East,
-    North,
-    South,
-    Up,
-    West,
-}
-
-/// What direction a block is facing, 6 possible directions.
-#[derive(Clone, PartialEq)]
-pub enum Facing6 {
-    Down,
-    East,
-    North,
-    South,
-    Up,
-    West,
-}
+use crate::positioning::*;
 
 /// Doors are two blocks high. Which block is this?
 #[derive(Clone, PartialEq)]
@@ -94,46 +44,6 @@ bounded_integer! {
     /// For Leaves, how far they are from the trunk.
     #[repr(i8)]
     pub struct DistanceToTrunk { 0..=7 }
-}
-
-/// For Logs, pillars, etc. What axis they are aligned with.
-#[derive(Clone, PartialEq)]
-pub enum Axis {
-    /// East-West orientation
-    X,
-    /// Vertical (Up-Down) orientation
-    Y,
-    /// North-South orientation
-    Z,
-}
-
-#[allow(non_upper_case_globals)]
-impl Axis {
-    /// Helper alias for axis orientation
-    pub const East: Axis = Axis::X;
-    pub const West: Axis = Axis::X;
-    pub const Up: Axis = Axis::Y;
-    pub const Down: Axis = Axis::Y;
-    pub const South: Axis = Axis::Z;
-    pub const North: Axis = Axis::Z;
-}
-
-/// For Nether Portal blocks.
-#[derive(Clone, PartialEq)]
-pub enum Axis2D {
-    /// East-West orientation
-    X,
-    /// North-South orientation
-    Z,
-}
-
-#[allow(non_upper_case_globals)]
-impl Axis2D {
-    /// Helper alias for axis orientation
-    pub const East: Axis2D = Axis2D::X;
-    pub const West: Axis2D = Axis2D::X;
-    pub const South: Axis2D = Axis2D::Z;
-    pub const North: Axis2D = Axis2D::Z;
 }
 
 bounded_integer! {
@@ -190,24 +100,10 @@ bounded_integer! {
     pub struct CakeBites { 0..=6 }
 }
 
-bounded_integer! {
-    /// Facing starts at 0 for South, then goes clockwise by 22.5 degrees,
-    /// e.g. 2 is southwest, 4 is West, 15 is south-southeast.
-    #[repr(i8)]
-    pub struct Facing16 { 0..=15 }
-}
-
-/// Despite the name, actually is used for describing both Sign, Banner, and Head.
-#[derive(Clone, PartialEq)]
-pub enum WallFloorFacing {
-    Floor(Facing16),
-    Wall(Facing),
-}
-
 #[derive(Clone, PartialEq)]
 pub struct Sign {
     material: WoodMaterial,
-    facing: WallFloorFacing,
+    placement: WallOrRotatedOnFloor,
     waterlogged: bool,
     colour: Colour,
     text1: String,
@@ -217,7 +113,7 @@ pub struct Sign {
 }
 
 #[derive(Clone, PartialEq)]
-pub enum SlabPosition {
+pub enum SlabVariant {
     Bottom,
     Double,
     Top,
@@ -226,18 +122,8 @@ pub enum SlabPosition {
 #[derive(Clone, PartialEq)]
 pub struct Slab {
     material: SlabMaterial,
-    position: SlabPosition,
+    position: SlabVariant,
     waterlogged: bool,
-}
-
-#[derive(Clone, PartialEq)]
-pub enum VerticalPosition {
-    /// For stairs, full block surface at the bottom.
-    /// For trapdoors, trapdoor sits at the bottom when closed.
-    Bottom,
-    /// For stairs, full block surface at the top.
-    /// For trapdoors, trapdoor sits at the top when closed.
-    Top,
 }
 
 /// Stair shape is not configurable, as it depend on neighbouring stairs.
@@ -246,8 +132,7 @@ pub enum VerticalPosition {
 #[derive(Clone, PartialEq)]
 pub struct Stair {
     pub material: StairMaterial,
-    pub position: VerticalPosition,
-    pub facing: Facing,
+    pub position: Edge8,
     pub waterlogged: bool,
 }
 
@@ -322,16 +207,13 @@ pub enum AnvilDamage {
     VeryDamaged,
 }
 
+/// Growth and attachment state for Melon and Pumpkin stems.
 #[derive(Clone, PartialEq)]
 pub enum StemState {
+    /// Stem has not yet produced any fruit, or the fruit has been removed.
     Growing(Age8),
-    Attached(Facing),
-}
-
-#[derive(Clone, PartialEq)]
-pub enum StemMaterial {
-    Melon,
-    Pumpkin,
+    /// Stem has produced a fruit, and faces in the direction of that fruit.
+    Attached(Surface4),
 }
 
 #[derive(Clone, PartialEq)]
@@ -345,21 +227,13 @@ pub enum BambooLeaves {
 pub struct Log {
     pub material: WoodMaterial,
     /// Logs with no alignment have bark (or stripped pattern) on all sides.
-    pub alignment: Option<Axis>,
+    pub alignment: Option<Axis3>,
     pub stripped: bool,
 }
 
 bounded_integer! {
     #[repr(i8)]
     pub struct HoneyLevel { 0..=5 }
-}
-
-#[derive(Clone, PartialEq)]
-pub enum BellMounting {
-    Ceiling,
-    DoubleWall,
-    Floor,
-    SingleWall,
 }
 
 #[derive(Clone, PartialEq)]
@@ -382,12 +256,6 @@ pub struct DirectionFlags6 {
 pub type ChorusPlantConnections = DirectionFlags6;
 pub type FireFace = DirectionFlags6;
 
-#[derive(Clone, PartialEq)]
-pub enum BubbleDirection {
-    Upward,
-    Downward,
-}
-
 bounded_integer! {
     #[repr(i8)]
     pub struct WaterLevel { 0..=3 }
@@ -404,7 +272,7 @@ pub enum CommandBlockVariant {
 pub struct CommandBlock {
     pub variant: CommandBlockVariant,
     pub conditional: bool,
-    pub facing: Facing6,
+    pub facing: Surface6,
 }
 
 #[derive(Clone, PartialEq)]
@@ -416,7 +284,7 @@ pub enum ChestVariant {
 
 #[derive(Clone, PartialEq)]
 pub struct Chest {
-    pub facing: Facing,
+    pub facing: Surface4,
     pub variant: ChestVariant,
     pub waterlogged: bool,
 }
@@ -434,7 +302,7 @@ pub enum HeadVariant {
 #[derive(Clone, PartialEq)]
 pub struct Head {
     pub variant: HeadVariant,
-    pub facing: WallFloorFacing,
+    pub placement: WallOrRotatedOnFloor,
     pub waterlogged: bool,
 }
 
@@ -469,24 +337,6 @@ pub enum PottedPlant {
     WarpedFungus,
     Warpedroots,
     WitherRose,
-}
-
-/// I have no idea what all of this means... But supposedly it is the valid
-/// orientations for a Jigsaw Block in Java Edition.
-#[derive(Clone, PartialEq)]
-pub enum JigsawBlockOrientation {
-    DownEast,
-    DownNorth,
-    DownSouth,
-    DownWest,
-    EastUp,
-    NorthUp,
-    SouthUp,
-    UpEast,
-    UpNorth,
-    UpSouth,
-    UpWest,
-    WestUp,
 }
 
 #[derive(Clone, PartialEq)]
@@ -597,7 +447,7 @@ pub enum Block {
     Air,
     AncientDebris,
     Anvil {
-        facing: Facing,
+        facing: Surface4,
         damage: AnvilDamage,
     },
     Andesite,
@@ -608,14 +458,14 @@ pub enum Block {
     },
     Banner {
         colour: Colour,
-        placement: WallFloorFacing,
+        placement: WallOrRotatedOnFloor,
     }, // TODO add block entity
     Barrel {
-        facing: Facing6,
+        facing: Surface6,
     }, // TODO add block entity
     Barrier,
     Basalt {
-        alignment: Axis,
+        alignment: Axis3,
     },
     Beacon, // TODO add block entity
     Bedrock,
@@ -623,25 +473,24 @@ pub enum Block {
         growth_stage: Age4,
     },
     Beehive {
-        facing: Facing,
+        facing: Surface4,
         honey_level: HoneyLevel,
     }, // TODO add block entity
     BeeNest {
-        facing: Facing,
+        facing: Surface4,
         honey_level: HoneyLevel,
     }, // TODO add block entity
     Bell {
-        mounting: BellMounting,
-        facing: Facing,
+        position: BellPosition,
     }, // TODO add block entity
     Bed {
         colour: Colour,
-        facing: Facing,
+        facing: Surface4,
         end: BedEnd,
     },
     Blackstone,
     BlastFurnace {
-        facing: Facing,
+        facing: Surface4,
     }, // TODO add block entity
     BlockOfCoal,
     BlockOfDiamond,
@@ -653,7 +502,7 @@ pub enum Block {
     BlockOfRedstone,
     BlueIce,
     BoneBlock {
-        alignment: Axis,
+        alignment: Axis3,
     },
     Bookshelf,
     BrewingStand, // TODO add block entity
@@ -662,9 +511,9 @@ pub enum Block {
         cap_directions: DirectionFlags6,
     },
     BubbleColumn {
-        drag_direction: BubbleDirection,
+        drag_direction: Surface2,
     }, // Is this even needed?
-    Button(ButtonMaterial, Face, Facing),
+    Button(ButtonMaterial, SurfaceRotation12),
     Cactus {
         age: Age16,
     },
@@ -672,7 +521,7 @@ pub enum Block {
         bites: CakeBites,
     },
     Campfire {
-        facing: Facing,
+        facing: Surface4,
         lit: bool,
         waterlogged: bool,
     },
@@ -684,7 +533,7 @@ pub enum Block {
     },
     CartographyTable,
     CarvedPumpkin {
-        facing: Facing,
+        facing: Surface4,
     },
     Cauldron {
         water_level: WaterLevel,
@@ -710,7 +559,7 @@ pub enum Block {
     Cobweb,
     CocoaBeans {
         age: Age3,
-        facing: Facing,
+        facing: Surface4,
     },
     CommandBlock(CommandBlock), // TODO add block entity
     Composter {
@@ -736,7 +585,7 @@ pub enum Block {
     },
     CoralFan {
         material: CoralMaterial,
-        facing: Facing5,
+        facing: Surface5,
         dead: bool,
         waterlogged: bool,
     },
@@ -757,11 +606,11 @@ pub enum Block {
     Diorite,
     Dirt,
     Dispenser {
-        facing: Facing6,
+        facing: Surface6,
     }, // TODO add block entity
     Door {
         material: DoorMaterial,
-        facing: Facing,
+        facing: Surface4,
         half: DoorHalf,
         hinge: Hinge,
         open: bool,
@@ -769,23 +618,23 @@ pub enum Block {
     DragonEgg,
     DriedKelpBlock,
     Dropper {
-        facing: Facing6,
+        facing: Surface6,
     }, // TODO add block entity
     EmeraldOre,
     EnchantingTable, // TODO add block entity
     EndGateway,      // TODO add block entity
     EndPortal,       // TODO add block entity
     EndPortalFrame {
-        facing: Facing,
+        facing: Surface4,
         has_eye: bool,
     },
     Endrod {
-        facing: Facing,
+        facing: Surface4,
     },
     EndStone,
     EndStoneBricks,
     EnderChest {
-        facing: Facing,
+        facing: Surface4,
         waterlogged: bool,
     }, // TODO add block entity (?)
     Farmland {
@@ -797,7 +646,7 @@ pub enum Block {
     },
     FenceGate {
         material: WoodMaterial,
-        facing: Facing,
+        facing: Surface4,
         open: bool,
     },
     Fire {
@@ -811,7 +660,7 @@ pub enum Block {
     },
     FrostedIce,
     Furnace {
-        facing: Facing,
+        facing: Surface4,
         lit: bool,
     }, // TODO add block entity
     GildedBlackstone,
@@ -824,7 +673,7 @@ pub enum Block {
     },
     GlazedTerracotta {
         colour: Colour,
-        facing: Facing,
+        facing: Surface4,
     },
     Glowstone,
     GoldOre,
@@ -834,15 +683,15 @@ pub enum Block {
     GrassBlock,
     GrassPath,
     Gravel,
-    GrindStone(Face, Facing),
+    GrindStone(SurfaceRotation12),
     HayBale {
-        alignment: Axis,
+        alignment: Axis3,
     },
     Head(Head), // TODO add block entity (used only for PlayerHead variant)
     HoneyBlock,
     HoneycombBlock,
     Hopper {
-        facing: Facing5,
+        facing: Surface5,
     }, // TODO add block entity
     Ice,
     InfestedChiseledStoneBricks,
@@ -857,7 +706,7 @@ pub enum Block {
     },
     IronOre,
     JackOLantern {
-        facing: Facing,
+        facing: Surface4,
     },
     JigsawBlock {
         orientation: JigsawBlockOrientation,
@@ -867,11 +716,11 @@ pub enum Block {
         age: Age26,
     },
     Ladder {
-        facing: Facing,
+        facing: Surface4,
         waterlogged: bool,
     },
     Lantern {
-        hanging: bool,
+        mounted_at: Surface2,
     },
     LapisLazuliBlock,
     LapisLazuliOre,
@@ -882,17 +731,20 @@ pub enum Block {
         persistent: bool,
     },
     Lectern {
-        facing: Facing,
+        facing: Surface4,
     }, // TODO add block entity (and possibly "has book" bool)
-    Lever(Face, Facing, OnOffState),
+    Lever(SurfaceRotation12, OnOffState),
     LilyPad,
     LodeStone,
     Log(Log),
     Loom {
-        facing: Facing,
+        facing: Surface4,
     },
     MagmaBlock,
     Melon,
+    MelonStem {
+        state: StemState,
+    },
     MossyCobblestone,
     MossyStoneBricks,
     // TODO consider adding the MovingPiston technical block and block entity
@@ -903,7 +755,7 @@ pub enum Block {
     NetherBricks,
     NetherGoldOre,
     NetherPortal {
-        alignment: Axis2D,
+        alignment: Axis2,
     },
     NetherQuartzOre,
     NetherSprouts,
@@ -917,12 +769,12 @@ pub enum Block {
     }, // TODO instrument depend on neighbouring block below.
     // Figure out if an "instrument" field is needed.
     Observer {
-        facing: Facing,
+        facing: Surface6,
     }, // TODO consider if a "powered" field is useful.
     Obsidian,
     PackedIce,
     Piston {
-        facing: Facing,
+        facing: Surface6,
     }, // TODO consider adding "extended" field and PistonHead block.
     Planks {
         material: WoodMaterial,
@@ -930,7 +782,7 @@ pub enum Block {
     Podzol,
     PolishedAndesite,
     PolishedBasalt {
-        alignment: Axis,
+        alignment: Axis3,
     },
     PolishedBlackstone,
     PolishedBlackstoneBricks,
@@ -945,13 +797,16 @@ pub enum Block {
     Prismarine,
     PrismarineBricks,
     Pumpkin,
+    PumpkinStem {
+        state: StemState,
+    },
     PurpurBlock,
     PurpurPillar {
-        alignment: Axis,
+        alignment: Axis3,
     },
     QuartzBricks,
     QuartsPillar {
-        alignment: Axis,
+        alignment: Axis3,
     },
     Rail {
         variant: RailType,
@@ -965,19 +820,19 @@ pub enum Block {
     RedSand,
     RedSandstone,
     RedstoneComparator {
-        facing: Facing,
-    }, // TODO add block entity (?)
-    RedstoneSubtractor {
-        facing: Facing,
+        facing: Surface4,
     }, // TODO add block entity (?)
     RedstoneLamp,
     RedstoneOre,
     RedstoneRepeater {
-        facing: Facing,
+        facing: Surface4,
         delay: DelaySetting,
     },
+    RedstoneSubtractor {
+        facing: Surface4,
+    }, // TODO add block entity (?)
     RedstoneTorch {
-        facing: Facing5,
+        facing: Surface5,
     },
     RedstoneWire, // TODO upcoming change: * or + shape, of non-connected wire
     RespawnAnchor {
@@ -1003,14 +858,14 @@ pub enum Block {
     Shroomlight,
     ShulkerBox {
         colour: Option<Colour>,
-        facing: Facing6,
+        facing: Surface6,
     }, // TODO add block entity
     Sign(Box<Sign>),
     Slab(Slab),
     SlimeBlock,
     SmithingTable,
     Smoker {
-        facing: Facing,
+        facing: Surface4,
         lit: bool,
     }, // TODO add block entity
     SmoothQuartz,
@@ -1022,7 +877,7 @@ pub enum Block {
     },
     SnowBlock,
     SoulCampfire {
-        facing: Facing,
+        facing: Surface4,
         lit: bool,
         waterlogged: bool,
     },
@@ -1031,27 +886,23 @@ pub enum Block {
         burning_faces: FireFace,
     },
     SoulLantern {
-        hanging: bool,
+        mounted_at: Surface2,
     },
     SoulTorch {
-        facing: Facing5,
+        facing: Surface5,
     },
     SoulSand,
     SoulSoil,
     Spawner, // TODO add block entity
     Sponge,
     Stair(Stair),
-    Stem {
-        material: StemMaterial,
-        state: StemState,
-    },
     StickyPiston {
-        facing: Facing,
+        facing: Surface4,
     }, // TODO consider "extended" field and StickyPistonHead.
     Stone,
     StoneBricks,
     StoneCutter {
-        facing: Facing,
+        facing: Surface4,
     },
     StructureBlock, // TODO Add Corner, Data, Load, and Save variants. TODO add block entity
     StructureVoid,
@@ -1069,19 +920,18 @@ pub enum Block {
         unstable: bool,
     },
     Torch {
-        facing: Facing5,
+        facing: Surface5,
     },
     Trapdoor {
         material: DoorMaterial,
-        position: VerticalPosition,
-        facing: Facing,
+        hinge_at: Edge8,
         open: bool,
         waterlogged: bool,
     },
     TrappedChest(Chest), // TODO add block entity
     Tripwire,
     TripwireHook {
-        facing: Facing,
+        facing: Surface4,
     },
     TurtleEgg {
         count: TurtleEggCount,

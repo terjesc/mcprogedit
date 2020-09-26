@@ -7,4 +7,5 @@ pub mod block;
 pub mod canvas;
 pub mod coordinates;
 pub mod material;
+pub mod positioning;
 pub mod region_file;
