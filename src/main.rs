@@ -59,8 +59,8 @@ fn main() {
         std::mem::size_of::<mcprogedit::block::FireFace>()
     );
     println!(
-        "PickleCount size is {}",
-        std::mem::size_of::<mcprogedit::block::PickleCount>()
+        "Int1Through4 size is {}",
+        std::mem::size_of::<mcprogedit::bounded_ints::Int1Through4>()
     );
     println!(
         "Seagrass size is {}",
@@ -79,8 +79,8 @@ fn main() {
         std::mem::size_of::<mcprogedit::positioning::WallOrRotatedOnFloor>()
     );
     println!(
-        "Age16 size is {}",
-        std::mem::size_of::<mcprogedit::block::Age16>()
+        "Int0Through15 size is {}",
+        std::mem::size_of::<mcprogedit::bounded_ints::Int0Through15>()
     );
 
     if let Err(err) = run() {

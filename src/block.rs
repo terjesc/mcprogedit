@@ -1,3 +1,4 @@
+use crate::bounded_ints::*;
 use crate::colour::*;
 use crate::material::*;
 use crate::positioning::*;
@@ -18,66 +19,6 @@ pub enum DoorHalf {
 pub enum Hinge {
     Left,
     Right,
-}
-
-bounded_integer! {
-    /// For Leaves, how far they are from the trunk.
-    #[repr(i8)]
-    pub struct DistanceToTrunk { 0..=7 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age2 { 0..=1 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age3 { 0..=2 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age4 { 0..=3 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age6 { 0..=5 }
-}
-
-bounded_integer! {
-    /// For melon and pumpkin stems.
-    #[repr(i8)]
-    pub struct Age8 { 0..=7 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age16 { 0..=15 }
-}
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct Age26 { 0..=25 }
-}
-
-bounded_integer! {
-    /// For composter.
-    #[repr(i8)]
-    pub struct Level9 { 0..=8 }
-}
-
-bounded_integer! {
-    /// For framland. Fully hydrated (wet texture) at 7.
-    #[repr(i8)]
-    pub struct Wetness { 0..=7 }
-}
-
-bounded_integer! {
-    /// Number of bites taken from a cake.
-    #[repr(i8)]
-    pub struct CakeBites { 0..=6 }
 }
 
 #[derive(Clone, PartialEq)]
@@ -191,7 +132,7 @@ pub enum AnvilDamage {
 #[derive(Clone, PartialEq)]
 pub enum StemState {
     /// Stem has not yet produced any fruit, or the fruit has been removed.
-    Growing(Age8),
+    Growing(Int0Through7),
     /// Stem has produced a fruit, and faces in the direction of that fruit.
     Attached(Surface4),
 }
@@ -235,11 +176,6 @@ pub struct DirectionFlags6 {
 
 pub type ChorusPlantConnections = DirectionFlags6;
 pub type FireFace = DirectionFlags6;
-
-bounded_integer! {
-    #[repr(i8)]
-    pub struct WaterLevel { 0..=3 }
-}
 
 #[derive(Clone, PartialEq)]
 pub enum CommandBlockVariant {
@@ -354,72 +290,37 @@ pub enum Pitch {
     Fs2,
 }
 
-bounded_integer! {
-    #[repr(i8)]
-    pub struct PitchValue { 0..=24 }
-}
-
 impl Pitch {
-    pub fn from_value(value: PitchValue) -> Self {
+    pub fn from_value(value: u8) -> Self {
         match value {
-            PitchValue(0) => Pitch::Fs0,
-            PitchValue(1) => Pitch::G0,
-            PitchValue(2) => Pitch::Gs0,
-            PitchValue(3) => Pitch::A0,
-            PitchValue(4) => Pitch::As0,
-            PitchValue(5) => Pitch::B0,
-            PitchValue(6) => Pitch::C1,
-            PitchValue(7) => Pitch::Cs1,
-            PitchValue(8) => Pitch::D1,
-            PitchValue(9) => Pitch::Ds1,
-            PitchValue(10) => Pitch::E1,
-            PitchValue(11) => Pitch::F1,
-            PitchValue(12) => Pitch::Fs1,
-            PitchValue(13) => Pitch::G1,
-            PitchValue(14) => Pitch::Gs1,
-            PitchValue(15) => Pitch::A1,
-            PitchValue(16) => Pitch::As1,
-            PitchValue(17) => Pitch::B1,
-            PitchValue(18) => Pitch::C2,
-            PitchValue(19) => Pitch::Cs2,
-            PitchValue(20) => Pitch::D2,
-            PitchValue(21) => Pitch::Ds2,
-            PitchValue(22) => Pitch::E2,
-            PitchValue(23) => Pitch::F2,
-            PitchValue(24) => Pitch::Fs2,
-            _ => panic!("PitchValue out of range!"),
+            0 => Pitch::Fs0,
+            1 => Pitch::G0,
+            2 => Pitch::Gs0,
+            3 => Pitch::A0,
+            4 => Pitch::As0,
+            5 => Pitch::B0,
+            6 => Pitch::C1,
+            7 => Pitch::Cs1,
+            8 => Pitch::D1,
+            9 => Pitch::Ds1,
+            10 => Pitch::E1,
+            11 => Pitch::F1,
+            12 => Pitch::Fs1,
+            13 => Pitch::G1,
+            14 => Pitch::Gs1,
+            15 => Pitch::A1,
+            16 => Pitch::As1,
+            17 => Pitch::B1,
+            18 => Pitch::C2,
+            19 => Pitch::Cs2,
+            20 => Pitch::D2,
+            21 => Pitch::Ds2,
+            22 => Pitch::E2,
+            23 => Pitch::F2,
+            24 => Pitch::Fs2,
+            _ => panic!("Pitch value out of range!"),
         }
     }
-}
-
-bounded_integer! {
-    /// RedstoneRepeater delay in number of "redstone" ticks.
-    #[repr(i8)]
-    pub struct DelaySetting { 1..=4 }
-}
-
-bounded_integer! {
-    /// Number of charges for a RespawnAnchor.
-    #[repr(i8)]
-    pub struct RespawnAnchorCharges { 0..=4 }
-}
-
-bounded_integer! {
-    /// Number of SeaPickles in the block.
-    #[repr(i8)]
-    pub struct PickleCount { 1..=4 }
-}
-
-bounded_integer! {
-    /// Number of TurtleEggs in the block.
-    #[repr(i8)]
-    pub struct TurtleEggCount { 1..=4 }
-}
-
-bounded_integer! {
-    /// Number of snow layers (snow depth)
-    #[repr(i8)]
-    pub struct SnowLayerCount { 1..=8 }
 }
 
 #[derive(Clone, PartialEq)]
@@ -432,9 +333,9 @@ pub enum Block {
     },
     Andesite,
     Bamboo {
-        age: Age2,
+        age: Int0Through1,
         leaves: BambooLeaves,
-        stage: Age2,
+        stage: Int0Through1,
     },
     Banner {
         colour: Colour,
@@ -450,7 +351,7 @@ pub enum Block {
     Beacon, // TODO add block entity
     Bedrock,
     Beetroots {
-        growth_stage: Age4,
+        growth_stage: Int0Through3,
     },
     Beehive {
         facing: Surface4,
@@ -495,10 +396,10 @@ pub enum Block {
     }, // Is this even needed?
     Button(ButtonMaterial, SurfaceRotation12),
     Cactus {
-        age: Age16,
+        age: Int0Through15,
     },
     Cake {
-        bites: CakeBites,
+        bites: Int0Through6,
     },
     Campfire {
         facing: Surface4,
@@ -509,14 +410,14 @@ pub enum Block {
         colour: Colour,
     },
     Carrots {
-        growth_stage: Age8,
+        growth_stage: Int0Through7,
     },
     CartographyTable,
     CarvedPumpkin {
         facing: Surface4,
     },
     Cauldron {
-        water_level: WaterLevel,
+        water_level: Int0Through3,
     },
     CaveAir,
     Chest(Chest), // TODO add block entity
@@ -527,7 +428,7 @@ pub enum Block {
     ChiseledSandstone,
     ChiseledStoneBricks,
     ChorusFlower {
-        age: Age6,
+        age: Int0Through5,
     },
     ChorusPlant {
         connections: ChorusPlantConnections,
@@ -538,12 +439,12 @@ pub enum Block {
     Cobblestone,
     Cobweb,
     CocoaBeans {
-        age: Age3,
+        age: Int0Through2,
         facing: Surface4,
     },
     CommandBlock(CommandBlock), // TODO add block entity
     Composter {
-        fullness: Level9,
+        fullness: Int0Through8,
     },
     Concrete {
         colour: Colour,
@@ -618,7 +519,7 @@ pub enum Block {
         waterlogged: bool,
     }, // TODO add block entity (?)
     Farmland {
-        wetness: Wetness,
+        wetness: Int0Through7,
     },
     Fence {
         material: FenceMaterial,
@@ -630,7 +531,7 @@ pub enum Block {
         open: bool,
     },
     Fire {
-        age: Age16,
+        age: Int0Through15,
         burning_faces: FireFace,
     },
     FletchingTable,
@@ -693,7 +594,7 @@ pub enum Block {
     }, // TODO add block entity
     Jukebox, // TODO add block entity (and potentially "has record" bool)
     Kelp {
-        age: Age26,
+        age: Int0Through25,
     },
     Ladder {
         facing: Surface4,
@@ -707,7 +608,7 @@ pub enum Block {
     LavaSource, // TODO handle magic (that is, the "flowing" state)
     Leaves {
         material: LeavesMaterial,
-        distance_to_trunk: DistanceToTrunk,
+        distance_to_trunk: Int0Through7,
         persistent: bool,
     },
     Lectern {
@@ -740,7 +641,7 @@ pub enum Block {
     NetherQuartzOre,
     NetherSprouts,
     NetherWart {
-        age: Age4,
+        age: Int0Through3,
     },
     NetherWartBlock,
     Netherrack,
@@ -769,7 +670,7 @@ pub enum Block {
     PolishedDiorite,
     PolishedGranite,
     Potatoes {
-        growth_stage: Age8,
+        growth_stage: Int0Through7,
     },
     PressurePlate {
         material: PressurePlateMaterial,
@@ -806,7 +707,7 @@ pub enum Block {
     RedstoneOre,
     RedstoneRepeater {
         facing: Surface4,
-        delay: DelaySetting,
+        delay: Int1Through4,
     },
     RedstoneSubtractor {
         facing: Surface4,
@@ -816,20 +717,20 @@ pub enum Block {
     },
     RedstoneWire, // TODO upcoming change: * or + shape, of non-connected wire
     RespawnAnchor {
-        charges: RespawnAnchorCharges,
+        charges: Int0Through4,
     },
     Sand,
     Sandstone,
     Sapling {
         material: SaplingMaterial,
-        stage: Age2,
+        stage: Int0Through1,
     },
     Scaffolding {
         waterlogged: bool,
     },
     SeaLantern,
     SeaPickle {
-        count: PickleCount,
+        count: Int1Through4,
         waterlogged: bool,
     },
     Seagrass {
@@ -853,7 +754,7 @@ pub enum Block {
     SmoothSandstone,
     SmoothStone,
     Snow {
-        thickness: SnowLayerCount,
+        thickness: Int1Through8,
     },
     SnowBlock,
     SoulCampfire {
@@ -862,7 +763,7 @@ pub enum Block {
         waterlogged: bool,
     },
     SoulFire {
-        age: Age16,
+        age: Int0Through15,
         burning_faces: FireFace,
     },
     SoulLantern {
@@ -887,10 +788,10 @@ pub enum Block {
     StructureBlock, // TODO Add Corner, Data, Load, and Save variants. TODO add block entity
     StructureVoid,
     SugarCane {
-        age: Age16,
+        age: Int0Through15,
     },
     SweetBerryBush {
-        age: Age4,
+        age: Int0Through3,
     },
     Target,
     Terracotta {
@@ -914,11 +815,11 @@ pub enum Block {
         facing: Surface4,
     },
     TurtleEgg {
-        count: TurtleEggCount,
-        age: Age3,
+        count: Int1Through4,
+        age: Int0Through2,
     },
     TwistingVines {
-        age: Age26,
+        age: Int0Through25,
     },
     TwistingVinesPlant,
     Vines, // NB should attach to all neighbouring blocks by default
@@ -933,12 +834,12 @@ pub enum Block {
     WarpedWartBlock,
     WaterSource, // TODO handle magic (that is, the "flowing" state)
     WeepingVines {
-        age: Age26,
+        age: Int0Through25,
     },
     WeepingVinesPlant,
     WetSponge,
     Wheat {
-        age: Age8,
+        age: Int0Through7,
     },
     Wool {
         colour: Option<Colour>,
