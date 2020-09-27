@@ -1,3 +1,5 @@
+//! For describing material variants of blocks.
+
 /// Materials for the "Button" family of blocks.
 ///
 /// # Variant availability

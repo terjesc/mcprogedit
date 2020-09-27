@@ -1,3 +1,5 @@
+//! A three-dimensional grid of voxels, representing a piece of a Minecraft world.
+
 use crate::block::Block;
 extern crate ndarray;
 

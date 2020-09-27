@@ -1,21 +1,9 @@
-// Different ways to be positioned
-//
-// _BubbleDirection (2) - neg or pos Y (up/down)
-// _Hanging (2) - ceiling/floor (up/down)
-// _Axis2D (2) - aligned along one of the 2 horizontal axes (x and z)
-// _Axis (3) - aligned along one of the 3 axes
-// _Facing4 (4) - oriented in one of the 4 compass directions
-// _Facing5 (5) - one of the four compass directions, or one of up/down (probably floor / down)
-// _Facing6 (6) - oriented in one of 6 directions
+//! For describing positioning of blocks within their voxel (placement, rotation, etc.)
+
+// TODO Consider adding door placement data structure to this file...
 // Door (8) - hinged at one of 4 corners, + pointing in one of 2 directions from that corner
-// _Trapdoor (8) - (facing4 + up/down)
-// _Stair (8) - (facing4 + up/down)
-// _Face3 + Facing4 (12) - ceiling/floor/wall + one of 4 compass directions
-// _JigsawBlockOrientation (12) - this one is just weird
-// _Facing4 + BellMounting (16) - ceiling/floor/wall/doublewall + one of 4 compass directions
-// _WallFloorFacing (20) - on floor in one of 16 directions, or on one of four walls
 //
-// // Consider if appropriate here, as not really positioning... more configuration...
+// TODO Consider if appropriate here, as not really positioning... more configuration...
 // SlabVariant (3) - up/down/double
 // RailShape (10) - all the different rail configuration options
 // DirectionFlags6 (2^6 = 64) - each cube surface can be in one of two states
