@@ -4,6 +4,7 @@ extern crate bounded_integer;
 extern crate static_assertions;
 
 pub mod block;
+pub mod colour;
 pub mod canvas;
 pub mod coordinates;
 pub mod material;

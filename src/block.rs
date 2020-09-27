@@ -1,24 +1,4 @@
-#[derive(Clone, PartialEq)]
-pub enum Colour {
-    Black,
-    Red,
-    Green,
-    Brown,
-    Blue,
-    Purple,
-    Cyan,
-    LightGray,
-    Gray,
-    Pink,
-    Lime,
-    Yellow,
-    LightBlue,
-    Magenta,
-    Orange,
-    White,
-}
-
-pub type Color = Colour;
+use crate::colour::*;
 use crate::material::*;
 use crate::positioning::*;
 
