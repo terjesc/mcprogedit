@@ -326,6 +326,7 @@ impl Pitch {
 
 #[derive(Clone, PartialEq)]
 pub enum Block {
+    None,
     Air,
     AncientDebris,
     Anvil {

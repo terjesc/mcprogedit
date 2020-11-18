@@ -12,7 +12,7 @@ pub struct Canvas {
 impl Canvas {
     pub fn new(x: usize, y: usize, z: usize) -> Self {
         Canvas {
-            canvas: ndarray::Array3::<Block>::from_elem((x, y, z), Block::Air),
+            canvas: ndarray::Array3::<Block>::from_elem((x, y, z), Block::None),
         }
     }
 
