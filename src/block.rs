@@ -1,3 +1,4 @@
+use crate::banner::*;
 use crate::bounded_ints::*;
 use crate::colour::*;
 use crate::material::*;
@@ -337,10 +338,7 @@ pub enum Block {
         leaves: BambooLeaves,
         stage: Int0Through1,
     },
-    Banner {
-        colour: Colour,
-        placement: WallOrRotatedOnFloor,
-    }, // TODO add block entity
+    Banner(Box<Banner>),
     Barrel {
         facing: Surface6,
     }, // TODO add block entity
