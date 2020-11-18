@@ -19,14 +19,10 @@ fn run() -> Result<()> {
     let level_dat_path = save_directory.join("level.dat");
 
     let mut level_dat = fs::File::open(level_dat_path)?;
-    println!(
-        "================================= NBT Contents ================================="
-    );
+    println!("================================= NBT Contents =================================");
     let blob = Blob::from_gzip_reader(&mut level_dat)?;
     println!("{}", blob);
-    println!(
-        "============================== JSON Representation ============================="
-    );
+    println!("============================== JSON Representation =============================");
     match serde_json::to_string_pretty(&blob) {
         Ok(json) => println!("{}", json),
         Err(e) => {

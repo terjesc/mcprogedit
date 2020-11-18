@@ -10,7 +10,7 @@ pub fn matches() -> clap::ArgMatches<'static> {
                 .long("input-directory")
                 .value_name("DIRECTORY")
                 .help("Input savefile directory")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             clap::Arg::with_name("output_save")
@@ -18,7 +18,7 @@ pub fn matches() -> clap::ArgMatches<'static> {
                 .long("output-directory")
                 .value_name("DIRECTORY")
                 .help("Output savefile directory")
-                .takes_value(true)
+                .takes_value(true),
         )
         .get_matches()
 }

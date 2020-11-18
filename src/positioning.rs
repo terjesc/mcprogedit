@@ -208,4 +208,3 @@ pub enum JigsawBlockOrientation {
     UpWest,
     WestUp,
 }
-
