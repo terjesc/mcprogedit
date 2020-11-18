@@ -8,32 +8,33 @@ use std::process::exit;
 use nbt::Blob;
 use nbt::Result;
 
+use mcprogedit::arguments;
 //use mcprogedit::coordinates;
 
 fn run() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    if let Some(arg) = args.into_iter().skip(1).take(1).next() {
-        let mut file = fs::File::open(&arg)?;
-        println!(
-            "================================= NBT Contents ================================="
-        );
-        let blob = Blob::from_gzip_reader(&mut file)?;
-        println!("{}", blob);
-        println!(
-            "============================== JSON Representation ============================="
-        );
-        match serde_json::to_string_pretty(&blob) {
-            Ok(json) => println!("{}", json),
-            Err(e) => {
-                eprintln!("error: {}", e);
-                exit(1)
-            }
+    let matches = arguments::matches();
+
+    let save_directory = matches.value_of("input_save").unwrap();
+    let save_directory = std::path::Path::new(save_directory);
+    let level_dat_path = save_directory.join("level.dat");
+
+    let mut level_dat = fs::File::open(level_dat_path)?;
+    println!(
+        "================================= NBT Contents ================================="
+    );
+    let blob = Blob::from_gzip_reader(&mut level_dat)?;
+    println!("{}", blob);
+    println!(
+        "============================== JSON Representation ============================="
+    );
+    match serde_json::to_string_pretty(&blob) {
+        Ok(json) => println!("{}", json),
+        Err(e) => {
+            eprintln!("error: {}", e);
+            exit(1)
         }
-        Ok(())
-    } else {
-        eprintln!("error: a filename is required.");
-        exit(1)
     }
+    Ok(())
 }
 
 fn main() {

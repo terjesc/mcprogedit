@@ -9,6 +9,7 @@ description = "Programmatically edit Minecraft savefiles and schematics."
 
 [dependencies]
 bounded-integer = "0.2.1"
+clap = "2.33.3"
 hematite-nbt = "0.5.0"
 ndarray = "0.13.1"
 serde_derive = "1.0"

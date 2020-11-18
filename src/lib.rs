@@ -3,6 +3,7 @@ extern crate bounded_integer;
 #[macro_use]
 extern crate static_assertions;
 
+pub mod arguments;
 pub mod banner;
 pub mod block;
 pub mod bounded_ints;
