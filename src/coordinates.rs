@@ -1,11 +1,11 @@
-#[derive(Debug, PartialEq, Eq)]
-pub struct BlockCoord(i64, i64, i64);
-#[derive(Debug, PartialEq, Eq)]
-pub struct BlockColumnCoord(i64, i64);
-#[derive(Debug, PartialEq, Eq)]
-pub struct ChunkCoord(i64, i64);
-#[derive(Debug, PartialEq, Eq)]
-pub struct RegionCoord(i64, i64);
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BlockCoord(pub i64, pub i64, pub i64);
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BlockColumnCoord(pub i64, pub i64);
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ChunkCoord(pub i64, pub i64);
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RegionCoord(pub i64, pub i64);
 
 impl From<BlockCoord> for BlockColumnCoord {
     fn from(block: BlockCoord) -> Self {
@@ -22,6 +22,12 @@ impl From<BlockColumnCoord> for ChunkCoord {
 impl From<ChunkCoord> for RegionCoord {
     fn from(chunk: ChunkCoord) -> Self {
         RegionCoord(chunk.0 >> 5, chunk.1 >> 5)
+    }
+}
+
+impl From<(i64, i64, i64)> for BlockCoord {
+    fn from(coords: (i64, i64, i64)) -> Self {
+        BlockCoord(coords.0, coords.1, coords.2)
     }
 }
 
