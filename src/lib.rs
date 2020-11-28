@@ -10,6 +10,7 @@ pub mod bounded_ints;
 pub mod colour;
 pub mod coordinates;
 pub mod material;
+pub mod mc_version;
 pub mod positioning;
 pub mod region_file;
 pub mod world_excerpt;
