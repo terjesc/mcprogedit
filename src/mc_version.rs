@@ -715,31 +715,34 @@ impl McVersion {
         McVersion { id: id.into() }
     }
 
-    /// Creates a new McVersion from a version name string.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use mcprogedit::mc_version::McVersion;
-    ///
-    /// let snapshot_version = McVersion::from_str("15w32a");
-    /// let release_version = McVersion::from_str("1.12.2");
-    /// ```
-    pub fn from_str<S>(name: S) -> Self
-    where
-        S: Into<&'static str>,
-    {
-        McVersion {
-            id: STR2ID[name.into()],
-        }
-    }
-
     pub fn id(&self) -> i32 {
         self.id
     }
 
     pub fn name(&self) -> &'static str {
         ID2STR[&self.id]
+    }
+}
+
+impl std::str::FromStr for McVersion {
+    type Err = ();
+
+    /// Creates a new McVersion from a version name string.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mcprogedit::mc_version::McVersion;
+    /// use std::str::FromStr;
+    ///
+    /// let snapshot_version = McVersion::from_str("15w32a").unwrap();
+    /// let release_version = McVersion::from_str("1.12.2").unwrap();
+    /// ```
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match STR2ID.get(s) {
+            Some(id) => Ok(McVersion { id: *id }),
+            None => Err(()),
+        }
     }
 }
 
