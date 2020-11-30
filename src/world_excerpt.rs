@@ -150,12 +150,13 @@ impl WorldExcerpt {
                     for chunk_z in in_region_chunk_bounds.z_min..=in_region_chunk_bounds.z_max {
                         println!("Handling (region internal) chunk {}, {}", chunk_x, chunk_z);
 
+                        //TODO Parse the raw chunk data into a chunk object
                         //TODO Read out the blocks, and put them in the WorldExcerpt
                         //TODO Read out entities, and put them in the WorldExcerpt
                         match region.get_chunk_data(&(chunk_x, chunk_z).into()) {
-                            RawChunkData::GZip(chunk_data) => println!("Has GZip data!"),
-                            RawChunkData::ZLib(chunk_data) => println!("Has ZLib data!"),
-                            RawChunkData::Uncompressed(chunk_data) => println!("Has data!"),
+                            RawChunkData::GZip(_chunk_data) => println!("Has GZip data!"),
+                            RawChunkData::ZLib(_chunk_data) => println!("Has ZLib data!"),
+                            RawChunkData::Uncompressed(_chunk_data) => println!("Has data!"),
                             RawChunkData::Empty => continue, // No data to load from this chunk
                         }
                     }
