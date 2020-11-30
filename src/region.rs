@@ -3,16 +3,17 @@ use byteorder::{BigEndian, ReadBytesExt};
 use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Cursor, Read, Seek, SeekFrom};
 use std::time::SystemTime;
 
+use crate::chunk::RawChunkData;
 use crate::coordinates::ChunkCoord;
 
 const SECTOR_LEN_BYTES: usize = 4096;
 const SECTOR_LEN_WORDS: usize = SECTOR_LEN_BYTES / 4;
 
 pub struct Region {
-    chunks: HashMap<ChunkCoord, ChunkData>,
+    chunks: HashMap<ChunkCoord, InternalChunkData>,
 }
 
 impl Region {
@@ -85,7 +86,7 @@ impl Region {
                     .take(data_len_bytes as u64)
                     .read_to_end(&mut data);
 
-                chunks.insert((x as i64, z as i64).into(), ChunkData { timestamp, data });
+                chunks.insert((x as i64, z as i64).into(), InternalChunkData { timestamp, data });
             }
         }
 
@@ -96,10 +97,29 @@ impl Region {
         unimplemented!();
     }
 
-    pub fn get_chunk_data(&self, local_chunk_coordinates: &ChunkCoord) -> Option<&Vec<u8>> {
+    pub fn get_chunk_data(&self, local_chunk_coordinates: &ChunkCoord) -> RawChunkData {
         match self.chunks.get(local_chunk_coordinates) {
-            Some(chunk) => Some(&chunk.data),
-            None => None,
+            Some(chunk) => {
+                // Read four bytes: Length of compresion byte + data.
+                let mut chunk_reader = Cursor::new(&chunk.data);
+                let len = chunk_reader.read_u32::<BigEndian>().unwrap();
+                // Read one byte: compression
+                let compression = chunk_reader.read_u8().unwrap();
+                let mut chunk_data = Vec::<u8>::with_capacity((len - 1) as usize);
+                chunk_reader.read_to_end(&mut chunk_data);
+                // Check bit 7: if in separate file or here
+                if (compression & 0x80) == 0x80 {
+                    // TODO data to be found in separate chunk file!
+                    unimplemented!();
+                }
+                match compression & 0x03 {
+                    0x01 => RawChunkData::GZip(chunk_data),
+                    0x02 => RawChunkData::ZLib(chunk_data),
+                    0x03 => RawChunkData::Uncompressed(chunk_data),
+                    _ => panic!("Unknown compression format: {}", compression & 0x03),
+                }
+            }
+            None => RawChunkData::Empty,
         }
     }
 
@@ -109,11 +129,11 @@ impl Region {
             .unwrap()
             .as_secs() as u32;
         self.chunks
-            .insert(*local_chunk_coordinates, ChunkData { timestamp, data });
+            .insert(*local_chunk_coordinates, InternalChunkData { timestamp, data });
     }
 }
 
-struct ChunkData {
+struct InternalChunkData {
     timestamp: u32,
     data: Vec<u8>,
 }

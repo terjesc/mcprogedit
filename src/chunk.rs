@@ -1,3 +1,12 @@
+
+pub enum RawChunkData {
+    Empty,
+    GZip(Vec<u8>),
+    ZLib(Vec<u8>),
+    Uncompressed(Vec<u8>),
+}
+
+
 //  chunk data format:
 //      | byte  | 0 1 2 3 | 4           | 5 -  |
 //      +-------+---------+-------------+------+
