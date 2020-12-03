@@ -18,31 +18,6 @@ pub struct Region {
 
 impl Region {
     pub fn load_from_file(region_file_path: &std::path::Path) -> Self {
-        //  Region file format:
-        //      | byte  | 0 - 4095  | 4096 - 8181 | 8192 -     |
-        //      +-------+-----------+-------------+------------+
-        //      | field | locations | timestamps  | chunk data |
-        //
-        //  "locations" and "timestamps" are 1024 element arrays, each with one entry
-        //      for each of the region's chunks. Entry for chunk at chunk coordinates
-        //      (x, z) is found at byte offset ``4 * ((x & 31) + (z & 31) * 32)´´.
-        //
-        //  location: Where in the file to find "chunk data".
-        //
-        //      | byte  | 0 1 2  | 3            |
-        //      +-------+--------+--------------+
-        //      | field | offset | sector count |
-        //
-        //  offset: big-endian offset in 4 KiB sectors from the start of the file,
-        //      for where the chunk data starts.
-        //
-        //  sector count: length of chunk data, in 4 KiB sectors (rounded up)
-        //  * max chunk size is 1 MiB
-        //  * Special value 0x00000000 means there is no chunk data for the given chunk
-        //
-        //  timestamp: 4 byte big endian unix epoch timestamp,
-        //      when the chunk was last modified
-
         let mut region_file = File::open(region_file_path)
             .unwrap_or_else(|_| panic!("Unable to open region file {:?}", region_file_path));
 

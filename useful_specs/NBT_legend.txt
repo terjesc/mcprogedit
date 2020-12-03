@@ -1,0 +1,15 @@
+Legend for NBT format descriptions:
+
+[E] TAG_End
+[B] TAG_Byte
+[S] TAG_Short
+[I] TAG_Int
+[L] TAG_Long
+[F] TAG_Float
+[D] TAG_Double
+[[B]] TAG_Byte_Array
+[""] TAG_String
+[-] TAG_List
+[C] TAG_Compound
+[[I]] TAG_Int_Array
+[[L]] TAG_Long_Array
