@@ -13,6 +13,7 @@ pub mod colour;
 pub mod coordinates;
 pub mod material;
 pub mod mc_version;
+mod nbt_lookup;
 pub mod positioning;
 mod region;
 pub mod world_excerpt;
