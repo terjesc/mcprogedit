@@ -20,10 +20,10 @@ fn run() -> Result<()> {
     let level_dat_path = save_directory.join("level.dat");
 
     let mut level_dat = fs::File::open(level_dat_path)?;
-    println!("================================= NBT Contents =================================");
+    //println!("================================= NBT Contents =================================");
     let blob = Blob::from_gzip_reader(&mut level_dat)?;
-    println!("{}", blob);
-    println!("================================================================================");
+    //println!("{}", blob);
+    //println!("================================================================================");
 
     if let nbt::Value::Compound(data) = blob.get("Data").expect("Could not read data.") {
         let level_name = data.get("LevelName").expect("Could not read level name.");
@@ -78,17 +78,10 @@ fn run() -> Result<()> {
         }
     }
 
-    let excerpt = WorldExcerpt::from_save((-4, 50, 0).into(), (18, 80, -25).into(), save_directory);
-    /*
-    println!("============================== JSON Representation =============================");
-    match serde_json::to_string_pretty(&blob) {
-        Ok(json) => println!("{}", json),
-        Err(e) => {
-            eprintln!("error: {}", e);
-            exit(1)
-        }
-    }
-    */
+    //let _excerpt = WorldExcerpt::from_save((-4, 50, 0).into(), (18, 80, -25).into(), save_directory);
+    //let _excerpt = WorldExcerpt::from_save((0, 50, 0).into(), (15, 66, 15).into(), save_directory);
+    let _excerpt =
+        WorldExcerpt::from_save((-16, 50, -16).into(), (-1, 66, -1).into(), save_directory);
 
     Ok(())
 }
@@ -97,47 +90,6 @@ fn main() {
     println!(
         "Block enum size is {}",
         std::mem::size_of::<mcprogedit::block::Block>()
-    );
-
-    println!(
-        "Slab size is {}",
-        std::mem::size_of::<mcprogedit::block::Slab>()
-    );
-    println!(
-        "Log size is {}",
-        std::mem::size_of::<mcprogedit::block::Log>()
-    );
-    println!(
-        "ChorusPlantConnections size is {}",
-        std::mem::size_of::<mcprogedit::block::ChorusPlantConnections>()
-    );
-    println!(
-        "FireFace size is {}",
-        std::mem::size_of::<mcprogedit::block::FireFace>()
-    );
-    println!(
-        "Int1Through4 size is {}",
-        std::mem::size_of::<mcprogedit::bounded_ints::Int1Through4>()
-    );
-    println!(
-        "Seagrass size is {}",
-        std::mem::size_of::<mcprogedit::block::Seagrass>()
-    );
-    println!(
-        "Sign size is {}",
-        std::mem::size_of::<mcprogedit::block::Sign>()
-    );
-    println!(
-        "Box<Sign> size is {}",
-        std::mem::size_of::<Box<mcprogedit::block::Sign>>()
-    );
-    println!(
-        "WallFloorFacing size is {}",
-        std::mem::size_of::<mcprogedit::positioning::WallOrRotatedOnFloor>()
-    );
-    println!(
-        "Int0Through15 size is {}",
-        std::mem::size_of::<mcprogedit::bounded_ints::Int0Through15>()
     );
 
     if let Err(err) = run() {

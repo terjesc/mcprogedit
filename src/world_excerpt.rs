@@ -1,8 +1,9 @@
 //! A piece of a Minecraft world.
 
 use crate::block::Block;
-use crate::chunk::RawChunkData;
+use crate::chunk::Chunk;
 use crate::coordinates::*;
+use crate::nbt_lookup::*;
 use crate::region::Region;
 
 extern crate nbt;
@@ -38,25 +39,12 @@ impl WorldExcerpt {
         }
 
         // TODO candidate for refactoring: Read level.dat into LevelDat struct.
-        let mut level_dat = std::fs::File::open(level_dat_file).expect("Unable to open level.dat.");
+        let mut level_dat = std::fs::File::open(level_dat_file).expect("Unable to open level.dat");
         let level_dat_blob = nbt::Blob::from_gzip_reader(&mut level_dat)
-            .expect("Unable to parse level.dat contents.");
+            .expect("Unable to parse level.dat contents");
 
-        // TODO candidate for refactoring: Get DataVersion from LevelDat struct.
-        let data_version = {
-            let data = level_dat_blob.get("Data").expect("Could not read data.");
-            let data = match data {
-                nbt::Value::Compound(data) => data,
-                _ => panic!("Unexpected tag variant for level.dat \"Data\" tag."),
-            };
-            let data_version = data
-                .get("DataVersion")
-                .expect("Could not read data version.");
-            match data_version {
-                nbt::Value::Int(data_version) => data_version,
-                _ => panic!("Unexpected tag variant for \"DataVersion\" tag."),
-            }
-        };
+        let data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
+            .unwrap_or_else(|| panic!("level.dat Data/DataVersion not found"));
 
         // Create an empty (None-filled) WorldExcerpt of the correct size.
         let mut world_excerpt = Self::new(
@@ -150,15 +138,12 @@ impl WorldExcerpt {
                     for chunk_z in in_region_chunk_bounds.z_min..=in_region_chunk_bounds.z_max {
                         println!("Handling (region internal) chunk {}, {}", chunk_x, chunk_z);
 
-                        //TODO Parse the raw chunk data into a chunk object
+                        // Parse the raw chunk data into a chunk object
+                        let chunk_data = region.get_chunk_data(&(chunk_x, chunk_z).into());
+                        let chunk = Chunk::from_raw_chunk_data(&chunk_data);
+
                         //TODO Read out the blocks, and put them in the WorldExcerpt
                         //TODO Read out entities, and put them in the WorldExcerpt
-                        match region.get_chunk_data(&(chunk_x, chunk_z).into()) {
-                            RawChunkData::GZip(_chunk_data) => println!("Has GZip data!"),
-                            RawChunkData::ZLib(_chunk_data) => println!("Has ZLib data!"),
-                            RawChunkData::Uncompressed(_chunk_data) => println!("Has data!"),
-                            RawChunkData::Empty => continue, // No data to load from this chunk
-                        }
                     }
                 }
             }

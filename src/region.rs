@@ -65,8 +65,11 @@ impl Region {
                 // check bit 7
                 if (chunk_compression & 0x80) == 0x80 {
                     todo!("Import data from separate chunk file!");
-                } else {
-                    region_file.read_exact(&mut chunk_data).unwrap();
+                } else if let Ok(chunk_file) = region_file.try_clone() {
+                    chunk_file
+                        .take((chunk_len - 1) as u64)
+                        .read_to_end(&mut chunk_data)
+                        .unwrap();
                 }
 
                 // Deliver data in the correct compression type
