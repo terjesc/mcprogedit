@@ -1,4 +1,4 @@
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Colour {
     White = 0,
     Orange = 1,
@@ -42,4 +42,28 @@ impl From<i32> for Colour {
     }
 }
 
+impl From<&str> for Colour {
+    fn from(colour_string: &str) -> Self {
+        match colour_string {
+            "white" => Colour::White,
+            "orange" => Colour::Orange,
+            "magenta" => Colour::Magenta,
+            "light_blue" => Colour::LightBlue,
+            "yellow" => Colour::Yellow,
+            "lime" => Colour::Lime,
+            "pink" => Colour::Pink,
+            "gray" => Colour::Gray,
+            "light_gray" => Colour::LightGray,
+            "cyan" => Colour::Cyan,
+            "purple" => Colour::Purple,
+            "blue" => Colour::Blue,
+            "brown" => Colour::Brown,
+            "green" => Colour::Green,
+            "red" => Colour::Red,
+            "black" => Colour::Black,
+            _ => Colour::Black,
+        }
+    }
+
+}
 pub type Color = Colour;
