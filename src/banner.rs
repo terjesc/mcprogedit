@@ -31,13 +31,13 @@ pub struct Banner {
 //                   Blue: 11, Brown: 12, Green: 13, Red: 14, Black: 15.
 //
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ColouredPattern {
     colour: Colour,
     pattern: BannerPattern,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BannerPattern {
     BaseColor,               // b (base)
     Base,                    // bs (bottom stripe)

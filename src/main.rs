@@ -20,10 +20,7 @@ fn run() -> Result<()> {
     let level_dat_path = save_directory.join("level.dat");
 
     let mut level_dat = fs::File::open(level_dat_path)?;
-    //println!("================================= NBT Contents =================================");
     let blob = Blob::from_gzip_reader(&mut level_dat)?;
-    //println!("{}", blob);
-    //println!("================================================================================");
 
     if let nbt::Value::Compound(data) = blob.get("Data").expect("Could not read data.") {
         let level_name = data.get("LevelName").expect("Could not read level name.");
@@ -79,9 +76,9 @@ fn run() -> Result<()> {
     }
 
     //let _excerpt = WorldExcerpt::from_save((-4, 50, 0).into(), (18, 80, -25).into(), save_directory);
-    //let _excerpt = WorldExcerpt::from_save((0, 50, 0).into(), (15, 66, 15).into(), save_directory);
-    let _excerpt =
-        WorldExcerpt::from_save((-16, 50, -16).into(), (-1, 66, -1).into(), save_directory);
+    let _excerpt = WorldExcerpt::from_save((0, 50, 0).into(), (15, 66, 15).into(), save_directory);
+    //let _excerpt =
+    //    WorldExcerpt::from_save((-16, 50, -16).into(), (-1, 66, -1).into(), save_directory);
 
     Ok(())
 }

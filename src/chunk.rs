@@ -1,3 +1,4 @@
+use crate::block_entity::BlockEntity;
 use crate::coordinates::ChunkCoord;
 use crate::mc_version::McVersion;
 use crate::nbt_lookup::*;
@@ -48,6 +49,7 @@ pub struct Chunk {
 impl Chunk {
     pub fn from_raw_chunk_data(data: &RawChunkData) -> Self {
         let nbt = data.to_nbt();
+        //println!("{}", nbt);
 
         let data_version = nbt_blob_lookup_int(&nbt, "DataVersion")
             .map(McVersion::from_id)
@@ -59,9 +61,18 @@ impl Chunk {
 
         let last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
 
+        let tile_entities = nbt_blob_lookup_list(&nbt, "Level/TileEntities")
+            .unwrap_or_else(|| panic!("Level/TileEntities not found"));
+        let block_entities: Vec<_> = tile_entities
+            .iter()
+            .map(|nbt| BlockEntity::from_nbt_value(nbt))
+            .collect();
+        println!("TileEntities: {:?}", block_entities);
+
+        //let block_entities = BlockEntity::vec_from_nbt_list(tile_entities);
+
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|| panic!("Level/Sections not found"));
-
         for section in sections {
             println!("Y index: {:?}", nbt_value_lookup(&section, "Y"));
         }
