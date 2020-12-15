@@ -5,7 +5,7 @@ use crate::material::*;
 use crate::positioning::*;
 
 /// Doors are two blocks high. Which block is this?
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DoorHalf {
     /// Bottom block of the door
     Lower,
@@ -16,13 +16,13 @@ pub enum DoorHalf {
 /// For doors, what way they are hinged. Left/Right relative to the direction
 /// the door is Facing. (E.g. if Facing North, Left means on the West side,
 /// and Right means on the East side.)
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Hinge {
     Left,
     Right,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Sign {
     material: WoodMaterial,
     placement: WallOrRotatedOnFloor,
@@ -34,14 +34,14 @@ pub struct Sign {
     text4: String,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SlabVariant {
     Bottom,
     Double,
     Top,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Slab {
     material: SlabMaterial,
     position: SlabVariant,
@@ -51,14 +51,14 @@ pub struct Slab {
 /// Stair shape is not configurable, as it depend on neighbouring stairs.
 /// Stair shape is either automatically calculated on save, or the block is
 /// flagged for update so that it will be automatically corrected in-game.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Stair {
     pub material: StairMaterial,
     pub position: Edge8,
     pub waterlogged: bool,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum RailType {
     Activator,
     Detector,
@@ -66,7 +66,7 @@ pub enum RailType {
     Powered,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum RailShape {
     EastWest,
     NorthEast,
@@ -80,7 +80,7 @@ pub enum RailShape {
     AscendingWest,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Flower {
     Allium,
     AzureBluet,
@@ -105,7 +105,7 @@ pub enum Flower {
     WitherRose,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Grass {
     Fern,
     Grass,
@@ -115,14 +115,14 @@ pub enum Grass {
     TallGrassTop,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Seagrass {
     Seagrass,
     TallSeagrassBottom,
     TallSeagrassTop,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum AnvilDamage {
     Intact,
     SlightlyDamaged,
@@ -130,7 +130,7 @@ pub enum AnvilDamage {
 }
 
 /// Growth and attachment state for Melon and Pumpkin stems.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum StemState {
     /// Stem has not yet produced any fruit, or the fruit has been removed.
     Growing(Int0Through7),
@@ -138,14 +138,14 @@ pub enum StemState {
     Attached(Surface4),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BambooLeaves {
     None,
     Small,
     Large,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Log {
     pub material: WoodMaterial,
     /// Logs with no alignment have bark (or stripped pattern) on all sides.
@@ -158,14 +158,14 @@ bounded_integer! {
     pub struct HoneyLevel { 0..=5 }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BedEnd {
     Foot,
     Head,
 }
 
 // TODO consider using BitSet here
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct DirectionFlags6 {
     pub east: bool,
     pub down: bool,
@@ -178,35 +178,35 @@ pub struct DirectionFlags6 {
 pub type ChorusPlantConnections = DirectionFlags6;
 pub type FireFace = DirectionFlags6;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum CommandBlockVariant {
     ChainedCommandBlock,
     CommandBlock,
     RepeatingCommandBlock,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CommandBlock {
     pub variant: CommandBlockVariant,
     pub conditional: bool,
     pub facing: Surface6,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ChestVariant {
     Left,
     Right,
     Single,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Chest {
     pub facing: Surface4,
     pub variant: ChestVariant,
     pub waterlogged: bool,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum HeadVariant {
     CreeperHead,
     DragonHead,
@@ -216,14 +216,14 @@ pub enum HeadVariant {
     ZombieHead,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Head {
     pub variant: HeadVariant,
     pub placement: WallOrRotatedOnFloor,
     pub waterlogged: bool,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PottedPlant {
     AcaciaSapling,
     Allium,
@@ -256,13 +256,13 @@ pub enum PottedPlant {
     WitherRose,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum OnOffState {
     On,
     Off,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Pitch {
     Fs0 = 0,
     G0,
@@ -324,7 +324,7 @@ impl Pitch {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Block {
     None,
     Air,

@@ -31,7 +31,7 @@
 /// // From 20w15a
 /// mcprogedit::material::ButtonMaterial::PolishedBlackstone;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ButtonMaterial {
     Acacia,
     Birch,
@@ -57,7 +57,7 @@ pub enum ButtonMaterial {
 /// mcprogedit::material::CoralMaterial::Horn;
 /// mcprogedit::material::CoralMaterial::Tube;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum CoralMaterial {
     /// Purple coral variant
     Bubble,
@@ -110,7 +110,7 @@ pub enum CoralMaterial {
 /// mcprogedit::material::DoorMaterial::Crimson; // Door, Trapdoor
 /// mcprogedit::material::DoorMaterial::Warped;  // Door, Trapdoor
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum DoorMaterial {
     Acacia,
     Birch,
@@ -151,7 +151,7 @@ pub enum DoorMaterial {
 /// mcprogedit::material::FenceMaterial::Crimson;
 /// mcprogedit::material::FenceMaterial::Warped;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum FenceMaterial {
     Acacia,
     Birch,
@@ -187,7 +187,7 @@ pub enum FenceMaterial {
 /// mcprogedit::material::LeavesMaterial::Acacia;
 /// mcprogedit::material::LeavesMaterial::DarkOak;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum LeavesMaterial {
     Acacia,
     Birch,
@@ -230,7 +230,7 @@ pub enum LeavesMaterial {
 /// // From 20w15a
 /// mcprogedit::material::PressurePlateMaterial::PolishedBlackstone;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PressurePlateMaterial {
     Acacia,
     Birch,
@@ -246,7 +246,7 @@ pub enum PressurePlateMaterial {
     Warped,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SaplingMaterial {
     Acacia,
     Bamboo,
@@ -347,7 +347,7 @@ pub enum SaplingMaterial {
 /// mcprogedit::material::SlabMaterial::PolishedBlackstone;
 /// mcprogedit::material::SlabMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SlabMaterial {
     Acacia,
     Andesite,
@@ -483,7 +483,7 @@ pub enum SlabMaterial {
 /// mcprogedit::material::StairMaterial::PolishedBlackstone;
 /// mcprogedit::material::StairMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum StairMaterial {
     Acacia,
     Andesite,
@@ -555,7 +555,7 @@ pub enum StairMaterial {
 /// mcprogedit::material::WallMaterial::PolishedBlackstone;
 /// mcprogedit::material::WallMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum WallMaterial {
     Andesite,
     Blackstone,
@@ -642,7 +642,7 @@ pub enum WallMaterial {
 /// mcprogedit::material::WoodMaterial::Crimson; // FenceGate, Log, Planks, Sign
 /// mcprogedit::material::WoodMaterial::Warped;  // FenceGate, Log, Planks, Sign
 /// ```
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum WoodMaterial {
     Oak,
     Spruce,

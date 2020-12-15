@@ -2,7 +2,7 @@ use crate::colour::*;
 use crate::positioning::*;
 
 /// Banner "block".
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Banner {
     /// Base colour of the banner.
     pub colour: Colour,
