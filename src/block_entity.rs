@@ -1,6 +1,11 @@
 use crate::banner;
 use crate::colour::Colour;
+use crate::item::Item;
 use crate::nbt_lookup::*;
+
+use std::collections::HashMap;
+
+type Inventory = HashMap<i8, (i8, Item)>;
 
 // Block entity, aka "tile entity". Contains additional block data, a bit
 // analogous to storing variable size data in a heap.
@@ -37,7 +42,7 @@ pub enum BlockEntity {
         common: CommonTags,
         custom_name: Option<String>,
         lock: Option<String>,
-        items: (), // TODO change to items and slots and stacks and whatnot
+        items: Inventory, // <slot, (count, item)>
         loot_table: Option<()>, // TODO support for loot tables
         loot_table_seed: Option<()>, // TODO support for loot tables
     },
@@ -166,7 +171,20 @@ impl BlockEntity {
     }
 
     fn chest_from_nbt_value(value: &nbt::Value) -> Self {
-        todo!();
+        println!("{:#?}", value);
+        let items = if let Some(items) = nbt_value_lookup_list(&value, "Items") {
+            item_collection_from_nbt_value_vec(&items)
+        } else {
+            Inventory::new()
+        };
+        BlockEntity::Chest {
+            common: CommonTags::from_nbt_value(&value),
+            custom_name: nbt_value_lookup_string(&value, "CustomName"),
+            lock: nbt_value_lookup_string(&value, "Lock"),
+            items,
+            loot_table: None, // TODO
+            loot_table_seed: None, // TODO
+        }
     }
 
     fn comparator_from_nbt_value(value: &nbt::Value) -> Self {
@@ -276,6 +294,25 @@ impl BlockEntity {
     fn structure_block_from_nbt_value(value: &nbt::Value) -> Self {
         todo!();
     }
+}
+
+// TODO should probably live in item.rs instead...
+fn item_collection_from_nbt_value_vec(list: &[nbt::Value]) -> Inventory {
+    let mut items = HashMap::new();
+    for item in list {
+        let (slot, count, item) = item_from_nbt_value(item);
+        items.insert(slot, (count, item));
+    }
+    items
+}
+
+// TODO should probably live in item.rs instead...
+fn item_from_nbt_value(value: &nbt::Value) -> (i8, i8, Item) {
+    let slot = nbt_value_lookup_byte(&value, "Slot").unwrap();
+    let count = nbt_value_lookup_byte(&value, "Count").unwrap();
+    let item = Item::from_nbt_value(&value);
+
+    (slot, count, item)
 }
 
 // Tags present for all block entities.

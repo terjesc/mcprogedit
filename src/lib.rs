@@ -12,6 +12,8 @@ pub mod bounds;
 mod chunk;
 pub mod colour;
 pub mod coordinates;
+pub mod enchantment;
+pub mod item;
 pub mod material;
 pub mod mc_version;
 mod nbt_lookup;

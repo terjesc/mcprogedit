@@ -67,7 +67,7 @@ impl Chunk {
             .iter()
             .map(|nbt| BlockEntity::from_nbt_value(nbt))
             .collect();
-        println!("TileEntities: {:?}", block_entities);
+        //println!("TileEntities: {:?}", block_entities);
 
         //let block_entities = BlockEntity::vec_from_nbt_list(tile_entities);
 

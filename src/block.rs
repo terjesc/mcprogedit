@@ -129,6 +129,17 @@ pub enum AnvilDamage {
     VeryDamaged,
 }
 
+impl From<i16> for AnvilDamage {
+    fn from(damage: i16) -> Self {
+        match damage {
+            0 => Self::Intact,
+            1 => Self::SlightlyDamaged,
+            2 => Self::VeryDamaged,
+            _ => panic!("Invalid anvil damage value: {}", damage),
+        }
+    }
+}
+
 /// Growth and attachment state for Melon and Pumpkin stems.
 #[derive(Clone, Debug, PartialEq)]
 pub enum StemState {
@@ -775,7 +786,7 @@ pub enum Block {
     SoulSoil,
     Spawner, // TODO add block entity
     Sponge,
-    Stair(Stair),
+    Stairs(Stair),
     StickyPiston {
         facing: Surface4,
     }, // TODO consider "extended" field and StickyPistonHead.

@@ -1,4 +1,17 @@
-//! For describing material variants of blocks.
+//! For describing material variants of blocks and items.
+
+/// Materials for Armour.
+//TODO add descriptions for when materials were first introduced
+#[derive(Clone, Debug, PartialEq)]
+pub enum ArmourMaterial {
+    Chainmail,
+    Diamond,
+    Gold,
+    Iron,
+    Leather,
+    Netherite,
+}
+
 
 /// Materials for the "Button" family of blocks.
 ///
@@ -164,6 +177,36 @@ pub enum FenceMaterial {
     Warped,
 }
 
+/// Materials for Horse Armor.
+//TODO add descriptions for when materials were first introduced
+#[derive(Clone, Debug, PartialEq)]
+pub enum HorseArmorMaterial {
+    Gold,
+    Iron,
+    Diamond,
+}
+
+/// Materials for Ingots.
+///
+/// # Variant availability
+/// ## Introduced in Minecraft Beta
+/// ```
+/// // Since time immemorial
+/// mcprogedit::material::IngotMaterial::Gold;
+/// mcprogedit::material::IngotMaterial::Iron;
+/// ```
+/// ## Introduced in Minecraft 1.16
+/// ```
+/// // From 20w06a
+/// mcprogedit::material::IngotMaterial::Netherite;
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+pub enum IngotMaterial {
+    Gold,
+    Iron,
+    Netherite,
+}
+
 /// Materials for the "Leaves" family of blocks.
 ///
 /// # Variant availability
@@ -195,6 +238,13 @@ pub enum LeavesMaterial {
     Jungle,
     Oak,
     Spruce,
+}
+
+// TODO description
+#[derive(Clone, Debug, PartialEq)]
+pub enum NuggetMaterial {
+    Gold,
+    Iron,
 }
 
 /// Materials for the "PressurePlate" family of blocks.
@@ -246,6 +296,29 @@ pub enum PressurePlateMaterial {
     Warped,
 }
 
+/// Materials for Saplings.
+///
+/// # Variant availability
+/// ## Introduced in Minecraft Beta
+/// ```
+/// // Since time immemorial
+/// mcprogedit::material::SaplingMaterial::Oak;
+///
+/// // From Minecraft Beta 1.5
+/// mcprogedit::material::SaplingMaterial::Birch;
+/// mcprogedit::material::SaplingMaterial::Spruce;
+/// ```
+/// ## Introduced in Minecraft 1.2.1
+/// ```
+/// // From 12w04a
+/// mcprogedit::material::SaplingMaterial::Jungle;
+/// ```
+/// ## Introduced in Minecraft 1.7.2
+/// ```
+/// // From 13w43a
+/// mcprogedit::material::SaplingMaterial::Acacia;
+/// mcprogedit::material::SaplingMaterial::DarkOak;
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub enum SaplingMaterial {
     Acacia,
@@ -255,6 +328,31 @@ pub enum SaplingMaterial {
     Jungle,
     Oak,
     Spruce,
+}
+
+/// Materials for Seeds.
+///
+/// # Variant availability
+/// ## Introduced in Minecraft Beta
+/// ```
+/// // Since time immemorial
+/// mcprogedit::material::SeedMaterial::Wheat;
+///
+/// // From Minecraft Beta 1.8
+/// mcprogedit::material::SeedMaterial::Melon;
+/// mcprogedit::material::SeedMaterial::Pumpkin;
+/// ```
+/// ## Introduced in Minecraft 1.9
+/// ```
+/// // From 15w31a
+/// mcprogedit::material::SeedMaterial::Beetroot;
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+pub enum SeedMaterial {
+    Beetroot,
+    Melon,
+    Pumpkin,
+    Wheat,
 }
 
 /// Materials for the "Slab" family of blocks.
@@ -523,6 +621,33 @@ pub enum StairMaterial {
     Warped,
 }
 
+/// Materials for tools and swords.
+///
+/// # Variant availability
+/// ## Introduced in Minecraft Beta
+/// ```
+/// // Since time immemorial
+/// mcprogedit::material::ToolMaterial::Diamond;
+/// mcprogedit::material::ToolMaterial::Gold;
+/// mcprogedit::material::ToolMaterial::Iron;
+/// mcprogedit::material::ToolMaterial::Stone;
+/// mcprogedit::material::ToolMaterial::Wood;
+/// ```
+/// ## Introduced in Minecraft 1.16
+/// ```
+/// // From 20w06a
+/// mcprogedit::material::ToolMaterial::Netherite;
+/// ```
+#[derive(Clone, Debug, PartialEq)]
+pub enum ToolMaterial {
+    Diamond,
+    Gold,
+    Iron,
+    Netherite,
+    Stone,
+    Wood
+}
+
 /// Materials for the "Wall" family of blocks.
 ///
 /// # Variant availability
@@ -576,7 +701,7 @@ pub enum WallMaterial {
     StoneBrick,
 }
 
-/// Materials for the "FenceGate", "Log", "Planks" and "Sign" families of blocks.
+/// Materials for the "FenceGate", "Log", "Planks" and "Sign" families of blocks, and Boats.
 ///
 /// # Variant availability
 /// ## Introduced in Minecraft Beta
