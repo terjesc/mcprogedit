@@ -345,6 +345,9 @@ static STR2ID: phf::Map<&'static str, i32> = phf_map! {
     "20w45a" => 2681i32,
     "20w46a" => 2682i32,
     "20w48a" => 2683i32,
+    "20w49a" => 2685i32,
+    "20w51a" => 2687i32,
+    // Released in 2021
     // NOTE 2701 "Combat Test 6" not supported
     // NOTE 2704 "Combat Test 7c" not supported
     // NOTE 2706 "Combat Test 8b" not supported
@@ -686,6 +689,9 @@ static ID2STR: phf::Map<i32, &'static str> = phf_map! {
     2681i32 => "20w45a",
     2682i32 => "20w46a",
     2683i32 => "20w48a",
+    2685i32 => "20w49a",
+    2687i32 => "20w51a",
+    // Released in 2021
     // NOTE 2701 "Combat Test 6" not supported
     // NOTE 2704 "Combat Test 7c" not supported
     // NOTE 2706 "Combat Test 8b" not supported
