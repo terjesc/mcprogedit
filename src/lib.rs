@@ -13,6 +13,7 @@ mod chunk;
 pub mod colour;
 pub mod coordinates;
 pub mod enchantment;
+pub mod inventory;
 pub mod item;
 pub mod material;
 pub mod mc_version;
