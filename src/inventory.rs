@@ -15,7 +15,7 @@ use std::collections::HashMap;
 // e.g. furnace has "fuel" slot, "cooking" slot and "cooked" slot,
 // and animals have "saddle" slot, "armor" slot, "chest" slots, etc.
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Inventory {
     slots: HashMap<i8, ItemStack>
 }
@@ -50,7 +50,7 @@ impl Default for Inventory {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct ItemStack {
     item: Item,
     count: i8,

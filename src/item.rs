@@ -6,7 +6,7 @@ use crate::enchantment::Enchantment;
 use crate::material::*;
 use crate::nbt_lookup::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Item {
     custom_name: Option<String>,
     enchantments: Vec<Enchantment>,
@@ -815,7 +815,7 @@ pub enum MinecartContents {
     TNT,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum ItemKind {
     // mcprogedit "items"
     Unknown,

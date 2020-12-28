@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::banner;
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
@@ -8,7 +10,7 @@ use crate::status_effect::StatusEffect;
 
 // Block entity, aka "tile entity". Contains additional block data, a bit
 // analogous to storing variable size data in a heap.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum BlockEntity {
     Unknown {
         id: Option<String>,
@@ -108,9 +110,21 @@ pub enum BlockEntity {
 }
 
 impl BlockEntity {
+    pub fn map_from_nbt_list(list: &nbt::Value) -> HashMap<BlockCoord, Self> {
+        Self::vec_from_nbt_list(&list)
+            .iter()
+            .map(|entity| (entity.coordinates(), entity))
+            .filter(|(coord, _entity)| coord.is_some())
+            .map(|(coord, entity)| (coord.unwrap(), entity.clone()))
+            .collect()
+    }
+
     pub fn vec_from_nbt_list(list: &nbt::Value) -> Vec<Self> {
         if let nbt::Value::List(block_entities) = list {
-            block_entities.iter().map(|nbt| BlockEntity::from_nbt_value(nbt)).collect()
+            block_entities
+                .iter()
+                .map(|nbt| BlockEntity::from_nbt_value(nbt))
+                .collect()
         } else {
             Vec::new()
         }
@@ -396,10 +410,43 @@ impl BlockEntity {
         // TODO (deferred as too complicated)
         BlockEntity::StructureBlock
     }
+
+    fn coordinates(&self) -> Option<BlockCoord> {
+        match self {
+            BlockEntity::Unknown { .. } => None,
+            Self::Banner { common, .. } => Some(common.coordinates()),
+            Self::Barrel { tags } => Some(tags.common.coordinates()),
+            Self::Beacon { common, .. } => Some(common.coordinates()),
+            Self::Bed { common, .. } => Some(common.coordinates()),
+            Self::BlastFurnace { tags } => Some(tags.common.coordinates()),
+            Self::BrewingStand { common, .. } => Some(common.coordinates()),
+            Self::Chest { tags } => Some(tags.common.coordinates()),
+            Self::Comparator { common, .. } => Some(common.coordinates()),
+            Self::CommandBlock => None,
+            Self::DaylightDetector { common } => Some(common.coordinates()),
+            Self::Dispenser { tags } => Some(tags.common.coordinates()),
+            Self::Dropper { tags } => Some(tags.common.coordinates()),
+            Self::EnchantingTable { common, .. } => Some(common.coordinates()),
+            Self::EnderChest { common } => Some(common.coordinates()),
+            Self::EndGateway { common, .. } => Some(common.coordinates()),
+            Self::EndPortal { common } => Some(common.coordinates()),
+            Self::Furnace { tags } => Some(tags.common.coordinates()),
+            Self::Hopper { tags } => Some(tags.common.coordinates()),
+            Self::Jukebox { common, .. } => Some(common.coordinates()),
+            Self::Lectern { common, .. } => Some(common.coordinates()),
+            Self::MobSpawner => None,
+            Self::Piston => None,
+            Self::ShulkerBox { tags } => Some(tags.common.coordinates()),
+            Self::Sign { common, .. } => Some(common.coordinates()),
+            Self::Skull => None,
+            Self::Smoker { tags } => Some(tags.common.coordinates()),
+            Self::StructureBlock => None,
+        }
+    }
 }
 
 // Tags present for all block entities.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CommonTags {
     id: String, // block entity ID
     x: i32, // chunk local x coordinate
@@ -409,7 +456,7 @@ pub struct CommonTags {
 }
 
 impl CommonTags {
-    pub fn from_nbt_value(value: &nbt::Value) -> Self {
+    fn from_nbt_value(value: &nbt::Value) -> Self {
         Self {
             id: nbt_value_lookup_string(&value, "id").unwrap(),
             x: nbt_value_lookup_int(&value, "x").unwrap(),
@@ -418,10 +465,14 @@ impl CommonTags {
             keep_packed: nbt_value_lookup_byte(&value, "keepPacked").unwrap_or(0) != 0,
         }
     }
+
+    fn coordinates(&self) -> BlockCoord {
+        (self.x as i64, self.y as i64, self.z as i64).into()
+    }
 }
 
 // Tags present for all "chest similar" block entities, e.g. Chest, Dropper, etc.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ChestTags {
         common: CommonTags,
         custom_name: Option<String>,
@@ -450,7 +501,7 @@ impl ChestTags {
 }
 
 // Tags present for all "furnace similar" block entities, e.g. Furnace, Smoker, etc.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FurnaceTags {
     common: CommonTags,
     custom_name: Option<String>,

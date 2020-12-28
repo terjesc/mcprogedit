@@ -61,15 +61,10 @@ impl Chunk {
 
         let last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
 
-        let tile_entities = nbt_blob_lookup_list(&nbt, "Level/TileEntities")
+        let tile_entities = nbt_blob_lookup(&nbt, "Level/TileEntities")
             .unwrap_or_else(|| panic!("Level/TileEntities not found"));
-        let block_entities: Vec<_> = tile_entities
-            .iter()
-            .map(|nbt| BlockEntity::from_nbt_value(nbt))
-            .collect();
-        //println!("TileEntities: {:?}", block_entities);
-
-        //let block_entities = BlockEntity::vec_from_nbt_list(tile_entities);
+        let block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
+        //println!("TileEntities: {:#?}", block_entities);
 
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|| panic!("Level/Sections not found"));
