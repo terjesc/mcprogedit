@@ -6,7 +6,7 @@ use crate::enchantment::Enchantment;
 use crate::material::*;
 use crate::nbt_lookup::*;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Item {
     custom_name: Option<String>,
     enchantments: Vec<Enchantment>,
@@ -97,7 +97,7 @@ impl Item {
             "minecraft:bread" => ItemKind::Bread,
             "minecraft:brewing_stand" => ItemKind::BrewingStand,
             "minecraft:brick" => ItemKind::Brick,
-            "minecraft:brick_block" => ItemKind::Bricks,
+            "minecraft:brick_block" => ItemKind::BrickBlock,
             "minecraft:brick_stairs" => ItemKind::Stairs(StairMaterial::Brick),
             "minecraft:brown_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::Brown))
@@ -815,7 +815,7 @@ pub enum MinecartContents {
     TNT,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ItemKind {
     // mcprogedit "items"
     Unknown,
@@ -990,7 +990,7 @@ pub enum ItemKind {
     BlockOfRedstone,
     BoneBlock,
     Bookshelf,
-    Bricks,
+    BrickBlock,
     BrownMushroom,
     BrownMushroomBlock,
     Button(ButtonMaterial),

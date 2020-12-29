@@ -1,6 +1,7 @@
 use crate::banner::*;
 use crate::bounded_ints::*;
 use crate::colour::*;
+use crate::inventory::Inventory;
 use crate::material::*;
 use crate::positioning::*;
 
@@ -43,9 +44,9 @@ pub enum SlabVariant {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Slab {
-    material: SlabMaterial,
-    position: SlabVariant,
-    waterlogged: bool,
+    pub material: SlabMaterial,
+    pub position: SlabVariant,
+    pub waterlogged: bool,
 }
 
 /// Stair shape is not configurable, as it depend on neighbouring stairs.
@@ -78,6 +79,24 @@ pub enum RailShape {
     AscendingNorth,
     AscendingSouth,
     AscendingWest,
+}
+
+impl RailShape {
+    pub fn from_value(value: i8) -> Self {
+        match value {
+            0 => Self::NorthSouth,
+            1 => Self::EastWest,
+            2 => Self::AscendingEast,
+            3 => Self::AscendingWest,
+            4 => Self::AscendingNorth,
+            5 => Self::AscendingSouth,
+            6 => Self::SouthEast,
+            7 => Self::SouthWest,
+            8 => Self::NorthWest,
+            9 => Self::NorthEast,
+            n => panic!("Invalid rail shape value: {}", n),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -218,6 +237,14 @@ pub struct Chest {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct Dispenser {
+    pub facing: Surface6,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum HeadVariant {
     CreeperHead,
     DragonHead,
@@ -330,9 +357,31 @@ impl Pitch {
             22 => Pitch::E2,
             23 => Pitch::F2,
             24 => Pitch::Fs2,
-            _ => panic!("Pitch value out of range!"),
+            n => panic!("Pitch value {} is out of range!", n),
         }
     }
+}
+
+// TODO put somewhere suitable
+// TODO utility functions
+#[derive(Clone, Debug, PartialEq)]
+pub enum Instrument {
+    Banjo,
+    Basedrum,
+    Bass,
+    Bell,
+    Bit,
+    Chime,
+    CowBell,
+    Didgeridoo,
+    Flute,
+    Guitar,
+    Harp,
+    Hat,
+    IronXylophone,
+    Pling,
+    Snare,
+    Xylophone,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -397,6 +446,7 @@ pub enum Block {
     },
     Bookshelf,
     BrewingStand, // TODO add block entity
+    BrickBlock,
     BrownMushroom,
     BrownMushroomBlock {
         cap_directions: DirectionFlags6,
@@ -496,9 +546,7 @@ pub enum Block {
     DiamondOre,
     Diorite,
     Dirt,
-    Dispenser {
-        facing: Surface6,
-    }, // TODO add block entity
+    Dispenser(Box<Dispenser>),
     Door {
         material: DoorMaterial,
         facing: Surface4,
@@ -618,7 +666,7 @@ pub enum Block {
     LavaSource, // TODO handle magic (that is, the "flowing" state)
     Leaves {
         material: LeavesMaterial,
-        distance_to_trunk: Int0Through7,
+        distance_to_trunk: Option<Int0Through7>,
         persistent: bool,
     },
     Lectern {
@@ -657,8 +705,7 @@ pub enum Block {
     Netherrack,
     Noteblock {
         pitch: Pitch,
-    }, // TODO instrument depend on neighbouring block below.
-    // Figure out if an "instrument" field is needed.
+    },
     Observer {
         facing: Surface6,
     }, // TODO consider if a "powered" field is useful.
@@ -666,7 +713,11 @@ pub enum Block {
     PackedIce,
     Piston {
         facing: Surface6,
-    }, // TODO consider adding "extended" field and PistonHead block.
+        extended: bool,
+    },
+    PistonHead {
+        facing: Surface6,
+    },
     Planks {
         material: WoodMaterial,
     },
@@ -788,8 +839,12 @@ pub enum Block {
     Sponge,
     Stairs(Stair),
     StickyPiston {
-        facing: Surface4,
-    }, // TODO consider "extended" field and StickyPistonHead.
+        facing: Surface6,
+        extended: bool,
+    },
+    StickyPistonHead {
+        facing: Surface6,
+    },
     Stone,
     StoneBricks,
     StoneCutter {
@@ -807,9 +862,7 @@ pub enum Block {
     Terracotta {
         colour: Option<Colour>,
     },
-    TNT {
-        unstable: bool,
-    },
+    TNT,
     Torch {
         facing: Surface5,
     },

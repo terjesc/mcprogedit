@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::banner;
+use crate::block::Pitch;
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
@@ -93,6 +94,11 @@ pub enum BlockEntity {
         book: Option<(Item, i32)>, // (book, page)
     },
     MobSpawner,
+    Noteblock {
+        common: CommonTags,
+        note: Pitch,
+        powered: bool,
+    },
     Piston,
     ShulkerBox {
         tags: ChestTags,
@@ -159,6 +165,7 @@ impl BlockEntity {
                 "minecraft:jukebox" => Self::jukebox_from_nbt_value(&value),
                 "minecraft:lectern" => Self::lectern_from_nbt_value(&value),
                 "minecraft:mob_spawner" => Self::mob_spawner_from_nbt_value(&value),
+                "minecraft:noteblock" => Self::noteblock_from_nbt_value(&value),
                 "minecraft:piston" => Self::piston_from_nbt_value(&value),
                 "minecraft:shulker_box" => Self::shulker_box_from_nbt_value(&value),
                 "minecraft:sign" => Self::sign_from_nbt_value(&value),
@@ -361,6 +368,19 @@ impl BlockEntity {
         BlockEntity::MobSpawner
     }
 
+    fn noteblock_from_nbt_value(value: &nbt::Value) -> Self {
+        println!("{:#?}", value);
+        BlockEntity::Noteblock {
+            common: CommonTags::from_nbt_value(&value),
+            note: Pitch::from_value(nbt_value_lookup_byte(&value, "note").unwrap() as u8),
+            powered: if let Some(0) = nbt_value_lookup_byte(&value, "powered") {
+                false
+            } else {
+                true
+            },
+        }
+    }
+
     fn piston_from_nbt_value(_value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::Piston
@@ -435,6 +455,7 @@ impl BlockEntity {
             Self::Jukebox { common, .. } => Some(common.coordinates()),
             Self::Lectern { common, .. } => Some(common.coordinates()),
             Self::MobSpawner => None,
+            Self::Noteblock { common, .. } => Some(common.coordinates()),
             Self::Piston => None,
             Self::ShulkerBox { tags } => Some(tags.common.coordinates()),
             Self::Sign { common, .. } => Some(common.coordinates()),
@@ -475,9 +496,9 @@ impl CommonTags {
 #[derive(Clone, Debug)]
 pub struct ChestTags {
         common: CommonTags,
-        custom_name: Option<String>,
-        lock: Option<String>,
-        items: Inventory,
+        pub custom_name: Option<String>,
+        pub lock: Option<String>,
+        pub items: Inventory,
         loot_table: Option<()>, // TODO support for loot tables
         loot_table_seed: Option<()>, // TODO support for loot tables
 }
@@ -504,12 +525,12 @@ impl ChestTags {
 #[derive(Clone, Debug)]
 pub struct FurnaceTags {
     common: CommonTags,
-    custom_name: Option<String>,
-    lock: Option<String>,
-    items: Inventory,
-    burn_time: i16,
-    cook_time: i16,
-    cook_time_total: i16,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+    pub burn_time: i16,
+    pub cook_time: i16,
+    pub cook_time_total: i16,
     // TODO Add structure for recipes for which XP is not collected yet..
 }
 
