@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use crate::block;
 use crate::block::{
-    BedEnd, Block, Chest, Dispenser, Flower, Furnace, Jukebox, OnOffState, RailShape, RailType, Sign, Slab, SlabVariant, Stair,
+    BedEnd, Block, Chest, DirectionFlags6, Dispenser, Flower, Furnace, Jukebox, OnOffState,
+    RailShape, RailType, Sign, Slab, SlabVariant, Stair, StemState,
 };
 use crate::block_entity::BlockEntity;
 use crate::bounded_ints::*;
@@ -107,6 +108,7 @@ impl Chunk {
         const X_LENGTH: i64 = 16;
         const Y_HEIGHT: i64 = 16;
         const Z_LENGTH: i64 = 16;
+
         // index = (y * X_LENGTH * Z_LENGTH) + (z * X_LENGTH) + x
         fn coordinates(section_y_index: i64, index: usize) -> BlockCoord {
             let y_offset = section_y_index * Y_HEIGHT;
@@ -124,6 +126,44 @@ impl Chunk {
                 4 => Surface4::West,
                 5 => Surface4::East,
                 n => panic!("Unknown facing data variant for chest: {}", n),
+            }
+        }
+
+        fn fence_gate_facing(data: i8) -> Surface4 {
+            match data & 0x3 {
+                0 => Surface4::South,
+                1 => Surface4::West,
+                2 => Surface4::North,
+                3 => Surface4::East,
+                _ => unreachable!(),
+            }
+        }
+
+        // OK this is kind of messy, but basically each number gives a combination
+        // of what sides have a cap (or stem) on them. Values 10 and 15 are for stems,
+        // and all other values are for caps. The caller needs to check whether the
+        // resulting sides should be caps or stem, by checking if the data value is
+        // 10 or 15 (stem) or any other value (caps).
+        fn mushroom_caps(data: i8) -> DirectionFlags6 {
+            // Only the four least significant bytes count
+            let data = data & 0xF;
+
+            // Prepare direction flags
+            let east = (data <= 9 && (data % 3) == 0) || data == 10 || data >= 14;
+            let down = data >= 14;
+            let north = (data >= 1 && data <= 3) || data == 10 || data >= 14;
+            let south = (data >= 7 && data <= 10) || data >= 14;
+            let up = (data >= 1 && data <= 9) || data >= 14;
+            let west = (data <= 10 && (data % 3) == 1) || data >= 14;
+
+            // Create and return value
+            DirectionFlags6 {
+                east,
+                down,
+                north,
+                south,
+                up,
+                west,
             }
         }
 
@@ -182,7 +222,7 @@ impl Chunk {
                         n => panic!("Unknown plank data variant: {}", n),
                     },
                     6 => Block::Sapling {
-                        growth_stage: Int0Through1::new((data[index] & 0x8) >>3).unwrap(),
+                        growth_stage: Int0Through1::new((data[index] & 0x8) >> 3).unwrap(),
                         material: match data[index] & 0x7 {
                             0 => SaplingMaterial::Oak,
                             1 => SaplingMaterial::Spruce,
@@ -338,8 +378,7 @@ impl Chunk {
                         extended: data[index] & 0x8 == 0x8,
                     },
                     30 => Block::Cobweb,
-                    // NB TODO add parsing of more blocks
-                    // (uncertain about data value 31 "tallgrass" types)
+                    // TODO block 31 tallgrass
                     32 => Block::DeadBush,
                     33 => Block::Piston {
                         facing: match data[index] & 0x7 {
@@ -372,8 +411,7 @@ impl Chunk {
                     35 => Block::Wool {
                         colour: Some((data[index] as i32).into()),
                     },
-                    // NB TODO add parsing of more blocks
-                    // (uncertain about data value 36 "Block moved by Piston")
+                    // TODO block 36 piston_extension ("Block moved by Piston")
                     37 => Block::Flower(Flower::Dandelion),
                     38 => Block::Flower(match data[index] {
                         0 => Flower::Poppy,
@@ -453,8 +491,7 @@ impl Chunk {
                     51 => Block::Fire {
                         age: Int0Through15::new(data[index]).unwrap(),
                     },
-                    // NB TODO add parsing of more blocks
-                    // 52 mob spawner
+                    // TODO block 52 mob spawner
                     53 => Block::Stairs(Stair {
                         material: StairMaterial::Oak,
                         position: (data[index] & 0x7).into(),
@@ -465,16 +502,14 @@ impl Chunk {
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
-                            BlockEntity::Chest { tags } => {
-                                Block::Chest(Box::new(Chest {
-                                    facing: ladder_furnace_chest_facing(data[index]),
-                                    variant: None,
-                                    waterlogged: false,
-                                    custom_name: tags.custom_name.clone(),
-                                    lock: tags.lock.clone(),
-                                    items: tags.items.clone(),
-                                }))
-                            }
+                            BlockEntity::Chest { tags } => Block::Chest(Box::new(Chest {
+                                facing: ladder_furnace_chest_facing(data[index]),
+                                variant: None,
+                                waterlogged: false,
+                                custom_name: tags.custom_name.clone(),
+                                lock: tags.lock.clone(),
+                                items: tags.items.clone(),
+                            })),
                             _ => panic!("Wrong block entity variant for chest"),
                         }
                     }
@@ -493,18 +528,16 @@ impl Chunk {
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
-                            BlockEntity::Furnace { tags } => {
-                                Block::Furnace(Box::new(Furnace {
-                                    facing: ladder_furnace_chest_facing(data[index]),
-                                    lit: block == 62,
-                                    custom_name: tags.custom_name.clone(),
-                                    lock: tags.lock.clone(),
-                                    items: tags.items.clone(),
-                                    burn_time: tags.burn_time,
-                                    cook_time: tags.cook_time,
-                                    cook_time_total: tags.cook_time_total,
-                                }))
-                            }
+                            BlockEntity::Furnace { tags } => Block::Furnace(Box::new(Furnace {
+                                facing: ladder_furnace_chest_facing(data[index]),
+                                lit: block == 62,
+                                custom_name: tags.custom_name.clone(),
+                                lock: tags.lock.clone(),
+                                items: tags.items.clone(),
+                                burn_time: tags.burn_time,
+                                cook_time: tags.cook_time,
+                                cook_time_total: tags.cook_time_total,
+                            })),
                             _ => panic!("Wrong block entity variant for chest"),
                         }
                     }
@@ -517,7 +550,7 @@ impl Chunk {
                                 Block::Sign(Box::new(Sign {
                                     material: WoodMaterial::Oak,
                                     placement: WallOrRotatedOnFloor::Floor(
-                                        (data[index] & 0xF).into()
+                                        (data[index] & 0xF).into(),
                                     ),
                                     waterlogged: false,
                                     colour: colour.clone(),
@@ -591,17 +624,16 @@ impl Chunk {
                             OnOffState::On
                         } else {
                             OnOffState::Off
-                        }
+                        },
                     ),
                     70 => Block::PressurePlate {
                         material: PressurePlateMaterial::Stone,
                     },
-                    // NB TODO add parsing of more blocks
-                    // 71 iron door
+                    // TODO block 71 iron door
                     72 => Block::PressurePlate {
                         material: PressurePlateMaterial::Oak,
                     },
-                    73 | 74 => Block::RedstoneOre, // TODO glowing
+                    73 | 74 => Block::RedstoneOre,
                     75 | 76 => Block::RedstoneTorch {
                         attached: match data[index] {
                             1 => Surface5::West,
@@ -649,10 +681,10 @@ impl Chunk {
                             }
                             _ => panic!("Wrong block entity variant for jukebox"),
                         }
-                    },
+                    }
                     85 => Block::Fence {
                         material: FenceMaterial::Oak,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     86 => Block::Pumpkin {
                         facing: match data[index] & 0x3 {
@@ -692,7 +724,80 @@ impl Chunk {
                     95 => Block::Glass {
                         colour: Some(((data[index] & 0xF) as i32).into()),
                     },
-                    // NB TODO add parsing of more blocks
+                    96 => Block::Trapdoor {
+                        material: DoorMaterial::Oak,
+                        hinge_at: match data[index] & (0x3 | 0x8) {
+                            0 => Edge8::DownSouth,
+                            1 => Edge8::DownNorth,
+                            2 => Edge8::DownEast,
+                            3 => Edge8::DownWest,
+                            8 => Edge8::UpSouth,
+                            9 => Edge8::UpNorth,
+                            10 => Edge8::UpEast,
+                            11 => Edge8::UpWest,
+                            n => panic!("Impossible position data for trapdoor: {}", n),
+                        },
+                        open: data[index] & 0x4 == 0x4,
+                        waterlogged: false,
+                    },
+                    97 => match data[index] {
+                        0 => Block::InfestedStone,
+                        1 => Block::InfestedCobblestone,
+                        2 => Block::InfestedStoneBricks,
+                        3 => Block::InfestedMossyStoneBricks,
+                        4 => Block::InfestedCrackedStoneBricks,
+                        5 => Block::InfestedChiseledStoneBricks,
+                        n => panic!("Unknown infested block data variant: {}", n),
+                    },
+                    98 => match data[index] {
+                        0 => Block::StoneBricks,
+                        1 => Block::MossyStoneBricks,
+                        2 => Block::CrackedStoneBricks,
+                        3 => Block::ChiseledStoneBricks,
+                        n => panic!("Unknown stone brick data variant: {}", n),
+                    },
+                    99 | 100 => match data[index] {
+                        stem @ 10 | stem @ 15 => Block::MushroomStem {
+                            stem_directions: mushroom_caps(stem),
+                        },
+                        cap => {
+                            let cap_directions = mushroom_caps(cap);
+                            if block == 99 {
+                                Block::BrownMushroomBlock { cap_directions }
+                            } else if block == 100 {
+                                Block::RedMushroomBlock { cap_directions }
+                            } else {
+                                unreachable!();
+                            }
+                        }
+                    },
+                    101 => Block::IronBars { waterlogged: false },
+                    102 => Block::GlassPane {
+                        colour: None,
+                        waterlogged: false,
+                    },
+                    103 => Block::Melon,
+                    104 => Block::PumpkinStem {
+                        state: StemState::Growing(Int0Through7::new(data[index] & 0x7).unwrap()),
+                    },
+                    105 => Block::MelonStem {
+                        state: StemState::Growing(Int0Through7::new(data[index] & 0x7).unwrap()),
+                    },
+                    106 => Block::Vines {
+                        anchored_at: DirectionFlags6 {
+                            east: data[index] & 0x8 == 0x8,
+                            down: false,
+                            north: data[index] & 0x4 == 0x4,
+                            south: data[index] & 0x1 == 0x1,
+                            up: false,
+                            west: data[index] & 0x2 == 0x2,
+                        },
+                    },
+                    107 => Block::FenceGate {
+                        material: WoodMaterial::Oak,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
                     108 => Block::Stairs(Stair {
                         material: StairMaterial::Brick,
                         position: (data[index] & 0x7).into(),
@@ -703,17 +808,30 @@ impl Chunk {
                         position: (data[index] & 0x7).into(),
                         waterlogged: false,
                     }),
-                    // NB TODO add parsing of more blocks
+                    110 => Block::Mycelium,
+                    111 => Block::LilyPad,
+                    112 => Block::NetherBricks,
                     113 => Block::Fence {
                         material: FenceMaterial::NetherBrick,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     114 => Block::Stairs(Stair {
                         material: StairMaterial::NetherBrick,
                         position: (data[index] & 0x7).into(),
                         waterlogged: false,
                     }),
+                    115 => Block::NetherWart {
+                        growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
+                    },
                     // NB TODO add parsing of more blocks
+                    // 116 enchanting table
+                    // 117 brewing stand
+                    // 118 cauldron
+                    // 119 end portal
+                    // 120 end portal frame
+                    121 => Block::EndStone,
+                    122 => Block::DragonEgg,
+                    123 | 124 => Block::RedstoneLamp,
                     125 => {
                         let material = match data[index] & 0x7 {
                             0 => SlabMaterial::Oak,
@@ -754,13 +872,35 @@ impl Chunk {
                             waterlogged,
                         })
                     }
-                    // NB TODO add parsing of more blocks
+                    127 => Block::CocoaBeans {
+                        growth_stage: Int0Through2::new((data[index] & 0xC) >> 2).unwrap(),
+                        facing: match data[index] & 0x3 {
+                            0 => Surface4::North,
+                            1 => Surface4::East,
+                            2 => Surface4::South,
+                            3 => Surface4::West,
+                            _ => unreachable!(),
+                        },
+                    },
                     128 => Block::Stairs(Stair {
                         material: StairMaterial::Sandstone,
                         position: (data[index] & 0x7).into(),
                         waterlogged: false,
                     }),
+                    129 => Block::EmeraldOre,
                     // NB TODO add parsing of more blocks
+                    // 130 ender chest
+                    131 => Block::TripwireHook {
+                        facing: match data[index] & 0x3 {
+                            0 => Surface4::South,
+                            1 => Surface4::West,
+                            2 => Surface4::North,
+                            3 => Surface4::East,
+                            _ => unreachable!(),
+                        },
+                    },
+                    132 => Block::Tripwire,
+                    133 => Block::BlockOfEmerald,
                     134 => Block::Stairs(Stair {
                         material: StairMaterial::Spruce,
                         position: (data[index] & 0x7).into(),
@@ -777,32 +917,63 @@ impl Chunk {
                         waterlogged: false,
                     }),
                     // NB TODO add parsing of more blocks
+                    // 137 command block
+                    // 138 beacon
+                    // 139 cobblestone wall
+                    // 140 flower pot
                     141 => Block::Carrots {
                         growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                     },
                     142 => Block::Potatoes {
                         growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                     },
+                    143 => Block::Button(
+                        ButtonMaterial::Oak,
+                        match data[index] & 0x7 {
+                            // NB these directions are probably wrong...
+                            0 => SurfaceRotation12::DownFacingEast,
+                            1 => SurfaceRotation12::East,
+                            2 => SurfaceRotation12::West,
+                            3 => SurfaceRotation12::South,
+                            4 => SurfaceRotation12::North,
+                            5 => SurfaceRotation12::UpFacingSouth,
+                            n => panic!("Unknown position data for stone button: {}", n),
+                        },
+                    ),
                     // NB TODO add parsing of more blocks
+                    // 144 skull
+                    // 145 anvil
                     146 => {
                         let coordinates = coordinates(section_y_index, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
-                            BlockEntity::Chest { tags } => {
-                                Block::TrappedChest(Box::new(Chest {
-                                    facing: ladder_furnace_chest_facing(data[index]),
-                                    variant: None,
-                                    waterlogged: false,
-                                    custom_name: tags.custom_name.clone(),
-                                    lock: tags.lock.clone(),
-                                    items: tags.items.clone(),
-                                }))
-                            }
+                            BlockEntity::Chest { tags } => Block::TrappedChest(Box::new(Chest {
+                                facing: ladder_furnace_chest_facing(data[index]),
+                                variant: None,
+                                waterlogged: false,
+                                custom_name: tags.custom_name.clone(),
+                                lock: tags.lock.clone(),
+                                items: tags.items.clone(),
+                            })),
                             _ => panic!("Wrong block entity variant for chest"),
                         }
                     }
+                    147 => Block::PressurePlate {
+                        material: PressurePlateMaterial::Gold,
+                    },
+                    148 => Block::PressurePlate {
+                        material: PressurePlateMaterial::Iron,
+                    },
                     // NB TODO add parsing of more blocks
+                    // 149 comparator
+                    // 150 comparator
+                    // 151 daylight detector
+                    152 => Block::BlockOfRedstone,
+                    153 => Block::NetherQuartzOre,
+                    // NB TODO add parsing of more blocks
+                    // 154 hopper
+                    155 => Block::BlockOfQuartz,
                     156 => Block::Stairs(Stair {
                         material: StairMaterial::Quartz,
                         position: (data[index] & 0x7).into(),
@@ -813,6 +984,7 @@ impl Chunk {
                         shape: RailShape::from_value(data[index] & 0x7),
                     },
                     // NB TODO add parsing of more blocks
+                    // 158 dropper
                     161 => {
                         let material = match data[index] & 0x3 {
                             0 => LeavesMaterial::Acacia,
@@ -881,26 +1053,50 @@ impl Chunk {
                             waterlogged,
                         })
                     }
-                    // NB TODO add parsing of more blocks
+                    183 => Block::FenceGate {
+                        material: WoodMaterial::Spruce,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
+                    184 => Block::FenceGate {
+                        material: WoodMaterial::Birch,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
+                    185 => Block::FenceGate {
+                        material: WoodMaterial::Jungle,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
+                    186 => Block::FenceGate {
+                        material: WoodMaterial::DarkOak,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
+                    187 => Block::FenceGate {
+                        material: WoodMaterial::Acacia,
+                        facing: fence_gate_facing(data[index]),
+                        open: data[index] & 0x4 == 0x4,
+                    },
                     188 => Block::Fence {
                         material: FenceMaterial::Spruce,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     189 => Block::Fence {
                         material: FenceMaterial::Birch,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     190 => Block::Fence {
                         material: FenceMaterial::Jungle,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     191 => Block::Fence {
                         material: FenceMaterial::DarkOak,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     192 => Block::Fence {
                         material: FenceMaterial::Acacia,
-                        waterlogged: false
+                        waterlogged: false,
                     },
                     // NB TODO add parsing of more blocks
                     // 193 spruce door

@@ -904,8 +904,10 @@ pub enum Block {
         growth_stage: Int0Through25,
     },
     TwistingVinesPlant,
-    Vines, // NB should attach to all neighbouring blocks by default
-    // TODO figure out if side bools are needed (e.g. hanging vines)
+    Vines {
+        // NB should attach to all neighbouring blocks by default
+        anchored_at: DirectionFlags6,
+    },
     Wall {
         material: WallMaterial,
         waterlogged: bool,
