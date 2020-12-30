@@ -2,6 +2,7 @@ use crate::banner::*;
 use crate::bounded_ints::*;
 use crate::colour::*;
 use crate::inventory::Inventory;
+use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
 
@@ -25,14 +26,14 @@ pub enum Hinge {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sign {
-    material: WoodMaterial,
-    placement: WallOrRotatedOnFloor,
-    waterlogged: bool,
-    colour: Colour,
-    text1: String,
-    text2: String,
-    text3: String,
-    text4: String,
+    pub material: WoodMaterial,
+    pub placement: WallOrRotatedOnFloor,
+    pub waterlogged: bool,
+    pub colour: Colour,
+    pub text1: String,
+    pub text2: String,
+    pub text3: String,
+    pub text4: String,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -232,8 +233,11 @@ pub enum ChestVariant {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Chest {
     pub facing: Surface4,
-    pub variant: ChestVariant,
+    pub variant: Option<ChestVariant>,
     pub waterlogged: bool,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -242,6 +246,18 @@ pub struct Dispenser {
     pub custom_name: Option<String>,
     pub lock: Option<String>,
     pub items: Inventory,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Furnace {
+    pub facing: Surface4,
+    pub lit: bool,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+    pub burn_time: i16,
+    pub cook_time: i16,
+    pub cook_time_total: i16,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -259,6 +275,11 @@ pub struct Head {
     pub variant: HeadVariant,
     pub placement: WallOrRotatedOnFloor,
     pub waterlogged: bool,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Jukebox {
+    pub record: Option<Item>,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -387,6 +408,7 @@ pub enum Instrument {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Block {
     None,
+    Unknown(Option<u8>),
     Air,
     AncientDebris,
     Anvil {
@@ -395,7 +417,7 @@ pub enum Block {
     },
     Andesite,
     Bamboo {
-        age: Int0Through1,
+        growth_stage: Int0Through1,
         leaves: BambooLeaves,
         stage: Int0Through1,
     },
@@ -429,9 +451,7 @@ pub enum Block {
         end: BedEnd,
     },
     Blackstone,
-    BlastFurnace {
-        facing: Surface4,
-    }, // TODO add block entity
+    BlastFurnace(Box<Furnace>),
     BlockOfCoal,
     BlockOfDiamond,
     BlockOfEmerald,
@@ -456,7 +476,7 @@ pub enum Block {
     }, // Is this even needed?
     Button(ButtonMaterial, SurfaceRotation12),
     Cactus {
-        age: Int0Through15,
+        growth_stage: Int0Through15,
     },
     Cake {
         bites: Int0Through6,
@@ -480,7 +500,7 @@ pub enum Block {
         water_level: Int0Through3,
     },
     CaveAir,
-    Chest(Chest), // TODO add block entity
+    Chest(Box<Chest>),
     ChiseledNetherBricks,
     ChiseledPolishedBlackstone,
     ChiseledQuartzBlock,
@@ -488,7 +508,7 @@ pub enum Block {
     ChiseledSandstone,
     ChiseledStoneBricks,
     ChorusFlower {
-        age: Int0Through5,
+        growth_stage: Int0Through5,
     },
     ChorusPlant {
         connections: ChorusPlantConnections,
@@ -499,7 +519,7 @@ pub enum Block {
     Cobblestone,
     Cobweb,
     CocoaBeans {
-        age: Int0Through2,
+        growth_stage: Int0Through2,
         facing: Surface4,
     },
     CommandBlock(CommandBlock), // TODO add block entity
@@ -590,7 +610,7 @@ pub enum Block {
     },
     Fire {
         age: Int0Through15,
-        burning_faces: FireFace,
+        //burning_faces: FireFace, // It seems burning faces are not a thing?
     },
     FletchingTable,
     Flower(Flower),
@@ -598,10 +618,7 @@ pub enum Block {
         plant: Option<PottedPlant>,
     },
     FrostedIce,
-    Furnace {
-        facing: Surface4,
-        lit: bool,
-    }, // TODO add block entity
+    Furnace(Box<Furnace>),
     GildedBlackstone,
     Glass {
         colour: Option<Colour>,
@@ -650,9 +667,9 @@ pub enum Block {
     JigsawBlock {
         orientation: JigsawBlockOrientation,
     }, // TODO add block entity
-    Jukebox, // TODO add block entity (and potentially "has record" bool)
+    Jukebox(Box<Jukebox>),
     Kelp {
-        age: Int0Through25,
+        growth_stage: Int0Through25,
     },
     Ladder {
         facing: Surface4,
@@ -694,12 +711,12 @@ pub enum Block {
     NetherBricks,
     NetherGoldOre,
     NetherPortal {
-        alignment: Axis2,
+        alignment: Option<Axis2>,
     },
     NetherQuartzOre,
     NetherSprouts,
     NetherWart {
-        age: Int0Through3,
+        growth_stage: Int0Through3,
     },
     NetherWartBlock,
     Netherrack,
@@ -738,7 +755,9 @@ pub enum Block {
     },
     Prismarine,
     PrismarineBricks,
-    Pumpkin,
+    Pumpkin {
+        facing: Surface4,
+    },
     PumpkinStem {
         state: StemState,
     },
@@ -774,7 +793,7 @@ pub enum Block {
         facing: Surface4,
     }, // TODO add block entity (?)
     RedstoneTorch {
-        facing: Surface5,
+        attached: Surface5,
     },
     RedstoneWire, // TODO upcoming change: * or + shape, of non-connected wire
     RespawnAnchor {
@@ -784,7 +803,7 @@ pub enum Block {
     Sandstone,
     Sapling {
         material: SaplingMaterial,
-        stage: Int0Through1,
+        growth_stage: Int0Through1,
     },
     Scaffolding {
         waterlogged: bool,
@@ -853,10 +872,10 @@ pub enum Block {
     StructureBlock, // TODO Add Corner, Data, Load, and Save variants. TODO add block entity
     StructureVoid,
     SugarCane {
-        age: Int0Through15,
+        growth_stage: Int0Through15,
     },
     SweetBerryBush {
-        age: Int0Through3,
+        growth_stage: Int0Through3,
     },
     Target,
     Terracotta {
@@ -864,7 +883,7 @@ pub enum Block {
     },
     TNT,
     Torch {
-        facing: Surface5,
+        attached: Surface5,
     },
     Trapdoor {
         material: DoorMaterial,
@@ -872,7 +891,7 @@ pub enum Block {
         open: bool,
         waterlogged: bool,
     },
-    TrappedChest(Chest), // TODO add block entity
+    TrappedChest(Box<Chest>),
     Tripwire,
     TripwireHook {
         facing: Surface4,
@@ -882,7 +901,7 @@ pub enum Block {
         age: Int0Through2,
     },
     TwistingVines {
-        age: Int0Through25,
+        growth_stage: Int0Through25,
     },
     TwistingVinesPlant,
     Vines, // NB should attach to all neighbouring blocks by default
@@ -897,12 +916,12 @@ pub enum Block {
     WarpedWartBlock,
     WaterSource, // TODO handle magic (that is, the "flowing" state)
     WeepingVines {
-        age: Int0Through25,
+        growth_stage: Int0Through25,
     },
     WeepingVinesPlant,
     WetSponge,
     Wheat {
-        age: Int0Through7,
+        growth_stage: Int0Through7,
     },
     Wool {
         colour: Option<Colour>,

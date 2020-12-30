@@ -46,7 +46,7 @@ pub enum Direction16 {
     West = 4,
     WestNorthWest = 5,
     NorthWest = 6,
-    NorthNorhtWest = 7,
+    NorthNorthWest = 7,
     North = 8,
     NorthNorthEast = 9,
     NorthEast = 10,
@@ -55,6 +55,30 @@ pub enum Direction16 {
     EastSouthEast = 13,
     SouthEast = 14,
     SouthSouthEast = 15,
+}
+
+impl From<i8> for Direction16 {
+    fn from(direction_number: i8) -> Self {
+        match direction_number {
+            0 => Direction16::South,
+            1 => Direction16::SouthSouthWest,
+            2 => Direction16::SouthWest,
+            3 => Direction16::WestSouthWest,
+            4 => Direction16::West,
+            5 => Direction16::WestNorthWest,
+            6 => Direction16::NorthWest,
+            7 => Direction16::NorthNorthWest,
+            8 => Direction16::North,
+            9 => Direction16::NorthNorthEast,
+            10 => Direction16::NorthEast,
+            11 => Direction16::EastNorthEast,
+            12 => Direction16::East,
+            13 => Direction16::EastSouthEast,
+            14 => Direction16::SouthEast,
+            15 => Direction16::SouthSouthEast,
+            _ => panic!("Invalid direction number: {}", direction_number),
+        }
+    }
 }
 
 /// Position and rotation for blocks that can either be put on top of the block below,
@@ -169,6 +193,22 @@ pub enum Edge8 {
     UpNorth,
     UpSouth,
     UpWest,
+}
+
+impl From<i8> for Edge8 {
+    fn from(edge_number: i8) -> Self {
+        match edge_number {
+            0 => Edge8::DownEast,
+            1 => Edge8::DownWest,
+            2 => Edge8::DownSouth,
+            3 => Edge8::DownNorth,
+            4 => Edge8::UpEast,
+            5 => Edge8::UpWest,
+            6 => Edge8::UpSouth,
+            7 => Edge8::UpNorth,
+            _ => panic!("Invalid edge number: {}", edge_number),
+        }
+    }
 }
 
 /// All six surfaces of the voxel volume populated by the block,

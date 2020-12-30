@@ -33,7 +33,7 @@ impl Item {
     // Source: https://minecraft.gamepedia.com/Java_Edition_data_value/Pre-flattening#Item_IDs
     // Implemented block items
     // Next item to implement: pumpkin_pie (from beginning) or beetroot_soup (from end)
-    // Missing: 
+    // Missing:
     // * lingering_potion
     // * potion
     // * splash_potion
@@ -72,20 +72,12 @@ impl Item {
             "minecraft:birch_fence" => ItemKind::Fence(FenceMaterial::Birch),
             "minecraft:birch_fence_gate" => ItemKind::FenceGate(WoodMaterial::Birch),
             "minecraft:birch_stairs" => ItemKind::Stairs(StairMaterial::Birch),
-            "minecraft:black_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Black))
-            }
-            "minecraft:black_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Black))
-            }
+            "minecraft:black_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Black)),
+            "minecraft:black_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Black)),
             "minecraft:blaze_powder" => ItemKind::BlazePowder,
             "minecraft:blaze_rod" => ItemKind::BlazeRod,
-            "minecraft:blue_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Blue))
-            }
-            "minecraft:blue_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Blue))
-            }
+            "minecraft:blue_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Blue)),
+            "minecraft:blue_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Blue)),
             "minecraft:boat" => ItemKind::Boat(WoodMaterial::Oak),
             "minecraft:bone" => ItemKind::Bone,
             "minecraft:bone_block" => ItemKind::BoneBlock,
@@ -99,14 +91,10 @@ impl Item {
             "minecraft:brick" => ItemKind::Brick,
             "minecraft:brick_block" => ItemKind::BrickBlock,
             "minecraft:brick_stairs" => ItemKind::Stairs(StairMaterial::Brick),
-            "minecraft:brown_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Brown))
-            }
+            "minecraft:brown_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Brown)),
             "minecraft:brown_mushroom" => ItemKind::BrownMushroom,
             "minecraft:brown_mushroom_block" => ItemKind::BrownMushroomBlock,
-            "minecraft:brown_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Brown))
-            }
+            "minecraft:brown_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Brown)),
             "minecraft:bucket" => ItemKind::Bucket(None),
             "minecraft:cake" => ItemKind::Cake,
             "minecraft:cactus" => ItemKind::Cactus,
@@ -116,9 +104,7 @@ impl Item {
             "minecraft:cauldron" => ItemKind::Cauldron,
             "minecraft:chain_command_block" => ItemKind::ChainCommandBlock,
             "minecraft:chainmail_boots" => ItemKind::Boots(ArmourMaterial::Chainmail),
-            "minecraft:chainmail_chestplate" => {
-                ItemKind::Chestplate(ArmourMaterial::Chainmail)
-            }
+            "minecraft:chainmail_chestplate" => ItemKind::Chestplate(ArmourMaterial::Chainmail),
             "minecraft:chainmail_helmet" => ItemKind::Helmet(ArmourMaterial::Chainmail),
             "minecraft:chainmail_leggings" => ItemKind::Leggings(ArmourMaterial::Chainmail),
             "minecraft:chest" => ItemKind::Chest,
@@ -131,23 +117,19 @@ impl Item {
             "minecraft:clay" => ItemKind::ClayBlock,
             "minecraft:clay_ball" => ItemKind::Clay,
             "minecraft:clock" => ItemKind::Clock,
-            "minecraft:coal" => {
-                match damage {
-                    0 => ItemKind::Coal,
-                    1 => ItemKind::Charcoal,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:coal" => match damage {
+                0 => ItemKind::Coal,
+                1 => ItemKind::Charcoal,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:coal_block" => ItemKind::BlockOfCoal,
             "minecraft:coal_ore" => ItemKind::CoalOre,
             "minecraft:cobblestone" => ItemKind::Cobblestone,
-            "minecraft:cobblestone_wall" => {
-                match damage {
-                    0 => ItemKind::CobblestoneWall,
-                    1 => ItemKind::MossyCobblestoneWall,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:cobblestone_wall" => match damage {
+                0 => ItemKind::CobblestoneWall,
+                1 => ItemKind::MossyCobblestoneWall,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:command_block" => ItemKind::CommandBlock,
             "minecraft:command_block_minecraft" => {
                 ItemKind::Minecart(Some(MinecartContents::CommandBlock))
@@ -164,12 +146,8 @@ impl Item {
             "minecraft:cooked_rabbit" => ItemKind::CookedRabbit,
             "minecraft:cookie" => ItemKind::Cookie,
             "minecraft:crafting_table" => ItemKind::CraftingTable,
-            "minecraft:cyan_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Cyan))
-            }
-            "minecraft:cyan_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Cyan))
-            }
+            "minecraft:cyan_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Cyan)),
+            "minecraft:cyan_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Cyan)),
             "minecraft:dark_oak_boat" => ItemKind::Boat(WoodMaterial::DarkOak),
             "minecraft:dark_oak_door" => ItemKind::Door(DoorMaterial::DarkOak),
             "minecraft:dark_oak_fence" => ItemKind::Fence(FenceMaterial::DarkOak),
@@ -185,22 +163,18 @@ impl Item {
             "minecraft:diamond_chestplate" => ItemKind::Chestplate(ArmourMaterial::Diamond),
             "minecraft:diamond_helmet" => ItemKind::Helmet(ArmourMaterial::Diamond),
             "minecraft:diamond_hoe" => ItemKind::Hoe(ToolMaterial::Diamond),
-            "minecraft:diamond_horse_armor" => {
-                ItemKind::HorseArmor(HorseArmorMaterial::Diamond)
-            }
+            "minecraft:diamond_horse_armor" => ItemKind::HorseArmor(HorseArmorMaterial::Diamond),
             "minecraft:diamond_leggings" => ItemKind::Leggings(ArmourMaterial::Diamond),
             "minecraft:diamond_ore" => ItemKind::DiamondOre,
             "minecraft:diamond_pickaxe" => ItemKind::Pickaxe(ToolMaterial::Diamond),
             "minecraft:diamond_shovel" => ItemKind::Shovel(ToolMaterial::Diamond),
             "minecraft:diamond_sword" => ItemKind::Sword(ToolMaterial::Diamond),
-            "minecraft:dirt" => {
-                match damage {
-                    0 => ItemKind::Dirt,
-                    1 => ItemKind::CoarseDirt,
-                    2 => ItemKind::Podzol,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:dirt" => match damage {
+                0 => ItemKind::Dirt,
+                1 => ItemKind::CoarseDirt,
+                2 => ItemKind::Podzol,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:dispenser" => ItemKind::Dispenser,
             "minecraft:double_plant" => {
                 match damage {
@@ -217,27 +191,25 @@ impl Item {
             "minecraft:dragon_egg" => ItemKind::DragonEgg,
             "minecraft:dragons_breath" => ItemKind::DragonBreath,
             "minecraft:dropper" => ItemKind::Dropper,
-            "minecraft:dye" => {
-                match damage {
-                    0 => ItemKind::InkSac,
-                    1 => ItemKind::RoseRed,
-                    2 => ItemKind::CactusGreen,
-                    3 => ItemKind::CocoaBeans,
-                    4 => ItemKind::LapisLazuli,
-                    5 => ItemKind::PurpleDye,
-                    6 => ItemKind::CyanDye,
-                    7 => ItemKind::LightGrayDye,
-                    8 => ItemKind::GrayDye,
-                    9 => ItemKind::PinkDye,
-                    10 => ItemKind::LimeDye,
-                    11 => ItemKind::DandelionYellow,
-                    12 => ItemKind::LightBlueDye,
-                    13 => ItemKind::MagentaDye,
-                    14 => ItemKind::OrangeDye,
-                    15 => ItemKind::BoneMeal,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:dye" => match damage {
+                0 => ItemKind::InkSac,
+                1 => ItemKind::RoseRed,
+                2 => ItemKind::CactusGreen,
+                3 => ItemKind::CocoaBeans,
+                4 => ItemKind::LapisLazuli,
+                5 => ItemKind::PurpleDye,
+                6 => ItemKind::CyanDye,
+                7 => ItemKind::LightGrayDye,
+                8 => ItemKind::GrayDye,
+                9 => ItemKind::PinkDye,
+                10 => ItemKind::LimeDye,
+                11 => ItemKind::DandelionYellow,
+                12 => ItemKind::LightBlueDye,
+                13 => ItemKind::MagentaDye,
+                14 => ItemKind::OrangeDye,
+                15 => ItemKind::BoneMeal,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:egg" => ItemKind::Egg,
             "minecraft:elytra" => ItemKind::Elytra,
             "minecraft:emerald" => ItemKind::Emerald,
@@ -269,9 +241,7 @@ impl Item {
             "minecraft:flint_and_steel" => ItemKind::FlintAndSteel,
             "minecraft:flower_pod" => ItemKind::FlowerPot,
             "minecraft:furnace" => ItemKind::Furnace,
-            "minecraft:furnace_minecart" => {
-                ItemKind::Minecart(Some(MinecartContents::Furnace))
-            }
+            "minecraft:furnace_minecart" => ItemKind::Minecart(Some(MinecartContents::Furnace)),
             "minecraft:ghast_tear" => ItemKind::GhastTear,
             "minecraft:glass" => ItemKind::Glass(None),
             "minecraft:glass_bottle" => ItemKind::GlassBottle,
@@ -279,13 +249,11 @@ impl Item {
             "minecraft:glowstone" => ItemKind::Glowstone,
             "minecraft:glowstone_dust" => ItemKind::GlowstoneDust,
             "minecraft:gold_block" => ItemKind::BlockOfGold,
-            "minecraft:golden_apple" => {
-                match damage {
-                    0 => ItemKind::GoldenApple,
-                    1 => ItemKind::EnchantedGoldenApple,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:golden_apple" => match damage {
+                0 => ItemKind::GoldenApple,
+                1 => ItemKind::EnchantedGoldenApple,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:golden_axe" => ItemKind::Axe(ToolMaterial::Gold),
             "minecraft:golden_boots" => ItemKind::Boots(ArmourMaterial::Gold),
             "minecraft:golden_carrot" => ItemKind::GoldenCarrot,
@@ -304,18 +272,10 @@ impl Item {
             "minecraft:grass" => ItemKind::GrassBlock,
             "minecraft:grass_path" => ItemKind::GrassPath,
             "minecraft:gravel" => ItemKind::Gravel,
-            "minecraft:gray_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Gray))
-            }
-            "minecraft:gray_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Gray))
-            }
-            "minecraft:green_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Green))
-            }
-            "minecraft:green_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Green))
-            }
+            "minecraft:gray_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Gray)),
+            "minecraft:gray_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Gray)),
+            "minecraft:green_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Green)),
+            "minecraft:green_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Green)),
             "minecraft:gunpowder" => ItemKind::Gunpowder,
             "minecraft:hardened_clay" => ItemKind::Terracotta(None),
             "minecraft:hay_block" => ItemKind::HayBale,
@@ -323,9 +283,7 @@ impl Item {
                 ItemKind::PressurePlate(PressurePlateMaterial::Iron)
             }
             "minecraft:hopper" => ItemKind::Hopper,
-            "minecrart:hopper_minecart" => {
-                ItemKind::Minecart(Some(MinecartContents::Hopper))
-            }
+            "minecrart:hopper_minecart" => ItemKind::Minecart(Some(MinecartContents::Hopper)),
             "minecraft:ice" => ItemKind::Ice,
             "minecraft:iron_axe" => ItemKind::Axe(ToolMaterial::Iron),
             "minecraft:iron_bars" => ItemKind::IronBars,
@@ -362,15 +320,13 @@ impl Item {
             "minecraft:leather_chestplate" => ItemKind::Chestplate(ArmourMaterial::Leather),
             "minecraft:leather_helmet" => ItemKind::Helmet(ArmourMaterial::Leather),
             "minecraft:leather_leggings" => ItemKind::Leggings(ArmourMaterial::Leather),
-            "minecraft:leaves" => {
-                match damage {
-                    0 => ItemKind::OakLeaves,
-                    1 => ItemKind::SpruceLeaves,
-                    2 => ItemKind::BirchLeaves,
-                    3 => ItemKind::JungleLeaves,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:leaves" => match damage {
+                0 => ItemKind::OakLeaves,
+                1 => ItemKind::SpruceLeaves,
+                2 => ItemKind::BirchLeaves,
+                3 => ItemKind::JungleLeaves,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:leaves2" => {
                 match damage {
                     // TODO figure out what values are correct
@@ -383,28 +339,20 @@ impl Item {
             "minecraft:light_blue_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::LightBlue))
             }
-            "minecraft:light_blue_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::LightBlue))
-            }
+            "minecraft:light_blue_shulker_box" => ItemKind::ShulkerBox(Some(Colour::LightBlue)),
             "minecraft:light_weighted_pressure_plate" => {
                 ItemKind::PressurePlate(PressurePlateMaterial::Gold)
             }
-            "minecraft:lime_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Lime))
-            }
-            "minecraft:lime_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Lime))
-            }
+            "minecraft:lime_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Lime)),
+            "minecraft:lime_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Lime)),
             "minecraft:lit_pumpkin" => ItemKind::JackOLantern,
-            "minecraft:log" => {
-                match damage {
-                    0 => ItemKind::Log(WoodMaterial::Oak),
-                    1 => ItemKind::Log(WoodMaterial::Spruce),
-                    2 => ItemKind::Log(WoodMaterial::Birch),
-                    3 => ItemKind::Log(WoodMaterial::Jungle),
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:log" => match damage {
+                0 => ItemKind::Log(WoodMaterial::Oak),
+                1 => ItemKind::Log(WoodMaterial::Spruce),
+                2 => ItemKind::Log(WoodMaterial::Birch),
+                3 => ItemKind::Log(WoodMaterial::Jungle),
+                _ => ItemKind::Unknown,
+            },
             "minecraft:log2" => {
                 match damage {
                     // TODO figure out which values are correct
@@ -416,9 +364,7 @@ impl Item {
             "minecraft:magenta_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::Magenta))
             }
-            "minecraft:magenta_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Magenta))
-            }
+            "minecraft:magenta_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Magenta)),
             "minecraft:magma" => ItemKind::Magma,
             "minecraft:magma_cream" => ItemKind::MagmaCream,
             "minecraft:map" => ItemKind::EmptyMap,
@@ -428,17 +374,15 @@ impl Item {
             "minecraft:milk_bucket" => ItemKind::Bucket(Some(BucketContents::Milk)),
             "minecraft:minecart" => ItemKind::Minecart(None),
             "minecraft:mob_spawner" => ItemKind::MobSpawner,
-            "minecraft:monster_egg" => {
-                match damage {
-                    0 => ItemKind::InfestedStone,
-                    1 => ItemKind::InfestedCobblestone,
-                    2 => ItemKind::InfestedStoneBricks,
-                    3 => ItemKind::InfestedMossyStoneBricks,
-                    4 => ItemKind::InfestedCrackedStoneBricks,
-                    5 => ItemKind::InfestedChiseledStoneBricks,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:monster_egg" => match damage {
+                0 => ItemKind::InfestedStone,
+                1 => ItemKind::InfestedCobblestone,
+                2 => ItemKind::InfestedStoneBricks,
+                3 => ItemKind::InfestedMossyStoneBricks,
+                4 => ItemKind::InfestedCrackedStoneBricks,
+                5 => ItemKind::InfestedChiseledStoneBricks,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:mossy_cobblestone" => ItemKind::MossyCobblestone,
             "minecraft:mushroom_stew" => ItemKind::Bowl(Some(BowlContents::MushroomStew)),
             "minecraft:mutton" => ItemKind::RawMutton,
@@ -447,9 +391,7 @@ impl Item {
             "minecraft:netherbrick" => ItemKind::NetherBrick,
             "minecraft:nether_brick" => ItemKind::NetherBrickBlock,
             "minecraft:nether_brick_fence" => ItemKind::Fence(FenceMaterial::NetherBrick),
-            "minecraft:nether_brick_stairs" => {
-                ItemKind::Stairs(StairMaterial::NetherBrick)
-            }
+            "minecraft:nether_brick_stairs" => ItemKind::Stairs(StairMaterial::NetherBrick),
             "minecraft:netherrack" => ItemKind::Netherrack,
             "minecraft:nether_star" => ItemKind::NetherStar,
             "minecraft:nether_wart" => ItemKind::NetherWart,
@@ -462,40 +404,30 @@ impl Item {
             "minecraft:orange_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::Orange))
             }
-            "minecraft:orange_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Orange))
-            }
+            "minecraft:orange_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Orange)),
             "minecraft:packed_ice" => ItemKind::PackedIce,
             "minecraft:painting" => ItemKind::Painting,
             "minecraft:paper" => ItemKind::Paper,
-            "minecraft:pink_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Pink))
-            }
-            "minecraft:pink_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Pink))
-            }
+            "minecraft:pink_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Pink)),
+            "minecraft:pink_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Pink)),
             "minecraft:piston" => ItemKind::Piston,
-            "minecraft:planks" => {
-                match damage {
-                    0 => ItemKind::Planks(WoodMaterial::Oak),
-                    1 => ItemKind::Planks(WoodMaterial::Spruce),
-                    2 => ItemKind::Planks(WoodMaterial::Birch),
-                    3 => ItemKind::Planks(WoodMaterial::Jungle),
-                    4 => ItemKind::Planks(WoodMaterial::Acacia),
-                    5 => ItemKind::Planks(WoodMaterial::DarkOak),
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:planks" => match damage {
+                0 => ItemKind::Planks(WoodMaterial::Oak),
+                1 => ItemKind::Planks(WoodMaterial::Spruce),
+                2 => ItemKind::Planks(WoodMaterial::Birch),
+                3 => ItemKind::Planks(WoodMaterial::Jungle),
+                4 => ItemKind::Planks(WoodMaterial::Acacia),
+                5 => ItemKind::Planks(WoodMaterial::DarkOak),
+                _ => ItemKind::Unknown,
+            },
             "minecraft:porkchop" => ItemKind::Porkchop { cooked: false },
             "minecraft:potato" => ItemKind::Potato,
-            "minecraft:prismarine" => {
-                match damage {
-                    0 => ItemKind::Prismarine,
-                    1 => ItemKind::DarkPrismarine,
-                    2 => ItemKind::PrismarineBricks,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:prismarine" => match damage {
+                0 => ItemKind::Prismarine,
+                1 => ItemKind::DarkPrismarine,
+                2 => ItemKind::PrismarineBricks,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:prismarine_crystals" => ItemKind::PrismarineCrystals,
             "minecraft:prismarine_shard" => ItemKind::PrismarineShard,
             "minecraft:pumpkin" => ItemKind::Pumpkin,
@@ -504,25 +436,19 @@ impl Item {
             "minecraft:purple_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::Purple))
             }
-            "minecraft:purple_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Purple))
-            }
+            "minecraft:purple_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Purple)),
             "minecraft:purpur_block" => ItemKind::PurpurBlock,
             "minecraft:purpur_pillar" => ItemKind::PurpurPillar,
             "minecraft:purpur_slab" => ItemKind::Slab(SlabMaterial::Purpur),
-            "minecraft:purpur_stairs" => {
-                ItemKind::Stairs(StairMaterial::Purpur)
-            }
+            "minecraft:purpur_stairs" => ItemKind::Stairs(StairMaterial::Purpur),
             "minecraft:quartz" => ItemKind::NetherQuartz,
-            "minecraft:quartz_block" => {
-                match damage {
-                    0 => ItemKind::BlockOfQuartz,
-                    1 => ItemKind::ChiseledQuartzBlock,
-                    2 => ItemKind::PillarQuartzBlock,
-                    3 => ItemKind::SmoothQuartzBlock,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:quartz_block" => match damage {
+                0 => ItemKind::BlockOfQuartz,
+                1 => ItemKind::ChiseledQuartzBlock,
+                2 => ItemKind::PillarQuartzBlock,
+                3 => ItemKind::SmoothQuartzBlock,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:quartz_ore" => ItemKind::QuartzOre,
             "minecraft:quartz_stairs" => ItemKind::Stairs(StairMaterial::Quartz),
             "minecraft:rabbit" => ItemKind::RawRabbit,
@@ -542,43 +468,33 @@ impl Item {
             "minecraft:record_strad" => ItemKind::Record(Recording::Strad),
             "minecraft:record_ward" => ItemKind::Record(Recording::Ward),
             "minecraft:record_wait" => ItemKind::Record(Recording::Wait),
-            "minecraft:red_flower" => {
-                match damage {
-                    0 => ItemKind::Flower(Flower::Poppy),
-                    1 => ItemKind::Flower(Flower::BlueOrchid),
-                    2 => ItemKind::Flower(Flower::Allium),
-                    3 => ItemKind::Flower(Flower::AzureBluet),
-                    4 => ItemKind::Flower(Flower::TulipRed),
-                    5 => ItemKind::Flower(Flower::TulipOrange),
-                    6 => ItemKind::Flower(Flower::TulipLightGray),
-                    7 => ItemKind::Flower(Flower::TulipPink),
-                    8 => ItemKind::Flower(Flower::OxeyeDaisy),
-                    9 => ItemKind::Flower(Flower::Cornflower),
-                    10 => ItemKind::Flower(Flower::LilyOfTheValley),
-                    _ => ItemKind::Unknown,
-                }
-            }
-            "minecraft:red_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::Red))
-            }
+            "minecraft:red_flower" => match damage {
+                0 => ItemKind::Flower(Flower::Poppy),
+                1 => ItemKind::Flower(Flower::BlueOrchid),
+                2 => ItemKind::Flower(Flower::Allium),
+                3 => ItemKind::Flower(Flower::AzureBluet),
+                4 => ItemKind::Flower(Flower::TulipRed),
+                5 => ItemKind::Flower(Flower::TulipOrange),
+                6 => ItemKind::Flower(Flower::TulipLightGray),
+                7 => ItemKind::Flower(Flower::TulipPink),
+                8 => ItemKind::Flower(Flower::OxeyeDaisy),
+                9 => ItemKind::Flower(Flower::Cornflower),
+                10 => ItemKind::Flower(Flower::LilyOfTheValley),
+                _ => ItemKind::Unknown,
+            },
+            "minecraft:red_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::Red)),
             "minecraft:red_mushroom" => ItemKind::RedMushroom,
             "minecraft:red_mushroom_block" => ItemKind::RedMushroomBlock,
             "minecraft:red_nether_brick" => ItemKind::RedNetherBrick,
-            "minecraft:red_sandstone" => {
-                match damage {
-                    0 => ItemKind::RedSandstone,
-                    1 => ItemKind::ChiseledRedSandstone,
-                    2 => ItemKind::CutRedSandstone,
-                    3 => ItemKind::SmoothRedSandstone,
-                    _ => ItemKind::Unknown,
-                }
-            }
-            "minecraft:red_sandstone_stairs" => {
-                ItemKind::Stairs(StairMaterial::RedSandstone)
-            }
-            "minecraft:red_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Red))
-            }
+            "minecraft:red_sandstone" => match damage {
+                0 => ItemKind::RedSandstone,
+                1 => ItemKind::ChiseledRedSandstone,
+                2 => ItemKind::CutRedSandstone,
+                3 => ItemKind::SmoothRedSandstone,
+                _ => ItemKind::Unknown,
+            },
+            "minecraft:red_sandstone_stairs" => ItemKind::Stairs(StairMaterial::RedSandstone),
+            "minecraft:red_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Red)),
             "minecraft:redstone" => ItemKind::Redstone,
             "minecraft:redstone_block" => ItemKind::BlockOfRedstone,
             "minecraft:redstone_lamp" => ItemKind::RedstoneLamp,
@@ -589,34 +505,28 @@ impl Item {
             "minecraft:repeating_command_block" => ItemKind::RepeatingCommandBlock,
             "minecraft:rotten_flesh" => ItemKind::RottenFlesh,
             "minecraft:saddle" => ItemKind::Saddle,
-            "minecraft:sand" => {
-                match damage {
-                    0 => ItemKind::Sand,
-                    1 => ItemKind::RedSand,
-                    _ => ItemKind::Unknown,
-                }
-            }
-            "minecraft:sandstone" => {
-                match damage {
-                    0 => ItemKind::Sandstone,
-                    1 => ItemKind::ChiseledSandstone,
-                    2 => ItemKind::CutSandstone,
-                    3 => ItemKind::SmoothSandstone,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:sand" => match damage {
+                0 => ItemKind::Sand,
+                1 => ItemKind::RedSand,
+                _ => ItemKind::Unknown,
+            },
+            "minecraft:sandstone" => match damage {
+                0 => ItemKind::Sandstone,
+                1 => ItemKind::ChiseledSandstone,
+                2 => ItemKind::CutSandstone,
+                3 => ItemKind::SmoothSandstone,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:sandstone_stairs" => ItemKind::Stairs(StairMaterial::Sandstone),
-            "minecraft:sapling" => {
-                match damage {
-                    0 => ItemKind::Sapling(SaplingMaterial::Oak),
-                    1 => ItemKind::Sapling(SaplingMaterial::Spruce),
-                    2 => ItemKind::Sapling(SaplingMaterial::Birch),
-                    3 => ItemKind::Sapling(SaplingMaterial::Jungle),
-                    4 => ItemKind::Sapling(SaplingMaterial::Acacia),
-                    5 => ItemKind::Sapling(SaplingMaterial::DarkOak),
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:sapling" => match damage {
+                0 => ItemKind::Sapling(SaplingMaterial::Oak),
+                1 => ItemKind::Sapling(SaplingMaterial::Spruce),
+                2 => ItemKind::Sapling(SaplingMaterial::Birch),
+                3 => ItemKind::Sapling(SaplingMaterial::Jungle),
+                4 => ItemKind::Sapling(SaplingMaterial::Acacia),
+                5 => ItemKind::Sapling(SaplingMaterial::DarkOak),
+                _ => ItemKind::Unknown,
+            },
             "minecraft:sea_lantern" => ItemKind::SeaLantern,
             "minecraft:shears" => ItemKind::Shears,
             "minecraft:shield" => ItemKind::Shield,
@@ -625,9 +535,7 @@ impl Item {
             "minecraft:silver_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::LightGray))
             }
-            "minecraft:silver_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::LightGray))
-            }
+            "minecraft:silver_shulker_box" => ItemKind::ShulkerBox(Some(Colour::LightGray)),
             // TODO Heads: 0 skeleton, 1 wither skeleton, 2 zombie,
             // 3 player (steve?), 4 creeper, 5 dragon (?)
             "minecraft:skull" => ItemKind::MobHead,
@@ -640,13 +548,11 @@ impl Item {
             "minecraft:spawn_egg" => ItemKind::SpawnEgg,
             "minecraft:speckled_melon" => ItemKind::GlisteringMelon,
             "minecraft:spider_eye" => ItemKind::SpiderEye,
-            "minecraft:sponge" => {
-                match damage {
-                    0 => ItemKind::Sponge,
-                    1 => ItemKind::WetSponge,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:sponge" => match damage {
+                0 => ItemKind::Sponge,
+                1 => ItemKind::WetSponge,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:spruce_boat" => ItemKind::Boat(WoodMaterial::Spruce),
             "minecraft:spruce_door" => ItemKind::Door(DoorMaterial::Spruce),
             "minecraft:spruce_fence" => ItemKind::Fence(FenceMaterial::Spruce),
@@ -661,29 +567,25 @@ impl Item {
             }
             "minecraft:stick" => ItemKind::Stick,
             "minecraft:sticky_piston" => ItemKind::StickyPiston,
-            "minecraft:stone" => {
-                match damage {
-                    0 => ItemKind::Stone,
-                    1 => ItemKind::Granite,
-                    2 => ItemKind::PolishedGranite,
-                    3 => ItemKind::Diorite,
-                    4 => ItemKind::PolishedDiorite,
-                    5 => ItemKind::Andesite,
-                    6 => ItemKind::PolishedAndesite,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:stone" => match damage {
+                0 => ItemKind::Stone,
+                1 => ItemKind::Granite,
+                2 => ItemKind::PolishedGranite,
+                3 => ItemKind::Diorite,
+                4 => ItemKind::PolishedDiorite,
+                5 => ItemKind::Andesite,
+                6 => ItemKind::PolishedAndesite,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:stone_axe" => ItemKind::Axe(ToolMaterial::Stone),
-            "minecraft:stonebrick" => {
-                match damage {
-                    0 => ItemKind::StoneBricks,
-                    1 => ItemKind::MossyStoneBricks,
-                    2 => ItemKind::CrackedStoneBricks,
-                    3 => ItemKind::ChiseledStoneBricks,
-                    4 => ItemKind::SmoothStoneBricks,
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:stonebrick" => match damage {
+                0 => ItemKind::StoneBricks,
+                1 => ItemKind::MossyStoneBricks,
+                2 => ItemKind::CrackedStoneBricks,
+                3 => ItemKind::ChiseledStoneBricks,
+                4 => ItemKind::SmoothStoneBricks,
+                _ => ItemKind::Unknown,
+            },
             "minecraft:stone_brick_stairs" => ItemKind::Stairs(StairMaterial::StoneBrick),
             "minecraft:stone_button" => ItemKind::Button(ButtonMaterial::Stone),
             "minecraft:stone_hoe" => ItemKind::Hoe(ToolMaterial::Stone),
@@ -692,18 +594,16 @@ impl Item {
                 ItemKind::PressurePlate(PressurePlateMaterial::Stone)
             }
             "minecraft:stone_shovel" => ItemKind::Shovel(ToolMaterial::Stone),
-            "minecraft:stone_slab" => {
-                match damage {
-                    0 => ItemKind::Slab(SlabMaterial::SmoothStone),
-                    1 => ItemKind::Slab(SlabMaterial::Sandstone),
-                    3 => ItemKind::Slab(SlabMaterial::Cobblestone),
-                    4 => ItemKind::Slab(SlabMaterial::Brick),
-                    5 => ItemKind::Slab(SlabMaterial::StoneBrick),
-                    6 => ItemKind::Slab(SlabMaterial::Quartz),
-                    7 => ItemKind::Slab(SlabMaterial::NetherBrick),
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:stone_slab" => match damage {
+                0 => ItemKind::Slab(SlabMaterial::SmoothStone),
+                1 => ItemKind::Slab(SlabMaterial::Sandstone),
+                3 => ItemKind::Slab(SlabMaterial::Cobblestone),
+                4 => ItemKind::Slab(SlabMaterial::Brick),
+                5 => ItemKind::Slab(SlabMaterial::StoneBrick),
+                6 => ItemKind::Slab(SlabMaterial::Quartz),
+                7 => ItemKind::Slab(SlabMaterial::NetherBrick),
+                _ => ItemKind::Unknown,
+            },
             "minecraft:stone_slab2" => ItemKind::Slab(SlabMaterial::RedSandstone),
             "minecraft:stone_stairs" => ItemKind::Stairs(StairMaterial::Cobblestone),
             "minecraft:stone_sword" => ItemKind::Sword(ToolMaterial::Stone),
@@ -713,9 +613,7 @@ impl Item {
             "minecraft:sugar" => ItemKind::Sugar,
             "minecraft:tallgrass" => ItemKind::Grass,
             "minecraft:tnt" => ItemKind::TNT,
-            "minecraft:tnt_minecart" => {
-                ItemKind::Minecart(Some(MinecartContents::TNT))
-            }
+            "minecraft:tnt_minecart" => ItemKind::Minecart(Some(MinecartContents::TNT)),
             "minecraft:torch" => ItemKind::Torch,
             "minecraft:totem_of_undying" => ItemKind::TotemOfUndying,
             "minecraft:trapdoor" => ItemKind::Trapdoor(DoorMaterial::Oak),
@@ -727,12 +625,8 @@ impl Item {
             "minecraft:web" => ItemKind::Cobweb,
             "minecraft:wheat" => ItemKind::Wheat,
             "minecraft:wheat_seeds" => ItemKind::Seeds(SeedMaterial::Wheat),
-            "minecraft:white_glazed_terracotta" => {
-                ItemKind::GlazedTerracotta(Some(Colour::White))
-            }
-            "minecraft:white_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::White))
-            }
+            "minecraft:white_glazed_terracotta" => ItemKind::GlazedTerracotta(Some(Colour::White)),
+            "minecraft:white_shulker_box" => ItemKind::ShulkerBox(Some(Colour::White)),
             "minecraft:wooden_axe" => ItemKind::Axe(ToolMaterial::Wood),
             "minecraft:wooden_door" => ItemKind::Door(DoorMaterial::Oak),
             "minecraft:wooden_hoe" => ItemKind::Hoe(ToolMaterial::Wood),
@@ -741,17 +635,15 @@ impl Item {
                 ItemKind::PressurePlate(PressurePlateMaterial::Oak)
             }
             "minecraft:wooden_shovel" => ItemKind::Shovel(ToolMaterial::Wood),
-            "minecraft:wooden_slab" => {
-                match damage {
-                    0 => ItemKind::Slab(SlabMaterial::Oak),
-                    1 => ItemKind::Slab(SlabMaterial::Spruce),
-                    2 => ItemKind::Slab(SlabMaterial::Birch),
-                    3 => ItemKind::Slab(SlabMaterial::Jungle),
-                    4 => ItemKind::Slab(SlabMaterial::Acacia),
-                    5 => ItemKind::Slab(SlabMaterial::DarkOak),
-                    _ => ItemKind::Unknown,
-                }
-            }
+            "minecraft:wooden_slab" => match damage {
+                0 => ItemKind::Slab(SlabMaterial::Oak),
+                1 => ItemKind::Slab(SlabMaterial::Spruce),
+                2 => ItemKind::Slab(SlabMaterial::Birch),
+                3 => ItemKind::Slab(SlabMaterial::Jungle),
+                4 => ItemKind::Slab(SlabMaterial::Acacia),
+                5 => ItemKind::Slab(SlabMaterial::DarkOak),
+                _ => ItemKind::Unknown,
+            },
             "minecraft:wooden_sword" => ItemKind::Sword(ToolMaterial::Wood),
             "minecraft:wool" => ItemKind::Wool(Colour::from(damage as i32)),
             "minecraft:written_book" => ItemKind::WrittenBook,
@@ -759,16 +651,14 @@ impl Item {
             "minecraft:yellow_glazed_terracotta" => {
                 ItemKind::GlazedTerracotta(Some(Colour::Yellow))
             }
-            "minecraft:yellow_shulker_box" => {
-                ItemKind::ShulkerBox(Some(Colour::Yellow))
-            }
+            "minecraft:yellow_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Yellow)),
             _ => ItemKind::Unknown,
         };
 
         Self {
-            custom_name: None, // TODO
+            custom_name: None,        // TODO
             enchantments: Vec::new(), // TODO
-            damage: None, // TODO
+            damage: None,             // TODO
             kind,
         }
     }
@@ -852,7 +742,7 @@ pub enum ItemKind {
     Cauldron,
     Charcoal,
     Chestplate(ArmourMaterial),
-    Chicken, // raw, cooked
+    Chicken,     // raw, cooked
     ChorusFruit, // popped?
     Clay,
     Clock,
@@ -930,7 +820,7 @@ pub enum ItemKind {
     Pickaxe(ToolMaterial),
     PinkDye,
     PoppedChorusFruit,
-    Porkchop{ cooked: bool },
+    Porkchop { cooked: bool },
     Potion, // type / splash? / lingering?
     Potato, // poisonous?
     PrismarineCrystals,
@@ -951,7 +841,7 @@ pub enum ItemKind {
     RoseRed,
     RottenFlesh,
     Saddle,
-    Scull, // aka "mob head"
+    Scull,               // aka "mob head"
     Seeds(SeedMaterial), // wheat, melon, pumpkin, beetroot
     Shears,
     Shield,

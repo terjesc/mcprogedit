@@ -17,19 +17,21 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Inventory {
-    slots: HashMap<i8, ItemStack>
+    slots: HashMap<i8, ItemStack>,
 }
 
 impl Inventory {
     pub fn new() -> Self {
-        Self { slots: HashMap::new() }
+        Self {
+            slots: HashMap::new(),
+        }
     }
 
     pub fn from_nbt_value_vec(list: &[nbt::Value]) -> Self {
         let mut slots = HashMap::new();
         for item in list {
             let slot = nbt_value_lookup_byte(&item, "Slot").unwrap();
-            slots.insert(slot, ItemStack::from_nbt_value(&item) );
+            slots.insert(slot, ItemStack::from_nbt_value(&item));
         }
         Inventory { slots }
     }

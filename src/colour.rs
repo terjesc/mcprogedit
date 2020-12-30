@@ -64,6 +64,5 @@ impl From<&str> for Colour {
             _ => Colour::Black,
         }
     }
-
 }
 pub type Color = Colour;

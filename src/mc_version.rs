@@ -142,7 +142,7 @@ static STR2ID: phf::Map<&'static str, i32> = phf_map! {
     "17w45a" => 1447i32,
     "17w45b" => 1448i32,
     "17w46a" => 1449i32,
-    "17w47a" => 1451i32,
+    "17w47a" => 1451i32, // This is when "the Flattening" happened.
     "17w47b" => 1452i32,
     "17w48a" => 1453i32,
     "17w49a" => 1454i32,
@@ -486,7 +486,7 @@ static ID2STR: phf::Map<i32, &'static str> = phf_map! {
     1447i32 => "17w45a",
     1448i32 => "17w45b",
     1449i32 => "17w46a",
-    1451i32 => "17w47a",
+    1451i32 => "17w47a", // This is when "the Flattening" happened.
     1452i32 => "17w47b",
     1453i32 => "17w48a",
     1454i32 => "17w49a",
@@ -751,5 +751,3 @@ impl std::str::FromStr for McVersion {
         }
     }
 }
-
-// TODO tests, tests, tests!

@@ -44,7 +44,7 @@ pub enum BlockEntity {
         lock: Option<String>,
         items: Inventory,
         brew_time: i16, // TODO change to integer with valid range
-        fuel: i8, // TODO change to integer with valid range
+        fuel: i8,       // TODO change to integer with valid range
     },
     Chest {
         tags: ChestTags,
@@ -87,7 +87,7 @@ pub enum BlockEntity {
     },
     Jukebox {
         common: CommonTags,
-        record: Item,
+        record: Option<Item>,
     },
     Lectern {
         common: CommonTags,
@@ -213,12 +213,16 @@ impl BlockEntity {
 
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn beehive_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn bell_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     fn blast_furnace_from_nbt_value(value: &nbt::Value) -> Self {
@@ -246,7 +250,9 @@ impl BlockEntity {
 
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn campfire_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     fn chest_from_nbt_value(value: &nbt::Value) -> Self {
@@ -269,7 +275,9 @@ impl BlockEntity {
 
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn conduit_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     fn daylight_detector_from_nbt_value(value: &nbt::Value) -> Self {
@@ -317,7 +325,8 @@ impl BlockEntity {
                 nbt_value_lookup_int(&value, "ExitPortal/X").unwrap() as i64,
                 nbt_value_lookup_int(&value, "ExitPortal/Y").unwrap() as i64,
                 nbt_value_lookup_int(&value, "ExitPortal/Z").unwrap() as i64,
-            ).into(),
+            )
+                .into(),
         }
     }
 
@@ -341,13 +350,19 @@ impl BlockEntity {
 
     fn jigsaw_from_nbt_value(value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Jukebox {
             common: CommonTags::from_nbt_value(&value),
-            record: Item::from_nbt_value(&nbt_value_lookup(&value, "RecordItem").unwrap()),
+            record: if let Some(value) = nbt_value_lookup(&value, "RecordItem") {
+                Some(Item::from_nbt_value(&value))
+            } else {
+                None
+            },
         }
     }
 
@@ -355,11 +370,13 @@ impl BlockEntity {
         BlockEntity::Lectern {
             common: CommonTags::from_nbt_value(&value),
             book: if let Some(book_value) = nbt_value_lookup(&value, "Book") {
-                Some(( Item::from_nbt_value(&book_value),
-                    nbt_value_lookup_int(&value, "Page").unwrap()))
+                Some((
+                    Item::from_nbt_value(&book_value),
+                    nbt_value_lookup_int(&value, "Page").unwrap(),
+                ))
             } else {
                 None
-            }
+            },
         }
     }
 
@@ -396,17 +413,17 @@ impl BlockEntity {
         BlockEntity::Sign {
             common: CommonTags::from_nbt_value(&value),
             colour: if let Some(colour) = nbt_value_lookup_string(&value, "Color") {
-                    Colour::from(colour.as_str())
+                Colour::from(colour.as_str())
             } else {
-                    Colour::Black
+                Colour::Black
             },
             // TODO handle text in a better manner than to expose "compound object" JSON
-            text: vec!(
+            text: vec![
                 nbt_value_lookup_string(&value, "Text1").unwrap_or_default(),
                 nbt_value_lookup_string(&value, "Text2").unwrap_or_default(),
                 nbt_value_lookup_string(&value, "Text3").unwrap_or_default(),
                 nbt_value_lookup_string(&value, "Text4").unwrap_or_default(),
-            ),
+            ],
         }
     }
 
@@ -423,7 +440,9 @@ impl BlockEntity {
 
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn soul_campfire_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown { id: nbt_value_lookup_string(&value, "id") }
+        BlockEntity::Unknown {
+            id: nbt_value_lookup_string(&value, "id"),
+        }
     }
 
     fn structure_block_from_nbt_value(_value: &nbt::Value) -> Self {
@@ -469,10 +488,10 @@ impl BlockEntity {
 // Tags present for all block entities.
 #[derive(Clone, Debug)]
 pub struct CommonTags {
-    id: String, // block entity ID
-    x: i32, // chunk local x coordinate
-    y: i32, // chunk local y coordinate
-    z: i32, // chunk local z coordinate
+    id: String,        // block entity ID
+    x: i32,            // chunk local x coordinate
+    y: i32,            // chunk local y coordinate
+    z: i32,            // chunk local z coordinate
     keep_packed: bool, // 1 indicates invalidated block entity
 }
 
@@ -495,12 +514,12 @@ impl CommonTags {
 // Tags present for all "chest similar" block entities, e.g. Chest, Dropper, etc.
 #[derive(Clone, Debug)]
 pub struct ChestTags {
-        common: CommonTags,
-        pub custom_name: Option<String>,
-        pub lock: Option<String>,
-        pub items: Inventory,
-        loot_table: Option<()>, // TODO support for loot tables
-        loot_table_seed: Option<()>, // TODO support for loot tables
+    common: CommonTags,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+    loot_table: Option<()>,      // TODO support for loot tables
+    loot_table_seed: Option<()>, // TODO support for loot tables
 }
 
 impl ChestTags {
@@ -515,7 +534,7 @@ impl ChestTags {
             } else {
                 Inventory::new()
             },
-            loot_table: None, // TODO
+            loot_table: None,      // TODO
             loot_table_seed: None, // TODO
         }
     }

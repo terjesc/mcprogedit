@@ -12,7 +12,6 @@ pub enum ArmourMaterial {
     Netherite,
 }
 
-
 /// Materials for the "Button" family of blocks.
 ///
 /// # Variant availability
@@ -645,7 +644,7 @@ pub enum ToolMaterial {
     Iron,
     Netherite,
     Stone,
-    Wood
+    Wood,
 }
 
 /// Materials for the "Wall" family of blocks.
