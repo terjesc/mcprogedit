@@ -28,8 +28,8 @@ pub enum BlockEntity {
         common: CommonTags,
         lock: Option<String>,
         levels: i32, // TODO change type to integer with valid range
-        primary: StatusEffect,
-        secondary: StatusEffect,
+        primary: Option<StatusEffect>,
+        secondary: Option<StatusEffect>,
     },
     Bed {
         common: CommonTags,
@@ -199,8 +199,8 @@ impl BlockEntity {
             common: CommonTags::from_nbt_value(&value),
             lock: nbt_value_lookup_string(&value, "Lock"),
             levels: nbt_value_lookup_int(&value, "Levels").unwrap(),
-            primary: StatusEffect::from(nbt_value_lookup_int(&value, "Primary").unwrap()),
-            secondary: StatusEffect::from(nbt_value_lookup_int(&value, "Sekondary").unwrap()),
+            primary: nbt_value_lookup_int(&value, "Primary").map(StatusEffect::from),
+            secondary: nbt_value_lookup_int(&value, "Secondary").map(StatusEffect::from),
         }
     }
 

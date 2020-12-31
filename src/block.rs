@@ -5,6 +5,7 @@ use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
+use crate::status_effect::StatusEffect;
 
 /// Doors are two blocks high. Which block is this?
 #[derive(Clone, Debug, PartialEq)]
@@ -22,6 +23,23 @@ pub enum DoorHalf {
 pub enum Hinge {
     Left,
     Right,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Beacon {
+    pub lock: Option<String>,
+    pub levels: i32, // TODO change type to integer with valid range
+    pub primary: Option<StatusEffect>,
+    pub secondary: Option<StatusEffect>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Hopper {
+    pub facing: Surface5,
+    pub waterlogged: bool,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -98,6 +116,15 @@ impl RailShape {
             n => panic!("Invalid rail shape value: {}", n),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct BrewingStand {
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+    pub brew_time: i16, // TODO change to integer with valid range
+    pub fuel: i8,       // TODO change to integer with valid range
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -242,6 +269,14 @@ pub struct Chest {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Dispenser {
+    pub facing: Surface6,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Dropper {
     pub facing: Surface6,
     pub custom_name: Option<String>,
     pub lock: Option<String>,
@@ -406,6 +441,15 @@ pub enum Instrument {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct ShulkerBox {
+    pub colour: Option<Colour>,
+    pub facing: Surface6,
+    pub custom_name: Option<String>,
+    pub lock: Option<String>,
+    pub items: Inventory,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Block {
     None,
     Unknown(Option<u8>),
@@ -429,7 +473,7 @@ pub enum Block {
     Basalt {
         alignment: Axis3,
     },
-    Beacon, // TODO add block entity
+    Beacon(Box<Beacon>),
     Bedrock,
     Beetroots {
         growth_stage: Int0Through3,
@@ -465,7 +509,7 @@ pub enum Block {
         alignment: Axis3,
     },
     Bookshelf,
-    BrewingStand, // TODO add block entity
+    BrewingStand(Box<BrewingStand>),
     BrickBlock,
     BrownMushroom,
     BrownMushroomBlock {
@@ -576,19 +620,19 @@ pub enum Block {
     },
     DragonEgg,
     DriedKelpBlock,
-    Dropper {
-        facing: Surface6,
-    }, // TODO add block entity
+    Dropper(Box<Dropper>),
     EmeraldOre,
-    EnchantingTable, // TODO add block entity
-    EndGateway,      // TODO add block entity
-    EndPortal,       // TODO add block entity
+    EnchantingTable {
+        custom_name: Box<Option<String>>,
+    },
+    EndGateway, // TODO add block entity
+    EndPortal,  // TODO add block entity
     EndPortalFrame {
         facing: Surface4,
         has_eye: bool,
     },
-    Endrod {
-        facing: Surface4,
+    EndRod {
+        facing: Surface6,
     },
     EndStone,
     EndStoneBricks,
@@ -646,9 +690,7 @@ pub enum Block {
     Head(Head), // TODO add block entity (used only for PlayerHead variant)
     HoneyBlock,
     HoneycombBlock,
-    Hopper {
-        facing: Surface5,
-    }, // TODO add block entity
+    Hopper(Box<Hopper>),
     Ice,
     InfestedChiseledStoneBricks,
     InfestedCobblestone,
@@ -725,7 +767,7 @@ pub enum Block {
     },
     Observer {
         facing: Surface6,
-    }, // TODO consider if a "powered" field is useful.
+    },
     Obsidian,
     PackedIce,
     Piston {
@@ -817,10 +859,7 @@ pub enum Block {
         variant: Seagrass,
     },
     Shroomlight,
-    ShulkerBox {
-        colour: Option<Colour>,
-        facing: Surface6,
-    }, // TODO add block entity
+    ShulkerBox(Box<ShulkerBox>),
     Sign(Box<Sign>),
     Slab(Slab),
     SlimeBlock,
