@@ -369,26 +369,16 @@ impl Chunk {
                         n => panic!("Unknown dirt data variant: {}", n),
                     },
                     4 => Block::Cobblestone,
-                    5 => match data[index] {
-                        0 => Block::Planks {
-                            material: WoodMaterial::Oak,
+                    5 => Block::Planks {
+                        material: match data[index] {
+                            0 => WoodMaterial::Oak,
+                            1 => WoodMaterial::Spruce,
+                            2 => WoodMaterial::Birch,
+                            3 => WoodMaterial::Jungle,
+                            4 => WoodMaterial::Acacia,
+                            5 => WoodMaterial::DarkOak,
+                            n => panic!("Unknown plank data variant: {}", n),
                         },
-                        1 => Block::Planks {
-                            material: WoodMaterial::Spruce,
-                        },
-                        2 => Block::Planks {
-                            material: WoodMaterial::Birch,
-                        },
-                        3 => Block::Planks {
-                            material: WoodMaterial::Jungle,
-                        },
-                        4 => Block::Planks {
-                            material: WoodMaterial::Acacia,
-                        },
-                        5 => Block::Planks {
-                            material: WoodMaterial::DarkOak,
-                        },
-                        n => panic!("Unknown plank data variant: {}", n),
                     },
                     6 => Block::Sapling {
                         growth_stage: Int0Through1::new((data[index] & 0x8) >> 3).unwrap(),
@@ -427,22 +417,17 @@ impl Chunk {
                         alignment: wood_alignment(data[index]),
                         stripped: false,
                     }),
-                    18 => {
-                        let material = match data[index] & 0x3 {
+                    18 => Block::Leaves {
+                        material: match data[index] & 0x3 {
                             0 => LeavesMaterial::Oak,
                             1 => LeavesMaterial::Spruce,
                             2 => LeavesMaterial::Birch,
                             3 => LeavesMaterial::Jungle,
-                            n => panic!("Impossible leaves material data: {}", n),
-                        };
-                        let persistent = (data[index] & 0x4) == 0x4;
-                        let distance_to_trunk = None;
-                        Block::Leaves {
-                            material,
-                            distance_to_trunk,
-                            persistent,
-                        }
-                    }
+                            _ => unreachable!(),
+                        },
+                        distance_to_trunk: None,
+                        persistent: (data[index] & 0x4) == 0x4,
+                    },
                     19 => match data[index] {
                         0 => Block::Sponge,
                         1 => Block::WetSponge,
@@ -507,7 +492,6 @@ impl Chunk {
                         extended: data[index] & 0x8 == 0x8,
                     },
                     30 => Block::Cobweb,
-                    // TODO block 31 tallgrass
                     31 => Block::Grass(match data[index] & 0x1 {
                         0 => Grass::Grass,
                         1 => Grass::Fern,
@@ -642,7 +626,13 @@ impl Chunk {
                             _ => panic!("Wrong block entity variant for chest"),
                         }
                     }
-                    63 => {
+                    // Both block variants of signs
+                    63 | 68 => {
+                        let placement = match block {
+                            63 => WallOrRotatedOnFloor::Floor((data[index] & 0xF).into()),
+                            68 => WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index])),
+                            _ => unreachable!(),
+                        };
                         let coordinates = Self::coordinates(section_y_index, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
@@ -650,9 +640,7 @@ impl Chunk {
                             BlockEntity::Sign { colour, text, .. } => {
                                 Block::Sign(Box::new(Sign {
                                     material: WoodMaterial::Oak,
-                                    placement: WallOrRotatedOnFloor::Floor(
-                                        (data[index] & 0xF).into(),
-                                    ),
+                                    placement,
                                     waterlogged: false,
                                     colour: colour.clone(),
                                     // TODO something reasonable instead of JSON text
@@ -662,7 +650,7 @@ impl Chunk {
                                     text4: text.get(3).unwrap_or(&String::new()).to_string(),
                                 }))
                             }
-                            _ => panic!("Wrong block entity variant for standing sign"),
+                            _ => panic!("Wrong block entity variant for sign"),
                         }
                     }
                     // All doors
@@ -724,29 +712,7 @@ impl Chunk {
                         position: (data[index] & 0x7).into(),
                         waterlogged: false,
                     }),
-                    68 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Sign { colour, text, .. } => {
-                                Block::Sign(Box::new(Sign {
-                                    material: WoodMaterial::Oak,
-                                    placement: WallOrRotatedOnFloor::Wall(facing4_xxnswe(
-                                        data[index],
-                                    )),
-                                    waterlogged: false,
-                                    colour: colour.clone(),
-                                    // TODO something reasonable instead of JSON text
-                                    text1: text.get(0).unwrap_or(&String::new()).to_string(),
-                                    text2: text.get(1).unwrap_or(&String::new()).to_string(),
-                                    text3: text.get(2).unwrap_or(&String::new()).to_string(),
-                                    text4: text.get(3).unwrap_or(&String::new()).to_string(),
-                                }))
-                            }
-                            _ => panic!("Wrong block entity variant for wall sign"),
-                        }
-                    }
+                    // 68 wall sign - already handled
                     69 => Block::Lever(
                         button_lever_facing(data[index]),
                         if data[index] & 0x8 == 0x8 {
@@ -1167,20 +1133,15 @@ impl Chunk {
                         colour: Some((data[index] as i32).into()),
                         waterlogged: false,
                     },
-                    161 => {
-                        let material = match data[index] & 0x3 {
+                    161 => Block::Leaves {
+                        material: match data[index] & 0x1 {
                             0 => LeavesMaterial::Acacia,
                             1 => LeavesMaterial::DarkOak,
-                            n => panic!("Unknown leaves2 material data: {}", n),
-                        };
-                        let persistent = (data[index] & 0x4) == 0x4;
-                        let distance_to_trunk = None;
-                        Block::Leaves {
-                            material,
-                            distance_to_trunk,
-                            persistent,
-                        }
-                    }
+                            _ => unreachable!(),
+                        },
+                        distance_to_trunk: None,
+                        persistent: (data[index] & 0x4) == 0x4,
+                    },
                     162 => Block::Log(block::Log {
                         material: match data[index] & 0x1 {
                             0 => WoodMaterial::Acacia,
@@ -1224,6 +1185,7 @@ impl Chunk {
                     172 => Block::Terracotta { colour: None },
                     173 => Block::BlockOfCoal,
                     174 => Block::PackedIce,
+                    // All double tall plants (Flowers, Ferns, Grass)
                     175 => {
                         let coordinates = Self::coordinates(section_y_index, index);
                         let entity_coordinates = if (data[index] & 0x8) == 0x8 {
@@ -1269,8 +1231,7 @@ impl Chunk {
                             _ => panic!("Wrong block entity variant for flower or grass"),
                         }
                     }
-                    // TODO 175 large flowers
-                    // - type of flower on top block depend on value from bottom block
+                    // Banners
                     176 | 177 => {
                         let coordinates = Self::coordinates(section_y_index, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
