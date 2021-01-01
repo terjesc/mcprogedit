@@ -452,7 +452,7 @@ pub struct ShulkerBox {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Block {
     None,
-    Unknown(Option<u8>),
+    Unknown(Option<u16>),
     Air,
     AncientDebris,
     Anvil {

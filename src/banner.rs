@@ -9,32 +9,15 @@ pub struct Banner {
     /// If used: The name is used as a marker on maps.
     pub custom_name: Option<String>,
     pub placement: WallOrRotatedOnFloor,
-    /// List of up to 6 coloured patterns that are featured on the banner.
-    pub patterns: [ColouredPattern; 6],
+    /// List of (normally) up to 6 coloured patterns,
+    /// that are featured on top of each other the banner.
+    pub patterns: Vec<ColouredPattern>,
 }
-
-// [ BANNER ]
-//
-// TAGS
-//
-// CustomName: Option<TAG_String> (The name of this banner in JSON text component, which appears
-//                                 when added as markers on maps.)
-// Patterns: TAG_List (List of all patterns applied to the banner.)
-//  -> TAG_Compound (Individual pattern)
-//      -> Color: TAG_Int (Color of the section.)
-//      -> Pattern: TAG_String (The banner pattern code the color is applied to.)
-//
-// VALUES
-//
-// Values for Color: White: 0, Orange: 1, Magenta: 2, LightBlue: 3, Yellow: 4,
-//                   Lime: 5, Pink: 6, Gray: 7, LightGray: 8, Cyan: 9, Purple: 10,
-//                   Blue: 11, Brown: 12, Green: 13, Red: 14, Black: 15.
-//
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ColouredPattern {
-    colour: Colour,
-    pattern: BannerPattern,
+    pub colour: Colour,
+    pub pattern: BannerPattern,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -80,4 +63,53 @@ pub enum BannerPattern {
     Thing,                   // moj (mojang)
     Globe,                   // glb (globe)
     Snout,                   // pig (piglin)
+}
+
+impl From<&str> for BannerPattern {
+    fn from(pattern_string: &str) -> Self {
+        match pattern_string {
+            "b" => Self::BaseColor,                // b (base)
+            "bs" => Self::Base,                    // bs (bottom stripe)
+            "ts" => Self::Chief,                   // ts (top stripe)
+            "ls" => Self::PaleDexter,              // ls (left stripe)
+            "rs" => Self::PaleSinister,            // rs (right sripe)
+            "cs" => Self::Pale,                    // cs (center stripe, vertical)
+            "ms" => Self::Fess,                    // ms (middle sripe, horizontal)
+            "drs" => Self::Bend,                   // drs (down right stripe)
+            "dls" => Self::BendSinister,           // dls (down left stripe)
+            "ss" => Self::Paly,                    // ss (smal vertical stripes)
+            "cr" => Self::Saltire,                 // cr (diagonal cross)
+            "sc" => Self::Cross,                   // sc (square cross)
+            "ld" => Self::PerBendSinister,         // ld (left of diagonal)
+            "rud" => Self::PerBend,                // rud (right of upside-down diagonal)
+            "lud" => Self::PerBendInverted,        // lud (left of upside-down diagonal)
+            "rd" => Self::PerBendSinisterInverted, // rd (right of diagonal)
+            "vh" => Self::PerPale,                 // vh (vertical half left)
+            "vhr" => Self::PerPaleInverted,        // vhr (vertical half right)
+            "hh" => Self::PerFess,                 // hh (horizontal half top)
+            "hhb" => Self::PerFessInverted,        // hhb (horizontal half bottom)
+            "bl" => Self::BaseDexterCanton,        // bl (bottom left corner)
+            "br" => Self::BaseSinisterCanton,      // br (bottom right corner)
+            "tl" => Self::ChiefDexterCanton,       // tl (top left corner)
+            "tr" => Self::ChiefSinisterCanton,     // tr (top right corner)
+            "bt" => Self::Chevron,                 // bt (bottom triangle)
+            "tt" => Self::InvertedChevron,         // tt (top triangle)
+            "bts" => Self::BaseIndented,           // bts (bottom triangle sawtooth
+            "tts" => Self::ChiefIndented,          // tts (top triangle sawtooth
+            "mc" => Self::Roundel,                 // mc (middle circle)
+            "mr" => Self::Lozenge,                 // mr (middle rhombus)
+            "bo" => Self::Bordure,                 // bo (border)
+            "cbo" => Self::BordureIndented,        // cbo (curly border)
+            "bri" => Self::FieldMasoned,           // bri (brick)
+            "gra" => Self::Gradient,               // gra (gradient)
+            "gru" => Self::BaseGradient,           // gru (gradient upside-down)
+            "cre" => Self::CreeperCharge,          // cre (creeper)
+            "sku" => Self::SkullCharge,            // sku (skull)
+            "flo" => Self::FlowerCharge,           // flo (flower)
+            "moj" => Self::Thing,                  // moj (mojang)
+            "glb" => Self::Globe,                  // glb (globe)
+            "pig" => Self::Snout,                  // pig (piglin)
+            other => panic!("Unknown banner pattern string: {}", other),
+        }
+    }
 }

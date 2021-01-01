@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 
 use crate::banner;
-use crate::block::Pitch;
+use crate::block::{Flower, Grass, Hinge, Pitch};
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::nbt_lookup::*;
+use crate::positioning::Surface4;
 use crate::status_effect::StatusEffect;
 
 // Block entity, aka "tile entity". Contains additional block data, a bit
@@ -18,6 +19,7 @@ pub enum BlockEntity {
     },
     Banner {
         common: CommonTags,
+        colour: Colour,
         custom_name: Option<String>,
         patterns: Vec<banner::ColouredPattern>,
     },
@@ -113,6 +115,18 @@ pub enum BlockEntity {
         tags: FurnaceTags,
     },
     StructureBlock,
+    /// "Pseudo" variants are not found in game save files.
+    /// They are internal to mcprogedit, and used for storing parameters from
+    /// multiblock structures during world loading.
+    PseudoDoorBottom {
+        open: bool,
+        facing: Surface4,
+    },
+    PseudoDoorTop {
+        hinge: Hinge,
+    },
+    PseudoFlowerBottom(Flower),
+    PseudoGrassBottom(Grass),
 }
 
 impl BlockEntity {
@@ -181,10 +195,31 @@ impl BlockEntity {
     }
 
     fn banner_from_nbt_value(value: &nbt::Value) -> Self {
+        let mut patterns = Vec::new();
+
+        if let Some(pattern_entries) = nbt_value_lookup_list(&value, "Patterns") {
+            for pattern_entry in pattern_entries {
+                let pattern = banner::ColouredPattern {
+                    colour: Colour::from(nbt_value_lookup_int(&pattern_entry, "Color").unwrap()),
+                    pattern: banner::BannerPattern::from(
+                        nbt_value_lookup_string(&pattern_entry, "Pattern")
+                            .unwrap()
+                            .as_str(),
+                    ),
+                };
+                patterns.push(pattern);
+            }
+        }
+
         BlockEntity::Banner {
             common: CommonTags::from_nbt_value(&value),
+            colour: if let Some(colour) = nbt_value_lookup_string(&value, "Color") {
+                Colour::from(colour.as_str())
+            } else {
+                Colour::White
+            },
             custom_name: nbt_value_lookup_string(&value, "CustomName"),
-            patterns: Vec::new(), // TODO actually parse and fill patterns
+            patterns,
         }
     }
 
@@ -481,6 +516,11 @@ impl BlockEntity {
             Self::Skull => None,
             Self::Smoker { tags } => Some(tags.common.coordinates()),
             Self::StructureBlock => None,
+            // Internal mcprogedit block entities do not contain x, y, z tags
+            Self::PseudoDoorBottom { .. }
+            | Self::PseudoDoorTop { .. }
+            | Self::PseudoFlowerBottom(_)
+            | Self::PseudoGrassBottom(_) => None,
         }
     }
 }
