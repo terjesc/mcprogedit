@@ -132,9 +132,10 @@ impl Chunk {
         blocks
             .iter()
             .enumerate()
-            .map(|(index, block)| (index, ((add[index] as u16) << 8) + *block as u16))
+            .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
             .filter_map(|(index, block)| {
                 match block {
+                    // All doors
                     64 | 71 | 193..=197 => {
                         // Doors. Check if top or bottom, generate tuple of
                         // coordinates and pesudo block entity
@@ -162,6 +163,8 @@ impl Chunk {
                             ))
                         }
                     }
+
+                    // Large flowers / grass / ferns
                     175 => match data[index] {
                         0..=1 | 4..=5 => Some((
                             Self::coordinates(section_y_index, index),
@@ -344,7 +347,7 @@ impl Chunk {
         blocks
             .iter()
             .enumerate()
-            .map(|(index, block)| (index, ((add[index] as u16) << 8) + *block as u16))
+            .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
             .map(|(index, block)| {
                 match block {
                     0 => Block::Air,
@@ -505,6 +508,11 @@ impl Chunk {
                     },
                     30 => Block::Cobweb,
                     // TODO block 31 tallgrass
+                    31 => Block::Grass(match data[index] & 0x1 {
+                        0 => Grass::Grass,
+                        1 => Grass::Fern,
+                        _ => unreachable!(),
+                    }),
                     32 => Block::DeadBush,
                     33 => Block::Piston {
                         facing: facing6_dunswe(data[index]),
@@ -1216,6 +1224,51 @@ impl Chunk {
                     172 => Block::Terracotta { colour: None },
                     173 => Block::BlockOfCoal,
                     174 => Block::PackedIce,
+                    175 => {
+                        let coordinates = Self::coordinates(section_y_index, index);
+                        let entity_coordinates = if (data[index] & 0x8) == 0x8 {
+                            // top block; pseudo block entity is found at the bottom
+                            coordinates - (0, 1, 0).into()
+                        } else {
+                            // bottom block; pseudo block entity is found here
+                            coordinates
+                        };
+                        match block_entities.get(&entity_coordinates).unwrap() {
+                            BlockEntity::PseudoFlowerBottom(bottom_flower) => {
+                                if (data[index] & 0x8) == 0x8 {
+                                    let top_flower = match bottom_flower {
+                                        Flower::LilacBottom => Flower::LilacTop,
+                                        Flower::PeonyBottom => Flower::PeonyTop,
+                                        Flower::RoseBushBottom => Flower::RoseBushTop,
+                                        Flower::SunflowerBottom => Flower::SunflowerTop,
+                                        variant => panic!(
+                                            "Unexpected grass variant for bottom grass: {:?}",
+                                            variant,
+                                        ),
+                                    };
+                                    Block::Flower(top_flower)
+                                } else {
+                                    Block::Flower(bottom_flower.clone())
+                                }
+                            }
+                            BlockEntity::PseudoGrassBottom(bottom_grass) => {
+                                if (data[index] & 0x8) == 0x8 {
+                                    let top_grass = match bottom_grass {
+                                        Grass::LargeFernBottom => Grass::LargeFernTop,
+                                        Grass::TallGrassBottom => Grass::TallGrassTop,
+                                        variant => panic!(
+                                            "Unexpected grass variant for bottom grass: {:?}",
+                                            variant,
+                                        ),
+                                    };
+                                    Block::Grass(top_grass)
+                                } else {
+                                    Block::Grass(bottom_grass.clone())
+                                }
+                            }
+                            _ => panic!("Wrong block entity variant for flower or grass"),
+                        }
+                    }
                     // TODO 175 large flowers
                     // - type of flower on top block depend on value from bottom block
                     176 | 177 => {
