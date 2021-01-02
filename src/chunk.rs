@@ -28,19 +28,16 @@ impl RawChunkData {
     fn to_nbt(&self) -> nbt::Blob {
         match self {
             RawChunkData::GZip(chunk_data) => {
-                println!("Has GZip data!");
                 let mut cursor = std::io::Cursor::new(chunk_data);
                 nbt::Blob::from_gzip_reader(&mut cursor)
                     .unwrap_or_else(|err| panic!("Bad chunk read: {}", err))
             }
             RawChunkData::ZLib(chunk_data) => {
-                println!("Has ZLib data!");
                 let mut cursor = std::io::Cursor::new(chunk_data);
                 nbt::Blob::from_zlib_reader(&mut cursor)
                     .unwrap_or_else(|err| panic!("Bad chunk read: {}", err))
             }
             RawChunkData::Uncompressed(chunk_data) => {
-                println!("Has uncompressed data!");
                 let mut cursor = std::io::Cursor::new(chunk_data);
                 nbt::Blob::from_reader(&mut cursor)
                     .unwrap_or_else(|err| panic!("Bad chunk read: {}", err))
@@ -56,7 +53,7 @@ pub struct Chunk {
     last_update: i64,
     //biome: BiomeMapping,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
-    //blocks: ???<Block>, // ???
+    //blocks: ndarray::Array3<Block>,
 }
 
 impl Chunk {
@@ -79,48 +76,59 @@ impl Chunk {
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
         //println!("TileEntities: {:#?}", block_entities);
 
-        let mut blocks = Vec::new();
+        let mut blocks = Vec::with_capacity(16*16*256);
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|| panic!("Level/Sections not found"));
 
         // Fist pass: Prepare pseudo bock entities for block data that is stored
         // in one block but used for another. This may cross section boundaries.
         for section in &sections {
-            block_entities.extend(Chunk::pseudo_block_entities(&section).into_iter());
+            block_entities.extend(Chunk::pseudo_block_entities(&section, &global_pos).into_iter());
         }
 
         // Second pass: Collect the full set of (finished) blocks
         for section in sections {
-            println!("Y index: {:?}", nbt_value_lookup(&section, "Y"));
-            blocks.extend_from_slice(&Chunk::section_to_block_array(&section, &block_entities));
+            //println!("Y index: {:?}", nbt_value_lookup(&section, "Y"));
+            blocks.extend_from_slice(&Chunk::section_to_block_array(
+                &section,
+                &block_entities,
+                &global_pos,
+            ));
         }
 
         //println!("{:#?}", blocks);
-        //        /*
+        /*
         let x_index = 1;
         let z_index = 1;
         let xz_index = 16 * z_index + x_index;
         let column: Vec<Block> = blocks.iter().skip(xz_index).step_by(256).cloned().collect();
         println!("{:?}", column);
-        //        */
+        */
+        // /*
+        /*
+        let y_start = 56;
+        let blocks: Vec<Block> = blocks
+            .iter()
+            .skip(y_start * 16 * 16)
+            .filter(|block| **block != Block::Air)
+            .cloned()
+            .collect();
+        println!("{:#?}", blocks);
+        */
+        // */
         Self {
             data_version,
             global_pos,
             last_update,
+            //blocks: blocks.into(),
         }
     }
 
-    fn pseudo_block_entities(section: &nbt::Value) -> HashMap<BlockCoord, BlockEntity> {
-        fn facing4_eswn(data: i8) -> Surface4 {
-            match data & 0x3 {
-                0 => Surface4::East,
-                1 => Surface4::South,
-                2 => Surface4::West,
-                3 => Surface4::North,
-                _ => unreachable!(),
-            }
-        }
-
+    fn pseudo_block_entities(
+        section: &nbt::Value,
+        chunk_position: &ChunkCoord,
+    ) -> HashMap<BlockCoord, BlockEntity> {
+        let xz_offset: BlockCoord = chunk_position.into();
         let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
         let blocks = nbt_value_lookup_byte_array(&section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
@@ -129,7 +137,7 @@ impl Chunk {
         );
         let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(&section, "Data").unwrap());
 
-        blocks
+        return blocks
             .iter()
             .enumerate()
             .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
@@ -139,7 +147,7 @@ impl Chunk {
                     64 | 71 | 193..=197 => {
                         // Doors. Check if top or bottom, generate tuple of
                         // coordinates and pesudo block entity
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         if (data[index] & 0x8) == 0x8 {
                             // Top of door
                             Some((
@@ -167,7 +175,7 @@ impl Chunk {
                     // Large flowers / grass / ferns
                     175 => match data[index] {
                         0..=1 | 4..=5 => Some((
-                            Self::coordinates(section_y_index, index),
+                            Self::coordinates(section_y_index, xz_offset, index),
                             BlockEntity::PseudoFlowerBottom(match data[index] {
                                 0 => Flower::SunflowerBottom,
                                 1 => Flower::LilacBottom,
@@ -177,7 +185,7 @@ impl Chunk {
                             }),
                         )),
                         2..=3 => Some((
-                            Self::coordinates(section_y_index, index),
+                            Self::coordinates(section_y_index, xz_offset, index),
                             BlockEntity::PseudoGrassBottom(match data[index] {
                                 2 => Grass::TallGrassBottom,
                                 3 => Grass::LargeFernBottom,
@@ -189,10 +197,20 @@ impl Chunk {
                     _ => None,
                 }
             })
-            .collect()
+            .collect();
+
+        fn facing4_eswn(data: i8) -> Surface4 {
+            match data & 0x3 {
+                0 => Surface4::East,
+                1 => Surface4::South,
+                2 => Surface4::West,
+                3 => Surface4::North,
+                _ => unreachable!(),
+            }
+        }
     }
 
-    fn coordinates(section_y_index: i64, index: usize) -> BlockCoord {
+    fn coordinates(section_y_index: i64, chunk_offset: BlockCoord, index: usize) -> BlockCoord {
         // index = (y * X_LENGTH * Z_LENGTH) + (z * X_LENGTH) + x
         const X_LENGTH: i64 = 16;
         const Y_HEIGHT: i64 = 16;
@@ -202,140 +220,27 @@ impl Chunk {
         let z = (index as i64) % (X_LENGTH * Z_LENGTH) / X_LENGTH;
         let x = (index as i64) % X_LENGTH;
         //println!("Looking for block entity at ({}, {}, {})", x, y, z);
-        (x, y, z).into()
+        let local_coordinates: BlockCoord = (x, y, z).into();
+        local_coordinates + chunk_offset
     }
 
     // TODO Move this function to a more reasonable place. A new file, perhaps?
-    // It should be a non-public function. It belongs somewhat here and somewhat to Block.
+    // It should be a non-public function. It belongs somewhat here and somewhat
+    // to Block.
+    //
+    // This function reads a "Section" nbt entry, converting it into an array of
+    // block::Block elements, using the save format of Minecraft 1.12.2.
+    // It also needs a pre-parsed hasmap of block entities, including internal 
+    // "pseudo block entities" for two-part block structures such as doors and
+    // large flowers. Those structures have some metadata in the top block, and
+    // some metadata in the bottom block, while the internal mcprogedit format
+    // keeps all data in both blocks.
     fn section_to_block_array(
         section: &nbt::Value,
         block_entities: &HashMap<BlockCoord, BlockEntity>,
+        chunk_position: &ChunkCoord,
     ) -> Vec<Block> {
-        fn facing4_xxnswe(data: i8) -> Surface4 {
-            match data & 0x7 {
-                2 => Surface4::North,
-                3 => Surface4::South,
-                4 => Surface4::West,
-                5 => Surface4::East,
-                n @ 0..=1 | n @ 6..=7 => panic!("Unknown facing4 nswe value: {}", n),
-                _ => unreachable!(),
-            }
-        }
-
-        fn facing4_swne(data: i8) -> Surface4 {
-            match data & 0x3 {
-                0 => Surface4::South,
-                1 => Surface4::West,
-                2 => Surface4::North,
-                3 => Surface4::East,
-                _ => unreachable!(),
-            }
-        }
-
-        fn facing5_xwensd(data: i8) -> Surface5 {
-            match data & 0x7 {
-                1 => Surface5::West,
-                2 => Surface5::East,
-                3 => Surface5::North,
-                4 => Surface5::South,
-                5 => Surface5::Down,
-                n @ 0 | n @ 6..=7 => panic!("Unknown facing5 xwensd value: {}", n),
-                _ => unreachable!(),
-            }
-        }
-
-        fn facing5_dxnswe(data: i8) -> Surface5 {
-            match data & 0x7 {
-                0 => Surface5::Down,
-                2 => Surface5::North,
-                3 => Surface5::South,
-                4 => Surface5::West,
-                5 => Surface5::East,
-                n @ 1 | n @ 6..=7 => panic!("Unknown facing5 dxnswe value: {}", n),
-                _ => unreachable!(),
-            }
-        }
-
-        fn facing6_dunswe(data: i8) -> Surface6 {
-            match data & 0x7 {
-                0 => Surface6::Down,
-                1 => Surface6::Up,
-                2 => Surface6::North,
-                3 => Surface6::South,
-                4 => Surface6::West,
-                5 => Surface6::East,
-                n @ 6..=7 => panic!("Unknown facing6 dunswe value: {}", n),
-                _ => unreachable!(),
-            }
-        }
-
-        fn trapdoor_hinge_at(data: i8) -> Edge8 {
-            match data & (0x3 | 0x8) {
-                0 => Edge8::DownSouth,
-                1 => Edge8::DownNorth,
-                2 => Edge8::DownEast,
-                3 => Edge8::DownWest,
-                8 => Edge8::UpSouth,
-                9 => Edge8::UpNorth,
-                10 => Edge8::UpEast,
-                11 => Edge8::UpWest,
-                _ => unreachable!(),
-            }
-        }
-
-        fn wood_alignment(data: i8) -> Option<Axis3> {
-            match (data & 0xC) >> 2 {
-                0 => Some(Axis3::Y),
-                1 => Some(Axis3::X),
-                2 => Some(Axis3::Z),
-                3 => None,
-                _ => unreachable!(),
-            }
-        }
-
-        fn button_lever_facing(data: i8) -> SurfaceRotation12 {
-            match data & 0x7 {
-                // NB these directions are probably wrong...
-                0 => SurfaceRotation12::DownFacingEast,
-                1 => SurfaceRotation12::East,
-                2 => SurfaceRotation12::West,
-                3 => SurfaceRotation12::South,
-                4 => SurfaceRotation12::North,
-                5 => SurfaceRotation12::UpFacingSouth,
-                6 => SurfaceRotation12::UpFacingEast,
-                7 => SurfaceRotation12::DownFacingSouth,
-                _ => unreachable!(),
-            }
-        }
-
-        // OK this is kind of messy, but basically each number gives a combination
-        // of what sides have a cap (or stem) on them. Values 10 and 15 are for stems,
-        // and all other values are for caps. The caller needs to check whether the
-        // resulting sides should be caps or stem, by checking if the data value is
-        // 10 or 15 (stem) or any other value (caps).
-        fn mushroom_caps(data: i8) -> DirectionFlags6 {
-            // Only the four least significant bytes count
-            let data = data & 0xF;
-
-            // Prepare direction flags
-            let east = (data <= 9 && (data % 3) == 0) || data == 10 || data >= 14;
-            let down = data >= 14;
-            let north = (data >= 1 && data <= 3) || data == 10 || data >= 14;
-            let south = (data >= 7 && data <= 10) || data >= 14;
-            let up = (data >= 1 && data <= 9) || data >= 14;
-            let west = (data <= 10 && (data % 3) == 1) || data >= 14;
-
-            // Create and return value
-            DirectionFlags6 {
-                east,
-                down,
-                north,
-                south,
-                up,
-                west,
-            }
-        }
-
+        let xz_offset: BlockCoord = chunk_position.into();
         let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
         let blocks = nbt_value_lookup_byte_array(&section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
@@ -344,7 +249,7 @@ impl Chunk {
         );
         let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(&section, "Data").unwrap());
 
-        blocks
+        return blocks
             .iter()
             .enumerate()
             .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
@@ -437,7 +342,7 @@ impl Chunk {
                     21 => Block::LapisLazuliOre,
                     22 => Block::LapisLazuliBlock,
                     23 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -459,7 +364,7 @@ impl Chunk {
                         n => panic!("Unknown sandstone data variant: {}", n),
                     },
                     25 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         if let BlockEntity::Noteblock { note, .. } = block_entity {
@@ -511,7 +416,7 @@ impl Chunk {
                         }
                     }
                     35 => Block::Wool {
-                        colour: Some((data[index] as i32).into()),
+                        colour: Some(((data[index] & 0xF) as i32).into()),
                     },
                     // TODO block 36 piston_extension ("Block moved by Piston")
                     37 => Block::Flower(Flower::Dandelion),
@@ -574,7 +479,7 @@ impl Chunk {
                         attached: facing5_xwensd(data[index]),
                     },
                     51 => Block::Fire {
-                        age: Int0Through15::new(data[index]).unwrap(),
+                        age: Int0Through15::new(data[index] & 0xF).unwrap(),
                     },
                     // TODO block 52 mob spawner
                     53 => Block::Stairs(Stair {
@@ -583,7 +488,7 @@ impl Chunk {
                         waterlogged: false,
                     }),
                     54 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -609,7 +514,7 @@ impl Chunk {
                         wetness: Int0Through7::new(data[index] & 0x7).unwrap(),
                     },
                     61 | 62 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -633,7 +538,7 @@ impl Chunk {
                             68 => WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index])),
                             _ => unreachable!(),
                         };
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -661,7 +566,7 @@ impl Chunk {
                             DoorHalf::Lower
                         };
 
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
 
                         let top_coordinates = match half {
                             DoorHalf::Upper => coordinates,
@@ -746,7 +651,7 @@ impl Chunk {
                         growth_stage: Int0Through15::new(data[index] & 0xF).unwrap(),
                     },
                     84 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -893,7 +798,7 @@ impl Chunk {
                         growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
                     },
                     116 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -906,7 +811,7 @@ impl Chunk {
                         }
                     }
                     117 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1007,7 +912,7 @@ impl Chunk {
                     }),
                     // TODO 137 command block // Deferred for now, too complicated
                     138 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1055,7 +960,7 @@ impl Chunk {
                         },
                     },
                     146 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1088,7 +993,7 @@ impl Chunk {
                     152 => Block::BlockOfRedstone,
                     153 => Block::NetherQuartzOre,
                     154 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1113,7 +1018,7 @@ impl Chunk {
                         shape: RailShape::from_value(data[index] & 0x7),
                     },
                     158 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1127,10 +1032,10 @@ impl Chunk {
                         }
                     }
                     159 => Block::Terracotta {
-                        colour: Some((data[index] as i32).into()),
+                        colour: Some(((data[index] & 0xF) as i32).into()),
                     },
                     160 => Block::GlassPane {
-                        colour: Some((data[index] as i32).into()),
+                        colour: Some(((data[index] & 0xF) as i32).into()),
                         waterlogged: false,
                     },
                     161 => Block::Leaves {
@@ -1180,14 +1085,14 @@ impl Chunk {
                         },
                     },
                     171 => Block::Carpet {
-                        colour: (data[index] as i32).into(),
+                        colour: ((data[index] & 0xF) as i32).into(),
                     },
                     172 => Block::Terracotta { colour: None },
                     173 => Block::BlockOfCoal,
                     174 => Block::PackedIce,
                     // All double tall plants (Flowers, Ferns, Grass)
                     175 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let entity_coordinates = if (data[index] & 0x8) == 0x8 {
                             // top block; pseudo block entity is found at the bottom
                             coordinates - (0, 1, 0).into()
@@ -1233,7 +1138,7 @@ impl Chunk {
                     }
                     // Banners
                     176 | 177 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1348,7 +1253,7 @@ impl Chunk {
                     },
                     // All shulker box colours
                     block_id @ 219..=234 => {
-                        let coordinates = Self::coordinates(section_y_index, index);
+                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                         let block_entity = block_entities.get(&coordinates).unwrap();
 
                         match block_entity {
@@ -1370,16 +1275,141 @@ impl Chunk {
                         facing: facing4_swne(data[index]),
                     },
                     251 => Block::Concrete {
-                        colour: (data[index] as i32).into(),
+                        colour: ((data[index] & 0xF) as i32).into(),
                     },
                     252 => Block::ConcretePowder {
-                        colour: (data[index] as i32).into(),
+                        colour: ((data[index] & 0xF) as i32).into(),
                     },
                     // TODO 255 structure block
                     n => Block::Unknown(Some(n)),
                 }
             })
-            .collect()
+            .collect();
+
+        fn facing4_xxnswe(data: i8) -> Surface4 {
+            match data & 0x7 {
+                2 => Surface4::North,
+                3 => Surface4::South,
+                4 => Surface4::West,
+                5 => Surface4::East,
+                n @ 0..=1 | n @ 6..=7 => panic!("Unknown facing4 nswe value: {}", n),
+                _ => unreachable!(),
+            }
+        }
+
+        fn facing4_swne(data: i8) -> Surface4 {
+            match data & 0x3 {
+                0 => Surface4::South,
+                1 => Surface4::West,
+                2 => Surface4::North,
+                3 => Surface4::East,
+                _ => unreachable!(),
+            }
+        }
+
+        fn facing5_xwensd(data: i8) -> Surface5 {
+            match data & 0x7 {
+                1 => Surface5::West,
+                2 => Surface5::East,
+                3 => Surface5::North,
+                4 => Surface5::South,
+                5 => Surface5::Down,
+                n @ 0 | n @ 6..=7 => panic!("Unknown facing5 xwensd value: {}", n),
+                _ => unreachable!(),
+            }
+        }
+
+        fn facing5_dxnswe(data: i8) -> Surface5 {
+            match data & 0x7 {
+                0 => Surface5::Down,
+                2 => Surface5::North,
+                3 => Surface5::South,
+                4 => Surface5::West,
+                5 => Surface5::East,
+                n @ 1 | n @ 6..=7 => panic!("Unknown facing5 dxnswe value: {}", n),
+                _ => unreachable!(),
+            }
+        }
+
+        fn facing6_dunswe(data: i8) -> Surface6 {
+            match data & 0x7 {
+                0 => Surface6::Down,
+                1 => Surface6::Up,
+                2 => Surface6::North,
+                3 => Surface6::South,
+                4 => Surface6::West,
+                5 => Surface6::East,
+                n @ 6..=7 => panic!("Unknown facing6 dunswe value: {}", n),
+                _ => unreachable!(),
+            }
+        }
+
+        fn trapdoor_hinge_at(data: i8) -> Edge8 {
+            match data & (0x3 | 0x8) {
+                0 => Edge8::DownSouth,
+                1 => Edge8::DownNorth,
+                2 => Edge8::DownEast,
+                3 => Edge8::DownWest,
+                8 => Edge8::UpSouth,
+                9 => Edge8::UpNorth,
+                10 => Edge8::UpEast,
+                11 => Edge8::UpWest,
+                _ => unreachable!(),
+            }
+        }
+
+        fn wood_alignment(data: i8) -> Option<Axis3> {
+            match (data & 0xC) >> 2 {
+                0 => Some(Axis3::Y),
+                1 => Some(Axis3::X),
+                2 => Some(Axis3::Z),
+                3 => None,
+                _ => unreachable!(),
+            }
+        }
+
+        fn button_lever_facing(data: i8) -> SurfaceRotation12 {
+            match data & 0x7 {
+                // NB these directions are probably wrong...
+                0 => SurfaceRotation12::DownFacingEast,
+                1 => SurfaceRotation12::East,
+                2 => SurfaceRotation12::West,
+                3 => SurfaceRotation12::South,
+                4 => SurfaceRotation12::North,
+                5 => SurfaceRotation12::UpFacingSouth,
+                6 => SurfaceRotation12::UpFacingEast,
+                7 => SurfaceRotation12::DownFacingSouth,
+                _ => unreachable!(),
+            }
+        }
+
+        // OK this is kind of messy, but basically each number gives a combination
+        // of what sides have a cap (or stem) on them. Values 10 and 15 are for stems,
+        // and all other values are for caps. The caller needs to check whether the
+        // resulting sides should be caps or stem, by checking if the data value is
+        // 10 or 15 (stem) or any other value (caps).
+        fn mushroom_caps(data: i8) -> DirectionFlags6 {
+            // Only the four least significant bytes count
+            let data = data & 0xF;
+
+            // Prepare direction flags
+            let east = (data <= 9 && (data % 3) == 0) || data == 10 || data >= 14;
+            let down = data >= 14;
+            let north = (data >= 1 && data <= 3) || data == 10 || data >= 14;
+            let south = (data >= 7 && data <= 10) || data >= 14;
+            let up = (data >= 1 && data <= 9) || data >= 14;
+            let west = (data <= 10 && (data % 3) == 1) || data >= 14;
+
+            // Create and return value
+            DirectionFlags6 {
+                east,
+                down,
+                north,
+                south,
+                up,
+                west,
+            }
+        }
     }
 }
 
@@ -1390,7 +1420,7 @@ impl Chunk {
 fn packed_nibbles_to_bytes(nibbles: &[i8]) -> Vec<i8> {
     nibbles
         .iter()
-        .flat_map(|byte| vec![byte & 0x0F, byte >> 4])
+        .flat_map(|byte| vec![byte & 0x0F, (byte >> 4) & 0x0F])
         .collect()
 }
 

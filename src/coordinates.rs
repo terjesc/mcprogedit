@@ -29,6 +29,12 @@ impl std::ops::Sub for BlockCoord {
     }
 }
 
+impl From<&ChunkCoord> for BlockCoord {
+    fn from(chunk: &ChunkCoord) -> Self {
+        Self(chunk.0 << 4, 0, chunk.1 << 4)
+    }
+}
+
 impl From<(i64, i64)> for BlockColumnCoord {
     fn from(coords: (i64, i64)) -> Self {
         Self(coords.0, coords.1)

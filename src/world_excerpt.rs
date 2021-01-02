@@ -136,7 +136,7 @@ impl WorldExcerpt {
                 // Handle those chunks
                 for chunk_x in in_region_chunk_bounds.x_min..=in_region_chunk_bounds.x_max {
                     for chunk_z in in_region_chunk_bounds.z_min..=in_region_chunk_bounds.z_max {
-                        println!("Handling (region internal) chunk {}, {}", chunk_x, chunk_z);
+                        //println!("Handling (region internal) chunk {}, {}", chunk_x, chunk_z);
 
                         // Parse the raw chunk data into a chunk object
                         let chunk_data = region.get_chunk_data(&(chunk_x, chunk_z).into());

@@ -234,8 +234,12 @@ impl BlockEntity {
             common: CommonTags::from_nbt_value(&value),
             lock: nbt_value_lookup_string(&value, "Lock"),
             levels: nbt_value_lookup_int(&value, "Levels").unwrap(),
-            primary: nbt_value_lookup_int(&value, "Primary").map(StatusEffect::from),
-            secondary: nbt_value_lookup_int(&value, "Secondary").map(StatusEffect::from),
+            primary: nbt_value_lookup_int(&value, "Primary")
+                .filter(|i| *i != 0)
+                .map(StatusEffect::from),
+            secondary: nbt_value_lookup_int(&value, "Secondary")
+                .filter(|i| *i != 0)
+                .map(StatusEffect::from),
         }
     }
 
@@ -421,7 +425,6 @@ impl BlockEntity {
     }
 
     fn noteblock_from_nbt_value(value: &nbt::Value) -> Self {
-        println!("{:#?}", value);
         BlockEntity::Noteblock {
             common: CommonTags::from_nbt_value(&value),
             note: Pitch::from_value(nbt_value_lookup_byte(&value, "note").unwrap() as u8),
