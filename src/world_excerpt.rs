@@ -1,25 +1,30 @@
 //! A piece of a Minecraft world.
 
 use crate::block::Block;
+use crate::block_cuboid::BlockCuboid;
 use crate::chunk::Chunk;
 use crate::coordinates::*;
 use crate::nbt_lookup::*;
 use crate::region::Region;
 
 extern crate nbt;
-extern crate ndarray;
 
 /// Structure for holding blocks and entities, representing a piece of a Minecraft world.
+#[derive(Debug)]
 pub struct WorldExcerpt {
-    blocks: ndarray::Array3<Block>,
+    blocks: BlockCuboid,
 }
 
 impl WorldExcerpt {
     /// Creates a new empty `WorldExcerpt` of the given size.
     pub fn new(x: usize, y: usize, z: usize) -> Self {
         WorldExcerpt {
-            blocks: ndarray::Array3::<Block>::from_elem((x, y, z), Block::None),
+            blocks: BlockCuboid::new((x, y, z)),
         }
+    }
+
+    fn dim(&self) -> (usize, usize, usize) {
+        self.blocks.dim()
     }
 
     /// Creates a new `WorldExcerpt` from part of a saved Minecraft world.
@@ -43,7 +48,7 @@ impl WorldExcerpt {
         let level_dat_blob = nbt::Blob::from_gzip_reader(&mut level_dat)
             .expect("Unable to parse level.dat contents");
 
-        let data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
+        let _data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
             .unwrap_or_else(|| panic!("level.dat Data/DataVersion not found"));
 
         // Create an empty (None-filled) WorldExcerpt of the correct size.
@@ -142,8 +147,16 @@ impl WorldExcerpt {
                         let chunk_data = region.get_chunk_data(&(chunk_x, chunk_z).into());
                         let chunk = Chunk::from_raw_chunk_data(&chunk_data);
 
-                        //TODO Read out the blocks, and put them in the WorldExcerpt
-                        //TODO Read out entities, and put them in the WorldExcerpt
+                        // Paste the blocks from the chunk
+                        let chunk_offset: BlockCoord = chunk.chunk_coordinates().into();
+                        let chunk_offset_in_blocks = (
+                            chunk_offset.0 - global_block_bounds.x_min,
+                            chunk_offset.1 - global_block_bounds.y_min,
+                            chunk_offset.2 - global_block_bounds.z_min,
+                        );
+                        world_excerpt.blocks.paste(chunk_offset_in_blocks, chunk.blocks());
+
+                        // TODO Move or copy the entities from the chunk
                     }
                 }
             }
@@ -165,12 +178,12 @@ impl WorldExcerpt {
 
     /// Set the block at location `at` to the provided block.
     pub fn set_block_at(&mut self, at: BlockCoord, block: Block) {
-        self.blocks[[at.0 as usize, at.1 as usize, at.2 as usize]] = block;
+        self.blocks.insert((at.0 as usize, at.1 as usize, at.2 as usize), block);
     }
 
     /// Get a copy of the block at location `at`.
-    pub fn get_block_at(&self, at: BlockCoord) -> Block {
-        self.blocks[[at.0 as usize, at.1 as usize, at.2 as usize]].clone()
+    pub fn get_block_at(&self, at: BlockCoord) -> Option<&Block> {
+        self.blocks.get((at.0 as usize, at.1 as usize, at.2 as usize))
     }
 
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.
@@ -178,33 +191,8 @@ impl WorldExcerpt {
     /// Empty blocks ([`Block::None`](crate::block::Block::None)) are not copied over,
     /// allowing for pasting non-rectangular cuboid selections.
     pub fn paste(&mut self, at: BlockCoord, other: &WorldExcerpt) {
-        for x in 0..other.blocks.len_of(ndarray::Axis(0)) as i64 {
-            let self_x = x + at.0;
-            if self_x < 0 || self_x >= self.blocks.len_of(ndarray::Axis(0)) as i64 {
-                // Do not paste outside of self bounding box.
-                continue;
-            }
-            for y in 0..other.blocks.len_of(ndarray::Axis(1)) as i64 {
-                let self_y = y + at.1;
-                if self_y < 0 || self_y >= self.blocks.len_of(ndarray::Axis(1)) as i64 {
-                    // Do not paste outside of self bounding box.
-                    continue;
-                }
-                for z in 0..other.blocks.len_of(ndarray::Axis(2)) as i64 {
-                    let self_z = z + at.2;
-                    if self_z < 0 || self_z >= self.blocks.len_of(ndarray::Axis(2)) as i64 {
-                        // Do not paste outside of self bounding box.
-                        continue;
-                    }
-
-                    // The actual pasting of blocks
-                    let block = other.get_block_at((x, y, z).into());
-                    if Block::None != block {
-                        self.set_block_at((self_x, self_y, self_z).into(), block);
-                    }
-                }
-            }
-        }
+        self.blocks.paste((at.0, at.1, at.2), &other.blocks);
+        // TODO also handle / copy entities within the world excerpts
     }
 
     //TODO functions for:

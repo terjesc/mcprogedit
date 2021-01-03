@@ -101,7 +101,7 @@ impl Region {
         }
     }
 
-    pub fn set_chunk_data(&mut self, local_chunk_coordinates: &ChunkCoord, data: RawChunkData) {
+    pub fn _set_chunk_data(&mut self, local_chunk_coordinates: &ChunkCoord, data: RawChunkData) {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap()

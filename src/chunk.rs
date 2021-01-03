@@ -49,20 +49,28 @@ impl RawChunkData {
 }
 
 pub struct Chunk {
-    data_version: McVersion,
+    _data_version: McVersion,
     global_pos: ChunkCoord,
-    last_update: i64,
+    _last_update: i64,
     //biome: BiomeMapping,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
     blocks: BlockCuboid,
 }
 
 impl Chunk {
+    pub fn blocks(&self) -> &BlockCuboid {
+        &self.blocks
+    }
+
+    pub fn chunk_coordinates(&self) -> &ChunkCoord {
+        &self.global_pos
+    }
+
     pub fn from_raw_chunk_data(data: &RawChunkData) -> Self {
         let nbt = data.to_nbt();
         //println!("{}", nbt);
 
-        let data_version = nbt_blob_lookup_int(&nbt, "DataVersion")
+        let _data_version = nbt_blob_lookup_int(&nbt, "DataVersion")
             .map(McVersion::from_id)
             .unwrap();
 
@@ -70,7 +78,7 @@ impl Chunk {
         let z_pos = nbt_blob_lookup_int(&nbt, "Level/zPos").unwrap();
         let global_pos: ChunkCoord = (x_pos.into(), z_pos.into()).into();
 
-        let last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
+        let _last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
 
         let tile_entities = nbt_blob_lookup(&nbt, "Level/TileEntities")
             .unwrap_or_else(|| panic!("Level/TileEntities not found"));
@@ -99,12 +107,12 @@ impl Chunk {
             );
         }
 
-        println!("{:#?}", block_cuboid);
+        //println!("{:#?}", block_cuboid);
 
         Self {
-            data_version,
+            _data_version,
             global_pos,
-            last_update,
+            _last_update,
             blocks: block_cuboid,
         }
     }
@@ -202,7 +210,7 @@ impl Chunk {
         const Z_LENGTH: i64 = 16;
         let y_offset = section_y_index * Y_HEIGHT;
         let y = y_offset + (index as i64) / (X_LENGTH * Z_LENGTH);
-        let z = (index as i64) % (X_LENGTH * Z_LENGTH) / X_LENGTH;
+        let z = ((index as i64) % (X_LENGTH * Z_LENGTH)) / X_LENGTH;
         let x = (index as i64) % X_LENGTH;
         //println!("Looking for block entity at ({}, {}, {})", x, y, z);
         let local_coordinates: BlockCoord = (x, y, z).into();
@@ -366,7 +374,7 @@ impl Chunk {
                     26 => Block::Bed {
                         colour: Colour::Red,
                         facing: facing4_swne(data[index]),
-                        end: if data[index] & 0x4 == 0x4 {
+                        end: if (data[index] & 0x8) == 0x8 {
                             BedEnd::Head
                         } else {
                             BedEnd::Foot

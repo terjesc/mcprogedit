@@ -87,6 +87,8 @@ fn run() -> Result<()> {
     //let _excerpt =
     //    WorldExcerpt::from_save((-16, 50, -16).into(), (-1, 66, -1).into(), save_directory);
 
+    //println!("{:#?}", _excerpt);
+
     Ok(())
 }
 
