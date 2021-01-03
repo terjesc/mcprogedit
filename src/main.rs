@@ -78,9 +78,10 @@ fn run() -> Result<()> {
     //let _excerpt = WorldExcerpt::from_save((-4, 50, 0).into(), (18, 80, -25).into(), save_directory);
     //let _excerpt = WorldExcerpt::from_save((0, 50, 0).into(), (15, 66, 15).into(), save_directory);
     let _excerpt = WorldExcerpt::from_save(
-        #[allow(clippy::erasing_op)]
+        #[allow(clippy::erasing_op, clippy::identity_op)]
         ((0 * 16), 56, 0).into(),
-        ((16 * 16) - 1, 66, (1 * 16) - 1).into(),
+        #[allow(clippy::erasing_op, clippy::identity_op)]
+        ((1 * 16) - 1, 66, (1 * 16) - 1).into(),
         save_directory,
     );
     //let _excerpt =

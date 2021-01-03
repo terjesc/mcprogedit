@@ -7,6 +7,7 @@ use crate::block::{
     Dropper, Flower, Furnace, Grass, Hinge, Hopper, Jukebox, OnOffState, RailShape, RailType,
     ShulkerBox, Sign, Slab, SlabVariant, Stair, StemState,
 };
+use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
 use crate::bounded_ints::*;
 use crate::colour::Colour;
@@ -53,7 +54,7 @@ pub struct Chunk {
     last_update: i64,
     //biome: BiomeMapping,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
-    //blocks: ndarray::Array3<Block>,
+    blocks: BlockCuboid,
 }
 
 impl Chunk {
@@ -76,7 +77,7 @@ impl Chunk {
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
         //println!("TileEntities: {:#?}", block_entities);
 
-        let mut blocks = Vec::with_capacity(16*16*256);
+        //let mut blocks = Vec::with_capacity(16 * 16 * 256);
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|| panic!("Level/Sections not found"));
 
@@ -86,41 +87,25 @@ impl Chunk {
             block_entities.extend(Chunk::pseudo_block_entities(&section, &global_pos).into_iter());
         }
 
+        let mut block_cuboid = BlockCuboid::new((16, 256, 16));
         // Second pass: Collect the full set of (finished) blocks
         for section in sections {
             //println!("Y index: {:?}", nbt_value_lookup(&section, "Y"));
-            blocks.extend_from_slice(&Chunk::section_to_block_array(
+            Chunk::section_into_block_cuboid(
                 &section,
                 &block_entities,
                 &global_pos,
-            ));
+                &mut block_cuboid,
+            );
         }
 
-        //println!("{:#?}", blocks);
-        /*
-        let x_index = 1;
-        let z_index = 1;
-        let xz_index = 16 * z_index + x_index;
-        let column: Vec<Block> = blocks.iter().skip(xz_index).step_by(256).cloned().collect();
-        println!("{:?}", column);
-        */
-        // /*
-        /*
-        let y_start = 56;
-        let blocks: Vec<Block> = blocks
-            .iter()
-            .skip(y_start * 16 * 16)
-            .filter(|block| **block != Block::Air)
-            .cloned()
-            .collect();
-        println!("{:#?}", blocks);
-        */
-        // */
+        println!("{:#?}", block_cuboid);
+
         Self {
             data_version,
             global_pos,
             last_update,
-            //blocks: blocks.into(),
+            blocks: block_cuboid,
         }
     }
 
@@ -230,16 +215,17 @@ impl Chunk {
     //
     // This function reads a "Section" nbt entry, converting it into an array of
     // block::Block elements, using the save format of Minecraft 1.12.2.
-    // It also needs a pre-parsed hasmap of block entities, including internal 
+    // It also needs a pre-parsed hasmap of block entities, including internal
     // "pseudo block entities" for two-part block structures such as doors and
     // large flowers. Those structures have some metadata in the top block, and
     // some metadata in the bottom block, while the internal mcprogedit format
     // keeps all data in both blocks.
-    fn section_to_block_array(
+    fn section_into_block_cuboid(
         section: &nbt::Value,
         block_entities: &HashMap<BlockCoord, BlockEntity>,
         chunk_position: &ChunkCoord,
-    ) -> Vec<Block> {
+        block_cuboid: &mut BlockCuboid,
+    ) {
         let xz_offset: BlockCoord = chunk_position.into();
         let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
         let blocks = nbt_value_lookup_byte_array(&section, "Blocks").unwrap();
@@ -249,11 +235,13 @@ impl Chunk {
         );
         let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(&section, "Data").unwrap());
 
-        return blocks
+        //let mut block_cuboid = BlockCuboid::new((16, 16, 16));
+        blocks
             .iter()
             .enumerate()
             .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
             .map(|(index, block)| {
+                (index, 
                 match block {
                     0 => Block::Air,
                     1 => match data[index] {
@@ -1283,8 +1271,18 @@ impl Chunk {
                     // TODO 255 structure block
                     n => Block::Unknown(Some(n)),
                 }
+                )
             })
-            .collect();
+            .for_each(|(index, block)| {
+                let coordinates = Self::coordinates(section_y_index, (0, 0, 0).into(), index);
+                let coordinates = (
+                    coordinates.0 as usize,
+                    coordinates.1 as usize,
+                    coordinates.2 as usize,
+                );
+                block_cuboid.insert(coordinates, block);
+            });
+        //return block_cuboid;
 
         fn facing4_xxnswe(data: i8) -> Surface4 {
             match data & 0x7 {

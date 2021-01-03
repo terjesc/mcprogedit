@@ -6,6 +6,7 @@ extern crate static_assertions;
 pub mod arguments;
 pub mod banner;
 pub mod block;
+mod block_cuboid;
 mod block_entity;
 pub mod bounded_ints;
 pub mod bounds;
