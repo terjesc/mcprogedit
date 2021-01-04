@@ -294,10 +294,24 @@ impl Chunk {
                         },
                     },
                     7 => Block::Bedrock,
-                    //8 => // TODO flowing water, not yet implemented
-                    9 => Block::WaterSource,
-                    //10 => // TODO flowing lava, not yet implemented
-                    11 => Block::LavaSource,
+                    #[allow(clippy::verbose_bit_mask)]
+                    8 | 9 => if (data[index] & 0x7) == 0x0 {
+                        Block::WaterSource
+                    } else {
+                        Block::Water {
+                            falling: (data[index] & 0x8) == 0x8,
+                            level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
+                        }
+                    },
+                    #[allow(clippy::verbose_bit_mask)]
+                    10 | 11 => if (data[index] & 0x7) == 0x0 {
+                        Block::LavaSource
+                    } else {
+                        Block::Lava {
+                            falling: (data[index] & 0x8) == 0x8,
+                            level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
+                        }
+                    },
                     12 => match data[index] {
                         0 => Block::Sand,
                         1 => Block::RedSand,

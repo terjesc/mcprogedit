@@ -74,6 +74,12 @@ bounded_integer! {
 
 bounded_integer! {
     #[repr(i8)]
+    /// Integers in the range from 1 to 7 inclusive.
+    pub struct Int1Through7 { 1..=7 }
+}
+
+bounded_integer! {
+    #[repr(i8)]
     /// Integers in the range from 1 to 8 inclusive.
     pub struct Int1Through8 { 1..=8 }
 }

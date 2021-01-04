@@ -722,7 +722,11 @@ pub enum Block {
     },
     LapisLazuliBlock,
     LapisLazuliOre,
-    LavaSource, // TODO handle magic (that is, the "flowing" state)
+    Lava {
+        falling: bool,
+        level: Int1Through7,
+    },
+    LavaSource,
     Leaves {
         material: LeavesMaterial,
         distance_to_trunk: Option<Int0Through7>,
@@ -955,7 +959,11 @@ pub enum Block {
     WarpedNyliym,
     WarpedRoots,
     WarpedWartBlock,
-    WaterSource, // TODO handle magic (that is, the "flowing" state)
+    Water {
+        falling: bool,
+        level: Int1Through7,
+    },
+    WaterSource,
     WeepingVines {
         growth_stage: Int0Through25,
     },
