@@ -1,5 +1,7 @@
 //! For describing material variants of blocks and items.
 
+use std::convert::TryFrom;
+
 /// Materials for Armour.
 //TODO add descriptions for when materials were first introduced
 #[derive(Clone, Debug, PartialEq)]
@@ -10,6 +12,22 @@ pub enum ArmourMaterial {
     Iron,
     Leather,
     Netherite,
+}
+
+impl TryFrom<Material> for ArmourMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Chainmail => Ok(Self::Chainmail),
+            Material::Diamond => Ok(Self::Diamond),
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            Material::Leather => Ok(Self::Leather),
+            Material::Netherite => Ok(Self::Netherite),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "Button" family of blocks.
@@ -57,6 +75,26 @@ pub enum ButtonMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for ButtonMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::PolishedBlackstone => Ok(Self::PolishedBlackstone),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Stone => Ok(Self::Stone),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for the "Coral", "CoralBlock" and "CoralFan" families of blocks.
 ///
 /// # Variant availability
@@ -81,6 +119,21 @@ pub enum CoralMaterial {
     Horn,
     /// Blue coral variant
     Tube,
+}
+
+impl TryFrom<Material> for CoralMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Bubble => Ok(Self::Bubble),
+            Material::Brain => Ok(Self::Brain),
+            Material::Fire => Ok(Self::Fire),
+            Material::Horn => Ok(Self::Horn),
+            Material::Tube => Ok(Self::Tube),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "Door" and "Trapdoor" families of blocks.
@@ -135,6 +188,25 @@ pub enum DoorMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for DoorMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Iron => Ok(Self::Iron),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for the "Fence" family of blocks.
 ///
 /// # Variant availability
@@ -176,6 +248,25 @@ pub enum FenceMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for FenceMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::NetherBrick => Ok(Self::NetherBrick),
+            Material::Oak => Ok(Self::Oak),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for Horse Armor.
 //TODO add descriptions for when materials were first introduced
 #[derive(Clone, Debug, PartialEq)]
@@ -183,6 +274,19 @@ pub enum HorseArmorMaterial {
     Gold,
     Iron,
     Diamond,
+}
+
+impl TryFrom<Material> for HorseArmorMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            Material::Diamond => Ok(Self::Diamond),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for Ingots.
@@ -204,6 +308,19 @@ pub enum IngotMaterial {
     Gold,
     Iron,
     Netherite,
+}
+
+impl TryFrom<Material> for IngotMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            Material::Netherite => Ok(Self::Netherite),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "Leaves" family of blocks.
@@ -239,11 +356,416 @@ pub enum LeavesMaterial {
     Spruce,
 }
 
-// TODO description
+impl TryFrom<Material> for LeavesMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::Spruce => Ok(Self::Spruce),
+            _ => Err(()),
+        }
+    }
+}
+
+/// All materials.
+///
+/// Convertible to and from all other material types.
+pub enum Material {
+    Acacia,
+    Andesite,
+    Bamboo,
+    Beetroot,
+    Birch,
+    Blackstone,
+    Brain,
+    Brick,
+    Bubble,
+    Chainmail,
+    Cobblestone,
+    Crimson,
+    CutRedSandstone,
+    CutSandstone,
+    DarkOak,
+    DarkPrismarine,
+    Diamond,
+    Diorite,
+    EndStoneBrick,
+    Fire,
+    Gold,
+    Granite,
+    Horn,
+    Iron,
+    Jungle,
+    Leather,
+    Melon,
+    MossyCobblestone,
+    MossyStoneBrick,
+    NetherBrick,
+    Netherite,
+    Oak,
+    PetrifiedOak,
+    PolishedAndesite,
+    PolishedBlackstone,
+    PolishedBlackstoneBrick,
+    PolishedDiorite,
+    PolishedGranite,
+    Prismarine,
+    PrismarineBrick,
+    Pumpkin,
+    Purpur,
+    Quartz,
+    RedNetherBrick,
+    RedSandstone,
+    Sandstone,
+    SmoothQuartz,
+    SmoothRedSandstone,
+    SmoothSandstone,
+    SmoothStone,
+    Spruce,
+    Stone,
+    StoneBrick,
+    Tube,
+    Warped,
+    Wheat,
+    Wood,
+}
+
+impl From<ArmourMaterial> for Material {
+    fn from(item: ArmourMaterial) -> Self {
+        match item {
+            ArmourMaterial::Chainmail => Self::Chainmail,
+            ArmourMaterial::Diamond => Self::Diamond,
+            ArmourMaterial::Gold => Self::Gold,
+            ArmourMaterial::Iron => Self::Iron,
+            ArmourMaterial::Leather => Self::Leather,
+            ArmourMaterial::Netherite => Self::Netherite,
+        }
+    }
+}
+
+impl From<ButtonMaterial> for Material {
+    fn from(item: ButtonMaterial) -> Self {
+        match item {
+            ButtonMaterial::Acacia => Self::Acacia,
+            ButtonMaterial::Birch => Self::Birch,
+            ButtonMaterial::Crimson => Self::Crimson,
+            ButtonMaterial::DarkOak => Self::DarkOak,
+            ButtonMaterial::Jungle => Self::Jungle,
+            ButtonMaterial::Oak => Self::Oak,
+            ButtonMaterial::PolishedBlackstone => Self::PolishedBlackstone,
+            ButtonMaterial::Spruce => Self::Spruce,
+            ButtonMaterial::Stone => Self::Stone,
+            ButtonMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<CoralMaterial> for Material {
+    fn from(item: CoralMaterial) -> Self {
+        match item {
+            CoralMaterial::Bubble => Self::Bubble,
+            CoralMaterial::Brain => Self::Brain,
+            CoralMaterial::Fire => Self::Fire,
+            CoralMaterial::Horn => Self::Horn,
+            CoralMaterial::Tube => Self::Tube,
+        }
+    }
+}
+
+impl From<DoorMaterial> for Material {
+    fn from(item: DoorMaterial) -> Self {
+        match item {
+            DoorMaterial::Acacia => Self::Acacia,
+            DoorMaterial::Birch => Self::Birch,
+            DoorMaterial::Crimson => Self::Crimson,
+            DoorMaterial::DarkOak => Self::DarkOak,
+            DoorMaterial::Iron => Self::Iron,
+            DoorMaterial::Jungle => Self::Jungle,
+            DoorMaterial::Oak => Self::Oak,
+            DoorMaterial::Spruce => Self::Spruce,
+            DoorMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<FenceMaterial> for Material {
+    fn from(item: FenceMaterial) -> Self {
+        match item {
+            FenceMaterial::Acacia => Self::Acacia,
+            FenceMaterial::Birch => Self::Birch,
+            FenceMaterial::Crimson => Self::Crimson,
+            FenceMaterial::DarkOak => Self::DarkOak,
+            FenceMaterial::Jungle => Self::Jungle,
+            FenceMaterial::NetherBrick => Self::NetherBrick,
+            FenceMaterial::Oak => Self::Oak,
+            FenceMaterial::Spruce => Self::Spruce,
+            FenceMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<HorseArmorMaterial> for Material {
+    fn from(item: HorseArmorMaterial) -> Self {
+        match item {
+            HorseArmorMaterial::Gold => Self::Gold,
+            HorseArmorMaterial::Iron => Self::Iron,
+            HorseArmorMaterial::Diamond => Self::Diamond,
+        }
+    }
+}
+
+impl From<IngotMaterial> for Material {
+    fn from(item: IngotMaterial) -> Self {
+        match item {
+            IngotMaterial::Gold => Self::Gold,
+            IngotMaterial::Iron => Self::Iron,
+            IngotMaterial::Netherite => Self::Netherite,
+        }
+    }
+}
+
+impl From<LeavesMaterial> for Material {
+    fn from(item: LeavesMaterial) -> Self {
+        match item {
+            LeavesMaterial::Acacia => Self::Acacia,
+            LeavesMaterial::Birch => Self::Birch,
+            LeavesMaterial::DarkOak => Self::DarkOak,
+            LeavesMaterial::Jungle => Self::Jungle,
+            LeavesMaterial::Oak => Self::Oak,
+            LeavesMaterial::Spruce => Self::Spruce,
+        }
+    }
+}
+
+impl From<NuggetMaterial> for Material {
+    fn from(item: NuggetMaterial) -> Self {
+        match item {
+            NuggetMaterial::Gold => Self::Gold,
+            NuggetMaterial::Iron => Self::Iron,
+        }
+    }
+}
+
+impl From<PressurePlateMaterial> for Material {
+    fn from(item: PressurePlateMaterial) -> Self {
+        match item {
+            PressurePlateMaterial::Acacia => Self::Acacia,
+            PressurePlateMaterial::Birch => Self::Birch,
+            PressurePlateMaterial::Crimson => Self::Crimson,
+            PressurePlateMaterial::DarkOak => Self::DarkOak,
+            PressurePlateMaterial::Gold => Self::Gold,
+            PressurePlateMaterial::Iron => Self::Iron,
+            PressurePlateMaterial::Jungle => Self::Jungle,
+            PressurePlateMaterial::Oak => Self::Oak,
+            PressurePlateMaterial::PolishedBlackstone => Self::PolishedBlackstone,
+            PressurePlateMaterial::Spruce => Self::Spruce,
+            PressurePlateMaterial::Stone => Self::Stone,
+            PressurePlateMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<SaplingMaterial> for Material {
+    fn from(item: SaplingMaterial) -> Self {
+        match item {
+            SaplingMaterial::Acacia => Self::Acacia,
+            SaplingMaterial::Bamboo => Self::Bamboo,
+            SaplingMaterial::Birch => Self::Birch,
+            SaplingMaterial::DarkOak => Self::DarkOak,
+            SaplingMaterial::Jungle => Self::Jungle,
+            SaplingMaterial::Oak => Self::Oak,
+            SaplingMaterial::Spruce => Self::Spruce,
+        }
+    }
+}
+
+impl From<SeedMaterial> for Material {
+    fn from(item: SeedMaterial) -> Self {
+        match item {
+            SeedMaterial::Beetroot => Self::Beetroot,
+            SeedMaterial::Melon => Self::Melon,
+            SeedMaterial::Pumpkin => Self::Pumpkin,
+            SeedMaterial::Wheat => Self::Wheat,
+        }
+    }
+}
+
+impl From<SlabMaterial> for Material {
+    fn from(item: SlabMaterial) -> Self {
+        match item {
+            SlabMaterial::Acacia => Self::Acacia,
+            SlabMaterial::Andesite => Self::Andesite,
+            SlabMaterial::Birch => Self::Birch,
+            SlabMaterial::Blackstone => Self::Blackstone,
+            SlabMaterial::Brick => Self::Brick,
+            SlabMaterial::Cobblestone => Self::Cobblestone,
+            SlabMaterial::Crimson => Self::Crimson,
+            SlabMaterial::CutRedSandstone => Self::CutRedSandstone,
+            SlabMaterial::CutSandstone => Self::CutSandstone,
+            SlabMaterial::DarkOak => Self::DarkOak,
+            SlabMaterial::DarkPrismarine => Self::DarkPrismarine,
+            SlabMaterial::Diorite => Self::Diorite,
+            SlabMaterial::EndStoneBrick => Self::EndStoneBrick,
+            SlabMaterial::Granite => Self::Granite,
+            SlabMaterial::Jungle => Self::Jungle,
+            SlabMaterial::MossyCobblestone => Self::MossyCobblestone,
+            SlabMaterial::MossyStoneBrick => Self::MossyStoneBrick,
+            SlabMaterial::NetherBrick => Self::NetherBrick,
+            SlabMaterial::Oak => Self::Oak,
+            SlabMaterial::PetrifiedOak => Self::PetrifiedOak,
+            SlabMaterial::PolishedAndesite => Self::PolishedAndesite,
+            SlabMaterial::PolishedBlackstone => Self::PolishedBlackstone,
+            SlabMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            SlabMaterial::PolishedDiorite => Self::PolishedDiorite,
+            SlabMaterial::PolishedGranite => Self::PolishedGranite,
+            SlabMaterial::Prismarine => Self::Prismarine,
+            SlabMaterial::PrismarineBrick => Self::PrismarineBrick,
+            SlabMaterial::Purpur => Self::Purpur,
+            SlabMaterial::Quartz => Self::Quartz,
+            SlabMaterial::RedNetherBrick => Self::RedNetherBrick,
+            SlabMaterial::RedSandstone => Self::RedSandstone,
+            SlabMaterial::Sandstone => Self::Sandstone,
+            SlabMaterial::SmoothQuartz => Self::SmoothQuartz,
+            SlabMaterial::SmoothRedSandstone => Self::SmoothRedSandstone,
+            SlabMaterial::SmoothSandstone => Self::SmoothSandstone,
+            SlabMaterial::SmoothStone => Self::SmoothStone,
+            SlabMaterial::Spruce => Self::Spruce,
+            SlabMaterial::Stone => Self::Stone,
+            SlabMaterial::StoneBrick => Self::StoneBrick,
+            SlabMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<StairMaterial> for Material {
+    fn from(item: StairMaterial) -> Self {
+        match item {
+            StairMaterial::Acacia => Self::Acacia,
+            StairMaterial::Andesite => Self::Andesite,
+            StairMaterial::Birch => Self::Birch,
+            StairMaterial::Blackstone => Self::Blackstone,
+            StairMaterial::Brick => Self::Brick,
+            StairMaterial::Cobblestone => Self::Cobblestone,
+            StairMaterial::Crimson => Self::Crimson,
+            StairMaterial::DarkOak => Self::DarkOak,
+            StairMaterial::DarkPrismarine => Self::DarkPrismarine,
+            StairMaterial::Diorite => Self::Diorite,
+            StairMaterial::EndStoneBrick => Self::EndStoneBrick,
+            StairMaterial::Granite => Self::Granite,
+            StairMaterial::Jungle => Self::Jungle,
+            StairMaterial::MossyCobblestone => Self::MossyCobblestone,
+            StairMaterial::MossyStoneBrick => Self::MossyStoneBrick,
+            StairMaterial::NetherBrick => Self::NetherBrick,
+            StairMaterial::Oak => Self::Oak,
+            StairMaterial::PolishedAndesite => Self::PolishedAndesite,
+            StairMaterial::PolishedBlackstone => Self::PolishedBlackstone,
+            StairMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            StairMaterial::PolishedDiorite => Self::PolishedDiorite,
+            StairMaterial::PolishedGranite => Self::PolishedGranite,
+            StairMaterial::Prismarine => Self::Prismarine,
+            StairMaterial::PrismarineBrick => Self::PrismarineBrick,
+            StairMaterial::Purpur => Self::Purpur,
+            StairMaterial::Quartz => Self::Quartz,
+            StairMaterial::RedNetherBrick => Self::RedNetherBrick,
+            StairMaterial::RedSandstone => Self::RedSandstone,
+            StairMaterial::Sandstone => Self::Sandstone,
+            StairMaterial::SmoothQuartz => Self::SmoothQuartz,
+            StairMaterial::SmoothRedSandstone => Self::SmoothRedSandstone,
+            StairMaterial::SmoothSandstone => Self::SmoothSandstone,
+            StairMaterial::Spruce => Self::Spruce,
+            StairMaterial::Stone => Self::Stone,
+            StairMaterial::StoneBrick => Self::StoneBrick,
+            StairMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+impl From<ToolMaterial> for Material {
+    fn from(item: ToolMaterial) -> Self {
+        match item {
+            ToolMaterial::Diamond => Self::Diamond,
+            ToolMaterial::Gold => Self::Gold,
+            ToolMaterial::Iron => Self::Iron,
+            ToolMaterial::Netherite => Self::Netherite,
+            ToolMaterial::Stone => Self::Stone,
+            ToolMaterial::Wood => Self::Wood,
+        }
+    }
+}
+
+impl From<WallMaterial> for Material {
+    fn from(item: WallMaterial) -> Self {
+        match item {
+            WallMaterial::Andesite => Self::Andesite,
+            WallMaterial::Blackstone => Self::Blackstone,
+            WallMaterial::Brick => Self::Brick,
+            WallMaterial::Cobblestone => Self::Cobblestone,
+            WallMaterial::Diorite => Self::Diorite,
+            WallMaterial::EndStoneBrick => Self::EndStoneBrick,
+            WallMaterial::Granite => Self::Granite,
+            WallMaterial::MossyCobblestone => Self::MossyCobblestone,
+            WallMaterial::MossyStoneBrick => Self::MossyStoneBrick,
+            WallMaterial::NetherBrick => Self::NetherBrick,
+            WallMaterial::PolishedBlackstone => Self::PolishedBlackstone,
+            WallMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            WallMaterial::Prismarine => Self::Prismarine,
+            WallMaterial::RedNetherBrick => Self::RedNetherBrick,
+            WallMaterial::RedSandstone => Self::RedSandstone,
+            WallMaterial::Sandstone => Self::Sandstone,
+            WallMaterial::StoneBrick => Self::StoneBrick,
+        }
+    }
+}
+
+impl From<WoodMaterial> for Material {
+    fn from(item: WoodMaterial) -> Self {
+        match item {
+            WoodMaterial::Acacia => Self::Acacia,
+            WoodMaterial::Birch => Self::Birch,
+            WoodMaterial::Crimson => Self::Crimson,
+            WoodMaterial::DarkOak => Self::DarkOak,
+            WoodMaterial::Jungle => Self::Jungle,
+            WoodMaterial::Oak => Self::Oak,
+            WoodMaterial::Spruce => Self::Spruce,
+            WoodMaterial::Warped => Self::Warped,
+        }
+    }
+}
+
+/// Materials for the "Nugget" family of items.
+///
+/// # Variant availability
+/// ## Introduced in Minecraft Beta
+/// ```
+/// // Since Beta 1.9 Prerelease
+/// mcprogedit::material::NuggetMaterial::Gold;
+/// ```
+/// ## Introduced in Minecraft 1.11.1
+/// ```
+/// // Since 16w50a
+/// mcprogedit::material::NuggetMaterial::Iron;
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub enum NuggetMaterial {
     Gold,
     Iron,
+}
+
+impl TryFrom<Material> for NuggetMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "PressurePlate" family of blocks.
@@ -295,6 +817,28 @@ pub enum PressurePlateMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for PressurePlateMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::PolishedBlackstone => Ok(Self::PolishedBlackstone),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Stone => Ok(Self::Stone),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for Saplings.
 ///
 /// # Variant availability
@@ -329,6 +873,23 @@ pub enum SaplingMaterial {
     Spruce,
 }
 
+impl TryFrom<Material> for SaplingMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Bamboo => Ok(Self::Bamboo),
+            Material::Birch => Ok(Self::Birch),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::Spruce => Ok(Self::Spruce),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for Seeds.
 ///
 /// # Variant availability
@@ -352,6 +913,20 @@ pub enum SeedMaterial {
     Melon,
     Pumpkin,
     Wheat,
+}
+
+impl TryFrom<Material> for SeedMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Beetroot => Ok(Self::Beetroot),
+            Material::Melon => Ok(Self::Melon),
+            Material::Pumpkin => Ok(Self::Pumpkin),
+            Material::Wheat => Ok(Self::Wheat),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "Slab" family of blocks.
@@ -493,6 +1068,56 @@ pub enum SlabMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for SlabMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Andesite => Ok(Self::Andesite),
+            Material::Birch => Ok(Self::Birch),
+            Material::Blackstone => Ok(Self::Blackstone),
+            Material::Brick => Ok(Self::Brick),
+            Material::Cobblestone => Ok(Self::Cobblestone),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::CutRedSandstone => Ok(Self::CutRedSandstone),
+            Material::CutSandstone => Ok(Self::CutSandstone),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::DarkPrismarine => Ok(Self::DarkPrismarine),
+            Material::Diorite => Ok(Self::Diorite),
+            Material::EndStoneBrick => Ok(Self::EndStoneBrick),
+            Material::Granite => Ok(Self::Granite),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::MossyCobblestone => Ok(Self::MossyCobblestone),
+            Material::MossyStoneBrick => Ok(Self::MossyStoneBrick),
+            Material::NetherBrick => Ok(Self::NetherBrick),
+            Material::Oak => Ok(Self::Oak),
+            Material::PetrifiedOak => Ok(Self::PetrifiedOak),
+            Material::PolishedAndesite => Ok(Self::PolishedAndesite),
+            Material::PolishedBlackstone => Ok(Self::PolishedBlackstone),
+            Material::PolishedBlackstoneBrick => Ok(Self::PolishedBlackstoneBrick),
+            Material::PolishedDiorite => Ok(Self::PolishedDiorite),
+            Material::PolishedGranite => Ok(Self::PolishedGranite),
+            Material::Prismarine => Ok(Self::Prismarine),
+            Material::PrismarineBrick => Ok(Self::PrismarineBrick),
+            Material::Purpur => Ok(Self::Purpur),
+            Material::Quartz => Ok(Self::Quartz),
+            Material::RedNetherBrick => Ok(Self::RedNetherBrick),
+            Material::RedSandstone => Ok(Self::RedSandstone),
+            Material::Sandstone => Ok(Self::Sandstone),
+            Material::SmoothQuartz => Ok(Self::SmoothQuartz),
+            Material::SmoothRedSandstone => Ok(Self::SmoothRedSandstone),
+            Material::SmoothSandstone => Ok(Self::SmoothSandstone),
+            Material::SmoothStone => Ok(Self::SmoothStone),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Stone => Ok(Self::Stone),
+            Material::StoneBrick => Ok(Self::StoneBrick),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for the "Stair" family of blocks.
 ///
 /// # Variant availability
@@ -620,6 +1245,52 @@ pub enum StairMaterial {
     Warped,
 }
 
+impl TryFrom<Material> for StairMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Andesite => Ok(Self::Andesite),
+            Material::Birch => Ok(Self::Birch),
+            Material::Blackstone => Ok(Self::Blackstone),
+            Material::Brick => Ok(Self::Brick),
+            Material::Cobblestone => Ok(Self::Cobblestone),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::DarkPrismarine => Ok(Self::DarkPrismarine),
+            Material::Diorite => Ok(Self::Diorite),
+            Material::EndStoneBrick => Ok(Self::EndStoneBrick),
+            Material::Granite => Ok(Self::Granite),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::MossyCobblestone => Ok(Self::MossyCobblestone),
+            Material::MossyStoneBrick => Ok(Self::MossyStoneBrick),
+            Material::NetherBrick => Ok(Self::NetherBrick),
+            Material::Oak => Ok(Self::Oak),
+            Material::PolishedAndesite => Ok(Self::PolishedAndesite),
+            Material::PolishedBlackstone => Ok(Self::PolishedBlackstone),
+            Material::PolishedBlackstoneBrick => Ok(Self::PolishedBlackstoneBrick),
+            Material::PolishedDiorite => Ok(Self::PolishedDiorite),
+            Material::PolishedGranite => Ok(Self::PolishedGranite),
+            Material::Prismarine => Ok(Self::Prismarine),
+            Material::PrismarineBrick => Ok(Self::PrismarineBrick),
+            Material::Purpur => Ok(Self::Purpur),
+            Material::Quartz => Ok(Self::Quartz),
+            Material::RedNetherBrick => Ok(Self::RedNetherBrick),
+            Material::RedSandstone => Ok(Self::RedSandstone),
+            Material::Sandstone => Ok(Self::Sandstone),
+            Material::SmoothQuartz => Ok(Self::SmoothQuartz),
+            Material::SmoothRedSandstone => Ok(Self::SmoothRedSandstone),
+            Material::SmoothSandstone => Ok(Self::SmoothSandstone),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Stone => Ok(Self::Stone),
+            Material::StoneBrick => Ok(Self::StoneBrick),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for tools and swords.
 ///
 /// # Variant availability
@@ -647,6 +1318,22 @@ pub enum ToolMaterial {
     Wood,
 }
 
+impl TryFrom<Material> for ToolMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Diamond => Ok(Self::Diamond),
+            Material::Gold => Ok(Self::Gold),
+            Material::Iron => Ok(Self::Iron),
+            Material::Netherite => Ok(Self::Netherite),
+            Material::Stone => Ok(Self::Stone),
+            Material::Wood => Ok(Self::Wood),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Materials for the "Wall" family of blocks.
 ///
 /// # Variant availability
@@ -662,7 +1349,7 @@ pub enum ToolMaterial {
 /// mcprogedit::material::WallMaterial::Andesite;
 /// mcprogedit::material::WallMaterial::Brick;
 /// mcprogedit::material::WallMaterial::Diorite;
-/// mcprogedit::material::WallMaterial::EndStone;
+/// mcprogedit::material::WallMaterial::EndStoneBrick;
 /// mcprogedit::material::WallMaterial::Granite;
 /// mcprogedit::material::WallMaterial::MossyStoneBrick;
 /// mcprogedit::material::WallMaterial::NetherBrick;
@@ -686,7 +1373,7 @@ pub enum WallMaterial {
     Brick,
     Cobblestone,
     Diorite,
-    EndStone,
+    EndStoneBrick,
     Granite,
     MossyCobblestone,
     MossyStoneBrick,
@@ -698,6 +1385,33 @@ pub enum WallMaterial {
     RedSandstone,
     Sandstone,
     StoneBrick,
+}
+
+impl TryFrom<Material> for WallMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Andesite => Ok(Self::Andesite),
+            Material::Blackstone => Ok(Self::Blackstone),
+            Material::Brick => Ok(Self::Brick),
+            Material::Cobblestone => Ok(Self::Cobblestone),
+            Material::Diorite => Ok(Self::Diorite),
+            Material::EndStoneBrick => Ok(Self::EndStoneBrick),
+            Material::Granite => Ok(Self::Granite),
+            Material::MossyCobblestone => Ok(Self::MossyCobblestone),
+            Material::MossyStoneBrick => Ok(Self::MossyStoneBrick),
+            Material::NetherBrick => Ok(Self::NetherBrick),
+            Material::PolishedBlackstone => Ok(Self::PolishedBlackstone),
+            Material::PolishedBlackstoneBrick => Ok(Self::PolishedBlackstoneBrick),
+            Material::Prismarine => Ok(Self::Prismarine),
+            Material::RedNetherBrick => Ok(Self::RedNetherBrick),
+            Material::RedSandstone => Ok(Self::RedSandstone),
+            Material::Sandstone => Ok(Self::Sandstone),
+            Material::StoneBrick => Ok(Self::StoneBrick),
+            _ => Err(()),
+        }
+    }
 }
 
 /// Materials for the "FenceGate", "Log", "Planks" and "Sign" families of blocks, and Boats.
@@ -768,12 +1482,30 @@ pub enum WallMaterial {
 /// ```
 #[derive(Clone, Debug, PartialEq)]
 pub enum WoodMaterial {
+    Acacia,
+    Birch,
+    Crimson,
+    DarkOak,
+    Jungle,
     Oak,
     Spruce,
-    Birch,
-    Jungle,
-    Acacia,
-    DarkOak,
-    Crimson,
     Warped,
+}
+
+impl TryFrom<Material> for WoodMaterial {
+    type Error = ();
+
+    fn try_from(item: Material) -> Result<Self, Self::Error> {
+        match item {
+            Material::Acacia => Ok(Self::Acacia),
+            Material::Birch => Ok(Self::Birch),
+            Material::Crimson => Ok(Self::Crimson),
+            Material::DarkOak => Ok(Self::DarkOak),
+            Material::Jungle => Ok(Self::Jungle),
+            Material::Oak => Ok(Self::Oak),
+            Material::Spruce => Ok(Self::Spruce),
+            Material::Warped => Ok(Self::Warped),
+            _ => Err(()),
+        }
+    }
 }
