@@ -4,7 +4,6 @@ extern crate bounded_integer;
 extern crate static_assertions;
 
 pub mod arguments;
-pub mod banner;
 pub mod block;
 mod block_cuboid;
 mod block_entity;

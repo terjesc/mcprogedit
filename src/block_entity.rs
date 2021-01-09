@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use crate::banner;
-use crate::block::{Flower, Grass, Hinge, Pitch};
+use crate::block::{BannerPattern, ColouredPattern, Flower, Grass, Hinge, Pitch};
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
@@ -21,7 +20,7 @@ pub enum BlockEntity {
         common: CommonTags,
         colour: Colour,
         custom_name: Option<String>,
-        patterns: Vec<banner::ColouredPattern>,
+        patterns: Vec<ColouredPattern>,
     },
     Barrel {
         tags: ChestTags,
@@ -199,9 +198,9 @@ impl BlockEntity {
 
         if let Some(pattern_entries) = nbt_value_lookup_list(&value, "Patterns") {
             for pattern_entry in pattern_entries {
-                let pattern = banner::ColouredPattern {
+                let pattern = ColouredPattern {
                     colour: Colour::from(nbt_value_lookup_int(&pattern_entry, "Color").unwrap()),
-                    pattern: banner::BannerPattern::from(
+                    pattern: BannerPattern::from(
                         nbt_value_lookup_string(&pattern_entry, "Pattern")
                             .unwrap()
                             .as_str(),

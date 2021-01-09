@@ -1,6 +1,8 @@
 use std::convert::TryFrom;
 
-use crate::banner::*;
+mod banner;
+pub use crate::block::banner::*;
+
 use crate::bounded_ints::*;
 use crate::colour::*;
 use crate::inventory::Inventory;

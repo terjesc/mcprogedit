@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 
-use crate::banner::Banner;
 use crate::block;
 use crate::block::{
-    AnvilDamage, Beacon, BedEnd, Block, BrewingStand, Chest, DirectionFlags6, Dispenser, DoorHalf,
-    Dropper, Flower, Furnace, Grass, Hinge, Hopper, Jukebox, OnOffState, RailShape, RailType,
-    ShulkerBox, Sign, Slab, SlabVariant, Stair, StemState,
+    AnvilDamage, Banner, Beacon, BedEnd, Block, BrewingStand, Chest, DirectionFlags6, Dispenser,
+    DoorHalf, Dropper, Flower, Furnace, Grass, Hinge, Hopper, Jukebox, OnOffState, RailShape,
+    RailType, ShulkerBox, Sign, Slab, SlabVariant, Stair, StemState,
 };
 use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
