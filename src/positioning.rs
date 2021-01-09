@@ -1,5 +1,7 @@
 //! For describing positioning of blocks within their voxel (placement, rotation, etc.)
 
+use std::convert::TryFrom;
+
 // TODO Consider adding door placement data structure to this file...
 // Door (8) - hinged at one of 4 corners, + pointing in one of 2 directions from that corner
 //
@@ -33,6 +35,150 @@ pub enum BellPosition {
     DownNorth,
     DownSouth,
     DownWest,
+}
+
+/// All directions.
+///
+/// Convertible to and from direction, edge and surface data types.
+#[derive(Clone, Debug, PartialEq)]
+pub enum Direction {
+    Down,
+    DownEast,
+    DownNorth,
+    DownSouth,
+    DownWest,
+    East,
+    EastNorthEast,
+    EastSouthEast,
+    North,
+    NorthEast,
+    NorthNorthEast,
+    NorthNorthWest,
+    NorthWest,
+    South,
+    SouthEast,
+    SouthSouthEast,
+    SouthSouthWest,
+    SouthWest,
+    Up,
+    UpEast,
+    UpNorth,
+    UpSouth,
+    UpWest,
+    West,
+    WestNorthWest,
+    WestSouthWest,
+}
+
+impl From<Direction16> for Direction {
+    fn from(item: Direction16) -> Self {
+        match item {
+            Direction16::South => Self::South,
+            Direction16::SouthSouthWest => Self::SouthSouthWest,
+            Direction16::SouthWest => Self::SouthWest,
+            Direction16::WestSouthWest => Self::WestSouthWest,
+            Direction16::West => Self::West,
+            Direction16::WestNorthWest => Self::WestNorthWest,
+            Direction16::NorthWest => Self::NorthWest,
+            Direction16::NorthNorthWest => Self::NorthNorthWest,
+            Direction16::North => Self::North,
+            Direction16::NorthNorthEast => Self::NorthNorthEast,
+            Direction16::NorthEast => Self::NorthEast,
+            Direction16::EastNorthEast => Self::EastNorthEast,
+            Direction16::East => Self::East,
+            Direction16::EastSouthEast => Self::EastSouthEast,
+            Direction16::SouthEast => Self::SouthEast,
+            Direction16::SouthSouthEast => Self::SouthSouthEast,
+        }
+    }
+}
+
+impl From<Edge8> for Direction {
+    fn from(item: Edge8) -> Self {
+        match item {
+            Edge8::DownEast => Self::DownEast,
+            Edge8::DownWest => Self::DownWest,
+            Edge8::DownSouth => Self::DownSouth,
+            Edge8::DownNorth => Self::DownNorth,
+            Edge8::UpEast => Self::UpEast,
+            Edge8::UpWest => Self::UpWest,
+            Edge8::UpSouth => Self::UpSouth,
+            Edge8::UpNorth => Self::UpNorth,
+        }
+    }
+}
+
+impl From<Surface2> for Direction {
+    fn from(item: Surface2) -> Self {
+        match item {
+            Surface2::Down => Self::Down,
+            Surface2::Up => Self::Up,
+        }
+    }
+}
+
+impl From<Surface4> for Direction {
+    fn from(item: Surface4) -> Self {
+        match item {
+            Surface4::East => Self::East,
+            Surface4::North => Self::North,
+            Surface4::South => Self::South,
+            Surface4::West => Self::West,
+        }
+    }
+}
+
+impl From<Surface5> for Direction {
+    fn from(item: Surface5) -> Self {
+        match item {
+            Surface5::Down => Self::Down,
+            Surface5::East => Self::East,
+            Surface5::North => Self::North,
+            Surface5::South => Self::South,
+            Surface5::West => Self::West,
+        }
+    }
+}
+
+impl From<Surface6> for Direction {
+    fn from(item: Surface6) -> Self {
+        match item {
+            Surface6::Down => Self::Down,
+            Surface6::East => Self::East,
+            Surface6::North => Self::North,
+            Surface6::South => Self::South,
+            Surface6::Up => Self::Up,
+            Surface6::West => Self::West,
+        }
+    }
+}
+
+impl From<WallOrRotatedOnFloor> for Direction {
+    fn from(item: WallOrRotatedOnFloor) -> Self {
+        match item {
+            WallOrRotatedOnFloor::Floor(direction) => Self::from(direction),
+            WallOrRotatedOnFloor::Wall(surface) => Self::from(surface),
+        }
+    }
+}
+
+impl From<SurfaceRotation12> for Direction {
+    fn from(item: SurfaceRotation12) -> Self {
+        match item {
+            SurfaceRotation12::DownFacingEast => Self::DownEast,
+            SurfaceRotation12::DownFacingNorth => Self::DownNorth,
+            SurfaceRotation12::DownFacingSouth => Self::DownSouth,
+            SurfaceRotation12::DownFacingWest => Self::DownWest,
+            SurfaceRotation12::East => Self::East,
+            SurfaceRotation12::North => Self::North,
+            SurfaceRotation12::South => Self::South,
+            SurfaceRotation12::West => Self::West,
+            SurfaceRotation12::UpFacingEast => Self::UpEast,
+            SurfaceRotation12::UpFacingNorth => Self::UpNorth,
+            SurfaceRotation12::UpFacingSouth => Self::UpSouth,
+            SurfaceRotation12::UpFacingWest => Self::UpWest,
+        }
+    }
 }
 
 /// Describes the rotation of blocks or entities that can be positioned in
@@ -77,6 +223,32 @@ impl From<i8> for Direction16 {
             14 => Direction16::SouthEast,
             15 => Direction16::SouthSouthEast,
             _ => panic!("Invalid direction number: {}", direction_number),
+        }
+    }
+}
+
+impl TryFrom<Direction> for Direction16 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::South => Ok(Self::South),
+            Direction::SouthSouthWest => Ok(Self::SouthSouthWest),
+            Direction::SouthWest => Ok(Self::SouthWest),
+            Direction::WestSouthWest => Ok(Self::WestSouthWest),
+            Direction::West => Ok(Self::West),
+            Direction::WestNorthWest => Ok(Self::WestNorthWest),
+            Direction::NorthWest => Ok(Self::NorthWest),
+            Direction::NorthNorthWest => Ok(Self::NorthNorthWest),
+            Direction::North => Ok(Self::North),
+            Direction::NorthNorthEast => Ok(Self::NorthNorthEast),
+            Direction::NorthEast => Ok(Self::NorthEast),
+            Direction::EastNorthEast => Ok(Self::EastNorthEast),
+            Direction::East => Ok(Self::East),
+            Direction::EastSouthEast => Ok(Self::EastSouthEast),
+            Direction::SouthEast => Ok(Self::SouthEast),
+            Direction::SouthSouthEast => Ok(Self::SouthSouthEast),
+            _ => Err(()),
         }
     }
 }
@@ -152,6 +324,18 @@ pub enum Surface2 {
     Up,
 }
 
+impl TryFrom<Direction> for Surface2 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::Down => Ok(Self::Down),
+            Direction::Up => Ok(Self::Up),
+            _ => Err(()),
+        }
+    }
+}
+
 /// The four side surfaces of the voxel volume populated by the block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Surface4 {
@@ -159,6 +343,20 @@ pub enum Surface4 {
     North,
     South,
     West,
+}
+
+impl TryFrom<Direction> for Surface4 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::East => Ok(Self::East),
+            Direction::North => Ok(Self::North),
+            Direction::South => Ok(Self::South),
+            Direction::West => Ok(Self::West),
+            _ => Err(()),
+        }
+    }
 }
 
 /// The bottom and four side surfaces of the voxel volume populated by the block..
@@ -171,6 +369,21 @@ pub enum Surface5 {
     West,
 }
 
+impl TryFrom<Direction> for Surface5 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::Down => Ok(Self::Down),
+            Direction::East => Ok(Self::East),
+            Direction::North => Ok(Self::North),
+            Direction::South => Ok(Self::South),
+            Direction::West => Ok(Self::West),
+            _ => Err(()),
+        }
+    }
+}
+
 /// All six surfaces of the voxel volume populated by the block.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Surface6 {
@@ -180,6 +393,22 @@ pub enum Surface6 {
     South,
     Up,
     West,
+}
+
+impl TryFrom<Direction> for Surface6 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::Down => Ok(Self::Down),
+            Direction::East => Ok(Self::East),
+            Direction::North => Ok(Self::North),
+            Direction::South => Ok(Self::South),
+            Direction::Up => Ok(Self::Up),
+            Direction::West => Ok(Self::West),
+            _ => Err(()),
+        }
+    }
 }
 
 /// The four top-most and four bottom-most edges of the voxel volume populated by the block.
@@ -207,6 +436,24 @@ impl From<i8> for Edge8 {
             6 => Edge8::UpSouth,
             7 => Edge8::UpNorth,
             _ => panic!("Invalid edge number: {}", edge_number),
+        }
+    }
+}
+
+impl TryFrom<Direction> for Edge8 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::DownEast => Ok(Self::DownEast),
+            Direction::DownWest => Ok(Self::DownWest),
+            Direction::DownSouth => Ok(Self::DownSouth),
+            Direction::DownNorth => Ok(Self::DownNorth),
+            Direction::UpEast => Ok(Self::UpEast),
+            Direction::UpWest => Ok(Self::UpWest),
+            Direction::UpSouth => Ok(Self::UpSouth),
+            Direction::UpNorth => Ok(Self::UpNorth),
+            _ => Err(()),
         }
     }
 }
