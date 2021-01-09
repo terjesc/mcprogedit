@@ -1,7 +1,26 @@
-use std::convert::TryFrom;
-
 mod banner;
+mod chest;
+mod dispenser;
+mod door;
+mod dropper;
+mod furnace;
+mod hopper;
+mod noteblock;
+mod sign;
+mod shulker_box;
+mod stair;
+
 pub use crate::block::banner::*;
+pub use crate::block::chest::*;
+pub use crate::block::dispenser::*;
+pub use crate::block::door::*;
+pub use crate::block::dropper::*;
+pub use crate::block::furnace::*;
+pub use crate::block::hopper::*;
+pub use crate::block::noteblock::*;
+pub use crate::block::sign::*;
+pub use crate::block::shulker_box::*;
+pub use crate::block::stair::*;
 
 use crate::bounded_ints::*;
 use crate::colour::*;
@@ -11,85 +30,12 @@ use crate::material::*;
 use crate::positioning::*;
 use crate::status_effect::StatusEffect;
 
-/// Doors are two blocks high. Which block is this?
-#[derive(Clone, Debug, PartialEq)]
-pub enum DoorHalf {
-    /// Bottom block of the door
-    Lower,
-    /// Top block of the door.
-    Upper,
-}
-
-/// For doors, what way they are hinged. Left/Right relative to the direction
-/// the door is Facing. (E.g. if Facing North, Left means on the West side,
-/// and Right means on the East side.)
-#[derive(Clone, Debug, PartialEq)]
-pub enum Hinge {
-    Left,
-    Right,
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Beacon {
     pub lock: Option<String>,
     pub levels: i32, // TODO change type to integer with valid range
     pub primary: Option<StatusEffect>,
     pub secondary: Option<StatusEffect>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Hopper {
-    pub facing: Surface5,
-    pub waterlogged: bool,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-}
-
-impl Hopper {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Hopper {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Hopper(hopper) => Ok(*hopper),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Sign {
-    pub material: WoodMaterial,
-    pub placement: WallOrRotatedOnFloor,
-    pub waterlogged: bool,
-    pub colour: Colour,
-    pub text1: String,
-    pub text2: String,
-    pub text3: String,
-    pub text4: String,
-}
-
-impl Sign {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.placement.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Sign {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Sign(sign) => Ok(*sign),
-            _ => Err(()),
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -104,33 +50,6 @@ pub struct Slab {
     pub material: SlabMaterial,
     pub position: SlabVariant,
     pub waterlogged: bool,
-}
-
-/// Stair shape is not configurable, as it depend on neighbouring stairs.
-/// Stair shape is either automatically calculated on save, or the block is
-/// flagged for update so that it will be automatically corrected in-game.
-#[derive(Clone, Debug, PartialEq)]
-pub struct Stair {
-    pub material: StairMaterial,
-    pub position: Edge8,
-    pub waterlogged: bool,
-}
-
-impl Stair {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.position.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Stair {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Stairs(stair) => Ok(stair),
-            _ => Err(()),
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -306,120 +225,6 @@ pub struct CommandBlock {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum ChestVariant {
-    Left,
-    Right,
-    Single,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Chest {
-    pub facing: Surface4,
-    pub variant: Option<ChestVariant>,
-    pub waterlogged: bool,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-}
-
-impl Chest {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Chest {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Chest(chest) => Ok(*chest),
-            Block::TrappedChest(chest) => Ok(*chest),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Dispenser {
-    pub facing: Surface6,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-}
-
-impl Dispenser {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Dispenser {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Dispenser(dispenser) => Ok(*dispenser),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Dropper {
-    pub facing: Surface6,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-}
-
-impl Dropper {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Dropper {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Dropper(dropper) => Ok(*dropper),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Furnace {
-    pub facing: Surface4,
-    pub lit: bool,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-    pub burn_time: i16,
-    pub cook_time: i16,
-    pub cook_time_total: i16,
-}
-
-impl Furnace {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for Furnace {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::Furnace(furnace) => Ok(*furnace),
-            _ => Err(()),
-        }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub enum HeadVariant {
     CreeperHead,
     DragonHead,
@@ -478,116 +283,6 @@ pub enum PottedPlant {
 pub enum OnOffState {
     On,
     Off,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Pitch {
-    Fs0 = 0,
-    G0,
-    Gs0,
-    A0,
-    As0,
-    B0,
-    C1,
-    Cs1,
-    D1,
-    Ds1,
-    E1,
-    F1,
-    Fs1,
-    G1,
-    Gs1,
-    A1,
-    As1,
-    B1,
-    C2,
-    Cs2,
-    D2,
-    Ds2,
-    E2,
-    F2,
-    Fs2,
-}
-
-impl Pitch {
-    pub fn from_value(value: u8) -> Self {
-        match value {
-            0 => Pitch::Fs0,
-            1 => Pitch::G0,
-            2 => Pitch::Gs0,
-            3 => Pitch::A0,
-            4 => Pitch::As0,
-            5 => Pitch::B0,
-            6 => Pitch::C1,
-            7 => Pitch::Cs1,
-            8 => Pitch::D1,
-            9 => Pitch::Ds1,
-            10 => Pitch::E1,
-            11 => Pitch::F1,
-            12 => Pitch::Fs1,
-            13 => Pitch::G1,
-            14 => Pitch::Gs1,
-            15 => Pitch::A1,
-            16 => Pitch::As1,
-            17 => Pitch::B1,
-            18 => Pitch::C2,
-            19 => Pitch::Cs2,
-            20 => Pitch::D2,
-            21 => Pitch::Ds2,
-            22 => Pitch::E2,
-            23 => Pitch::F2,
-            24 => Pitch::Fs2,
-            n => panic!("Pitch value {} is out of range!", n),
-        }
-    }
-}
-
-// TODO put somewhere suitable
-// TODO utility functions
-#[derive(Clone, Debug, PartialEq)]
-pub enum Instrument {
-    Banjo,
-    Basedrum,
-    Bass,
-    Bell,
-    Bit,
-    Chime,
-    CowBell,
-    Didgeridoo,
-    Flute,
-    Guitar,
-    Harp,
-    Hat,
-    IronXylophone,
-    Pling,
-    Snare,
-    Xylophone,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct ShulkerBox {
-    pub colour: Option<Colour>,
-    pub facing: Surface6,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-}
-
-impl ShulkerBox {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
-    }
-}
-
-impl TryFrom<Block> for ShulkerBox {
-    type Error = ();
-
-    fn try_from(block: Block) -> Result<Self, Self::Error> {
-        match block {
-            Block::ShulkerBox(shulker_box) => Ok(*shulker_box),
-            _ => Err(()),
-        }
-    }
 }
 
 /// Blocks, with the attributes required for full representation in the world.
@@ -758,13 +453,7 @@ pub enum Block {
     Diorite,
     Dirt,
     Dispenser(Box<Dispenser>),
-    Door {
-        material: DoorMaterial,
-        facing: Surface4,
-        half: DoorHalf,
-        hinge: Hinge,
-        open: bool,
-    },
+    Door(Door),
     DragonEgg,
     DriedKelpBlock,
     Dropper(Box<Dropper>),
@@ -913,9 +602,7 @@ pub enum Block {
     },
     NetherWartBlock,
     Netherrack,
-    Noteblock {
-        pitch: Pitch,
-    },
+    Noteblock(Noteblock),
     Observer {
         facing: Surface6,
     },
@@ -1260,7 +947,7 @@ impl Block {
             Self::CocoaBeans { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::CoralFan { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
-            Self::Door { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Door(door) => door.has_facing_of(direction),
             Self::Dropper(dropper) => dropper.has_facing_of(direction),
             Self::EndPortalFrame { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::EndRod { facing, .. } => Direction::from(facing.clone()) == direction,

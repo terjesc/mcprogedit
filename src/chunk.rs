@@ -1,11 +1,6 @@
 use std::collections::HashMap;
 
-use crate::block;
-use crate::block::{
-    AnvilDamage, Banner, Beacon, BedEnd, Block, BrewingStand, Chest, DirectionFlags6, Dispenser,
-    DoorHalf, Dropper, Flower, Furnace, Grass, Hinge, Hopper, Jukebox, OnOffState, RailShape,
-    RailType, ShulkerBox, Sign, Slab, SlabVariant, Stair, StemState,
-};
+use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
 use crate::bounded_ints::*;
@@ -325,7 +320,7 @@ impl Chunk {
                         14 => Block::GoldOre,
                         15 => Block::IronOre,
                         16 => Block::CoalOre,
-                        17 => Block::Log(block::Log {
+                        17 => Block::Log(Log {
                             material: match data[index] & 0x3 {
                                 0 => WoodMaterial::Oak,
                                 1 => WoodMaterial::Spruce,
@@ -382,9 +377,9 @@ impl Chunk {
                             let block_entity = block_entities.get(&coordinates).unwrap();
 
                             if let BlockEntity::Noteblock { note, .. } = block_entity {
-                                Block::Noteblock {
+                                Block::Noteblock(Noteblock {
                                     pitch: note.clone(),
-                                }
+                                })
                             } else {
                                 panic!("Wrong block entity variant for note block")
                             }
@@ -601,7 +596,7 @@ impl Chunk {
                                 (
                                     BlockEntity::PseudoDoorTop { hinge, .. },
                                     BlockEntity::PseudoDoorBottom { open, facing, .. },
-                                ) => Block::Door {
+                                ) => Block::Door(Door {
                                     facing: facing.clone(),
                                     half,
                                     hinge: hinge.clone(),
@@ -616,7 +611,7 @@ impl Chunk {
                                         197 => DoorMaterial::DarkOak,
                                         _ => unreachable!(),
                                     },
-                                },
+                                }),
                                 _ => panic!("Wrong block entity variant(s) for door"),
                             }
                         }
@@ -1076,7 +1071,7 @@ impl Chunk {
                             distance_to_trunk: None,
                             persistent: (data[index] & 0x4) == 0x4,
                         },
-                        162 => Block::Log(block::Log {
+                        162 => Block::Log(Log {
                             material: match data[index] & 0x1 {
                                 0 => WoodMaterial::Acacia,
                                 1 => WoodMaterial::DarkOak,
