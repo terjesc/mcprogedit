@@ -249,1050 +249,1072 @@ impl Chunk {
             .enumerate()
             .map(|(index, block)| (index, ((add[index] as u16) << 8) + ((*block as u16) & 0xFF)))
             .map(|(index, block)| {
-                (index, 
-                match block {
-                    0 => Block::Air,
-                    1 => match data[index] {
-                        0 => Block::Stone,
-                        1 => Block::Granite,
-                        2 => Block::PolishedGranite,
-                        3 => Block::Diorite,
-                        4 => Block::PolishedDiorite,
-                        5 => Block::Andesite,
-                        6 => Block::PolishedAndesite,
-                        n => panic!("Unknown stone data variant: {}", n),
-                    },
-                    2 => Block::GrassBlock,
-                    3 => match data[index] {
-                        0 => Block::Dirt,
-                        1 => Block::CoarseDirt,
-                        2 => Block::Podzol,
-                        n => panic!("Unknown dirt data variant: {}", n),
-                    },
-                    4 => Block::Cobblestone,
-                    5 => Block::Planks {
-                        material: match data[index] {
-                            0 => WoodMaterial::Oak,
-                            1 => WoodMaterial::Spruce,
-                            2 => WoodMaterial::Birch,
-                            3 => WoodMaterial::Jungle,
-                            4 => WoodMaterial::Acacia,
-                            5 => WoodMaterial::DarkOak,
-                            n => panic!("Unknown plank data variant: {}", n),
+                (
+                    index,
+                    match block {
+                        0 => Block::Air,
+                        1 => match data[index] {
+                            0 => Block::Stone,
+                            1 => Block::Granite,
+                            2 => Block::PolishedGranite,
+                            3 => Block::Diorite,
+                            4 => Block::PolishedDiorite,
+                            5 => Block::Andesite,
+                            6 => Block::PolishedAndesite,
+                            n => panic!("Unknown stone data variant: {}", n),
                         },
-                    },
-                    6 => Block::Sapling {
-                        growth_stage: Int0Through1::new((data[index] & 0x8) >> 3).unwrap(),
-                        material: match data[index] & 0x7 {
-                            0 => SaplingMaterial::Oak,
-                            1 => SaplingMaterial::Spruce,
-                            2 => SaplingMaterial::Birch,
-                            3 => SaplingMaterial::Jungle,
-                            4 => SaplingMaterial::Acacia,
-                            5 => SaplingMaterial::DarkOak,
-                            n => panic!("Unknown sapling data variant: {}", n),
+                        2 => Block::GrassBlock,
+                        3 => match data[index] {
+                            0 => Block::Dirt,
+                            1 => Block::CoarseDirt,
+                            2 => Block::Podzol,
+                            n => panic!("Unknown dirt data variant: {}", n),
                         },
-                    },
-                    7 => Block::Bedrock,
-                    #[allow(clippy::verbose_bit_mask)]
-                    8 | 9 => if (data[index] & 0x7) == 0x0 {
-                        Block::WaterSource
-                    } else {
-                        Block::Water {
-                            falling: (data[index] & 0x8) == 0x8,
-                            level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
-                        }
-                    },
-                    #[allow(clippy::verbose_bit_mask)]
-                    10 | 11 => if (data[index] & 0x7) == 0x0 {
-                        Block::LavaSource
-                    } else {
-                        Block::Lava {
-                            falling: (data[index] & 0x8) == 0x8,
-                            level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
-                        }
-                    },
-                    12 => match data[index] {
-                        0 => Block::Sand,
-                        1 => Block::RedSand,
-                        n => panic!("Unknown sand data variant: {}", n),
-                    },
-                    13 => Block::Gravel,
-                    14 => Block::GoldOre,
-                    15 => Block::IronOre,
-                    16 => Block::CoalOre,
-                    17 => Block::Log(block::Log {
-                        material: match data[index] & 0x3 {
-                            0 => WoodMaterial::Oak,
-                            1 => WoodMaterial::Spruce,
-                            2 => WoodMaterial::Birch,
-                            3 => WoodMaterial::Jungle,
-                            _ => unreachable!(),
-                        },
-                        alignment: wood_alignment(data[index]),
-                        stripped: false,
-                    }),
-                    18 => Block::Leaves {
-                        material: match data[index] & 0x3 {
-                            0 => LeavesMaterial::Oak,
-                            1 => LeavesMaterial::Spruce,
-                            2 => LeavesMaterial::Birch,
-                            3 => LeavesMaterial::Jungle,
-                            _ => unreachable!(),
-                        },
-                        distance_to_trunk: None,
-                        persistent: (data[index] & 0x4) == 0x4,
-                    },
-                    19 => match data[index] {
-                        0 => Block::Sponge,
-                        1 => Block::WetSponge,
-                        n => panic!("Unknown sponge data variant: {}", n),
-                    },
-                    20 => Block::Glass { colour: None },
-                    21 => Block::LapisLazuliOre,
-                    22 => Block::LapisLazuliBlock,
-                    23 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Dispenser { tags } => {
-                                Block::Dispenser(Box::new(Dispenser {
-                                    facing: facing6_dunswe(data[index]),
-                                    custom_name: tags.custom_name.clone(),
-                                    lock: tags.lock.clone(),
-                                    items: tags.items.clone(),
-                                }))
-                            }
-                            _ => panic!("Wrong block entity variant for dispenser"),
-                        }
-                    }
-                    24 => match data[index] {
-                        0 => Block::Sandstone,
-                        1 => Block::ChiseledSandstone,
-                        2 => Block::SmoothSandstone,
-                        n => panic!("Unknown sandstone data variant: {}", n),
-                    },
-                    25 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        if let BlockEntity::Noteblock { note, .. } = block_entity {
-                            Block::Noteblock {
-                                pitch: note.clone(),
-                            }
-                        } else {
-                            panic!("Wrong block entity variant for note block")
-                        }
-                    }
-                    26 => Block::Bed {
-                        colour: Colour::Red,
-                        facing: facing4_swne(data[index]),
-                        end: if (data[index] & 0x8) == 0x8 {
-                            BedEnd::Head
-                        } else {
-                            BedEnd::Foot
-                        },
-                    },
-                    27 => Block::Rail {
-                        variant: RailType::Powered,
-                        shape: RailShape::from_value(data[index] & 0x7),
-                    },
-                    28 => Block::Rail {
-                        variant: RailType::Detector,
-                        shape: RailShape::from_value(data[index] & 0x7),
-                    },
-                    29 => Block::StickyPiston {
-                        facing: facing6_dunswe(data[index]),
-                        extended: data[index] & 0x8 == 0x8,
-                    },
-                    30 => Block::Cobweb,
-                    31 => Block::Grass(match data[index] & 0x1 {
-                        0 => Grass::Grass,
-                        1 => Grass::Fern,
-                        _ => unreachable!(),
-                    }),
-                    32 => Block::DeadBush,
-                    33 => Block::Piston {
-                        facing: facing6_dunswe(data[index]),
-                        extended: data[index] & 0x8 == 0x8,
-                    },
-                    34 => {
-                        let facing = facing6_dunswe(data[index]);
-                        if data[index] & 0x8 == 0x8 {
-                            Block::StickyPistonHead { facing }
-                        } else {
-                            Block::PistonHead { facing }
-                        }
-                    }
-                    35 => Block::Wool {
-                        colour: Some(((data[index] & 0xF) as i32).into()),
-                    },
-                    // TODO block 36 piston_extension ("Block moved by Piston")
-                    37 => Block::Flower(Flower::Dandelion),
-                    38 => Block::Flower(match data[index] {
-                        0 => Flower::Poppy,
-                        1 => Flower::BlueOrchid,
-                        2 => Flower::Allium,
-                        3 => Flower::AzureBluet,
-                        4 => Flower::TulipRed,
-                        5 => Flower::TulipOrange,
-                        6 => Flower::TulipLightGray,
-                        7 => Flower::TulipPink,
-                        8 => Flower::OxeyeDaisy,
-                        n => panic!("Unkown red flower data variant: {}", n),
-                    }),
-                    39 => Block::BrownMushroom,
-                    40 => Block::RedMushroom,
-                    41 => Block::BlockOfGold,
-                    42 => Block::BlockOfIron,
-                    43 => Block::Slab(Slab {
-                        material: match data[index] & 0x7 {
-                            0 => SlabMaterial::SmoothStone,
-                            1 => SlabMaterial::Sandstone,
-                            2 => SlabMaterial::PetrifiedOak, // legacy
-                            3 => SlabMaterial::Cobblestone,
-                            4 => SlabMaterial::Brick,
-                            5 => SlabMaterial::StoneBrick,
-                            6 => SlabMaterial::NetherBrick,
-                            7 => SlabMaterial::Quartz,
-                            _ => unreachable!(),
-                        },
-                        position: SlabVariant::Double,
-                        waterlogged: false,
-                    }),
-                    44 => Block::Slab(Slab {
-                        material: match data[index] & 0x7 {
-                            0 => SlabMaterial::SmoothStone,
-                            1 => SlabMaterial::Sandstone,
-                            2 => SlabMaterial::PetrifiedOak, // legacy
-                            3 => SlabMaterial::Cobblestone,
-                            4 => SlabMaterial::Brick,
-                            5 => SlabMaterial::StoneBrick,
-                            6 => SlabMaterial::NetherBrick,
-                            7 => SlabMaterial::Quartz,
-                            _ => unreachable!(),
-                        },
-                        position: if (data[index] & 0x8) == 0x8 {
-                            SlabVariant::Top
-                        } else {
-                            SlabVariant::Bottom
-                        },
-                        waterlogged: false,
-                    }),
-                    45 => Block::BrickBlock,
-                    46 => Block::TNT,
-                    47 => Block::Bookshelf,
-                    48 => Block::MossyCobblestone,
-                    49 => Block::Obsidian,
-                    50 => Block::Torch {
-                        attached: facing5_xwensd(data[index]),
-                    },
-                    51 => Block::Fire {
-                        age: Int0Through15::new(data[index] & 0xF).unwrap(),
-                    },
-                    // TODO block 52 mob spawner
-                    53 => Block::Stairs(Stair {
-                        material: StairMaterial::Oak,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    54 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Chest { tags } => Block::Chest(Box::new(Chest {
-                                facing: facing4_xxnswe(data[index]),
-                                variant: None,
-                                waterlogged: false,
-                                custom_name: tags.custom_name.clone(),
-                                lock: tags.lock.clone(),
-                                items: tags.items.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for chest"),
-                        }
-                    }
-                    55 => Block::RedstoneWire,
-                    56 => Block::DiamondOre,
-                    57 => Block::BlockOfDiamond,
-                    58 => Block::CraftingTable,
-                    59 => Block::Wheat {
-                        growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
-                    },
-                    60 => Block::Farmland {
-                        wetness: Int0Through7::new(data[index] & 0x7).unwrap(),
-                    },
-                    61 | 62 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Furnace { tags } => Block::Furnace(Box::new(Furnace {
-                                facing: facing4_xxnswe(data[index]),
-                                lit: block == 62,
-                                custom_name: tags.custom_name.clone(),
-                                lock: tags.lock.clone(),
-                                items: tags.items.clone(),
-                                burn_time: tags.burn_time,
-                                cook_time: tags.cook_time,
-                                cook_time_total: tags.cook_time_total,
-                            })),
-                            _ => panic!("Wrong block entity variant for chest"),
-                        }
-                    }
-                    // Both block variants of signs
-                    63 | 68 => {
-                        let placement = match block {
-                            63 => WallOrRotatedOnFloor::Floor((data[index] & 0xF).into()),
-                            68 => WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index])),
-                            _ => unreachable!(),
-                        };
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Sign { colour, text, .. } => {
-                                Block::Sign(Box::new(Sign {
-                                    material: WoodMaterial::Oak,
-                                    placement,
-                                    waterlogged: false,
-                                    colour: colour.clone(),
-                                    // TODO something reasonable instead of JSON text
-                                    text1: text.get(0).unwrap_or(&String::new()).to_string(),
-                                    text2: text.get(1).unwrap_or(&String::new()).to_string(),
-                                    text3: text.get(2).unwrap_or(&String::new()).to_string(),
-                                    text4: text.get(3).unwrap_or(&String::new()).to_string(),
-                                }))
-                            }
-                            _ => panic!("Wrong block entity variant for sign"),
-                        }
-                    }
-                    // All doors
-                    64 | 71 | 193..=197 => {
-                        let half = if (data[index] & 0x8) == 0x8 {
-                            DoorHalf::Upper
-                        } else {
-                            DoorHalf::Lower
-                        };
-
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-
-                        let top_coordinates = match half {
-                            DoorHalf::Upper => coordinates,
-                            DoorHalf::Lower => coordinates + (0, 1, 0).into(),
-                        };
-
-                        let bottom_coordinates = match half {
-                            DoorHalf::Upper => coordinates - (0, 1, 0).into(),
-                            DoorHalf::Lower => coordinates,
-                        };
-
-                        let top_entity = block_entities.get(&top_coordinates).unwrap();
-                        let bottom_entity = block_entities.get(&bottom_coordinates).unwrap();
-
-                        match (top_entity, bottom_entity) {
-                            (
-                                BlockEntity::PseudoDoorTop { hinge, .. },
-                                BlockEntity::PseudoDoorBottom { open, facing, .. },
-                            ) => Block::Door {
-                                facing: facing.clone(),
-                                half,
-                                hinge: hinge.clone(),
-                                open: *open,
-                                material: match block {
-                                    64 => DoorMaterial::Oak,
-                                    71 => DoorMaterial::Iron,
-                                    193 => DoorMaterial::Spruce,
-                                    194 => DoorMaterial::Birch,
-                                    195 => DoorMaterial::Jungle,
-                                    196 => DoorMaterial::Acacia,
-                                    197 => DoorMaterial::DarkOak,
-                                    _ => unreachable!(),
-                                },
+                        4 => Block::Cobblestone,
+                        5 => Block::Planks {
+                            material: match data[index] {
+                                0 => WoodMaterial::Oak,
+                                1 => WoodMaterial::Spruce,
+                                2 => WoodMaterial::Birch,
+                                3 => WoodMaterial::Jungle,
+                                4 => WoodMaterial::Acacia,
+                                5 => WoodMaterial::DarkOak,
+                                n => panic!("Unknown plank data variant: {}", n),
                             },
-                            _ => panic!("Wrong block entity variant(s) for door"),
-                        }
-                    }
-                    65 => Block::Ladder {
-                        facing: facing4_xxnswe(data[index]),
-                        waterlogged: false,
-                    },
-                    66 => Block::Rail {
-                        variant: RailType::Normal,
-                        shape: RailShape::from_value(data[index]),
-                    },
-                    67 => Block::Stairs(Stair {
-                        material: StairMaterial::Cobblestone,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    // 68 wall sign - already handled
-                    69 => Block::Lever(
-                        button_lever_facing(data[index]),
-                        if data[index] & 0x8 == 0x8 {
-                            OnOffState::On
-                        } else {
-                            OnOffState::Off
                         },
-                    ),
-                    70 => Block::PressurePlate {
-                        material: PressurePlateMaterial::Stone,
-                    },
-                    // 71 Iron door - already handled
-                    72 => Block::PressurePlate {
-                        material: PressurePlateMaterial::Oak,
-                    },
-                    73 | 74 => Block::RedstoneOre,
-                    75 | 76 => Block::RedstoneTorch {
-                        attached: facing5_xwensd(data[index]),
-                    },
-                    77 => Block::Button(ButtonMaterial::Stone, button_lever_facing(data[index])),
-                    78 => Block::Snow {
-                        thickness: Int1Through8::new((data[index] & 0x7) + 1).unwrap(),
-                    },
-                    79 => Block::Ice,
-                    80 => Block::SnowBlock,
-                    81 => Block::Cactus {
-                        growth_stage: Int0Through15::new(data[index] & 0xF).unwrap(),
-                    },
-                    82 => Block::Clay,
-                    83 => Block::SugarCane {
-                        growth_stage: Int0Through15::new(data[index] & 0xF).unwrap(),
-                    },
-                    84 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Jukebox { record, .. } => {
-                                Block::Jukebox(Box::new(Jukebox {
-                                    record: record.clone(),
-                                }))
-                            }
-                            _ => panic!("Wrong block entity variant for jukebox"),
-                        }
-                    }
-                    // All fences
-                    85 | 113 | 188..=192 => Block::Fence {
-                        waterlogged: false,
-                        material: match block {
-                            85 => FenceMaterial::Oak,
-                            113 => FenceMaterial::NetherBrick,
-                            188 => FenceMaterial::Spruce,
-                            189 => FenceMaterial::Birch,
-                            190 => FenceMaterial::Jungle,
-                            191 => FenceMaterial::DarkOak,
-                            192 => FenceMaterial::Acacia,
-                            _ => unreachable!(),
+                        6 => Block::Sapling {
+                            growth_stage: Int0Through1::new((data[index] & 0x8) >> 3).unwrap(),
+                            material: match data[index] & 0x7 {
+                                0 => SaplingMaterial::Oak,
+                                1 => SaplingMaterial::Spruce,
+                                2 => SaplingMaterial::Birch,
+                                3 => SaplingMaterial::Jungle,
+                                4 => SaplingMaterial::Acacia,
+                                5 => SaplingMaterial::DarkOak,
+                                n => panic!("Unknown sapling data variant: {}", n),
+                            },
                         },
-                    },
-                    86 => Block::Pumpkin {
-                        facing: facing4_swne(data[index]),
-                    },
-                    87 => Block::Netherrack,
-                    88 => Block::SoulSand,
-                    89 => Block::Glowstone,
-                    90 => Block::NetherPortal { alignment: None },
-                    91 => Block::JackOLantern {
-                        facing: facing4_swne(data[index]),
-                    },
-                    92 => Block::Cake {
-                        bites: Int0Through6::new(data[index] & 0x7).unwrap(),
-                    },
-                    93 | 94 => Block::RedstoneRepeater {
-                        facing: facing4_swne(data[index]),
-                        delay: Int1Through4::new(((data[index] >> 2) & 0x3) + 1).unwrap(),
-                    },
-                    95 => Block::Glass {
-                        colour: Some(((data[index] & 0xF) as i32).into()),
-                    },
-                    // All trapdoors
-                    96 | 167 => Block::Trapdoor {
-                        hinge_at: trapdoor_hinge_at(data[index]),
-                        open: data[index] & 0x4 == 0x4,
-                        waterlogged: false,
-                        material: match block {
-                            96 => DoorMaterial::Oak,
-                            167 => DoorMaterial::Iron,
-                            _ => unreachable!(),
-                        },
-                    },
-                    97 => match data[index] {
-                        0 => Block::InfestedStone,
-                        1 => Block::InfestedCobblestone,
-                        2 => Block::InfestedStoneBricks,
-                        3 => Block::InfestedMossyStoneBricks,
-                        4 => Block::InfestedCrackedStoneBricks,
-                        5 => Block::InfestedChiseledStoneBricks,
-                        n => panic!("Unknown infested block data variant: {}", n),
-                    },
-                    98 => match data[index] {
-                        0 => Block::StoneBricks,
-                        1 => Block::MossyStoneBricks,
-                        2 => Block::CrackedStoneBricks,
-                        3 => Block::ChiseledStoneBricks,
-                        n => panic!("Unknown stone brick data variant: {}", n),
-                    },
-                    99 | 100 => match data[index] {
-                        stem @ 10 | stem @ 15 => Block::MushroomStem {
-                            stem_directions: mushroom_caps(stem),
-                        },
-                        cap => {
-                            let cap_directions = mushroom_caps(cap);
-                            if block == 99 {
-                                Block::BrownMushroomBlock { cap_directions }
-                            } else if block == 100 {
-                                Block::RedMushroomBlock { cap_directions }
+                        7 => Block::Bedrock,
+                        #[allow(clippy::verbose_bit_mask)]
+                        8 | 9 => {
+                            if (data[index] & 0x7) == 0x0 {
+                                Block::WaterSource
                             } else {
-                                unreachable!();
-                            }
-                        }
-                    },
-                    101 => Block::IronBars { waterlogged: false },
-                    102 => Block::GlassPane {
-                        colour: None,
-                        waterlogged: false,
-                    },
-                    103 => Block::Melon,
-                    104 => Block::PumpkinStem {
-                        state: StemState::Growing(Int0Through7::new(data[index] & 0x7).unwrap()),
-                    },
-                    105 => Block::MelonStem {
-                        state: StemState::Growing(Int0Through7::new(data[index] & 0x7).unwrap()),
-                    },
-                    106 => Block::Vines {
-                        anchored_at: DirectionFlags6 {
-                            east: data[index] & 0x8 == 0x8,
-                            down: false,
-                            north: data[index] & 0x4 == 0x4,
-                            south: data[index] & 0x1 == 0x1,
-                            up: false,
-                            west: data[index] & 0x2 == 0x2,
-                        },
-                    },
-                    // All fence gates
-                    107 | 183..=187 => Block::FenceGate {
-                        facing: facing4_swne(data[index]),
-                        open: data[index] & 0x4 == 0x4,
-                        material: match block {
-                            107 => WoodMaterial::Oak,
-                            183 => WoodMaterial::Spruce,
-                            184 => WoodMaterial::Birch,
-                            185 => WoodMaterial::Jungle,
-                            186 => WoodMaterial::DarkOak,
-                            187 => WoodMaterial::Acacia,
-                            _ => unreachable!(),
-                        },
-                    },
-                    108 => Block::Stairs(Stair {
-                        material: StairMaterial::Brick,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    109 => Block::Stairs(Stair {
-                        material: StairMaterial::StoneBrick,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    110 => Block::Mycelium,
-                    111 => Block::LilyPad,
-                    112 => Block::NetherBricks,
-                    // 113 nether brick fence - already handled
-                    114 => Block::Stairs(Stair {
-                        material: StairMaterial::NetherBrick,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    115 => Block::NetherWart {
-                        growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
-                    },
-                    116 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::EnchantingTable { custom_name, .. } => {
-                                Block::EnchantingTable {
-                                    custom_name: Box::new(custom_name.clone()),
+                                Block::Water {
+                                    falling: (data[index] & 0x8) == 0x8,
+                                    level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
                                 }
                             }
-                            _ => panic!("Wrong block entity variant for enchanting table"),
                         }
-                    }
-                    117 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::BrewingStand {
-                                custom_name,
-                                lock,
-                                items,
-                                brew_time,
-                                fuel,
-                                ..
-                            } => Block::BrewingStand(Box::new(BrewingStand {
-                                custom_name: custom_name.clone(),
-                                lock: lock.clone(),
-                                items: items.clone(),
-                                brew_time: *brew_time,
-                                fuel: *fuel,
-                            })),
-                            _ => panic!("Wrong block entity variant for brewing stand"),
-                        }
-                    }
-                    118 => Block::Cauldron {
-                        water_level: Int0Through3::new(data[index] & 0x3).unwrap(),
-                    },
-                    119 => Block::EndPortal, // TODO check if block entity data is needed
-                    120 => Block::EndPortalFrame {
-                        facing: facing4_swne(data[index]),
-                        has_eye: data[index] & 0x4 == 0x4,
-                    },
-                    121 => Block::EndStone,
-                    122 => Block::DragonEgg,
-                    123 | 124 => Block::RedstoneLamp,
-                    125 => Block::Slab(Slab {
-                        material: match data[index] & 0x7 {
-                            0 => SlabMaterial::Oak,
-                            1 => SlabMaterial::Spruce,
-                            2 => SlabMaterial::Birch,
-                            3 => SlabMaterial::Jungle,
-                            4 => SlabMaterial::Acacia,
-                            5 => SlabMaterial::DarkOak,
-                            n @ 6..=7 => panic!("Unknown double wooden slab data value: {}", n),
-                            _ => unreachable!(),
-                        },
-                        position: SlabVariant::Double,
-                        waterlogged: false,
-                    }),
-                    126 => Block::Slab(Slab {
-                        material: match data[index] & 0x7 {
-                            0 => SlabMaterial::Oak,
-                            1 => SlabMaterial::Spruce,
-                            2 => SlabMaterial::Birch,
-                            3 => SlabMaterial::Jungle,
-                            4 => SlabMaterial::Acacia,
-                            5 => SlabMaterial::DarkOak,
-                            n @ 6..=7 => panic!("Unknown double wooden slab data value: {}", n),
-                            _ => unreachable!(),
-                        },
-                        position: if (data[index] & 0x8) == 0x8 {
-                            SlabVariant::Top
-                        } else {
-                            SlabVariant::Bottom
-                        },
-                        waterlogged: false,
-                    }),
-                    127 => Block::CocoaBeans {
-                        growth_stage: Int0Through2::new((data[index] & 0xC) >> 2).unwrap(),
-                        facing: facing4_swne(data[index]),
-                    },
-                    128 => Block::Stairs(Stair {
-                        material: StairMaterial::Sandstone,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    129 => Block::EmeraldOre,
-                    130 => Block::EnderChest {
-                        facing: facing4_xxnswe(data[index]),
-                        waterlogged: false,
-                        // TODO check if block entity data is needed
-                    },
-                    131 => Block::TripwireHook {
-                        facing: facing4_swne(data[index]),
-                    },
-                    132 => Block::Tripwire,
-                    133 => Block::BlockOfEmerald,
-                    134 => Block::Stairs(Stair {
-                        material: StairMaterial::Spruce,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    135 => Block::Stairs(Stair {
-                        material: StairMaterial::Birch,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    136 => Block::Stairs(Stair {
-                        material: StairMaterial::Jungle,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    // TODO 137 command block // Deferred for now, too complicated
-                    138 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Beacon {
-                                lock,
-                                levels,
-                                primary,
-                                secondary,
-                                ..
-                            } => Block::Beacon(Box::new(Beacon {
-                                lock: lock.clone(),
-                                levels: *levels,
-                                primary: primary.clone(),
-                                secondary: secondary.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for beacon"),
-                        }
-                    }
-                    139 => Block::Wall {
-                        material: match data[index] {
-                            0 => WallMaterial::Cobblestone,
-                            1 => WallMaterial::MossyCobblestone,
-                            n => panic!("Unknown material data value for cobblestone wall: {}", n,),
-                        },
-                        waterlogged: false,
-                    },
-                    // TODO 140 flower pot
-                    // - Needs block entity (tile entity)
-                    // - Pots placed prior to 1.7 have contents in data value
-                    141 => Block::Carrots {
-                        growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
-                    },
-                    142 => Block::Potatoes {
-                        growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
-                    },
-                    143 => Block::Button(ButtonMaterial::Oak, button_lever_facing(data[index])),
-                    // TODO 144 skull // Deferred for now, too complicated
-                    145 => Block::Anvil {
-                        facing: facing4_swne(data[index]),
-                        damage: match data[index] & 0b1100 {
-                            0b0000 => AnvilDamage::Intact,
-                            0b0100 => AnvilDamage::SlightlyDamaged,
-                            0b1000 => AnvilDamage::VeryDamaged,
-                            n => panic!("Unknown anvil damage data value: {}", n),
-                        },
-                    },
-                    146 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Chest { tags } => Block::TrappedChest(Box::new(Chest {
-                                facing: facing4_xxnswe(data[index]),
-                                variant: None,
-                                waterlogged: false,
-                                custom_name: tags.custom_name.clone(),
-                                lock: tags.lock.clone(),
-                                items: tags.items.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for chest"),
-                        }
-                    }
-                    147 => Block::PressurePlate {
-                        material: PressurePlateMaterial::Gold,
-                    },
-                    148 => Block::PressurePlate {
-                        material: PressurePlateMaterial::Iron,
-                    },
-                    149 | 150 => {
-                        let facing = facing4_swne(data[index]);
-                        if data[index] & 0x4 == 0x4 {
-                            Block::RedstoneSubtractor { facing }
-                        } else {
-                            Block::RedstoneComparator { facing }
-                        }
-                    }
-                    151 => Block::DaylightDetector,
-                    152 => Block::BlockOfRedstone,
-                    153 => Block::NetherQuartzOre,
-                    154 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Hopper { tags } => Block::Hopper(Box::new(Hopper {
-                                facing: facing5_dxnswe(data[index]),
-                                waterlogged: false,
-                                custom_name: tags.custom_name.clone(),
-                                lock: tags.lock.clone(),
-                                items: tags.items.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for hopper"),
-                        }
-                    }
-                    155 => Block::BlockOfQuartz,
-                    156 => Block::Stairs(Stair {
-                        material: StairMaterial::Quartz,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    157 => Block::Rail {
-                        variant: RailType::Activator,
-                        shape: RailShape::from_value(data[index] & 0x7),
-                    },
-                    158 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
-
-                        match block_entity {
-                            BlockEntity::Dropper { tags } => Block::Dropper(Box::new(Dropper {
-                                facing: facing6_dunswe(data[index]),
-                                custom_name: tags.custom_name.clone(),
-                                lock: tags.lock.clone(),
-                                items: tags.items.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for dispenser"),
-                        }
-                    }
-                    159 => Block::Terracotta {
-                        colour: Some(((data[index] & 0xF) as i32).into()),
-                    },
-                    160 => Block::GlassPane {
-                        colour: Some(((data[index] & 0xF) as i32).into()),
-                        waterlogged: false,
-                    },
-                    161 => Block::Leaves {
-                        material: match data[index] & 0x1 {
-                            0 => LeavesMaterial::Acacia,
-                            1 => LeavesMaterial::DarkOak,
-                            _ => unreachable!(),
-                        },
-                        distance_to_trunk: None,
-                        persistent: (data[index] & 0x4) == 0x4,
-                    },
-                    162 => Block::Log(block::Log {
-                        material: match data[index] & 0x1 {
-                            0 => WoodMaterial::Acacia,
-                            1 => WoodMaterial::DarkOak,
-                            _ => unreachable!(),
-                        },
-                        alignment: wood_alignment(data[index]),
-                        stripped: false,
-                    }),
-                    163 => Block::Stairs(Stair {
-                        material: StairMaterial::Acacia,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    164 => Block::Stairs(Stair {
-                        material: StairMaterial::DarkOak,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    165 => Block::SlimeBlock,
-                    166 => Block::Barrier,
-                    // 167 iron trapdoor - already handled
-                    168 => match data[index] {
-                        0 => Block::Prismarine,
-                        1 => Block::DarkPrismarine,
-                        2 => Block::PrismarineBricks,
-                        n => panic!("Unknown data value for prismarine: {}", n),
-                    },
-                    169 => Block::SeaLantern,
-                    170 => Block::HayBale {
-                        alignment: match data[index] {
-                            0 => Axis3::Y,
-                            4 => Axis3::X,
-                            8 => Axis3::Z,
-                            n => panic!("Unknown data value for hay bale alignment: {}", n),
-                        },
-                    },
-                    171 => Block::Carpet {
-                        colour: ((data[index] & 0xF) as i32).into(),
-                    },
-                    172 => Block::Terracotta { colour: None },
-                    173 => Block::BlockOfCoal,
-                    174 => Block::PackedIce,
-                    // All double tall plants (Flowers, Ferns, Grass)
-                    175 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let entity_coordinates = if (data[index] & 0x8) == 0x8 {
-                            // top block; pseudo block entity is found at the bottom
-                            coordinates - (0, 1, 0).into()
-                        } else {
-                            // bottom block; pseudo block entity is found here
-                            coordinates
-                        };
-                        match block_entities.get(&entity_coordinates).unwrap() {
-                            BlockEntity::PseudoFlowerBottom(bottom_flower) => {
-                                if (data[index] & 0x8) == 0x8 {
-                                    let top_flower = match bottom_flower {
-                                        Flower::LilacBottom => Flower::LilacTop,
-                                        Flower::PeonyBottom => Flower::PeonyTop,
-                                        Flower::RoseBushBottom => Flower::RoseBushTop,
-                                        Flower::SunflowerBottom => Flower::SunflowerTop,
-                                        variant => panic!(
-                                            "Unexpected grass variant for bottom grass: {:?}",
-                                            variant,
-                                        ),
-                                    };
-                                    Block::Flower(top_flower)
-                                } else {
-                                    Block::Flower(bottom_flower.clone())
+                        #[allow(clippy::verbose_bit_mask)]
+                        10 | 11 => {
+                            if (data[index] & 0x7) == 0x0 {
+                                Block::LavaSource
+                            } else {
+                                Block::Lava {
+                                    falling: (data[index] & 0x8) == 0x8,
+                                    level: Int1Through7::new(8 - (data[index] & 0x7)).unwrap(),
                                 }
                             }
-                            BlockEntity::PseudoGrassBottom(bottom_grass) => {
-                                if (data[index] & 0x8) == 0x8 {
-                                    let top_grass = match bottom_grass {
-                                        Grass::LargeFernBottom => Grass::LargeFernTop,
-                                        Grass::TallGrassBottom => Grass::TallGrassTop,
-                                        variant => panic!(
-                                            "Unexpected grass variant for bottom grass: {:?}",
-                                            variant,
-                                        ),
-                                    };
-                                    Block::Grass(top_grass)
-                                } else {
-                                    Block::Grass(bottom_grass.clone())
+                        }
+                        12 => match data[index] {
+                            0 => Block::Sand,
+                            1 => Block::RedSand,
+                            n => panic!("Unknown sand data variant: {}", n),
+                        },
+                        13 => Block::Gravel,
+                        14 => Block::GoldOre,
+                        15 => Block::IronOre,
+                        16 => Block::CoalOre,
+                        17 => Block::Log(block::Log {
+                            material: match data[index] & 0x3 {
+                                0 => WoodMaterial::Oak,
+                                1 => WoodMaterial::Spruce,
+                                2 => WoodMaterial::Birch,
+                                3 => WoodMaterial::Jungle,
+                                _ => unreachable!(),
+                            },
+                            alignment: wood_alignment(data[index]),
+                            stripped: false,
+                        }),
+                        18 => Block::Leaves {
+                            material: match data[index] & 0x3 {
+                                0 => LeavesMaterial::Oak,
+                                1 => LeavesMaterial::Spruce,
+                                2 => LeavesMaterial::Birch,
+                                3 => LeavesMaterial::Jungle,
+                                _ => unreachable!(),
+                            },
+                            distance_to_trunk: None,
+                            persistent: (data[index] & 0x4) == 0x4,
+                        },
+                        19 => match data[index] {
+                            0 => Block::Sponge,
+                            1 => Block::WetSponge,
+                            n => panic!("Unknown sponge data variant: {}", n),
+                        },
+                        20 => Block::Glass { colour: None },
+                        21 => Block::LapisLazuliOre,
+                        22 => Block::LapisLazuliBlock,
+                        23 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Dispenser { tags } => {
+                                    Block::Dispenser(Box::new(Dispenser {
+                                        facing: facing6_dunswe(data[index]),
+                                        custom_name: tags.custom_name.clone(),
+                                        lock: tags.lock.clone(),
+                                        items: tags.items.clone(),
+                                    }))
                                 }
+                                _ => panic!("Wrong block entity variant for dispenser"),
                             }
-                            _ => panic!("Wrong block entity variant for flower or grass"),
                         }
-                    }
-                    // Banners
-                    176 | 177 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
+                        24 => match data[index] {
+                            0 => Block::Sandstone,
+                            1 => Block::ChiseledSandstone,
+                            2 => Block::SmoothSandstone,
+                            n => panic!("Unknown sandstone data variant: {}", n),
+                        },
+                        25 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
 
-                        match block_entity {
-                            BlockEntity::Banner {
-                                colour,
-                                custom_name,
-                                patterns,
-                                ..
-                            } => Block::Banner(Box::new(Banner {
-                                colour: colour.clone(),
-                                custom_name: custom_name.clone(),
-                                placement: if block == 176 {
-                                    WallOrRotatedOnFloor::Floor((data[index] & 0xF).into())
-                                } else {
-                                    WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index]))
-                                },
-                                patterns: patterns.clone(),
-                            })),
-                            _ => panic!("Wrong block entity variant for standing sign"),
+                            if let BlockEntity::Noteblock { note, .. } = block_entity {
+                                Block::Noteblock {
+                                    pitch: note.clone(),
+                                }
+                            } else {
+                                panic!("Wrong block entity variant for note block")
+                            }
                         }
-                    }
-                    178 => Block::InvertedDaylightDetector,
-                    179 => Block::RedSandstone,
-                    180 => Block::Stairs(Stair {
-                        material: StairMaterial::RedSandstone,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    181 => Block::Slab(Slab {
-                        material: SlabMaterial::RedSandstone,
-                        position: SlabVariant::Double,
-                        waterlogged: false,
-                    }),
-                    182 => Block::Slab(Slab {
-                        material: SlabMaterial::RedSandstone,
-                        position: if (data[index] & 0x8) == 0x8 {
-                            SlabVariant::Top
-                        } else {
-                            SlabVariant::Bottom
+                        26 => Block::Bed {
+                            colour: Colour::Red,
+                            facing: facing4_swne(data[index]),
+                            end: if (data[index] & 0x8) == 0x8 {
+                                BedEnd::Head
+                            } else {
+                                BedEnd::Foot
+                            },
                         },
-                        waterlogged: false,
-                    }),
-                    // 183..=187 various fence gates - already handled
-                    // 188..=192 various fences - already handled
-                    // 193..=197 various doors - already handled
-                    198 => Block::EndRod {
-                        facing: facing6_dunswe(data[index]),
-                    },
-                    199 => Block::ChorusPlant {
-                        // TODO actually figure out how to parse connections
-                        // For now:
-                        // - use same as mushroom caps, and hope for the best...
-                        connections: mushroom_caps(data[index]),
-                    },
-                    200 => Block::ChorusFlower {
-                        growth_stage: Int0Through5::new(data[index]).unwrap(),
-                    },
-                    201 => Block::PurpurBlock,
-                    202 => Block::PurpurPillar {
-                        // TODO actually figure out how to parse direction
-                        // For now:
-                        // - guess that it is the same as for hay bales
-                        alignment: match data[index] {
-                            0 => Axis3::Y,
-                            4 => Axis3::X,
-                            8 => Axis3::Z,
-                            n => panic!("Unknown data value for purpur pillar alignment: {}", n),
+                        27 => Block::Rail {
+                            variant: RailType::Powered,
+                            shape: RailShape::from_value(data[index] & 0x7),
                         },
-                    },
-                    203 => Block::Stairs(Stair {
-                        material: StairMaterial::Purpur,
-                        position: (data[index] & 0x7).into(),
-                        waterlogged: false,
-                    }),
-                    204 => Block::Slab(Slab {
-                        material: SlabMaterial::Purpur,
-                        position: SlabVariant::Double,
-                        waterlogged: false,
-                    }),
-                    205 => Block::Slab(Slab {
-                        material: SlabMaterial::Purpur,
-                        position: if (data[index] & 0x8) == 0x8 {
-                            SlabVariant::Top
-                        } else {
-                            SlabVariant::Bottom
+                        28 => Block::Rail {
+                            variant: RailType::Detector,
+                            shape: RailShape::from_value(data[index] & 0x7),
                         },
-                        waterlogged: false,
-                    }),
-                    206 => Block::EndStoneBricks,
-                    207 => Block::Beetroots {
-                        growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
-                    },
-                    208 => Block::GrassPath,
-                    209 => Block::EndGateway,
-                    // TODO 210 repeating command block
-                    // TODO 211 chain command block
-                    212 => Block::FrostedIce, // NB there might be data values here
-                    213 => Block::MagmaBlock,
-                    214 => Block::NetherWartBlock,
-                    215 => Block::RedNetherBricks,
-                    216 => Block::BoneBlock {
-                        alignment: match data[index] {
-                            0 => Axis3::Y,
-                            4 => Axis3::X,
-                            8 => Axis3::Z,
-                            n => panic!("Unknown data value for bone block alignment: {}", n),
+                        29 => Block::StickyPiston {
+                            facing: facing6_dunswe(data[index]),
+                            extended: data[index] & 0x8 == 0x8,
                         },
-                    },
-                    217 => Block::StructureVoid,
-                    218 => Block::Observer {
-                        facing: facing6_dunswe(data[index]),
-                    },
-                    // All shulker box colours
-                    block_id @ 219..=234 => {
-                        let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                        let block_entity = block_entities.get(&coordinates).unwrap();
+                        30 => Block::Cobweb,
+                        31 => Block::Grass(match data[index] & 0x1 {
+                            0 => Grass::Grass,
+                            1 => Grass::Fern,
+                            _ => unreachable!(),
+                        }),
+                        32 => Block::DeadBush,
+                        33 => Block::Piston {
+                            facing: facing6_dunswe(data[index]),
+                            extended: data[index] & 0x8 == 0x8,
+                        },
+                        34 => {
+                            let facing = facing6_dunswe(data[index]);
+                            if data[index] & 0x8 == 0x8 {
+                                Block::StickyPistonHead { facing }
+                            } else {
+                                Block::PistonHead { facing }
+                            }
+                        }
+                        35 => Block::Wool {
+                            colour: Some(((data[index] & 0xF) as i32).into()),
+                        },
+                        // TODO block 36 piston_extension ("Block moved by Piston")
+                        37 => Block::Flower(Flower::Dandelion),
+                        38 => Block::Flower(match data[index] {
+                            0 => Flower::Poppy,
+                            1 => Flower::BlueOrchid,
+                            2 => Flower::Allium,
+                            3 => Flower::AzureBluet,
+                            4 => Flower::TulipRed,
+                            5 => Flower::TulipOrange,
+                            6 => Flower::TulipLightGray,
+                            7 => Flower::TulipPink,
+                            8 => Flower::OxeyeDaisy,
+                            n => panic!("Unkown red flower data variant: {}", n),
+                        }),
+                        39 => Block::BrownMushroom,
+                        40 => Block::RedMushroom,
+                        41 => Block::BlockOfGold,
+                        42 => Block::BlockOfIron,
+                        43 => Block::Slab(Slab {
+                            material: match data[index] & 0x7 {
+                                0 => SlabMaterial::SmoothStone,
+                                1 => SlabMaterial::Sandstone,
+                                2 => SlabMaterial::PetrifiedOak, // legacy
+                                3 => SlabMaterial::Cobblestone,
+                                4 => SlabMaterial::Brick,
+                                5 => SlabMaterial::StoneBrick,
+                                6 => SlabMaterial::NetherBrick,
+                                7 => SlabMaterial::Quartz,
+                                _ => unreachable!(),
+                            },
+                            position: SlabVariant::Double,
+                            waterlogged: false,
+                        }),
+                        44 => Block::Slab(Slab {
+                            material: match data[index] & 0x7 {
+                                0 => SlabMaterial::SmoothStone,
+                                1 => SlabMaterial::Sandstone,
+                                2 => SlabMaterial::PetrifiedOak, // legacy
+                                3 => SlabMaterial::Cobblestone,
+                                4 => SlabMaterial::Brick,
+                                5 => SlabMaterial::StoneBrick,
+                                6 => SlabMaterial::NetherBrick,
+                                7 => SlabMaterial::Quartz,
+                                _ => unreachable!(),
+                            },
+                            position: if (data[index] & 0x8) == 0x8 {
+                                SlabVariant::Top
+                            } else {
+                                SlabVariant::Bottom
+                            },
+                            waterlogged: false,
+                        }),
+                        45 => Block::BrickBlock,
+                        46 => Block::TNT,
+                        47 => Block::Bookshelf,
+                        48 => Block::MossyCobblestone,
+                        49 => Block::Obsidian,
+                        50 => Block::Torch {
+                            attached: facing5_xwensd(data[index]),
+                        },
+                        51 => Block::Fire {
+                            age: Int0Through15::new(data[index] & 0xF).unwrap(),
+                        },
+                        // TODO block 52 mob spawner
+                        53 => Block::Stairs(Stair {
+                            material: StairMaterial::Oak,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        54 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
 
-                        match block_entity {
-                            BlockEntity::ShulkerBox { tags } => {
-                                Block::ShulkerBox(Box::new(ShulkerBox {
-                                    colour: Some(((block_id - 219) as i32).into()),
-                                    facing: facing6_dunswe(data[index]),
+                            match block_entity {
+                                BlockEntity::Chest { tags } => Block::Chest(Box::new(Chest {
+                                    facing: facing4_xxnswe(data[index]),
+                                    variant: None,
+                                    waterlogged: false,
                                     custom_name: tags.custom_name.clone(),
                                     lock: tags.lock.clone(),
                                     items: tags.items.clone(),
-                                }))
+                                })),
+                                _ => panic!("Wrong block entity variant for chest"),
                             }
-                            _ => panic!("Wrong block entity variant for shulker box"),
                         }
-                    }
-                    // All glazed terracotta colours
-                    block_id @ 235..=250 => Block::GlazedTerracotta {
-                        colour: ((block_id - 235) as i32).into(),
-                        facing: facing4_swne(data[index]),
+                        55 => Block::RedstoneWire,
+                        56 => Block::DiamondOre,
+                        57 => Block::BlockOfDiamond,
+                        58 => Block::CraftingTable,
+                        59 => Block::Wheat {
+                            growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
+                        },
+                        60 => Block::Farmland {
+                            wetness: Int0Through7::new(data[index] & 0x7).unwrap(),
+                        },
+                        61 | 62 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Furnace { tags } => {
+                                    Block::Furnace(Box::new(Furnace {
+                                        facing: facing4_xxnswe(data[index]),
+                                        lit: block == 62,
+                                        custom_name: tags.custom_name.clone(),
+                                        lock: tags.lock.clone(),
+                                        items: tags.items.clone(),
+                                        burn_time: tags.burn_time,
+                                        cook_time: tags.cook_time,
+                                        cook_time_total: tags.cook_time_total,
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for chest"),
+                            }
+                        }
+                        // Both block variants of signs
+                        63 | 68 => {
+                            let placement = match block {
+                                63 => WallOrRotatedOnFloor::Floor((data[index] & 0xF).into()),
+                                68 => WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index])),
+                                _ => unreachable!(),
+                            };
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Sign { colour, text, .. } => {
+                                    Block::Sign(Box::new(Sign {
+                                        material: WoodMaterial::Oak,
+                                        placement,
+                                        waterlogged: false,
+                                        colour: colour.clone(),
+                                        // TODO something reasonable instead of JSON text
+                                        text1: text.get(0).unwrap_or(&String::new()).to_string(),
+                                        text2: text.get(1).unwrap_or(&String::new()).to_string(),
+                                        text3: text.get(2).unwrap_or(&String::new()).to_string(),
+                                        text4: text.get(3).unwrap_or(&String::new()).to_string(),
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for sign"),
+                            }
+                        }
+                        // All doors
+                        64 | 71 | 193..=197 => {
+                            let half = if (data[index] & 0x8) == 0x8 {
+                                DoorHalf::Upper
+                            } else {
+                                DoorHalf::Lower
+                            };
+
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+
+                            let top_coordinates = match half {
+                                DoorHalf::Upper => coordinates,
+                                DoorHalf::Lower => coordinates + (0, 1, 0).into(),
+                            };
+
+                            let bottom_coordinates = match half {
+                                DoorHalf::Upper => coordinates - (0, 1, 0).into(),
+                                DoorHalf::Lower => coordinates,
+                            };
+
+                            let top_entity = block_entities.get(&top_coordinates).unwrap();
+                            let bottom_entity = block_entities.get(&bottom_coordinates).unwrap();
+
+                            match (top_entity, bottom_entity) {
+                                (
+                                    BlockEntity::PseudoDoorTop { hinge, .. },
+                                    BlockEntity::PseudoDoorBottom { open, facing, .. },
+                                ) => Block::Door {
+                                    facing: facing.clone(),
+                                    half,
+                                    hinge: hinge.clone(),
+                                    open: *open,
+                                    material: match block {
+                                        64 => DoorMaterial::Oak,
+                                        71 => DoorMaterial::Iron,
+                                        193 => DoorMaterial::Spruce,
+                                        194 => DoorMaterial::Birch,
+                                        195 => DoorMaterial::Jungle,
+                                        196 => DoorMaterial::Acacia,
+                                        197 => DoorMaterial::DarkOak,
+                                        _ => unreachable!(),
+                                    },
+                                },
+                                _ => panic!("Wrong block entity variant(s) for door"),
+                            }
+                        }
+                        65 => Block::Ladder {
+                            facing: facing4_xxnswe(data[index]),
+                            waterlogged: false,
+                        },
+                        66 => Block::Rail {
+                            variant: RailType::Normal,
+                            shape: RailShape::from_value(data[index]),
+                        },
+                        67 => Block::Stairs(Stair {
+                            material: StairMaterial::Cobblestone,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        // 68 wall sign - already handled
+                        69 => Block::Lever(
+                            button_lever_facing(data[index]),
+                            if data[index] & 0x8 == 0x8 {
+                                OnOffState::On
+                            } else {
+                                OnOffState::Off
+                            },
+                        ),
+                        70 => Block::PressurePlate {
+                            material: PressurePlateMaterial::Stone,
+                        },
+                        // 71 Iron door - already handled
+                        72 => Block::PressurePlate {
+                            material: PressurePlateMaterial::Oak,
+                        },
+                        73 | 74 => Block::RedstoneOre,
+                        75 | 76 => Block::RedstoneTorch {
+                            attached: facing5_xwensd(data[index]),
+                        },
+                        77 => {
+                            Block::Button(ButtonMaterial::Stone, button_lever_facing(data[index]))
+                        }
+                        78 => Block::Snow {
+                            thickness: Int1Through8::new((data[index] & 0x7) + 1).unwrap(),
+                        },
+                        79 => Block::Ice,
+                        80 => Block::SnowBlock,
+                        81 => Block::Cactus {
+                            growth_stage: Int0Through15::new(data[index] & 0xF).unwrap(),
+                        },
+                        82 => Block::Clay,
+                        83 => Block::SugarCane {
+                            growth_stage: Int0Through15::new(data[index] & 0xF).unwrap(),
+                        },
+                        84 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Jukebox { record, .. } => {
+                                    Block::Jukebox(Box::new(Jukebox {
+                                        record: record.clone(),
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for jukebox"),
+                            }
+                        }
+                        // All fences
+                        85 | 113 | 188..=192 => Block::Fence {
+                            waterlogged: false,
+                            material: match block {
+                                85 => FenceMaterial::Oak,
+                                113 => FenceMaterial::NetherBrick,
+                                188 => FenceMaterial::Spruce,
+                                189 => FenceMaterial::Birch,
+                                190 => FenceMaterial::Jungle,
+                                191 => FenceMaterial::DarkOak,
+                                192 => FenceMaterial::Acacia,
+                                _ => unreachable!(),
+                            },
+                        },
+                        86 => Block::Pumpkin {
+                            facing: facing4_swne(data[index]),
+                        },
+                        87 => Block::Netherrack,
+                        88 => Block::SoulSand,
+                        89 => Block::Glowstone,
+                        90 => Block::NetherPortal { alignment: None },
+                        91 => Block::JackOLantern {
+                            facing: facing4_swne(data[index]),
+                        },
+                        92 => Block::Cake {
+                            bites: Int0Through6::new(data[index] & 0x7).unwrap(),
+                        },
+                        93 | 94 => Block::RedstoneRepeater {
+                            facing: facing4_swne(data[index]),
+                            delay: Int1Through4::new(((data[index] >> 2) & 0x3) + 1).unwrap(),
+                        },
+                        95 => Block::Glass {
+                            colour: Some(((data[index] & 0xF) as i32).into()),
+                        },
+                        // All trapdoors
+                        96 | 167 => Block::Trapdoor {
+                            hinge_at: trapdoor_hinge_at(data[index]),
+                            open: data[index] & 0x4 == 0x4,
+                            waterlogged: false,
+                            material: match block {
+                                96 => DoorMaterial::Oak,
+                                167 => DoorMaterial::Iron,
+                                _ => unreachable!(),
+                            },
+                        },
+                        97 => match data[index] {
+                            0 => Block::InfestedStone,
+                            1 => Block::InfestedCobblestone,
+                            2 => Block::InfestedStoneBricks,
+                            3 => Block::InfestedMossyStoneBricks,
+                            4 => Block::InfestedCrackedStoneBricks,
+                            5 => Block::InfestedChiseledStoneBricks,
+                            n => panic!("Unknown infested block data variant: {}", n),
+                        },
+                        98 => match data[index] {
+                            0 => Block::StoneBricks,
+                            1 => Block::MossyStoneBricks,
+                            2 => Block::CrackedStoneBricks,
+                            3 => Block::ChiseledStoneBricks,
+                            n => panic!("Unknown stone brick data variant: {}", n),
+                        },
+                        99 | 100 => match data[index] {
+                            stem @ 10 | stem @ 15 => Block::MushroomStem {
+                                stem_directions: mushroom_caps(stem),
+                            },
+                            cap => {
+                                let cap_directions = mushroom_caps(cap);
+                                if block == 99 {
+                                    Block::BrownMushroomBlock { cap_directions }
+                                } else if block == 100 {
+                                    Block::RedMushroomBlock { cap_directions }
+                                } else {
+                                    unreachable!();
+                                }
+                            }
+                        },
+                        101 => Block::IronBars { waterlogged: false },
+                        102 => Block::GlassPane {
+                            colour: None,
+                            waterlogged: false,
+                        },
+                        103 => Block::Melon,
+                        104 => Block::PumpkinStem {
+                            state: StemState::Growing(
+                                Int0Through7::new(data[index] & 0x7).unwrap(),
+                            ),
+                        },
+                        105 => Block::MelonStem {
+                            state: StemState::Growing(
+                                Int0Through7::new(data[index] & 0x7).unwrap(),
+                            ),
+                        },
+                        106 => Block::Vines {
+                            anchored_at: DirectionFlags6 {
+                                east: data[index] & 0x8 == 0x8,
+                                down: false,
+                                north: data[index] & 0x4 == 0x4,
+                                south: data[index] & 0x1 == 0x1,
+                                up: false,
+                                west: data[index] & 0x2 == 0x2,
+                            },
+                        },
+                        // All fence gates
+                        107 | 183..=187 => Block::FenceGate {
+                            facing: facing4_swne(data[index]),
+                            open: data[index] & 0x4 == 0x4,
+                            material: match block {
+                                107 => WoodMaterial::Oak,
+                                183 => WoodMaterial::Spruce,
+                                184 => WoodMaterial::Birch,
+                                185 => WoodMaterial::Jungle,
+                                186 => WoodMaterial::DarkOak,
+                                187 => WoodMaterial::Acacia,
+                                _ => unreachable!(),
+                            },
+                        },
+                        108 => Block::Stairs(Stair {
+                            material: StairMaterial::Brick,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        109 => Block::Stairs(Stair {
+                            material: StairMaterial::StoneBrick,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        110 => Block::Mycelium,
+                        111 => Block::LilyPad,
+                        112 => Block::NetherBricks,
+                        // 113 nether brick fence - already handled
+                        114 => Block::Stairs(Stair {
+                            material: StairMaterial::NetherBrick,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        115 => Block::NetherWart {
+                            growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
+                        },
+                        116 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::EnchantingTable { custom_name, .. } => {
+                                    Block::EnchantingTable {
+                                        custom_name: Box::new(custom_name.clone()),
+                                    }
+                                }
+                                _ => panic!("Wrong block entity variant for enchanting table"),
+                            }
+                        }
+                        117 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::BrewingStand {
+                                    custom_name,
+                                    lock,
+                                    items,
+                                    brew_time,
+                                    fuel,
+                                    ..
+                                } => Block::BrewingStand(Box::new(BrewingStand {
+                                    custom_name: custom_name.clone(),
+                                    lock: lock.clone(),
+                                    items: items.clone(),
+                                    brew_time: *brew_time,
+                                    fuel: *fuel,
+                                })),
+                                _ => panic!("Wrong block entity variant for brewing stand"),
+                            }
+                        }
+                        118 => Block::Cauldron {
+                            water_level: Int0Through3::new(data[index] & 0x3).unwrap(),
+                        },
+                        119 => Block::EndPortal, // TODO check if block entity data is needed
+                        120 => Block::EndPortalFrame {
+                            facing: facing4_swne(data[index]),
+                            has_eye: data[index] & 0x4 == 0x4,
+                        },
+                        121 => Block::EndStone,
+                        122 => Block::DragonEgg,
+                        123 | 124 => Block::RedstoneLamp,
+                        125 => Block::Slab(Slab {
+                            material: match data[index] & 0x7 {
+                                0 => SlabMaterial::Oak,
+                                1 => SlabMaterial::Spruce,
+                                2 => SlabMaterial::Birch,
+                                3 => SlabMaterial::Jungle,
+                                4 => SlabMaterial::Acacia,
+                                5 => SlabMaterial::DarkOak,
+                                n @ 6..=7 => panic!("Unknown double wooden slab data value: {}", n),
+                                _ => unreachable!(),
+                            },
+                            position: SlabVariant::Double,
+                            waterlogged: false,
+                        }),
+                        126 => Block::Slab(Slab {
+                            material: match data[index] & 0x7 {
+                                0 => SlabMaterial::Oak,
+                                1 => SlabMaterial::Spruce,
+                                2 => SlabMaterial::Birch,
+                                3 => SlabMaterial::Jungle,
+                                4 => SlabMaterial::Acacia,
+                                5 => SlabMaterial::DarkOak,
+                                n @ 6..=7 => panic!("Unknown double wooden slab data value: {}", n),
+                                _ => unreachable!(),
+                            },
+                            position: if (data[index] & 0x8) == 0x8 {
+                                SlabVariant::Top
+                            } else {
+                                SlabVariant::Bottom
+                            },
+                            waterlogged: false,
+                        }),
+                        127 => Block::CocoaBeans {
+                            growth_stage: Int0Through2::new((data[index] & 0xC) >> 2).unwrap(),
+                            facing: facing4_swne(data[index]),
+                        },
+                        128 => Block::Stairs(Stair {
+                            material: StairMaterial::Sandstone,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        129 => Block::EmeraldOre,
+                        130 => Block::EnderChest {
+                            facing: facing4_xxnswe(data[index]),
+                            waterlogged: false,
+                            // TODO check if block entity data is needed
+                        },
+                        131 => Block::TripwireHook {
+                            facing: facing4_swne(data[index]),
+                        },
+                        132 => Block::Tripwire,
+                        133 => Block::BlockOfEmerald,
+                        134 => Block::Stairs(Stair {
+                            material: StairMaterial::Spruce,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        135 => Block::Stairs(Stair {
+                            material: StairMaterial::Birch,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        136 => Block::Stairs(Stair {
+                            material: StairMaterial::Jungle,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        // TODO 137 command block // Deferred for now, too complicated
+                        138 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Beacon {
+                                    lock,
+                                    levels,
+                                    primary,
+                                    secondary,
+                                    ..
+                                } => Block::Beacon(Box::new(Beacon {
+                                    lock: lock.clone(),
+                                    levels: *levels,
+                                    primary: primary.clone(),
+                                    secondary: secondary.clone(),
+                                })),
+                                _ => panic!("Wrong block entity variant for beacon"),
+                            }
+                        }
+                        139 => Block::Wall {
+                            material: match data[index] {
+                                0 => WallMaterial::Cobblestone,
+                                1 => WallMaterial::MossyCobblestone,
+                                n => panic!(
+                                    "Unknown material data value for cobblestone wall: {}",
+                                    n,
+                                ),
+                            },
+                            waterlogged: false,
+                        },
+                        // TODO 140 flower pot
+                        // - Needs block entity (tile entity)
+                        // - Pots placed prior to 1.7 have contents in data value
+                        141 => Block::Carrots {
+                            growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
+                        },
+                        142 => Block::Potatoes {
+                            growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
+                        },
+                        143 => Block::Button(ButtonMaterial::Oak, button_lever_facing(data[index])),
+                        // TODO 144 skull // Deferred for now, too complicated
+                        145 => Block::Anvil {
+                            facing: facing4_swne(data[index]),
+                            damage: match data[index] & 0b1100 {
+                                0b0000 => AnvilDamage::Intact,
+                                0b0100 => AnvilDamage::SlightlyDamaged,
+                                0b1000 => AnvilDamage::VeryDamaged,
+                                n => panic!("Unknown anvil damage data value: {}", n),
+                            },
+                        },
+                        146 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Chest { tags } => {
+                                    Block::TrappedChest(Box::new(Chest {
+                                        facing: facing4_xxnswe(data[index]),
+                                        variant: None,
+                                        waterlogged: false,
+                                        custom_name: tags.custom_name.clone(),
+                                        lock: tags.lock.clone(),
+                                        items: tags.items.clone(),
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for chest"),
+                            }
+                        }
+                        147 => Block::PressurePlate {
+                            material: PressurePlateMaterial::Gold,
+                        },
+                        148 => Block::PressurePlate {
+                            material: PressurePlateMaterial::Iron,
+                        },
+                        149 | 150 => {
+                            let facing = facing4_swne(data[index]);
+                            if data[index] & 0x4 == 0x4 {
+                                Block::RedstoneSubtractor { facing }
+                            } else {
+                                Block::RedstoneComparator { facing }
+                            }
+                        }
+                        151 => Block::DaylightDetector,
+                        152 => Block::BlockOfRedstone,
+                        153 => Block::NetherQuartzOre,
+                        154 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Hopper { tags } => Block::Hopper(Box::new(Hopper {
+                                    facing: facing5_dxnswe(data[index]),
+                                    waterlogged: false,
+                                    custom_name: tags.custom_name.clone(),
+                                    lock: tags.lock.clone(),
+                                    items: tags.items.clone(),
+                                })),
+                                _ => panic!("Wrong block entity variant for hopper"),
+                            }
+                        }
+                        155 => Block::BlockOfQuartz,
+                        156 => Block::Stairs(Stair {
+                            material: StairMaterial::Quartz,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        157 => Block::Rail {
+                            variant: RailType::Activator,
+                            shape: RailShape::from_value(data[index] & 0x7),
+                        },
+                        158 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Dropper { tags } => {
+                                    Block::Dropper(Box::new(Dropper {
+                                        facing: facing6_dunswe(data[index]),
+                                        custom_name: tags.custom_name.clone(),
+                                        lock: tags.lock.clone(),
+                                        items: tags.items.clone(),
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for dispenser"),
+                            }
+                        }
+                        159 => Block::Terracotta {
+                            colour: Some(((data[index] & 0xF) as i32).into()),
+                        },
+                        160 => Block::GlassPane {
+                            colour: Some(((data[index] & 0xF) as i32).into()),
+                            waterlogged: false,
+                        },
+                        161 => Block::Leaves {
+                            material: match data[index] & 0x1 {
+                                0 => LeavesMaterial::Acacia,
+                                1 => LeavesMaterial::DarkOak,
+                                _ => unreachable!(),
+                            },
+                            distance_to_trunk: None,
+                            persistent: (data[index] & 0x4) == 0x4,
+                        },
+                        162 => Block::Log(block::Log {
+                            material: match data[index] & 0x1 {
+                                0 => WoodMaterial::Acacia,
+                                1 => WoodMaterial::DarkOak,
+                                _ => unreachable!(),
+                            },
+                            alignment: wood_alignment(data[index]),
+                            stripped: false,
+                        }),
+                        163 => Block::Stairs(Stair {
+                            material: StairMaterial::Acacia,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        164 => Block::Stairs(Stair {
+                            material: StairMaterial::DarkOak,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        165 => Block::SlimeBlock,
+                        166 => Block::Barrier,
+                        // 167 iron trapdoor - already handled
+                        168 => match data[index] {
+                            0 => Block::Prismarine,
+                            1 => Block::DarkPrismarine,
+                            2 => Block::PrismarineBricks,
+                            n => panic!("Unknown data value for prismarine: {}", n),
+                        },
+                        169 => Block::SeaLantern,
+                        170 => Block::HayBale {
+                            alignment: match data[index] {
+                                0 => Axis3::Y,
+                                4 => Axis3::X,
+                                8 => Axis3::Z,
+                                n => panic!("Unknown data value for hay bale alignment: {}", n),
+                            },
+                        },
+                        171 => Block::Carpet {
+                            colour: ((data[index] & 0xF) as i32).into(),
+                        },
+                        172 => Block::Terracotta { colour: None },
+                        173 => Block::BlockOfCoal,
+                        174 => Block::PackedIce,
+                        // All double tall plants (Flowers, Ferns, Grass)
+                        175 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let entity_coordinates = if (data[index] & 0x8) == 0x8 {
+                                // top block; pseudo block entity is found at the bottom
+                                coordinates - (0, 1, 0).into()
+                            } else {
+                                // bottom block; pseudo block entity is found here
+                                coordinates
+                            };
+                            match block_entities.get(&entity_coordinates).unwrap() {
+                                BlockEntity::PseudoFlowerBottom(bottom_flower) => {
+                                    if (data[index] & 0x8) == 0x8 {
+                                        let top_flower = match bottom_flower {
+                                            Flower::LilacBottom => Flower::LilacTop,
+                                            Flower::PeonyBottom => Flower::PeonyTop,
+                                            Flower::RoseBushBottom => Flower::RoseBushTop,
+                                            Flower::SunflowerBottom => Flower::SunflowerTop,
+                                            variant => panic!(
+                                                "Unexpected grass variant for bottom grass: {:?}",
+                                                variant,
+                                            ),
+                                        };
+                                        Block::Flower(top_flower)
+                                    } else {
+                                        Block::Flower(bottom_flower.clone())
+                                    }
+                                }
+                                BlockEntity::PseudoGrassBottom(bottom_grass) => {
+                                    if (data[index] & 0x8) == 0x8 {
+                                        let top_grass = match bottom_grass {
+                                            Grass::LargeFernBottom => Grass::LargeFernTop,
+                                            Grass::TallGrassBottom => Grass::TallGrassTop,
+                                            variant => panic!(
+                                                "Unexpected grass variant for bottom grass: {:?}",
+                                                variant,
+                                            ),
+                                        };
+                                        Block::Grass(top_grass)
+                                    } else {
+                                        Block::Grass(bottom_grass.clone())
+                                    }
+                                }
+                                _ => panic!("Wrong block entity variant for flower or grass"),
+                            }
+                        }
+                        // Banners
+                        176 | 177 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Banner {
+                                    colour,
+                                    custom_name,
+                                    patterns,
+                                    ..
+                                } => Block::Banner(Box::new(Banner {
+                                    colour: colour.clone(),
+                                    custom_name: custom_name.clone(),
+                                    placement: if block == 176 {
+                                        WallOrRotatedOnFloor::Floor((data[index] & 0xF).into())
+                                    } else {
+                                        WallOrRotatedOnFloor::Wall(facing4_xxnswe(data[index]))
+                                    },
+                                    patterns: patterns.clone(),
+                                })),
+                                _ => panic!("Wrong block entity variant for standing sign"),
+                            }
+                        }
+                        178 => Block::InvertedDaylightDetector,
+                        179 => Block::RedSandstone,
+                        180 => Block::Stairs(Stair {
+                            material: StairMaterial::RedSandstone,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        181 => Block::Slab(Slab {
+                            material: SlabMaterial::RedSandstone,
+                            position: SlabVariant::Double,
+                            waterlogged: false,
+                        }),
+                        182 => Block::Slab(Slab {
+                            material: SlabMaterial::RedSandstone,
+                            position: if (data[index] & 0x8) == 0x8 {
+                                SlabVariant::Top
+                            } else {
+                                SlabVariant::Bottom
+                            },
+                            waterlogged: false,
+                        }),
+                        // 183..=187 various fence gates - already handled
+                        // 188..=192 various fences - already handled
+                        // 193..=197 various doors - already handled
+                        198 => Block::EndRod {
+                            facing: facing6_dunswe(data[index]),
+                        },
+                        199 => Block::ChorusPlant {
+                            // TODO actually figure out how to parse connections
+                            // For now:
+                            // - use same as mushroom caps, and hope for the best...
+                            connections: mushroom_caps(data[index]),
+                        },
+                        200 => Block::ChorusFlower {
+                            growth_stage: Int0Through5::new(data[index]).unwrap(),
+                        },
+                        201 => Block::PurpurBlock,
+                        202 => Block::PurpurPillar {
+                            // TODO actually figure out how to parse direction
+                            // For now:
+                            // - guess that it is the same as for hay bales
+                            alignment: match data[index] {
+                                0 => Axis3::Y,
+                                4 => Axis3::X,
+                                8 => Axis3::Z,
+                                n => {
+                                    panic!("Unknown data value for purpur pillar alignment: {}", n)
+                                }
+                            },
+                        },
+                        203 => Block::Stairs(Stair {
+                            material: StairMaterial::Purpur,
+                            position: (data[index] & 0x7).into(),
+                            waterlogged: false,
+                        }),
+                        204 => Block::Slab(Slab {
+                            material: SlabMaterial::Purpur,
+                            position: SlabVariant::Double,
+                            waterlogged: false,
+                        }),
+                        205 => Block::Slab(Slab {
+                            material: SlabMaterial::Purpur,
+                            position: if (data[index] & 0x8) == 0x8 {
+                                SlabVariant::Top
+                            } else {
+                                SlabVariant::Bottom
+                            },
+                            waterlogged: false,
+                        }),
+                        206 => Block::EndStoneBricks,
+                        207 => Block::Beetroots {
+                            growth_stage: Int0Through3::new(data[index] & 0x3).unwrap(),
+                        },
+                        208 => Block::GrassPath,
+                        209 => Block::EndGateway,
+                        // TODO 210 repeating command block
+                        // TODO 211 chain command block
+                        212 => Block::FrostedIce, // NB there might be data values here
+                        213 => Block::MagmaBlock,
+                        214 => Block::NetherWartBlock,
+                        215 => Block::RedNetherBricks,
+                        216 => Block::BoneBlock {
+                            alignment: match data[index] {
+                                0 => Axis3::Y,
+                                4 => Axis3::X,
+                                8 => Axis3::Z,
+                                n => panic!("Unknown data value for bone block alignment: {}", n),
+                            },
+                        },
+                        217 => Block::StructureVoid,
+                        218 => Block::Observer {
+                            facing: facing6_dunswe(data[index]),
+                        },
+                        // All shulker box colours
+                        block_id @ 219..=234 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::ShulkerBox { tags } => {
+                                    Block::ShulkerBox(Box::new(ShulkerBox {
+                                        colour: Some(((block_id - 219) as i32).into()),
+                                        facing: facing6_dunswe(data[index]),
+                                        custom_name: tags.custom_name.clone(),
+                                        lock: tags.lock.clone(),
+                                        items: tags.items.clone(),
+                                    }))
+                                }
+                                _ => panic!("Wrong block entity variant for shulker box"),
+                            }
+                        }
+                        // All glazed terracotta colours
+                        block_id @ 235..=250 => Block::GlazedTerracotta {
+                            colour: ((block_id - 235) as i32).into(),
+                            facing: facing4_swne(data[index]),
+                        },
+                        251 => Block::Concrete {
+                            colour: ((data[index] & 0xF) as i32).into(),
+                        },
+                        252 => Block::ConcretePowder {
+                            colour: ((data[index] & 0xF) as i32).into(),
+                        },
+                        // TODO 255 structure block
+                        n => Block::Unknown(Some(n)),
                     },
-                    251 => Block::Concrete {
-                        colour: ((data[index] & 0xF) as i32).into(),
-                    },
-                    252 => Block::ConcretePowder {
-                        colour: ((data[index] & 0xF) as i32).into(),
-                    },
-                    // TODO 255 structure block
-                    n => Block::Unknown(Some(n)),
-                }
                 )
             })
             .for_each(|(index, block)| {

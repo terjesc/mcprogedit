@@ -154,7 +154,9 @@ impl WorldExcerpt {
                             chunk_offset.1 - global_block_bounds.y_min,
                             chunk_offset.2 - global_block_bounds.z_min,
                         );
-                        world_excerpt.blocks.paste(chunk_offset_in_blocks, chunk.blocks());
+                        world_excerpt
+                            .blocks
+                            .paste(chunk_offset_in_blocks, chunk.blocks());
 
                         // TODO Move or copy the entities from the chunk
                     }
@@ -178,12 +180,14 @@ impl WorldExcerpt {
 
     /// Set the block at location `at` to the provided block.
     pub fn set_block_at(&mut self, at: BlockCoord, block: Block) {
-        self.blocks.insert((at.0 as usize, at.1 as usize, at.2 as usize), block);
+        self.blocks
+            .insert((at.0 as usize, at.1 as usize, at.2 as usize), block);
     }
 
     /// Get a copy of the block at location `at`.
     pub fn get_block_at(&self, at: BlockCoord) -> Option<&Block> {
-        self.blocks.get((at.0 as usize, at.1 as usize, at.2 as usize))
+        self.blocks
+            .get((at.0 as usize, at.1 as usize, at.2 as usize))
     }
 
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.
@@ -212,8 +216,8 @@ mod tests {
 
         fn run_test_at(excerpt: &mut WorldExcerpt, at: BlockCoord, block: Block) {
             excerpt.set_block_at(at, block.clone());
-            let block_read_back = excerpt.get_block_at(at);
-            if block != block_read_back {
+            let block_read_back = excerpt.get_block_at(at).unwrap();
+            if block != *block_read_back {
                 panic!("block != block_read_back @ {:?}", at);
             }
         }

@@ -63,11 +63,11 @@ impl BlockCuboid {
             i64::min(self.z_dim as i64 - 1, offset.2 + other.z_dim as i64 - 1) as usize, // z
         );
 
-        for to_x in min.0 ..= max.0 {
+        for to_x in min.0..=max.0 {
             let from_x = (to_x as i64 - offset.0) as usize;
-            for to_y in min.1 ..= max.1 {
+            for to_y in min.1..=max.1 {
                 let from_y = (to_y as i64 - offset.1) as usize;
-                for to_z in min.2 ..= max.2 {
+                for to_z in min.2..=max.2 {
                     let from_z = (to_z as i64 - offset.2) as usize;
                     if let Some(block) = other.get((from_x, from_y, from_z)) {
                         if *block != Block::None {
@@ -82,11 +82,10 @@ impl BlockCuboid {
     }
 
     fn index(&self, (x, y, z): (usize, usize, usize)) -> Option<usize> {
-        let index = self.y_dim * self.z_dim * x + self.y_dim * z + y;
-        if index >= self.blocks.len() {
+        if x >= self.x_dim || y >= self.y_dim || z >= self.z_dim {
             None
         } else {
-            Some(index)
+            Some(self.y_dim * self.z_dim * x + self.y_dim * z + y)
         }
     }
 }
