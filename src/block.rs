@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use crate::banner::*;
 use crate::bounded_ints::*;
 use crate::colour::*;
@@ -42,6 +44,23 @@ pub struct Hopper {
     pub items: Inventory,
 }
 
+impl Hopper {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Hopper {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Hopper(hopper) => Ok(*hopper),
+            _ => Err(()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Sign {
     pub material: WoodMaterial,
@@ -52,6 +71,23 @@ pub struct Sign {
     pub text2: String,
     pub text3: String,
     pub text4: String,
+}
+
+impl Sign {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.placement.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Sign {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Sign(sign) => Ok(*sign),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -76,6 +112,23 @@ pub struct Stair {
     pub material: StairMaterial,
     pub position: Edge8,
     pub waterlogged: bool,
+}
+
+impl Stair {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.position.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Stair {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Stairs(stair) => Ok(stair),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -267,6 +320,24 @@ pub struct Chest {
     pub items: Inventory,
 }
 
+impl Chest {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Chest {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Chest(chest) => Ok(*chest),
+            Block::TrappedChest(chest) => Ok(*chest),
+            _ => Err(()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Dispenser {
     pub facing: Surface6,
@@ -275,12 +346,46 @@ pub struct Dispenser {
     pub items: Inventory,
 }
 
+impl Dispenser {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Dispenser {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Dispenser(dispenser) => Ok(*dispenser),
+            _ => Err(()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Dropper {
     pub facing: Surface6,
     pub custom_name: Option<String>,
     pub lock: Option<String>,
     pub items: Inventory,
+}
+
+impl Dropper {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Dropper {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Dropper(dropper) => Ok(*dropper),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -293,6 +398,23 @@ pub struct Furnace {
     pub burn_time: i16,
     pub cook_time: i16,
     pub cook_time_total: i16,
+}
+
+impl Furnace {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Furnace {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Furnace(furnace) => Ok(*furnace),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -449,6 +571,29 @@ pub struct ShulkerBox {
     pub items: Inventory,
 }
 
+impl ShulkerBox {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.facing.clone().into()
+    }
+}
+
+impl TryFrom<Block> for ShulkerBox {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::ShulkerBox(shulker_box) => Ok(*shulker_box),
+            _ => Err(()),
+        }
+    }
+}
+
+/// Blocks, with the attributes required for full representation in the world.
+///
+/// Plain blocks can be created directly.
+/// Blocks with attributes can be created directly, or through the use of helper functions.
+/// Some of the more complex blocks have their own data structures, that are put inside
+/// the corresponding enum variant (often boxed.)
 #[derive(Clone, Debug, PartialEq)]
 pub enum Block {
     None,
@@ -988,3 +1133,292 @@ pub enum Block {
 // with pointer alignment, the assert will likely not work as intended. In that
 // case it can safely be commented out.
 assert_eq_size!(Block, i128);
+
+impl Block {
+    /// Returns a Leaves block of the Acacia variant.
+    pub fn acacia_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::Acacia,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Acacia variant, aligned with the given axis.
+    pub fn acacia_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::Acacia,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Acacia variant.
+    pub fn acacia_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::Acacia,
+        }
+    }
+
+    /// Returns a Sapling block of the Acacia variant.
+    pub fn acacia_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::Acacia,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    /// Returns a Leaves block of the Birch variant.
+    pub fn birch_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::Birch,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Birch variant, aligned with the given axis.
+    pub fn birch_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::Birch,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Birch variant.
+    pub fn birch_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::Birch,
+        }
+    }
+
+    /// Returns a Sapling block of the Birch variant.
+    pub fn birch_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::Birch,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    /// Returns a Leaves block of the Dark Oak variant.
+    pub fn dark_oak_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::DarkOak,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Dark Oak variant, aligned with the given axis.
+    pub fn dark_oak_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::DarkOak,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Dark Oak variant.
+    pub fn dark_oak_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::DarkOak,
+        }
+    }
+
+    /// Returns a Sapling block of the Dark Oak variant.
+    pub fn dark_oak_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::DarkOak,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    pub fn is_dispenser(&self) -> bool {
+        match self {
+            Self::Dispenser(_) => true,
+            _ => false,
+        }
+    }
+
+    // TODO description / documentation of this function
+    pub fn has_facing_of(&self, direction: Direction) -> bool {
+        match self {
+            Self::Anvil { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Banner(banner) => banner.has_facing_of(direction),
+            Self::Barrel { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Beehive { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::BeeNest { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Bed { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
+            Self::Button(_, rotation) => Direction::from(rotation.clone()) == direction,
+            Self::Campfire { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::CarvedPumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Chest(chest) => chest.has_facing_of(direction),
+            Self::CocoaBeans { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::CoralFan { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
+            Self::Door { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Dropper(dropper) => dropper.has_facing_of(direction),
+            Self::EndPortalFrame { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::EndRod { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::EnderChest { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::FenceGate { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Furnace(furnace) => furnace.has_facing_of(direction),
+            Self::GlazedTerracotta { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::GrindStone(rotation) => Direction::from(rotation.clone()) == direction,
+            // TODO Head
+            Self::Hopper(hopper) => hopper.has_facing_of(direction),
+            Self::JackOLantern { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Ladder { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Lantern { mounted_at, .. } => Direction::from(mounted_at.clone()) == direction,
+            Self::Lever(rotation, _) => Direction::from(rotation.clone()) == direction,
+            Self::Loom { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Observer { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Piston { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::PistonHead { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Pumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneComparator { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneRepeater { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneSubtractor { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneTorch { attached, .. } => Direction::from(attached.clone()) == direction,
+            Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
+            Self::Sign(sign) => sign.has_facing_of(direction),
+            Self::Smoker { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::SoulCampfire { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::SoulLantern { mounted_at, .. } => Direction::from(mounted_at.clone()) == direction,
+            Self::SoulTorch { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Stairs(stair) => stair.has_facing_of(direction),
+            Self::StickyPiston { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::StoneCutter { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Torch { attached, .. } => Direction::from(attached.clone()) == direction,
+            Self::TrappedChest(chest) => chest.has_facing_of(direction),
+            Self::TripwireHook { facing, .. } => Direction::from(facing.clone()) == direction,
+            _ => false,
+        }
+    }
+
+    /// Returns a Leaves block of the Jungle variant.
+    pub fn jungle_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::Jungle,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Jungle variant, aligned with the given axis.
+    pub fn jungle_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::Jungle,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Jungle variant.
+    pub fn jungle_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::Jungle,
+        }
+    }
+
+    /// Returns a Sapling block of the Jungle variant.
+    pub fn jungle_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::Jungle,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    /// Returns a Lava or LavaSource block with the given lava level.
+    /// Note that lava, if not in the nether, goes down by two levels per block.
+    pub fn lava(level: u8) -> Self {
+        if level == 8 {
+            Block::LavaSource
+        } else {
+            Block::Lava {
+                falling: false,
+                level: Int1Through7::new(level as i8).unwrap(),
+            }
+        }
+    }
+
+    /// Returns a Leaves block of the Oak variant.
+    pub fn oak_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::Oak,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Oak variant, aligned with the given axis.
+    pub fn oak_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::Oak,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Oak variant.
+    pub fn oak_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::Oak,
+        }
+    }
+
+    /// Returns a Sapling block of the Oak variant.
+    pub fn oak_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::Oak,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    /// Returns a Leaves block of the Spruce variant.
+    pub fn spruce_leaves(persistent: bool) -> Self {
+        Self::Leaves {
+            material: LeavesMaterial::Spruce,
+            distance_to_trunk: None,
+            persistent,
+        }
+    }
+
+    /// Returns a Log block of the Spruce variant, aligned with the given axis.
+    pub fn spruce_log(axis: Axis3) -> Self {
+        Self::Log(Log {
+            material: WoodMaterial::Spruce,
+            alignment: Some(axis),
+            stripped: false,
+        })
+    }
+
+    /// Returns a Plank block of the Spruce variant.
+    pub fn spruce_planks() -> Self {
+        Self::Planks {
+            material: WoodMaterial::Spruce,
+        }
+    }
+
+    /// Returns a Sapling block of the Spruce variant.
+    pub fn spruce_sapling() -> Self {
+        Self::Sapling {
+            material: SaplingMaterial::Spruce,
+            growth_stage: Int0Through1::new(0).unwrap(),
+        }
+    }
+
+    /// Returns a Water or WaterSource block with the given water level.
+    pub fn water(level: u8) -> Self {
+        if level == 8 {
+            Block::WaterSource
+        } else {
+            Block::Water {
+                falling: false,
+                level: Int1Through7::new(level as i8).unwrap(),
+            }
+        }
+    }
+}

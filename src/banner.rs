@@ -1,3 +1,6 @@
+use std::convert::TryFrom;
+
+use crate::block::Block;
 use crate::colour::*;
 use crate::positioning::*;
 
@@ -12,6 +15,23 @@ pub struct Banner {
     /// List of (normally) up to 6 coloured patterns,
     /// that are featured on top of each other the banner.
     pub patterns: Vec<ColouredPattern>,
+}
+
+impl Banner {
+    pub fn has_facing_of(&self, facing: Direction) -> bool {
+        facing == self.placement.clone().into()
+    }
+}
+
+impl TryFrom<Block> for Banner {
+    type Error = ();
+
+    fn try_from(block: Block) -> Result<Self, Self::Error> {
+        match block {
+            Block::Banner(banner) => Ok(*banner),
+            _ => Err(()),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
