@@ -70,6 +70,40 @@ pub enum Direction {
     WestSouthWest,
 }
 
+impl Direction {
+    /// Returns an instance of the opposite direction.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Self::Down => Self::Up,
+            Self::DownEast => Self::UpWest,
+            Self::DownNorth => Self::UpSouth,
+            Self::DownSouth => Self::UpNorth,
+            Self::DownWest => Self::UpEast,
+            Self::East => Self::West,
+            Self::EastNorthEast => Self::WestSouthWest,
+            Self::EastSouthEast => Self::WestNorthWest,
+            Self::North => Self::South,
+            Self::NorthEast => Self::SouthWest,
+            Self::NorthNorthEast => Self::SouthSouthWest,
+            Self::NorthNorthWest => Self::SouthSouthEast,
+            Self::NorthWest => Self::SouthEast,
+            Self::South => Self::North,
+            Self::SouthEast => Self::NorthWest,
+            Self::SouthSouthEast => Self::NorthNorthWest,
+            Self::SouthSouthWest => Self::NorthNorthEast,
+            Self::SouthWest => Self::NorthEast,
+            Self::Up => Self::Down,
+            Self::UpEast => Self::DownWest,
+            Self::UpNorth => Self::DownSouth,
+            Self::UpSouth => Self::DownNorth,
+            Self::UpWest => Self::DownEast,
+            Self::West => Self::East,
+            Self::WestNorthWest => Self::EastSouthEast,
+            Self::WestSouthWest => Self::EastNorthEast,
+        }
+    }
+}
+
 impl From<Direction16> for Direction {
     fn from(item: Direction16) -> Self {
         match item {

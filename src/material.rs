@@ -375,6 +375,7 @@ impl TryFrom<Material> for LeavesMaterial {
 /// All materials.
 ///
 /// Convertible to and from all other material types.
+#[derive(Clone, Debug, PartialEq)]
 pub enum Material {
     Acacia,
     Andesite,

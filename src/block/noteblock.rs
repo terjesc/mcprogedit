@@ -7,6 +7,12 @@ pub struct Noteblock {
     pub pitch: Pitch,
 }
 
+impl Noteblock {
+    pub fn has_pitch_of(&self, pitch: Pitch) -> bool {
+        self.pitch == pitch
+    }
+}
+
 impl TryFrom<Block> for Noteblock {
     type Error = ();
 

@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
-use crate::material::StairMaterial;
+use crate::material::{Material, StairMaterial};
 use crate::positioning::{Direction, Edge8};
 
 /// Stair shape is not configurable, as it depend on neighbouring stairs.
@@ -17,6 +17,10 @@ pub struct Stair {
 impl Stair {
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.position.clone().into()
+    }
+
+    pub fn has_material_of(&self, material: Material) -> bool {
+        material == self.material.clone().into()
     }
 }
 

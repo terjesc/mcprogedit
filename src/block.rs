@@ -1,4 +1,7 @@
+use std::convert::TryFrom;
+
 mod banner;
+mod bed;
 mod chest;
 mod dispenser;
 mod door;
@@ -6,11 +9,12 @@ mod dropper;
 mod furnace;
 mod hopper;
 mod noteblock;
-mod sign;
 mod shulker_box;
+mod sign;
 mod stair;
 
 pub use crate::block::banner::*;
+pub use crate::block::bed::*;
 pub use crate::block::chest::*;
 pub use crate::block::dispenser::*;
 pub use crate::block::door::*;
@@ -18,8 +22,8 @@ pub use crate::block::dropper::*;
 pub use crate::block::furnace::*;
 pub use crate::block::hopper::*;
 pub use crate::block::noteblock::*;
-pub use crate::block::sign::*;
 pub use crate::block::shulker_box::*;
+pub use crate::block::sign::*;
 pub use crate::block::stair::*;
 
 use crate::bounded_ints::*;
@@ -50,6 +54,12 @@ pub struct Slab {
     pub material: SlabMaterial,
     pub position: SlabVariant,
     pub waterlogged: bool,
+}
+
+impl Slab {
+    pub fn has_material_of(&self, material: Material) -> bool {
+        material == self.material.clone().into()
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -185,15 +195,15 @@ pub struct Log {
     pub stripped: bool,
 }
 
+impl Log {
+    pub fn has_material_of(&self, material: Material) -> bool {
+        material == self.material.clone().into()
+    }
+}
+
 bounded_integer! {
     #[repr(i8)]
     pub struct HoneyLevel { 0..=5 }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum BedEnd {
-    Foot,
-    Head,
 }
 
 // TODO consider using BitSet here
@@ -331,11 +341,7 @@ pub enum Block {
     Bell {
         position: BellPosition,
     }, // TODO add block entity
-    Bed {
-        colour: Colour,
-        facing: Surface4,
-        end: BedEnd,
-    },
+    Bed(Bed),
     Blackstone,
     BlastFurnace(Box<Furnace>),
     BlockOfCoal,
@@ -807,7 +813,7 @@ pub enum Block {
         growth_stage: Int0Through7,
     },
     Wool {
-        colour: Option<Colour>,
+        colour: Colour,
     },
 }
 
@@ -890,6 +896,15 @@ impl Block {
         }
     }
 
+    /// Returns a bottom slab of the specified material.
+    pub fn bottom_slab(material: Material) -> Self {
+        Self::Slab(Slab {
+            material: SlabMaterial::try_from(material).unwrap(),
+            position: SlabVariant::Bottom,
+            waterlogged: false,
+        })
+    }
+
     /// Returns a Leaves block of the Dark Oak variant.
     pub fn dark_oak_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -923,6 +938,39 @@ impl Block {
         }
     }
 
+    /// Returns a detector rail of the specified shape.
+    pub fn detector_rail(shape: RailShape) -> Self {
+        Self::Rail {
+            variant: RailType::Detector,
+            shape,
+        }
+    }
+
+    /// Returns a double slab of the specified material.
+    pub fn double_slab(material: Material) -> Self {
+        Self::Slab(Slab {
+            material: SlabMaterial::try_from(material).unwrap(),
+            position: SlabVariant::Double,
+            waterlogged: false,
+        })
+    }
+
+    /// Returns a fire block of minimum age.
+    pub fn fire() -> Self {
+        Self::Fire {
+            age: Int0Through15::new(0).unwrap(),
+        }
+    }
+
+    /// Returns true if the block is a chest.
+    pub fn is_chest(&self) -> bool {
+        match self {
+            Self::Chest(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a dispenser.
     pub fn is_dispenser(&self) -> bool {
         match self {
             Self::Dispenser(_) => true,
@@ -930,7 +978,84 @@ impl Block {
         }
     }
 
-    // TODO description / documentation of this function
+    /// Returns true if the block is a furnace.
+    pub fn is_furnace(&self) -> bool {
+        match self {
+            Self::Furnace(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a piston (base).
+    pub fn is_piston(&self) -> bool {
+        match self {
+            Self::Piston { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a piston head.
+    pub fn is_piston_head(&self) -> bool {
+        match self {
+            Self::PistonHead { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a sign.
+    pub fn is_sign(&self) -> bool {
+        match self {
+            Self::Sign(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a stair.
+    pub fn is_stairs(&self) -> bool {
+        match self {
+            Self::Stairs(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a sticky piston (base).
+    pub fn is_sticky_piston(&self) -> bool {
+        match self {
+            Self::StickyPiston { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a torch.
+    pub fn is_torch(&self) -> bool {
+        match self {
+            Self::Torch { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block has the given colour, false otherwise.
+    pub fn has_colour_of(&self, colour: Colour) -> bool {
+        match self {
+            Self::Banner(banner) => banner.has_colour_of(colour),
+            Self::Bed(bed) => bed.has_colour_of(colour),
+            Self::Carpet { colour: c } => *c == colour,
+            Self::Concrete { colour: c } => *c == colour,
+            Self::ConcretePowder { colour: c } => *c == colour,
+            Self::Glass { colour: Some(c) } => *c == colour,
+            Self::GlassPane {
+                colour: Some(c), ..
+            } => *c == colour,
+            Self::GlazedTerracotta { colour: c, .. } => *c == colour,
+            Self::ShulkerBox(shulker_box) => shulker_box.has_colour_of(colour),
+            Self::Sign(sign) => sign.has_colour_of(colour),
+            Self::Terracotta { colour: Some(c) } => *c == colour,
+            Self::Wool { colour: c } => *c == colour,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block faces in the given direction, false otherwise.
     pub fn has_facing_of(&self, direction: Direction) -> bool {
         match self {
             Self::Anvil { facing, .. } => Direction::from(facing.clone()) == direction,
@@ -938,7 +1063,7 @@ impl Block {
             Self::Barrel { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Beehive { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::BeeNest { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Bed { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Bed(bed) => bed.has_facing_of(direction),
             Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
             Self::Button(_, rotation) => Direction::from(rotation.clone()) == direction,
             Self::Campfire { facing, .. } => Direction::from(facing.clone()) == direction,
@@ -960,7 +1085,7 @@ impl Block {
             Self::Hopper(hopper) => hopper.has_facing_of(direction),
             Self::JackOLantern { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Ladder { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Lantern { mounted_at, .. } => Direction::from(mounted_at.clone()) == direction,
+            Self::Lantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
             Self::Lever(rotation, _) => Direction::from(rotation.clone()) == direction,
             Self::Loom { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Observer { facing, .. } => Direction::from(facing.clone()) == direction,
@@ -975,14 +1100,40 @@ impl Block {
             Self::Sign(sign) => sign.has_facing_of(direction),
             Self::Smoker { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::SoulCampfire { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::SoulLantern { mounted_at, .. } => Direction::from(mounted_at.clone()) == direction,
+            Self::SoulLantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
             Self::SoulTorch { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Stairs(stair) => stair.has_facing_of(direction),
             Self::StickyPiston { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::StoneCutter { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Torch { attached, .. } => Direction::from(attached.clone()) == direction,
+            Self::Torch { attached, .. } => {
+                Direction::from(attached.clone()).opposite() == direction
+            }
             Self::TrappedChest(chest) => chest.has_facing_of(direction),
             Self::TripwireHook { facing, .. } => Direction::from(facing.clone()) == direction,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is made of the given material, false otherwise.
+    pub fn has_material_of(&self, material: Material) -> bool {
+        match self {
+            Self::Button(mat, _) => Material::from(mat.clone()) == material,
+            Self::Coral { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::CoralBlock { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::CoralFan { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Door(door) => door.has_material_of(material),
+            Self::Fence { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::FenceGate { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Leaves { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Log(log) => log.has_material_of(material),
+            Self::Planks { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::PressurePlate { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Sapling { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Sign(sign) => sign.has_material_of(material),
+            Self::Slab(slab) => slab.has_material_of(material),
+            Self::Stairs(stair) => stair.has_material_of(material),
+            Self::Trapdoor { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Wall { material: mat, .. } => Material::from(mat.clone()) == material,
             _ => false,
         }
     }
@@ -1066,6 +1217,79 @@ impl Block {
         }
     }
 
+    /// Returns a powered rail of the specified shape.
+    pub fn powered_rail(shape: RailShape) -> Self {
+        Self::Rail {
+            variant: RailType::Powered,
+            shape,
+        }
+    }
+
+    /// Sets the age or growth_stage field of the block to the given value,
+    /// clamped to the valid range for the field of the particular block.
+    pub fn set_age_to(&mut self, new_age: i8) {
+        match self {
+            Self::Bamboo { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through1::new_saturating(new_age);
+            }
+            Self::Beetroots { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through3::new_saturating(new_age);
+            }
+            Self::Cactus { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through15::new_saturating(new_age);
+            }
+            Self::Carrots { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through7::new_saturating(new_age);
+            }
+            Self::ChorusFlower { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through5::new_saturating(new_age);
+            }
+            Self::CocoaBeans { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through2::new_saturating(new_age);
+            }
+            Self::Fire { ref mut age, .. } => {
+                *age = Int0Through15::new_saturating(new_age);
+            }
+            // TODO FrostedIce
+            Self::Kelp { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through25::new_saturating(new_age);
+            }
+            // TODO MelonStem
+            Self::NetherWart { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through3::new_saturating(new_age);
+            }
+            Self::Potatoes { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through7::new_saturating(new_age);
+            }
+            // TODO PumpkinStem
+            Self::Sapling { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through1::new_saturating(new_age);
+            }
+            Self::SoulFire { ref mut age, .. } => {
+                *age = Int0Through15::new_saturating(new_age);
+            }
+            Self::SugarCane { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through15::new_saturating(new_age);
+            }
+            Self::SweetBerryBush { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through3::new_saturating(new_age);
+            }
+            Self::TurtleEgg { ref mut age, .. } => {
+                *age = Int0Through2::new_saturating(new_age);
+            }
+            Self::TwistingVines { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through25::new_saturating(new_age);
+            }
+            Self::WeepingVines { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through25::new_saturating(new_age);
+            }
+            Self::Wheat { ref mut growth_stage, .. } => {
+                *growth_stage = Int0Through7::new_saturating(new_age);
+            }
+            _ => (),
+        }
+    }
+
     /// Returns a Leaves block of the Spruce variant.
     pub fn spruce_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -1099,6 +1323,15 @@ impl Block {
         }
     }
 
+    /// Returns a top slab of the specified material.
+    pub fn top_slab(material: Material) -> Self {
+        Self::Slab(Slab {
+            material: SlabMaterial::try_from(material).unwrap(),
+            position: SlabVariant::Top,
+            waterlogged: false,
+        })
+    }
+
     /// Returns a Water or WaterSource block with the given water level.
     pub fn water(level: u8) -> Self {
         if level == 8 {
@@ -1108,6 +1341,13 @@ impl Block {
                 falling: false,
                 level: Int1Through7::new(level as i8).unwrap(),
             }
+        }
+    }
+
+    /// Returns a wheat block of minimum age.
+    pub fn wheat() -> Self {
+        Self::Wheat {
+            growth_stage: Int0Through7::new(0).unwrap(),
         }
     }
 }

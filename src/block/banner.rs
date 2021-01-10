@@ -18,6 +18,10 @@ pub struct Banner {
 }
 
 impl Banner {
+    pub fn has_colour_of(&self, colour: Colour) -> bool {
+        colour == self.colour
+    }
+
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.placement.clone().into()
     }

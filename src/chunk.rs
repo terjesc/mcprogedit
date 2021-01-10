@@ -384,7 +384,7 @@ impl Chunk {
                                 panic!("Wrong block entity variant for note block")
                             }
                         }
-                        26 => Block::Bed {
+                        26 => Block::Bed(Bed {
                             colour: Colour::Red,
                             facing: facing4_swne(data[index]),
                             end: if (data[index] & 0x8) == 0x8 {
@@ -392,7 +392,7 @@ impl Chunk {
                             } else {
                                 BedEnd::Foot
                             },
-                        },
+                        }),
                         27 => Block::Rail {
                             variant: RailType::Powered,
                             shape: RailShape::from_value(data[index] & 0x7),
@@ -406,9 +406,10 @@ impl Chunk {
                             extended: data[index] & 0x8 == 0x8,
                         },
                         30 => Block::Cobweb,
-                        31 => Block::Grass(match data[index] & 0x1 {
-                            0 => Grass::Grass,
-                            1 => Grass::Fern,
+                        31 => Block::Grass(match data[index] & 0x3 {
+                            1 => Grass::Grass,
+                            2 => Grass::Fern,
+                            n @ 0 | n @ 3 => panic!("Unkown grass data variant: {}", n),
                             _ => unreachable!(),
                         }),
                         32 => Block::DeadBush,
@@ -425,7 +426,7 @@ impl Chunk {
                             }
                         }
                         35 => Block::Wool {
-                            colour: Some(((data[index] & 0xF) as i32).into()),
+                            colour: ((data[index] & 0xF) as i32).into(),
                         },
                         // TODO block 36 piston_extension ("Block moved by Piston")
                         37 => Block::Flower(Flower::Dandelion),

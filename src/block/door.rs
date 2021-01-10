@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
-use crate::material::DoorMaterial;
+use crate::material::{DoorMaterial, Material};
 use crate::positioning::{Direction, Surface4};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -16,6 +16,10 @@ pub struct Door {
 impl Door {
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.facing.clone().into()
+    }
+
+    pub fn has_material_of(&self, material: Material) -> bool {
+        material == self.material.clone().into()
     }
 }
 

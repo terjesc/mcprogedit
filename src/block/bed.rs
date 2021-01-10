@@ -2,21 +2,18 @@ use std::convert::TryFrom;
 
 use crate::block::Block;
 use crate::colour::Colour;
-use crate::inventory::Inventory;
-use crate::positioning::{Direction, Surface6};
+use crate::positioning::{Direction, Surface4};
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct ShulkerBox {
-    pub colour: Option<Colour>,
-    pub facing: Surface6,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
+pub struct Bed {
+    pub colour: Colour,
+    pub facing: Surface4,
+    pub end: BedEnd,
 }
 
-impl ShulkerBox {
+impl Bed {
     pub fn has_colour_of(&self, colour: Colour) -> bool {
-        Some(colour) == self.colour
+        colour == self.colour
     }
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
@@ -24,13 +21,19 @@ impl ShulkerBox {
     }
 }
 
-impl TryFrom<Block> for ShulkerBox {
+impl TryFrom<Block> for Bed {
     type Error = ();
 
     fn try_from(block: Block) -> Result<Self, Self::Error> {
         match block {
-            Block::ShulkerBox(shulker_box) => Ok(*shulker_box),
+            Block::Bed(bed) => Ok(bed),
             _ => Err(()),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum BedEnd {
+    Foot,
+    Head,
 }

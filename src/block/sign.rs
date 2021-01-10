@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use crate::block::Block;
 use crate::colour::Colour;
-use crate::material::WoodMaterial;
+use crate::material::{Material, WoodMaterial};
 use crate::positioning::{Direction, WallOrRotatedOnFloor};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,6 +18,14 @@ pub struct Sign {
 }
 
 impl Sign {
+    pub fn has_colour_of(&self, colour: Colour) -> bool {
+        colour == self.colour
+    }
+
+    pub fn has_material_of(&self, material: Material) -> bool {
+        material == self.material.clone().into()
+    }
+
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.placement.clone().into()
     }
