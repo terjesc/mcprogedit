@@ -30,6 +30,15 @@ impl Item {
         }
     }
 
+    pub fn new_record(recording: Recording) -> Self {
+        Self {
+            custom_name: None,
+            enchantments: Vec::new(),
+            damage: None,
+            kind: ItemKind::Record(recording),
+        }
+    }
+
     // Source: https://minecraft.gamepedia.com/Java_Edition_data_value/Pre-flattening#Item_IDs
     // Implemented block items
     // Next item to implement: pumpkin_pie (from beginning) or beetroot_soup (from end)

@@ -160,7 +160,7 @@ fn v_1_12_2_block_group_2() {
     assert_block_eq(&excerpt, (3, 0, 0), &Block::Sponge);
     assert_block_eq(&excerpt, (3, 0, 1), &Block::WetSponge);
 
-    assert_block_eq(&excerpt, (4, 0, 0), &Block::Glass { colour: None });
+    assert_block_eq(&excerpt, (4, 0, 0), &Block::glass());
 
     assert_block_eq(&excerpt, (5, 0, 0), &Block::LapisLazuliOre);
 
@@ -269,22 +269,22 @@ fn v_1_12_2_block_group_3() {
     let block = excerpt.get_block_at((2, 0, 4).into()).unwrap();
     assert!(block.is_piston_head() && block.has_facing_of(Direction::East));
 
-    assert_block_eq(&excerpt, (3, 0, 0), &Block::Wool { colour: Colour::White });
-    assert_block_eq(&excerpt, (3, 0, 1), &Block::Wool { colour: Colour::Orange });
-    assert_block_eq(&excerpt, (3, 0, 2), &Block::Wool { colour: Colour::Magenta });
-    assert_block_eq(&excerpt, (3, 0, 3), &Block::Wool { colour: Colour::LightBlue });
-    assert_block_eq(&excerpt, (3, 0, 4), &Block::Wool { colour: Colour::Yellow });
-    assert_block_eq(&excerpt, (3, 0, 5), &Block::Wool { colour: Colour::Lime });
-    assert_block_eq(&excerpt, (3, 0, 6), &Block::Wool { colour: Colour::Pink });
-    assert_block_eq(&excerpt, (3, 0, 7), &Block::Wool { colour: Colour::Gray });
-    assert_block_eq(&excerpt, (3, 0, 8), &Block::Wool { colour: Colour::LightGray });
-    assert_block_eq(&excerpt, (3, 0, 9), &Block::Wool { colour: Colour::Cyan });
-    assert_block_eq(&excerpt, (3, 0, 10), &Block::Wool { colour: Colour::Purple });
-    assert_block_eq(&excerpt, (3, 0, 11), &Block::Wool { colour: Colour::Blue });
-    assert_block_eq(&excerpt, (3, 0, 12), &Block::Wool { colour: Colour::Brown });
-    assert_block_eq(&excerpt, (3, 0, 13), &Block::Wool { colour: Colour::Green });
-    assert_block_eq(&excerpt, (3, 0, 14), &Block::Wool { colour: Colour::Red });
-    assert_block_eq(&excerpt, (3, 0, 15), &Block::Wool { colour: Colour::Black });
+    assert_block_eq(&excerpt, (3, 0, 0), &Block::wool_with_colour(Colour::White));
+    assert_block_eq(&excerpt, (3, 0, 1), &Block::wool_with_colour(Colour::Orange));
+    assert_block_eq(&excerpt, (3, 0, 2), &Block::wool_with_colour(Colour::Magenta));
+    assert_block_eq(&excerpt, (3, 0, 3), &Block::wool_with_colour(Colour::LightBlue));
+    assert_block_eq(&excerpt, (3, 0, 4), &Block::wool_with_colour(Colour::Yellow));
+    assert_block_eq(&excerpt, (3, 0, 5), &Block::wool_with_colour(Colour::Lime));
+    assert_block_eq(&excerpt, (3, 0, 6), &Block::wool_with_colour(Colour::Pink));
+    assert_block_eq(&excerpt, (3, 0, 7), &Block::wool_with_colour(Colour::Gray));
+    assert_block_eq(&excerpt, (3, 0, 8), &Block::wool_with_colour(Colour::LightGray));
+    assert_block_eq(&excerpt, (3, 0, 9), &Block::wool_with_colour(Colour::Cyan));
+    assert_block_eq(&excerpt, (3, 0, 10), &Block::wool_with_colour(Colour::Purple));
+    assert_block_eq(&excerpt, (3, 0, 11), &Block::wool_with_colour(Colour::Blue));
+    assert_block_eq(&excerpt, (3, 0, 12), &Block::wool_with_colour(Colour::Brown));
+    assert_block_eq(&excerpt, (3, 0, 13), &Block::wool_with_colour(Colour::Green));
+    assert_block_eq(&excerpt, (3, 0, 14), &Block::wool_with_colour(Colour::Red));
+    assert_block_eq(&excerpt, (3, 0, 15), &Block::wool_with_colour(Colour::Black));
 
     // NB block with ID 36, which should be here at x position 4,
     // is not implemented and is not present in the save file.
@@ -567,7 +567,189 @@ fn v_1_12_2_block_group_5() {
     assert_block_eq(&excerpt, (14, 0, 5), &Block::snow_layers(5));
     assert_block_eq(&excerpt, (14, 0, 6), &Block::snow_layers(6));
     assert_block_eq(&excerpt, (14, 0, 7), &Block::snow_layers(7));
-    assert_block_eq(&excerpt, (14, 0, 8), &Block::snow_block());
+    assert_block_eq(&excerpt, (14, 0, 8), &Block::snow_layers(8));
 
     assert_block_eq(&excerpt, (15, 0, 0), &Block::Ice);
+}
+
+#[test]
+/// Import of blocks with id 80 through 95
+fn v_1_12_2_block_group_6() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (80, 56, 0), (16, 3, 16));
+
+    assert_block_eq(&excerpt, (0, 0, 0), &Block::SnowBlock);
+
+    assert_block_eq(&excerpt, (1, 1, 0), &Block::cactus());
+
+    assert_block_eq(&excerpt, (2, 0, 0), &Block::Clay);
+
+    assert_block_eq(&excerpt, (3, 0, 0), &Block::sugar_cane());
+
+    use mcprogedit::item::Recording;
+    assert_block_eq(&excerpt, (4, 0, 0), &Block::jukebox());
+    assert_block_eq(&excerpt, (4, 0, 1), &Block::jukebox_with_recording(Recording::Thirteen));
+    assert_block_eq(&excerpt, (4, 0, 2), &Block::jukebox_with_recording(Recording::Cat));
+    assert_block_eq(&excerpt, (4, 0, 3), &Block::jukebox_with_recording(Recording::Blocks));
+    assert_block_eq(&excerpt, (4, 0, 4), &Block::jukebox_with_recording(Recording::Chirp));
+    assert_block_eq(&excerpt, (4, 0, 5), &Block::jukebox_with_recording(Recording::Far));
+    assert_block_eq(&excerpt, (4, 0, 6), &Block::jukebox_with_recording(Recording::Mall));
+    assert_block_eq(&excerpt, (4, 0, 7), &Block::jukebox_with_recording(Recording::Mellohi));
+    assert_block_eq(&excerpt, (4, 0, 8), &Block::jukebox_with_recording(Recording::Stal));
+    assert_block_eq(&excerpt, (4, 0, 9), &Block::jukebox_with_recording(Recording::Strad));
+    assert_block_eq(&excerpt, (4, 0, 10), &Block::jukebox_with_recording(Recording::Ward));
+    assert_block_eq(&excerpt, (4, 0, 11), &Block::jukebox_with_recording(Recording::Eleven));
+    assert_block_eq(&excerpt, (4, 0, 12), &Block::jukebox_with_recording(Recording::Wait));
+
+    assert_block_eq(&excerpt, (5, 0, 0), &Block::oak_fence());
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::pumpkin(Direction::West));
+    assert_block_eq(&excerpt, (6, 0, 2), &Block::pumpkin(Direction::South));
+    assert_block_eq(&excerpt, (6, 0, 4), &Block::pumpkin(Direction::East));
+    assert_block_eq(&excerpt, (6, 0, 6), &Block::pumpkin(Direction::North));
+
+    assert_block_eq(&excerpt, (7, 0, 0), &Block::Netherrack);
+
+    assert_block_eq(&excerpt, (8, 0, 0), &Block::SoulSand);
+
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::Glowstone);
+
+    // NB Alignment of nether portal blocks is not implemented.
+    assert_block_eq(&excerpt, (10, 0, 0), &Block::NetherPortal { alignment: None });
+
+    assert_block_eq(&excerpt, (11, 0, 0), &Block::jack_o_lantern(Direction::West));
+    assert_block_eq(&excerpt, (11, 0, 2), &Block::jack_o_lantern(Direction::South));
+    assert_block_eq(&excerpt, (11, 0, 4), &Block::jack_o_lantern(Direction::East));
+    assert_block_eq(&excerpt, (11, 0, 6), &Block::jack_o_lantern(Direction::North));
+
+    assert_block_eq(&excerpt, (12, 2, 0), &Block::cake());
+    assert_block_eq(&excerpt, (12, 2, 1), &Block::cake_with_remaining_pieces(6));
+    assert_block_eq(&excerpt, (12, 2, 2), &Block::cake_with_remaining_pieces(5));
+    assert_block_eq(&excerpt, (12, 2, 3), &Block::cake_with_remaining_pieces(4));
+    assert_block_eq(&excerpt, (12, 2, 4), &Block::cake_with_remaining_pieces(3));
+    assert_block_eq(&excerpt, (12, 2, 5), &Block::cake_with_remaining_pieces(2));
+    assert_block_eq(&excerpt, (12, 2, 6), &Block::cake_with_remaining_pieces(1));
+
+    // NB 13 "redstone repeater":
+    // * the one at (13, 0, 0) is locked
+    // * the one at (13, 0, 3) is powered
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(1)
+            .with_facing(&Direction::East)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 1), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(2)
+            .with_facing(&Direction::East)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 2), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(3)
+            .with_facing(&Direction::East)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 3), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(4)
+            .with_facing(&Direction::East)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 4), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(1)
+            .with_facing(&Direction::North)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 5), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(2)
+            .with_facing(&Direction::North)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 6), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(3)
+            .with_facing(&Direction::North)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 7), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(4)
+            .with_facing(&Direction::North)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 8), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(1)
+            .with_facing(&Direction::West)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 9), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(2)
+            .with_facing(&Direction::West)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 10), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(3)
+            .with_facing(&Direction::West)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 11), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(4)
+            .with_facing(&Direction::West)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 12), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(1)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 13), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(2)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 14), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(3)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (13, 0, 15), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(4)
+            .with_facing(&Direction::South)
+    ));
+
+    // NB 14 "powered redstone repeater"
+    // * the one at (14, 0, 3 is locked.
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(1)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (14, 0, 1), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(2)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (14, 0, 2), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(3)
+            .with_facing(&Direction::South)
+    ));
+    assert_block_eq(&excerpt, (14, 0, 3), &Block::from(
+            RedstoneRepeater::new()
+            .with_delay(4)
+            .with_facing(&Direction::South)
+    ));
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::glass_with_colour(Colour::White));
+    assert_block_eq(&excerpt, (15, 0, 1), &Block::glass_with_colour(Colour::Orange));
+    assert_block_eq(&excerpt, (15, 0, 2), &Block::glass_with_colour(Colour::Magenta));
+    assert_block_eq(&excerpt, (15, 0, 3), &Block::glass_with_colour(Colour::LightBlue));
+    assert_block_eq(&excerpt, (15, 0, 4), &Block::glass_with_colour(Colour::Yellow));
+    assert_block_eq(&excerpt, (15, 0, 5), &Block::glass_with_colour(Colour::Lime));
+    assert_block_eq(&excerpt, (15, 0, 6), &Block::glass_with_colour(Colour::Pink));
+    assert_block_eq(&excerpt, (15, 0, 7), &Block::glass_with_colour(Colour::Gray));
+    assert_block_eq(&excerpt, (15, 0, 8), &Block::glass_with_colour(Colour::LightGray));
+    assert_block_eq(&excerpt, (15, 0, 9), &Block::glass_with_colour(Colour::Cyan));
+    assert_block_eq(&excerpt, (15, 0, 10), &Block::glass_with_colour(Colour::Purple));
+    assert_block_eq(&excerpt, (15, 0, 11), &Block::glass_with_colour(Colour::Blue));
+    assert_block_eq(&excerpt, (15, 0, 12), &Block::glass_with_colour(Colour::Brown));
+    assert_block_eq(&excerpt, (15, 0, 13), &Block::glass_with_colour(Colour::Green));
+    assert_block_eq(&excerpt, (15, 0, 14), &Block::glass_with_colour(Colour::Red));
+    assert_block_eq(&excerpt, (15, 0, 15), &Block::glass_with_colour(Colour::Black));
 }

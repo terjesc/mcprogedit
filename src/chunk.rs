@@ -702,12 +702,12 @@ impl Chunk {
                             facing: facing4_swne(data[index]),
                         },
                         92 => Block::Cake {
-                            bites: Int0Through6::new(data[index] & 0x7).unwrap(),
+                            pieces: Int1Through7::new(7 - (data[index] & 0x7)).unwrap(),
                         },
-                        93 | 94 => Block::RedstoneRepeater {
-                            facing: facing4_swne(data[index]),
+                        93 | 94 => Block::RedstoneRepeater(RedstoneRepeater {
+                            facing: facing4_nesw(data[index]),
                             delay: Int1Through4::new(((data[index] >> 2) & 0x3) + 1).unwrap(),
-                        },
+                        }),
                         95 => Block::Glass {
                             colour: Some(((data[index] & 0xF) as i32).into()),
                         },
@@ -1340,6 +1340,16 @@ impl Chunk {
                 1 => Surface4::West,
                 2 => Surface4::North,
                 3 => Surface4::East,
+                _ => unreachable!(),
+            }
+        }
+
+        fn facing4_nesw(data: i8) -> Surface4 {
+            match data & 0x3 {
+                0 => Surface4::North,
+                1 => Surface4::East,
+                2 => Surface4::South,
+                3 => Surface4::West,
                 _ => unreachable!(),
             }
         }

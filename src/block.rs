@@ -9,6 +9,7 @@ mod dropper;
 mod furnace;
 mod hopper;
 mod noteblock;
+mod redstone_repeater;
 mod shulker_box;
 mod sign;
 mod stair;
@@ -22,6 +23,7 @@ pub use crate::block::dropper::*;
 pub use crate::block::furnace::*;
 pub use crate::block::hopper::*;
 pub use crate::block::noteblock::*;
+pub use crate::block::redstone_repeater::*;
 pub use crate::block::shulker_box::*;
 pub use crate::block::sign::*;
 pub use crate::block::stair::*;
@@ -371,7 +373,7 @@ pub enum Block {
         growth_stage: Int0Through15,
     },
     Cake {
-        bites: Int0Through6,
+        pieces: Int1Through7,
     },
     Campfire {
         facing: Surface4,
@@ -671,10 +673,7 @@ pub enum Block {
     }, // TODO add block entity (?)
     RedstoneLamp,
     RedstoneOre,
-    RedstoneRepeater {
-        facing: Surface4,
-        delay: Int1Through4,
-    },
+    RedstoneRepeater(RedstoneRepeater),
     RedstoneSubtractor {
         facing: Surface4,
     }, // TODO add block entity (?)
@@ -830,6 +829,23 @@ pub enum Block {
 assert_eq_size!(Block, i128);
 
 impl Block {
+    /// Returns an acacia fence.
+    pub fn acacia_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::Acacia,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed acacia fence gate with the doors facing in the given direction.
+    pub fn acacia_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Acacia,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
+        }
+    }
+
     /// Returns a Leaves block of the Acacia variant.
     pub fn acacia_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -860,6 +876,23 @@ impl Block {
         Self::Sapling {
             material: SaplingMaterial::Acacia,
             growth_stage: Int0Through1::MIN,
+        }
+    }
+
+    /// Returns a birch fence.
+    pub fn birch_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::Birch,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed birch fence gate with the doors facing in the given direction.
+    pub fn birch_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Birch,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
         }
     }
 
@@ -903,6 +936,44 @@ impl Block {
             position: SlabVariant::Bottom,
             waterlogged: false,
         })
+    }
+
+    /// Returns a (full) cake.
+    pub fn cake() -> Self {
+        Self::Cake {
+            pieces: Int1Through7::MAX,
+        }
+    }
+
+    /// Returns a cake with the given number of pieces remaining.
+    pub fn cake_with_remaining_pieces(pieces: i8) -> Self {
+        Self::Cake {
+            pieces: Int1Through7::new_saturating(pieces),
+        }
+    }
+
+    /// Returns a cactus block.
+    pub fn cactus() -> Self {
+        Self::Cactus {
+            growth_stage: Int0Through15::MIN,
+        }
+    }
+
+    /// Returns a dark oak fence.
+    pub fn dark_oak_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::DarkOak,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed dark oak fence gate with the doors facing in the given direction.
+    pub fn dark_oak_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::DarkOak,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
+        }
     }
 
     /// Returns a Leaves block of the Dark Oak variant.
@@ -959,6 +1030,20 @@ impl Block {
     pub fn fire() -> Self {
         Self::Fire {
             age: Int0Through15::MIN,
+        }
+    }
+
+    /// Returns an uncoloured glass block.
+    pub fn glass() -> Self {
+        Self::Glass {
+            colour: None,
+        }
+    }
+
+    /// Returns a glass block of the given colour.
+    pub fn glass_with_colour(colour: Colour) -> Self {
+        Self::Glass {
+            colour: Some(colour),
         }
     }
 
@@ -1021,7 +1106,7 @@ impl Block {
             Self::PistonHead { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::Pumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::RedstoneComparator { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneRepeater { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneRepeater(repeater) => repeater.has_facing_of(&direction),
             Self::RedstoneSubtractor { facing, .. } => Direction::from(facing.clone()) == direction,
             Self::RedstoneTorch { attached, .. } => {
                 Direction::from(attached.clone()).opposite() == direction
@@ -1142,11 +1227,58 @@ impl Block {
         }
     }
 
+    /// Returns a sugar cane block.
+    pub fn sugar_cane() -> Self {
+        Self::SugarCane {
+            growth_stage: Int0Through15::MIN,
+        }
+    }
+
     /// Returns true if the block is a torch.
     pub fn is_torch(&self) -> bool {
         match self {
             Self::Torch { .. } => true,
             _ => false,
+        }
+    }
+
+    /// Returns a jack o'lantern facing in the given direction.
+    pub fn jack_o_lantern(facing: Direction) -> Self {
+        Self::JackOLantern {
+            facing: Surface4::try_from(facing).unwrap(),
+        }
+    }
+
+    /// Returns an empty jukebox.
+    pub fn jukebox() -> Self {
+        Self::Jukebox(Box::new(Jukebox { record: None }))
+    }
+
+    /// Returns a jukebox with a disk of the given recording contained.
+    pub fn jukebox_with_recording(recording: crate::item::Recording) -> Self {
+        Self::Jukebox(
+            Box::new(
+                Jukebox {
+                    record: Some(crate::item::Item::new_record(recording)),
+                }
+            )
+        )
+    }
+
+    /// Returns an jungle fence.
+    pub fn jungle_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::Jungle,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed jungle fence gate with the doors facing in the given direction.
+    pub fn jungle_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Jungle,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
         }
     }
 
@@ -1225,6 +1357,31 @@ impl Block {
         )
     }
 
+    /// Returns a nether brick fence.
+    pub fn nether_brick_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::NetherBrick,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns an oak fence.
+    pub fn oak_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::Oak,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed oak fence gate with the doors facing in the given direction.
+    pub fn oak_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Oak,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
+        }
+    }
+
     /// Returns a Leaves block of the Oak variant.
     pub fn oak_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -1270,6 +1427,13 @@ impl Block {
     pub fn pressure_plate(material: Material) -> Self {
         Self::PressurePlate {
             material: PressurePlateMaterial::try_from(material).unwrap(),
+        }
+    }
+
+    /// Returns a pumpkin facing in the given direction.
+    pub fn pumpkin(facing: Direction) -> Self {
+        Self::Pumpkin {
+            facing: Surface4::try_from(facing).unwrap(),
         }
     }
 
@@ -1346,13 +1510,6 @@ impl Block {
         }
     }
 
-    /// Returns a full size snow block.
-    pub fn snow_block() -> Self {
-        Self::Snow {
-            thickness: Int1Through8::MAX,
-        }
-    }
-
     /// Returns a one layer thick snow block.
     pub fn snow_layer() -> Self {
         Self::Snow {
@@ -1364,6 +1521,23 @@ impl Block {
     pub fn snow_layers(thickness: i8) -> Self {
         Self::Snow {
             thickness: Int1Through8::new_saturating(thickness),
+        }
+    }
+
+    /// Returns a spruce fence.
+    pub fn spruce_fence() -> Self {
+        Self::Fence {
+            material: FenceMaterial::Spruce,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a closed spruce fence gate with the doors facing in the given direction.
+    pub fn spruce_fence_gate(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Spruce,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: false,
         }
     }
 
@@ -1435,6 +1609,13 @@ impl Block {
             ButtonMaterial::Oak,
             Surface6::try_from(direction).unwrap()
         )
+    }
+
+    /// Returns a wool block of the given colour.
+    pub fn wool_with_colour(colour: Colour) -> Self {
+        Self::Wool {
+            colour,
+        }
     }
 
     /// Returns a wheat block of minimum age.
