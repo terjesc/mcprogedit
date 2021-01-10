@@ -366,7 +366,7 @@ pub enum Block {
     BubbleColumn {
         drag_direction: Surface2,
     }, // Is this even needed?
-    Button(ButtonMaterial, SurfaceRotation12),
+    Button(ButtonMaterial, Surface6),
     Cactus {
         growth_stage: Int0Through15,
     },
@@ -733,7 +733,7 @@ pub enum Block {
         mounted_at: Surface2,
     },
     SoulTorch {
-        facing: Surface5,
+        attached: Surface5,
     },
     SoulSand,
     SoulSoil,
@@ -859,7 +859,7 @@ impl Block {
     pub fn acacia_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Acacia,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
         }
     }
 
@@ -892,7 +892,7 @@ impl Block {
     pub fn birch_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Birch,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
         }
     }
 
@@ -934,7 +934,7 @@ impl Block {
     pub fn dark_oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::DarkOak,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
         }
     }
 
@@ -958,7 +958,115 @@ impl Block {
     /// Returns a fire block of minimum age.
     pub fn fire() -> Self {
         Self::Fire {
-            age: Int0Through15::new(0).unwrap(),
+            age: Int0Through15::MIN,
+        }
+    }
+
+    /// Returns true if the block has the given colour, false otherwise.
+    pub fn has_colour_of(&self, colour: Colour) -> bool {
+        match self {
+            Self::Banner(banner) => banner.has_colour_of(colour),
+            Self::Bed(bed) => bed.has_colour_of(colour),
+            Self::Carpet { colour: c } => *c == colour,
+            Self::Concrete { colour: c } => *c == colour,
+            Self::ConcretePowder { colour: c } => *c == colour,
+            Self::Glass { colour: Some(c) } => *c == colour,
+            Self::GlassPane {
+                colour: Some(c), ..
+            } => *c == colour,
+            Self::GlazedTerracotta { colour: c, .. } => *c == colour,
+            Self::ShulkerBox(shulker_box) => shulker_box.has_colour_of(colour),
+            Self::Sign(sign) => sign.has_colour_of(colour),
+            Self::Terracotta { colour: Some(c) } => *c == colour,
+            Self::Wool { colour: c } => *c == colour,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block faces in the given direction, false otherwise.
+    pub fn has_facing_of(&self, direction: Direction) -> bool {
+        match self {
+            Self::Anvil { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Banner(banner) => banner.has_facing_of(direction),
+            Self::Barrel { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Beehive { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::BeeNest { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Bed(bed) => bed.has_facing_of(direction),
+            Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
+            Self::Button(_, rotation) => Direction::from(rotation.clone()) == direction,
+            Self::Campfire { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::CarvedPumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Chest(chest) => chest.has_facing_of(direction),
+            Self::CocoaBeans { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::CoralFan { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
+            Self::Door(door) => door.has_facing_of(&direction),
+            Self::Dropper(dropper) => dropper.has_facing_of(direction),
+            Self::EndPortalFrame { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::EndRod { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::EnderChest { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::FenceGate { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Furnace(furnace) => furnace.has_facing_of(direction),
+            Self::GlazedTerracotta { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::GrindStone(rotation) => Direction::from(rotation.clone()) == direction,
+            // TODO Head
+            Self::Hopper(hopper) => hopper.has_facing_of(direction),
+            Self::JackOLantern { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Ladder { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Lantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
+            Self::Lever(rotation, _) => Direction::from(rotation.clone()) == direction,
+            Self::Loom { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Observer { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Piston { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::PistonHead { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Pumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneComparator { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneRepeater { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneSubtractor { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneTorch { attached, .. } => {
+                Direction::from(attached.clone()).opposite() == direction
+            }
+            Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
+            Self::Sign(sign) => sign.has_facing_of(direction),
+            Self::Smoker { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::SoulCampfire { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::SoulLantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
+            Self::SoulTorch { attached, .. } => {
+                Direction::from(attached.clone()).opposite() == direction
+            }
+            Self::Stairs(stair) => stair.has_facing_of(direction),
+            Self::StickyPiston { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::StoneCutter { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Torch { attached, .. } => {
+                Direction::from(attached.clone()).opposite() == direction
+            }
+            Self::TrappedChest(chest) => chest.has_facing_of(direction),
+            Self::TripwireHook { facing, .. } => Direction::from(facing.clone()) == direction,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is made of the given material, false otherwise.
+    pub fn has_material_of(&self, material: Material) -> bool {
+        match self {
+            Self::Button(mat, _) => Material::from(mat.clone()) == material,
+            Self::Coral { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::CoralBlock { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::CoralFan { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Door(door) => door.has_material_of(&material),
+            Self::Fence { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::FenceGate { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Leaves { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Log(log) => log.has_material_of(material),
+            Self::Planks { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::PressurePlate { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Sapling { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Sign(sign) => sign.has_material_of(material),
+            Self::Slab(slab) => slab.has_material_of(material),
+            Self::Stairs(stair) => stair.has_material_of(material),
+            Self::Trapdoor { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Wall { material: mat, .. } => Material::from(mat.clone()) == material,
+            _ => false,
         }
     }
 
@@ -1002,6 +1110,14 @@ impl Block {
         }
     }
 
+    /// Returns true if the block is a redstone torch.
+    pub fn is_redstone_torch(&self) -> bool {
+        match self {
+            Self::RedstoneTorch { .. } => true,
+            _ => false,
+        }
+    }
+
     /// Returns true if the block is a sign.
     pub fn is_sign(&self) -> bool {
         match self {
@@ -1030,110 +1146,6 @@ impl Block {
     pub fn is_torch(&self) -> bool {
         match self {
             Self::Torch { .. } => true,
-            _ => false,
-        }
-    }
-
-    /// Returns true if the block has the given colour, false otherwise.
-    pub fn has_colour_of(&self, colour: Colour) -> bool {
-        match self {
-            Self::Banner(banner) => banner.has_colour_of(colour),
-            Self::Bed(bed) => bed.has_colour_of(colour),
-            Self::Carpet { colour: c } => *c == colour,
-            Self::Concrete { colour: c } => *c == colour,
-            Self::ConcretePowder { colour: c } => *c == colour,
-            Self::Glass { colour: Some(c) } => *c == colour,
-            Self::GlassPane {
-                colour: Some(c), ..
-            } => *c == colour,
-            Self::GlazedTerracotta { colour: c, .. } => *c == colour,
-            Self::ShulkerBox(shulker_box) => shulker_box.has_colour_of(colour),
-            Self::Sign(sign) => sign.has_colour_of(colour),
-            Self::Terracotta { colour: Some(c) } => *c == colour,
-            Self::Wool { colour: c } => *c == colour,
-            _ => false,
-        }
-    }
-
-    /// Returns true if the block faces in the given direction, false otherwise.
-    pub fn has_facing_of(&self, direction: Direction) -> bool {
-        match self {
-            Self::Anvil { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Banner(banner) => banner.has_facing_of(direction),
-            Self::Barrel { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Beehive { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::BeeNest { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Bed(bed) => bed.has_facing_of(direction),
-            Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
-            Self::Button(_, rotation) => Direction::from(rotation.clone()) == direction,
-            Self::Campfire { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::CarvedPumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Chest(chest) => chest.has_facing_of(direction),
-            Self::CocoaBeans { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::CoralFan { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
-            Self::Door(door) => door.has_facing_of(direction),
-            Self::Dropper(dropper) => dropper.has_facing_of(direction),
-            Self::EndPortalFrame { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::EndRod { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::EnderChest { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::FenceGate { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Furnace(furnace) => furnace.has_facing_of(direction),
-            Self::GlazedTerracotta { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::GrindStone(rotation) => Direction::from(rotation.clone()) == direction,
-            // TODO Head
-            Self::Hopper(hopper) => hopper.has_facing_of(direction),
-            Self::JackOLantern { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Ladder { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Lantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
-            Self::Lever(rotation, _) => Direction::from(rotation.clone()) == direction,
-            Self::Loom { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Observer { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Piston { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::PistonHead { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Pumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneComparator { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneRepeater { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneSubtractor { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneTorch { attached, .. } => Direction::from(attached.clone()) == direction,
-            Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
-            Self::Sign(sign) => sign.has_facing_of(direction),
-            Self::Smoker { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::SoulCampfire { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::SoulLantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
-            Self::SoulTorch { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Stairs(stair) => stair.has_facing_of(direction),
-            Self::StickyPiston { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::StoneCutter { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Torch { attached, .. } => {
-                Direction::from(attached.clone()).opposite() == direction
-            }
-            Self::TrappedChest(chest) => chest.has_facing_of(direction),
-            Self::TripwireHook { facing, .. } => Direction::from(facing.clone()) == direction,
-            _ => false,
-        }
-    }
-
-    /// Returns true if the block is made of the given material, false otherwise.
-    pub fn has_material_of(&self, material: Material) -> bool {
-        match self {
-            Self::Button(mat, _) => Material::from(mat.clone()) == material,
-            Self::Coral { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::CoralBlock { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::CoralFan { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Door(door) => door.has_material_of(material),
-            Self::Fence { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::FenceGate { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Leaves { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Log(log) => log.has_material_of(material),
-            Self::Planks { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::PressurePlate { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Sapling { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Sign(sign) => sign.has_material_of(material),
-            Self::Slab(slab) => slab.has_material_of(material),
-            Self::Stairs(stair) => stair.has_material_of(material),
-            Self::Trapdoor { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Wall { material: mat, .. } => Material::from(mat.clone()) == material,
             _ => false,
         }
     }
@@ -1167,21 +1179,50 @@ impl Block {
     pub fn jungle_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Jungle,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
+        }
+    }
+
+    /// Returns a ladder block of the given facing.
+    pub fn ladder(facing: Direction) -> Self {
+        Self::Ladder {
+            facing: Surface4::try_from(facing).unwrap(),
+            waterlogged: false,
         }
     }
 
     /// Returns a Lava or LavaSource block with the given lava level.
     /// Note that lava, if not in the nether, goes down by two levels per block.
-    pub fn lava(level: u8) -> Self {
+    pub fn lava(level: i8) -> Self {
         if level == 8 {
             Block::LavaSource
         } else {
             Block::Lava {
                 falling: false,
-                level: Int1Through7::new(level as i8).unwrap(),
+                level: Int1Through7::new_saturating(level),
             }
         }
+    }
+
+    /// Returns a lever in the given orientation.
+    pub fn lever(facing: Direction) -> Self {
+        Self::lever_off(facing)
+    }
+
+    /// Returns a switched off lever in the given orientation.
+    pub fn lever_off(facing: Direction) -> Self {
+        Self::Lever(
+           SurfaceRotation12::try_from(facing).unwrap(),
+           OnOffState::Off,
+        )
+    }
+
+    /// Returns a switched on lever in the given orientation.
+    pub fn lever_on(facing: Direction) -> Self {
+        Self::Lever(
+           SurfaceRotation12::try_from(facing).unwrap(),
+           OnOffState::On,
+        )
     }
 
     /// Returns a Leaves block of the Oak variant.
@@ -1213,7 +1254,7 @@ impl Block {
     pub fn oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Oak,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
         }
     }
 
@@ -1221,6 +1262,21 @@ impl Block {
     pub fn powered_rail(shape: RailShape) -> Self {
         Self::Rail {
             variant: RailType::Powered,
+            shape,
+        }
+    }
+
+    /// Returns a pressure plate with the specified material.
+    pub fn pressure_plate(material: Material) -> Self {
+        Self::PressurePlate {
+            material: PressurePlateMaterial::try_from(material).unwrap(),
+        }
+    }
+
+    /// Returns a rail of the specified shape.
+    pub fn rail(shape: RailShape) -> Self {
+        Self::Rail {
+            variant: RailType::Normal,
             shape,
         }
     }
@@ -1290,6 +1346,27 @@ impl Block {
         }
     }
 
+    /// Returns a full size snow block.
+    pub fn snow_block() -> Self {
+        Self::Snow {
+            thickness: Int1Through8::MAX,
+        }
+    }
+
+    /// Returns a one layer thick snow block.
+    pub fn snow_layer() -> Self {
+        Self::Snow {
+            thickness: Int1Through8::MIN,
+        }
+    }
+
+    /// Returns a snow block of the given thickness.
+    pub fn snow_layers(thickness: i8) -> Self {
+        Self::Snow {
+            thickness: Int1Through8::new_saturating(thickness),
+        }
+    }
+
     /// Returns a Leaves block of the Spruce variant.
     pub fn spruce_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -1319,8 +1396,16 @@ impl Block {
     pub fn spruce_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Spruce,
-            growth_stage: Int0Through1::new(0).unwrap(),
+            growth_stage: Int0Through1::MIN,
         }
+    }
+
+    /// Returns a stone button of the given placemnet.
+    pub fn stone_button(direction: Direction) -> Self {
+        Self::Button(
+            ButtonMaterial::Stone,
+            Surface6::try_from(direction).unwrap()
+        )
     }
 
     /// Returns a top slab of the specified material.
@@ -1333,21 +1418,29 @@ impl Block {
     }
 
     /// Returns a Water or WaterSource block with the given water level.
-    pub fn water(level: u8) -> Self {
+    pub fn water(level: i8) -> Self {
         if level == 8 {
             Block::WaterSource
         } else {
             Block::Water {
                 falling: false,
-                level: Int1Through7::new(level as i8).unwrap(),
+                level: Int1Through7::new_saturating(level),
             }
         }
+    }
+
+    /// Returns a wooden button of the given placemnet.
+    pub fn wooden_button(direction: Direction) -> Self {
+        Self::Button(
+            ButtonMaterial::Oak,
+            Surface6::try_from(direction).unwrap()
+        )
     }
 
     /// Returns a wheat block of minimum age.
     pub fn wheat() -> Self {
         Self::Wheat {
-            growth_stage: Int0Through7::new(0).unwrap(),
+            growth_stage: Int0Through7::MIN,
         }
     }
 }

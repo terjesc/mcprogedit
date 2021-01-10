@@ -9,17 +9,45 @@ pub struct Door {
     pub material: DoorMaterial,
     pub facing: Surface4,
     pub half: DoorHalf,
-    pub hinge: Hinge,
+    pub hinged_at: Hinge,
     pub open: bool,
 }
 
 impl Door {
-    pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
+    pub fn close(&mut self) {
+        self.open = false;
     }
 
-    pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+    pub fn has_facing_of(&self, facing: &Direction) -> bool {
+        *facing == self.facing.clone().into()
+    }
+
+    pub fn has_material_of(&self, material: &Material) -> bool {
+        *material == self.material.clone().into()
+    }
+
+    pub fn is_bottom_half(&self) -> bool {
+        self.half == DoorHalf::Lower
+    }
+
+    pub fn is_closed(&self) -> bool {
+        !self.is_open()
+    }
+
+    pub fn is_hinged_at(&self, hinge_side: &Hinge) -> bool {
+        *hinge_side == self.hinged_at
+    }
+
+    pub fn is_open(&self) -> bool {
+        self.open
+    }
+
+    pub fn is_top_half(&self) -> bool {
+        self.half == DoorHalf::Upper
+    }
+
+    pub fn open(&mut self) {
+        self.open = true;
     }
 }
 

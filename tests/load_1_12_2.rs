@@ -40,6 +40,31 @@ fn check_stairs(we: &WorldExcerpt, at: (i64, i64, i64), dir: Direction, mat: Mat
     );
 }
 
+fn check_door(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    fac: Direction,
+    mat: Material,
+    hinge: Hinge,
+    closed: bool,
+) {
+    let at = at.into();
+    let bottom_block = excerpt.get_block_at(at).unwrap();
+    let top_block = excerpt.get_block_at(at + (0, 1, 0).into()).unwrap();
+    let bottom_door = Door::try_from(bottom_block.clone()).unwrap();
+    let top_door = Door::try_from(top_block.clone()).unwrap();
+    assert!(bottom_door.has_material_of(&mat));
+    assert!(top_door.has_material_of(&mat));
+    assert!(bottom_door.has_facing_of(&fac));
+    assert!(top_door.has_facing_of(&fac));
+    assert!(bottom_door.is_hinged_at(&hinge));
+    assert!(top_door.is_hinged_at(&hinge));
+    assert!(bottom_door.is_bottom_half());
+    assert!(top_door.is_top_half());
+    assert_eq!(closed, bottom_door.is_closed());
+    assert_eq!(closed, top_door.is_closed());
+}
+
 #[test]
 /// Import of blocks with id 0 through 15
 fn v_1_12_2_block_group_1() {
@@ -420,4 +445,129 @@ fn v_1_12_2_block_group_4() {
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthEast));
     let block = excerpt.get_block_at((15, 0, 15).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthSouthEast));
+}
+
+#[test]
+/// Import of blocks with id 64 through 79
+fn v_1_12_2_block_group_5() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (64, 56, 0), (16, 11, 16));
+
+    check_door(&excerpt, (0, 0, 0), Direction::West, Material::Oak, Hinge::Left, true);
+    check_door(&excerpt, (0, 0, 1), Direction::West, Material::Oak, Hinge::Right, true);
+    check_door(&excerpt, (0, 0, 2), Direction::East, Material::Oak, Hinge::Right, true);
+    check_door(&excerpt, (0, 0, 3), Direction::East, Material::Oak, Hinge::Left, true);
+    check_door(&excerpt, (0, 0, 4), Direction::West, Material::Oak, Hinge::Left, false);
+    check_door(&excerpt, (0, 0, 5), Direction::West, Material::Oak, Hinge::Right, false);
+    check_door(&excerpt, (0, 0, 6), Direction::East, Material::Oak, Hinge::Right, false);
+    check_door(&excerpt, (0, 0, 7), Direction::East, Material::Oak, Hinge::Left, false);
+
+    assert_block_eq(&excerpt, (1, 0, 0), &Block::ladder(Direction::West));
+    assert_block_eq(&excerpt, (1, 1, 0), &Block::ladder(Direction::South));
+    assert_block_eq(&excerpt, (1, 2, 0), &Block::ladder(Direction::East));
+    assert_block_eq(&excerpt, (1, 3, 0), &Block::ladder(Direction::North));
+
+    assert_block_eq(&excerpt, (2, 1, 0), &Block::rail(RailShape::NorthSouth));
+
+    check_stairs(&excerpt, (3, 0, 0), Direction::DownEast, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 1), Direction::UpEast, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 2), Direction::DownNorth, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 3), Direction::UpNorth, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 4), Direction::DownWest, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 5), Direction::UpWest, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 6), Direction::DownSouth, Material::Cobblestone);
+    check_stairs(&excerpt, (3, 0, 7), Direction::UpSouth, Material::Cobblestone);
+
+    let block = excerpt.get_block_at((4, 0, 0).into()).unwrap();
+    assert!(block.is_sign() && block.has_facing_of(Direction::West));
+    let block = excerpt.get_block_at((4, 1, 0).into()).unwrap();
+    assert!(block.is_sign() && block.has_facing_of(Direction::South));
+    let block = excerpt.get_block_at((4, 2, 0).into()).unwrap();
+    assert!(block.is_sign() && block.has_facing_of(Direction::East));
+    let block = excerpt.get_block_at((4, 3, 0).into()).unwrap();
+    assert!(block.is_sign() && block.has_facing_of(Direction::North));
+
+    // Mounted on the bottom (attached to block below)
+    assert_block_eq(&excerpt, (5, 0, 1), &Block::lever_off(Direction::UpEast));
+    assert_block_eq(&excerpt, (5, 0, 2), &Block::lever_off(Direction::UpSouth));
+    assert_block_eq(&excerpt, (5, 0, 3), &Block::lever_off(Direction::UpEast)); // east again
+    assert_block_eq(&excerpt, (5, 0, 4), &Block::lever_off(Direction::UpSouth)); // south again
+    // Turned on, mounted on the bottom (attached to block below)
+    assert_block_eq(&excerpt, (5, 0, 5), &Block::lever_on(Direction::UpEast));
+    assert_block_eq(&excerpt, (5, 0, 6), &Block::lever_on(Direction::UpSouth));
+    assert_block_eq(&excerpt, (5, 0, 7), &Block::lever_on(Direction::UpEast)); // east again
+    assert_block_eq(&excerpt, (5, 0, 8), &Block::lever_on(Direction::UpSouth)); // south again
+    // Mounted on a side
+    assert_block_eq(&excerpt, (5, 1, 1), &Block::lever_off(Direction::West));
+    assert_block_eq(&excerpt, (5, 1, 3), &Block::lever_off(Direction::South));
+    assert_block_eq(&excerpt, (5, 1, 5), &Block::lever_off(Direction::East));
+    assert_block_eq(&excerpt, (5, 1, 7), &Block::lever_off(Direction::North));
+    // Mounted on the top (attached to block above)
+    assert_block_eq(&excerpt, (5, 2, 1), &Block::lever_off(Direction::DownEast));
+    assert_block_eq(&excerpt, (5, 2, 2), &Block::lever_off(Direction::DownSouth));
+    assert_block_eq(&excerpt, (5, 2, 3), &Block::lever_off(Direction::DownEast)); // east again
+    assert_block_eq(&excerpt, (5, 2, 1), &Block::lever_off(Direction::DownEast)); // south again
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::pressure_plate(Material::Stone));
+
+    check_door(&excerpt, (7, 0, 0), Direction::West, Material::Iron, Hinge::Left, true);
+    check_door(&excerpt, (7, 0, 1), Direction::West, Material::Iron, Hinge::Right, true);
+    check_door(&excerpt, (7, 0, 2), Direction::East, Material::Iron, Hinge::Right, true);
+    check_door(&excerpt, (7, 0, 3), Direction::East, Material::Iron, Hinge::Left, true);
+    check_door(&excerpt, (7, 0, 4), Direction::West, Material::Iron, Hinge::Left, false);
+    check_door(&excerpt, (7, 0, 5), Direction::West, Material::Iron, Hinge::Right, false);
+    check_door(&excerpt, (7, 0, 6), Direction::East, Material::Iron, Hinge::Right, false);
+    check_door(&excerpt, (7, 0, 7), Direction::East, Material::Iron, Hinge::Left, false);
+
+    assert_block_eq(&excerpt, (8, 0, 0), &Block::pressure_plate(Material::Oak));
+
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::RedstoneOre);
+
+    // NB Block ID 74 "lit redstone ore" should be here at x position 10,
+    // but it is not present in the save file, and lit status is not implemented.
+
+    // NB Block ID 75 "unlit redstone torch" should be here at x position 11,
+    // but is placed above the lit variant at x position 12 instead.
+
+    // NB "lit" status of redstone torch is not implemented.
+    // "unlit" variants are present in the save file, however, for future implementation.
+    // Lit torches
+    let block = excerpt.get_block_at((12, 0, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::Up));
+    let block = excerpt.get_block_at((12, 1, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::West));
+    let block = excerpt.get_block_at((12, 2, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::South));
+    let block = excerpt.get_block_at((12, 3, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::East));
+    let block = excerpt.get_block_at((12, 4, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::North));
+    // Unlit torches
+    let block = excerpt.get_block_at((12, 6, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::Up));
+    let block = excerpt.get_block_at((12, 7, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::West));
+    let block = excerpt.get_block_at((12, 8, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::South));
+    let block = excerpt.get_block_at((12, 9, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::East));
+    let block = excerpt.get_block_at((12, 10, 0).into()).unwrap();
+    assert!(block.is_redstone_torch() && block.has_facing_of(Direction::North));
+
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::stone_button(Direction::Up));
+    assert_block_eq(&excerpt, (13, 1, 4), &Block::stone_button(Direction::West));
+    assert_block_eq(&excerpt, (13, 2, 4), &Block::stone_button(Direction::South));
+    assert_block_eq(&excerpt, (13, 3, 4), &Block::stone_button(Direction::East));
+    assert_block_eq(&excerpt, (13, 4, 4), &Block::stone_button(Direction::North));
+    assert_block_eq(&excerpt, (13, 1, 5), &Block::stone_button(Direction::Down));
+
+    assert_block_eq(&excerpt, (14, 0, 1), &Block::snow_layer());
+    assert_block_eq(&excerpt, (14, 0, 2), &Block::snow_layers(2));
+    assert_block_eq(&excerpt, (14, 0, 3), &Block::snow_layers(3));
+    assert_block_eq(&excerpt, (14, 0, 4), &Block::snow_layers(4));
+    assert_block_eq(&excerpt, (14, 0, 5), &Block::snow_layers(5));
+    assert_block_eq(&excerpt, (14, 0, 6), &Block::snow_layers(6));
+    assert_block_eq(&excerpt, (14, 0, 7), &Block::snow_layers(7));
+    assert_block_eq(&excerpt, (14, 0, 8), &Block::snow_block());
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::Ice);
 }

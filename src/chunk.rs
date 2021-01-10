@@ -141,9 +141,9 @@ impl Chunk {
                                 coordinates,
                                 BlockEntity::PseudoDoorTop {
                                     hinge: if (data[index] & 0x1) == 0x1 {
-                                        Hinge::Left
-                                    } else {
                                         Hinge::Right
+                                    } else {
+                                        Hinge::Left
                                     },
                                 },
                             ))
@@ -153,7 +153,7 @@ impl Chunk {
                                 coordinates,
                                 BlockEntity::PseudoDoorBottom {
                                     open: (data[index] & 0x4) == 0x4,
-                                    facing: facing4_eswn(data[index]),
+                                    facing: facing4_wnes(data[index]),
                                 },
                             ))
                         }
@@ -186,12 +186,12 @@ impl Chunk {
             })
             .collect();
 
-        fn facing4_eswn(data: i8) -> Surface4 {
+        fn facing4_wnes(data: i8) -> Surface4 {
             match data & 0x3 {
-                0 => Surface4::East,
-                1 => Surface4::South,
-                2 => Surface4::West,
-                3 => Surface4::North,
+                0 => Surface4::West,
+                1 => Surface4::North,
+                2 => Surface4::East,
+                3 => Surface4::South,
                 _ => unreachable!(),
             }
         }
@@ -600,7 +600,7 @@ impl Chunk {
                                 ) => Block::Door(Door {
                                     facing: facing.clone(),
                                     half,
-                                    hinge: hinge.clone(),
+                                    hinged_at: hinge.clone(),
                                     open: *open,
                                     material: match block {
                                         64 => DoorMaterial::Oak,
@@ -631,7 +631,7 @@ impl Chunk {
                         }),
                         // 68 wall sign - already handled
                         69 => Block::Lever(
-                            button_lever_facing(data[index]),
+                            lever_facing(data[index]),
                             if data[index] & 0x8 == 0x8 {
                                 OnOffState::On
                             } else {
@@ -650,7 +650,7 @@ impl Chunk {
                             attached: facing5_xwensd(data[index]),
                         },
                         77 => {
-                            Block::Button(ButtonMaterial::Stone, button_lever_facing(data[index]))
+                            Block::Button(ButtonMaterial::Stone, facing6_dewsnu(data[index]))
                         }
                         78 => Block::Snow {
                             thickness: Int1Through8::new((data[index] & 0x7) + 1).unwrap(),
@@ -969,7 +969,7 @@ impl Chunk {
                         142 => Block::Potatoes {
                             growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                         },
-                        143 => Block::Button(ButtonMaterial::Oak, button_lever_facing(data[index])),
+                        143 => Block::Button(ButtonMaterial::Oak, facing6_dewsnu(data[index])),
                         // TODO 144 skull // Deferred for now, too complicated
                         145 => Block::Anvil {
                             facing: facing4_swne(data[index]),
@@ -1368,6 +1368,19 @@ impl Chunk {
             }
         }
 
+        fn facing6_dewsnu(data: i8) -> Surface6 {
+            match data & 0x7 {
+                0 => Surface6::Down,
+                1 => Surface6::East,
+                2 => Surface6::West,
+                3 => Surface6::South,
+                4 => Surface6::North,
+                5 => Surface6::Up,
+                n @ 6..=7 => panic!("Unknown facing6 dunswe value: {}", n),
+                _ => unreachable!(),
+            }
+        }
+
         fn facing6_dunswe(data: i8) -> Surface6 {
             match data & 0x7 {
                 0 => Surface6::Down,
@@ -1405,9 +1418,8 @@ impl Chunk {
             }
         }
 
-        fn button_lever_facing(data: i8) -> SurfaceRotation12 {
+        fn lever_facing(data: i8) -> SurfaceRotation12 {
             match data & 0x7 {
-                // NB these directions are probably wrong...
                 0 => SurfaceRotation12::DownFacingEast,
                 1 => SurfaceRotation12::East,
                 2 => SurfaceRotation12::West,

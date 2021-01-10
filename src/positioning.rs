@@ -510,6 +510,28 @@ pub enum SurfaceRotation12 {
     UpFacingWest,
 }
 
+impl TryFrom<Direction> for SurfaceRotation12 {
+    type Error = ();
+
+    fn try_from(item: Direction) -> Result<Self, Self::Error> {
+        match item {
+            Direction::DownEast => Ok(Self::DownFacingEast),
+            Direction::DownWest => Ok(Self::DownFacingWest),
+            Direction::DownSouth => Ok(Self::DownFacingSouth),
+            Direction::DownNorth => Ok(Self::DownFacingNorth),
+            Direction::East => Ok(Self::East),
+            Direction::West => Ok(Self::West),
+            Direction::South => Ok(Self::South),
+            Direction::North => Ok(Self::North),
+            Direction::UpEast => Ok(Self::UpFacingEast),
+            Direction::UpWest => Ok(Self::UpFacingWest),
+            Direction::UpSouth => Ok(Self::UpFacingSouth),
+            Direction::UpNorth => Ok(Self::UpFacingNorth),
+            _ => Err(()),
+        }
+    }
+}
+
 /// Valid orientations for a Jigsaw Block in Java Edition.
 ///
 /// Please don't ask. The terminology is taken directly from the Minecraft save format.
