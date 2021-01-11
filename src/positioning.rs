@@ -17,7 +17,7 @@ use std::convert::TryFrom;
 /// Bells can be rotated in four directions. On top of that they can hang
 /// form the block above, be mounted to one side, hang between two blocks
 /// (one on either side), or be mounted on the block below.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BellPosition {
     UpEast,
     UpNorth,
@@ -40,7 +40,7 @@ pub enum BellPosition {
 /// All directions.
 ///
 /// Convertible to and from direction, edge and surface data types.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction {
     Down,
     DownEast,
@@ -217,7 +217,7 @@ impl From<SurfaceRotation12> for Direction {
 
 /// Describes the rotation of blocks or entities that can be positioned in
 /// 16 different directions, by what direction they are facing.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Direction16 {
     South = 0,
     SouthSouthWest = 1,
@@ -303,7 +303,7 @@ impl TryFrom<Direction> for Direction16 {
 /// // A block attached to its neighbouring block to the south (i.e. facing north).
 /// let placement = WallOrRotatedOnFloor::Wall(Surface4::South);
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WallOrRotatedOnFloor {
     /// Block rests on top of the block below it, and may face 16 different directions.
     Floor(Direction16),
@@ -312,7 +312,7 @@ pub enum WallOrRotatedOnFloor {
 }
 
 /// Alignment along one of the 2 horizontal axes.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Axis2 {
     /// East-West orientation
     X,
@@ -330,7 +330,7 @@ impl Axis2 {
 }
 
 /// Alignment along an axis.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Axis3 {
     /// East-West orientation
     X,
@@ -352,7 +352,7 @@ impl Axis3 {
 }
 
 /// The top and bottom surfaces of the voxel volume populated by the block.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Surface2 {
     Down,
     Up,
@@ -371,7 +371,7 @@ impl TryFrom<Direction> for Surface2 {
 }
 
 /// The four side surfaces of the voxel volume populated by the block.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Surface4 {
     East,
     North,
@@ -394,7 +394,7 @@ impl TryFrom<Direction> for Surface4 {
 }
 
 /// The bottom and four side surfaces of the voxel volume populated by the block..
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Surface5 {
     Down,
     East,
@@ -419,7 +419,7 @@ impl TryFrom<Direction> for Surface5 {
 }
 
 /// All six surfaces of the voxel volume populated by the block.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Surface6 {
     Down,
     East,
@@ -446,7 +446,7 @@ impl TryFrom<Direction> for Surface6 {
 }
 
 /// The four top-most and four bottom-most edges of the voxel volume populated by the block.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Edge8 {
     DownEast,
     DownNorth,
@@ -494,7 +494,7 @@ impl TryFrom<Direction> for Edge8 {
 
 /// All six surfaces of the voxel volume populated by the block,
 /// with rotation towards a cardinal direction for the Up and Down surfaces.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SurfaceRotation12 {
     DownFacingEast,
     DownFacingNorth,
@@ -536,7 +536,7 @@ impl TryFrom<Direction> for SurfaceRotation12 {
 ///
 /// Please don't ask. The terminology is taken directly from the Minecraft save format.
 /// I have no idea what it means.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum JigsawBlockOrientation {
     DownEast,
     DownNorth,

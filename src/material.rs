@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 
 /// Materials for Armour.
 //TODO add descriptions for when materials were first introduced
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ArmourMaterial {
     Chainmail,
     Diamond,
@@ -61,7 +61,7 @@ impl TryFrom<Material> for ArmourMaterial {
 /// // From 20w15a
 /// mcprogedit::material::ButtonMaterial::PolishedBlackstone;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ButtonMaterial {
     Acacia,
     Birch,
@@ -107,7 +107,7 @@ impl TryFrom<Material> for ButtonMaterial {
 /// mcprogedit::material::CoralMaterial::Horn;
 /// mcprogedit::material::CoralMaterial::Tube;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CoralMaterial {
     /// Purple coral variant
     Bubble,
@@ -175,7 +175,7 @@ impl TryFrom<Material> for CoralMaterial {
 /// mcprogedit::material::DoorMaterial::Crimson; // Door, Trapdoor
 /// mcprogedit::material::DoorMaterial::Warped;  // Door, Trapdoor
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum DoorMaterial {
     Acacia,
     Birch,
@@ -235,7 +235,7 @@ impl TryFrom<Material> for DoorMaterial {
 /// mcprogedit::material::FenceMaterial::Crimson;
 /// mcprogedit::material::FenceMaterial::Warped;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum FenceMaterial {
     Acacia,
     Birch,
@@ -269,7 +269,7 @@ impl TryFrom<Material> for FenceMaterial {
 
 /// Materials for Horse Armor.
 //TODO add descriptions for when materials were first introduced
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum HorseArmorMaterial {
     Gold,
     Iron,
@@ -303,7 +303,7 @@ impl TryFrom<Material> for HorseArmorMaterial {
 /// // From 20w06a
 /// mcprogedit::material::IngotMaterial::Netherite;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum IngotMaterial {
     Gold,
     Iron,
@@ -346,7 +346,7 @@ impl TryFrom<Material> for IngotMaterial {
 /// mcprogedit::material::LeavesMaterial::Acacia;
 /// mcprogedit::material::LeavesMaterial::DarkOak;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LeavesMaterial {
     Acacia,
     Birch,
@@ -375,7 +375,7 @@ impl TryFrom<Material> for LeavesMaterial {
 /// All materials.
 ///
 /// Convertible to and from all other material types.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Material {
     Acacia,
     Andesite,
@@ -751,7 +751,7 @@ impl From<WoodMaterial> for Material {
 /// // Since 16w50a
 /// mcprogedit::material::NuggetMaterial::Iron;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum NuggetMaterial {
     Gold,
     Iron,
@@ -802,7 +802,7 @@ impl TryFrom<Material> for NuggetMaterial {
 /// // From 20w15a
 /// mcprogedit::material::PressurePlateMaterial::PolishedBlackstone;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PressurePlateMaterial {
     Acacia,
     Birch,
@@ -863,7 +863,7 @@ impl TryFrom<Material> for PressurePlateMaterial {
 /// mcprogedit::material::SaplingMaterial::Acacia;
 /// mcprogedit::material::SaplingMaterial::DarkOak;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SaplingMaterial {
     Acacia,
     Bamboo,
@@ -908,7 +908,7 @@ impl TryFrom<Material> for SaplingMaterial {
 /// // From 15w31a
 /// mcprogedit::material::SeedMaterial::Beetroot;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SeedMaterial {
     Beetroot,
     Melon,
@@ -1020,7 +1020,7 @@ impl TryFrom<Material> for SeedMaterial {
 /// mcprogedit::material::SlabMaterial::PolishedBlackstone;
 /// mcprogedit::material::SlabMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SlabMaterial {
     Acacia,
     Andesite,
@@ -1206,7 +1206,7 @@ impl TryFrom<Material> for SlabMaterial {
 /// mcprogedit::material::StairMaterial::PolishedBlackstone;
 /// mcprogedit::material::StairMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum StairMaterial {
     Acacia,
     Andesite,
@@ -1309,7 +1309,7 @@ impl TryFrom<Material> for StairMaterial {
 /// // From 20w06a
 /// mcprogedit::material::ToolMaterial::Netherite;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ToolMaterial {
     Diamond,
     Gold,
@@ -1367,7 +1367,7 @@ impl TryFrom<Material> for ToolMaterial {
 /// mcprogedit::material::WallMaterial::PolishedBlackstone;
 /// mcprogedit::material::WallMaterial::PolishedBlackstoneBrick;
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WallMaterial {
     Andesite,
     Blackstone,
@@ -1481,7 +1481,7 @@ impl TryFrom<Material> for WallMaterial {
 /// mcprogedit::material::WoodMaterial::Crimson; // FenceGate, Log, Planks, Sign
 /// mcprogedit::material::WoodMaterial::Warped;  // FenceGate, Log, Planks, Sign
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum WoodMaterial {
     Acacia,
     Birch,

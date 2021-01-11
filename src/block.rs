@@ -1035,9 +1035,7 @@ impl Block {
 
     /// Returns an uncoloured glass block.
     pub fn glass() -> Self {
-        Self::Glass {
-            colour: None,
-        }
+        Self::Glass { colour: None }
     }
 
     /// Returns a glass block of the given colour.
@@ -1071,62 +1069,58 @@ impl Block {
     /// Returns true if the block faces in the given direction, false otherwise.
     pub fn has_facing_of(&self, direction: Direction) -> bool {
         match self {
-            Self::Anvil { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Anvil { facing, .. } => Direction::from(*facing) == direction,
             Self::Banner(banner) => banner.has_facing_of(direction),
-            Self::Barrel { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Beehive { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::BeeNest { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Barrel { facing, .. } => Direction::from(*facing) == direction,
+            Self::Beehive { facing, .. } => Direction::from(*facing) == direction,
+            Self::BeeNest { facing, .. } => Direction::from(*facing) == direction,
             Self::Bed(bed) => bed.has_facing_of(direction),
             Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
-            Self::Button(_, rotation) => Direction::from(rotation.clone()) == direction,
-            Self::Campfire { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::CarvedPumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::Button(_, rotation) => Direction::from(*rotation) == direction,
+            Self::Campfire { facing, .. } => Direction::from(*facing) == direction,
+            Self::CarvedPumpkin { facing, .. } => Direction::from(*facing) == direction,
             Self::Chest(chest) => chest.has_facing_of(direction),
-            Self::CocoaBeans { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::CoralFan { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::CocoaBeans { facing, .. } => Direction::from(*facing) == direction,
+            Self::CoralFan { facing, .. } => Direction::from(*facing) == direction,
             Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
             Self::Door(door) => door.has_facing_of(&direction),
             Self::Dropper(dropper) => dropper.has_facing_of(direction),
-            Self::EndPortalFrame { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::EndRod { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::EnderChest { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::FenceGate { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::EndPortalFrame { facing, .. } => Direction::from(*facing) == direction,
+            Self::EndRod { facing, .. } => Direction::from(*facing) == direction,
+            Self::EnderChest { facing, .. } => Direction::from(*facing) == direction,
+            Self::FenceGate { facing, .. } => Direction::from(*facing) == direction,
             Self::Furnace(furnace) => furnace.has_facing_of(direction),
-            Self::GlazedTerracotta { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::GrindStone(rotation) => Direction::from(rotation.clone()) == direction,
+            Self::GlazedTerracotta { facing, .. } => Direction::from(*facing) == direction,
+            Self::GrindStone(rotation) => Direction::from(*rotation) == direction,
             // TODO Head
             Self::Hopper(hopper) => hopper.has_facing_of(direction),
-            Self::JackOLantern { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Ladder { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Lantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
-            Self::Lever(rotation, _) => Direction::from(rotation.clone()) == direction,
-            Self::Loom { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Observer { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Piston { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::PistonHead { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Pumpkin { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::RedstoneComparator { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::JackOLantern { facing, .. } => Direction::from(*facing) == direction,
+            Self::Ladder { facing, .. } => Direction::from(*facing) == direction,
+            Self::Lantern { mounted_at } => Direction::from(*mounted_at) == direction,
+            Self::Lever(rotation, _) => Direction::from(*rotation) == direction,
+            Self::Loom { facing, .. } => Direction::from(*facing) == direction,
+            Self::Observer { facing, .. } => Direction::from(*facing) == direction,
+            Self::Piston { facing, .. } => Direction::from(*facing) == direction,
+            Self::PistonHead { facing, .. } => Direction::from(*facing) == direction,
+            Self::Pumpkin { facing, .. } => Direction::from(*facing) == direction,
+            Self::RedstoneComparator { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneRepeater(repeater) => repeater.has_facing_of(&direction),
-            Self::RedstoneSubtractor { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::RedstoneSubtractor { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneTorch { attached, .. } => {
-                Direction::from(attached.clone()).opposite() == direction
+                Direction::from(*attached).opposite() == direction
             }
             Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
             Self::Sign(sign) => sign.has_facing_of(direction),
-            Self::Smoker { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::SoulCampfire { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::SoulLantern { mounted_at } => Direction::from(mounted_at.clone()) == direction,
-            Self::SoulTorch { attached, .. } => {
-                Direction::from(attached.clone()).opposite() == direction
-            }
+            Self::Smoker { facing, .. } => Direction::from(*facing) == direction,
+            Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
+            Self::SoulLantern { mounted_at } => Direction::from(*mounted_at) == direction,
+            Self::SoulTorch { attached, .. } => Direction::from(*attached).opposite() == direction,
             Self::Stairs(stair) => stair.has_facing_of(direction),
-            Self::StickyPiston { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::StoneCutter { facing, .. } => Direction::from(facing.clone()) == direction,
-            Self::Torch { attached, .. } => {
-                Direction::from(attached.clone()).opposite() == direction
-            }
+            Self::StickyPiston { facing, .. } => Direction::from(*facing) == direction,
+            Self::StoneCutter { facing, .. } => Direction::from(*facing) == direction,
+            Self::Torch { attached, .. } => Direction::from(*attached).opposite() == direction,
             Self::TrappedChest(chest) => chest.has_facing_of(direction),
-            Self::TripwireHook { facing, .. } => Direction::from(facing.clone()) == direction,
+            Self::TripwireHook { facing, .. } => Direction::from(*facing) == direction,
             _ => false,
         }
     }
@@ -1134,23 +1128,23 @@ impl Block {
     /// Returns true if the block is made of the given material, false otherwise.
     pub fn has_material_of(&self, material: Material) -> bool {
         match self {
-            Self::Button(mat, _) => Material::from(mat.clone()) == material,
-            Self::Coral { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::CoralBlock { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::CoralFan { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Button(mat, _) => Material::from(*mat) == material,
+            Self::Coral { material: mat, .. } => Material::from(*mat) == material,
+            Self::CoralBlock { material: mat, .. } => Material::from(*mat) == material,
+            Self::CoralFan { material: mat, .. } => Material::from(*mat) == material,
             Self::Door(door) => door.has_material_of(&material),
-            Self::Fence { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::FenceGate { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Leaves { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Fence { material: mat, .. } => Material::from(*mat) == material,
+            Self::FenceGate { material: mat, .. } => Material::from(*mat) == material,
+            Self::Leaves { material: mat, .. } => Material::from(*mat) == material,
             Self::Log(log) => log.has_material_of(material),
-            Self::Planks { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::PressurePlate { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Sapling { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Planks { material: mat, .. } => Material::from(*mat) == material,
+            Self::PressurePlate { material: mat, .. } => Material::from(*mat) == material,
+            Self::Sapling { material: mat, .. } => Material::from(*mat) == material,
             Self::Sign(sign) => sign.has_material_of(material),
             Self::Slab(slab) => slab.has_material_of(material),
             Self::Stairs(stair) => stair.has_material_of(material),
-            Self::Trapdoor { material: mat, .. } => Material::from(mat.clone()) == material,
-            Self::Wall { material: mat, .. } => Material::from(mat.clone()) == material,
+            Self::Trapdoor { material: mat, .. } => Material::from(*mat) == material,
+            Self::Wall { material: mat, .. } => Material::from(*mat) == material,
             _ => false,
         }
     }
@@ -1256,13 +1250,9 @@ impl Block {
 
     /// Returns a jukebox with a disk of the given recording contained.
     pub fn jukebox_with_recording(recording: crate::item::Recording) -> Self {
-        Self::Jukebox(
-            Box::new(
-                Jukebox {
-                    record: Some(crate::item::Item::new_record(recording)),
-                }
-            )
-        )
+        Self::Jukebox(Box::new(Jukebox {
+            record: Some(crate::item::Item::new_record(recording)),
+        }))
     }
 
     /// Returns an jungle fence.
@@ -1344,17 +1334,14 @@ impl Block {
     /// Returns a switched off lever in the given orientation.
     pub fn lever_off(facing: Direction) -> Self {
         Self::Lever(
-           SurfaceRotation12::try_from(facing).unwrap(),
-           OnOffState::Off,
+            SurfaceRotation12::try_from(facing).unwrap(),
+            OnOffState::Off,
         )
     }
 
     /// Returns a switched on lever in the given orientation.
     pub fn lever_on(facing: Direction) -> Self {
-        Self::Lever(
-           SurfaceRotation12::try_from(facing).unwrap(),
-           OnOffState::On,
-        )
+        Self::Lever(SurfaceRotation12::try_from(facing).unwrap(), OnOffState::On)
     }
 
     /// Returns a nether brick fence.
@@ -1449,61 +1436,106 @@ impl Block {
     /// clamped to the valid range for the field of the particular block.
     pub fn set_age_to(&mut self, new_age: i8) {
         match self {
-            Self::Bamboo { ref mut growth_stage, .. } => {
+            Self::Bamboo {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through1::new_saturating(new_age);
             }
-            Self::Beetroots { ref mut growth_stage, .. } => {
+            Self::Beetroots {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through3::new_saturating(new_age);
             }
-            Self::Cactus { ref mut growth_stage, .. } => {
+            Self::Cactus {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through15::new_saturating(new_age);
             }
-            Self::Carrots { ref mut growth_stage, .. } => {
+            Self::Carrots {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through7::new_saturating(new_age);
             }
-            Self::ChorusFlower { ref mut growth_stage, .. } => {
+            Self::ChorusFlower {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through5::new_saturating(new_age);
             }
-            Self::CocoaBeans { ref mut growth_stage, .. } => {
+            Self::CocoaBeans {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through2::new_saturating(new_age);
             }
             Self::Fire { ref mut age, .. } => {
                 *age = Int0Through15::new_saturating(new_age);
             }
             // TODO FrostedIce
-            Self::Kelp { ref mut growth_stage, .. } => {
+            Self::Kelp {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through25::new_saturating(new_age);
             }
             // TODO MelonStem
-            Self::NetherWart { ref mut growth_stage, .. } => {
+            Self::NetherWart {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through3::new_saturating(new_age);
             }
-            Self::Potatoes { ref mut growth_stage, .. } => {
+            Self::Potatoes {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through7::new_saturating(new_age);
             }
             // TODO PumpkinStem
-            Self::Sapling { ref mut growth_stage, .. } => {
+            Self::Sapling {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through1::new_saturating(new_age);
             }
             Self::SoulFire { ref mut age, .. } => {
                 *age = Int0Through15::new_saturating(new_age);
             }
-            Self::SugarCane { ref mut growth_stage, .. } => {
+            Self::SugarCane {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through15::new_saturating(new_age);
             }
-            Self::SweetBerryBush { ref mut growth_stage, .. } => {
+            Self::SweetBerryBush {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through3::new_saturating(new_age);
             }
             Self::TurtleEgg { ref mut age, .. } => {
                 *age = Int0Through2::new_saturating(new_age);
             }
-            Self::TwistingVines { ref mut growth_stage, .. } => {
+            Self::TwistingVines {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through25::new_saturating(new_age);
             }
-            Self::WeepingVines { ref mut growth_stage, .. } => {
+            Self::WeepingVines {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through25::new_saturating(new_age);
             }
-            Self::Wheat { ref mut growth_stage, .. } => {
+            Self::Wheat {
+                ref mut growth_stage,
+                ..
+            } => {
                 *growth_stage = Int0Through7::new_saturating(new_age);
             }
             _ => (),
@@ -1578,7 +1610,7 @@ impl Block {
     pub fn stone_button(direction: Direction) -> Self {
         Self::Button(
             ButtonMaterial::Stone,
-            Surface6::try_from(direction).unwrap()
+            Surface6::try_from(direction).unwrap(),
         )
     }
 
@@ -1605,17 +1637,12 @@ impl Block {
 
     /// Returns a wooden button of the given placemnet.
     pub fn wooden_button(direction: Direction) -> Self {
-        Self::Button(
-            ButtonMaterial::Oak,
-            Surface6::try_from(direction).unwrap()
-        )
+        Self::Button(ButtonMaterial::Oak, Surface6::try_from(direction).unwrap())
     }
 
     /// Returns a wool block of the given colour.
     pub fn wool_with_colour(colour: Colour) -> Self {
-        Self::Wool {
-            colour,
-        }
+        Self::Wool { colour }
     }
 
     /// Returns a wheat block of minimum age.

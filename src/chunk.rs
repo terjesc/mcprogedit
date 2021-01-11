@@ -598,7 +598,7 @@ impl Chunk {
                                     BlockEntity::PseudoDoorTop { hinge, .. },
                                     BlockEntity::PseudoDoorBottom { open, facing, .. },
                                 ) => Block::Door(Door {
-                                    facing: facing.clone(),
+                                    facing: *facing,
                                     half,
                                     hinged_at: hinge.clone(),
                                     open: *open,
@@ -649,9 +649,7 @@ impl Chunk {
                         75 | 76 => Block::RedstoneTorch {
                             attached: facing5_xwensd(data[index]),
                         },
-                        77 => {
-                            Block::Button(ButtonMaterial::Stone, facing6_dewsnu(data[index]))
-                        }
+                        77 => Block::Button(ButtonMaterial::Stone, facing6_dewsnu(data[index])),
                         78 => Block::Snow {
                             thickness: Int1Through8::new((data[index] & 0x7) + 1).unwrap(),
                         },

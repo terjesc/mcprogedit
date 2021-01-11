@@ -23,15 +23,18 @@ impl RedstoneRepeater {
     }
 
     pub fn get_facing(&self) -> Direction {
-        Direction::from(self.facing.clone())
+        Direction::from(self.facing)
     }
 
     pub fn has_delay_of(&self, delay: i8) -> bool {
         self.delay.get() == delay
     }
 
-    pub fn has_facing_of(&self, facing: &Direction) -> bool {
-        *facing == self.facing.clone().into()
+    pub fn has_facing_of<T>(&self, facing: &T) -> bool
+    where
+        T: Copy + Into<Direction>,
+    {
+        Into::<Direction>::into(self.facing) == Into::<Direction>::into(*facing)
     }
 
     pub fn set_delay(&mut self, delay: i8) {
@@ -39,7 +42,7 @@ impl RedstoneRepeater {
     }
 
     pub fn set_facing(&mut self, facing: &Direction) {
-        self.facing = Surface4::try_from(facing.clone()).unwrap();
+        self.facing = Surface4::try_from(*facing).unwrap();
     }
 
     pub fn with_delay(&self, delay: i8) -> Self {
