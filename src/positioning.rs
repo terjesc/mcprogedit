@@ -1,6 +1,7 @@
 //! For describing positioning of blocks within their voxel (placement, rotation, etc.)
 
 use std::convert::TryFrom;
+use thiserror::Error;
 
 // TODO Consider adding door placement data structure to this file...
 // Door (8) - hinged at one of 4 corners, + pointing in one of 2 directions from that corner
@@ -11,6 +12,12 @@ use std::convert::TryFrom;
 // DirectionFlags6 (2^6 = 64) - each cube surface can be in one of two states
 // ChorusPlantdirections = DirectionFlags6
 // FireFace = DirectionFlags6
+
+#[derive(Error, Debug)]
+pub enum DirectionError {
+    #[error("conversion from {0} failed")]
+    TryFrom(Direction),
+}
 
 /// Positioning of bells.
 ///
@@ -100,6 +107,47 @@ impl Direction {
             Self::West => Self::East,
             Self::WestNorthWest => Self::EastSouthEast,
             Self::WestSouthWest => Self::EastNorthEast,
+        }
+    }
+}
+
+impl Default for Direction {
+    fn default() -> Self {
+        Self::North
+    }
+}
+
+// TODO find and use a crate for deriving Display for simple enums,
+// instead of this manual implementation.
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            Self::Down => f.write_str("Down"),
+            Self::DownEast => f.write_str("DownEast"),
+            Self::DownNorth => f.write_str("DownNorth"),
+            Self::DownSouth => f.write_str("DownSouth"),
+            Self::DownWest => f.write_str("DownWest"),
+            Self::East => f.write_str("East"),
+            Self::EastNorthEast => f.write_str("EastNorthEast"),
+            Self::EastSouthEast => f.write_str("EastSouthEast"),
+            Self::North => f.write_str("North"),
+            Self::NorthEast => f.write_str("NorthEast"),
+            Self::NorthNorthEast => f.write_str("NorthNorthEast"),
+            Self::NorthNorthWest => f.write_str("NorthNorthWest"),
+            Self::NorthWest => f.write_str("NorthWest"),
+            Self::South => f.write_str("South"),
+            Self::SouthEast => f.write_str("SouthEast"),
+            Self::SouthSouthEast => f.write_str("SouthSouthEast"),
+            Self::SouthSouthWest => f.write_str("SouthSouthWest"),
+            Self::SouthWest => f.write_str("SouthWest"),
+            Self::Up => f.write_str("Up"),
+            Self::UpEast => f.write_str("UpEast"),
+            Self::UpNorth => f.write_str("UpNorth"),
+            Self::UpSouth => f.write_str("UpSouth"),
+            Self::UpWest => f.write_str("UpWest"),
+            Self::West => f.write_str("West"),
+            Self::WestNorthWest => f.write_str("WestNorthWest"),
+            Self::WestSouthWest => f.write_str("WestSouthWest"),
         }
     }
 }
@@ -237,6 +285,12 @@ pub enum Direction16 {
     SouthSouthEast = 15,
 }
 
+impl Default for Direction16 {
+    fn default() -> Self {
+        Self::North
+    }
+}
+
 impl From<i8> for Direction16 {
     fn from(direction_number: i8) -> Self {
         match direction_number {
@@ -262,7 +316,7 @@ impl From<i8> for Direction16 {
 }
 
 impl TryFrom<Direction> for Direction16 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -282,7 +336,7 @@ impl TryFrom<Direction> for Direction16 {
             Direction::EastSouthEast => Ok(Self::EastSouthEast),
             Direction::SouthEast => Ok(Self::SouthEast),
             Direction::SouthSouthEast => Ok(Self::SouthSouthEast),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -311,6 +365,12 @@ pub enum WallOrRotatedOnFloor {
     Wall(Surface4),
 }
 
+impl Default for WallOrRotatedOnFloor {
+    fn default() -> Self {
+        Self::Floor(Direction16::default())
+    }
+}
+
 /// Alignment along one of the 2 horizontal axes.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Axis2 {
@@ -327,6 +387,12 @@ impl Axis2 {
     pub const West: Axis2 = Axis2::X;
     pub const South: Axis2 = Axis2::Z;
     pub const North: Axis2 = Axis2::Z;
+}
+
+impl Default for Axis2 {
+    fn default() -> Self {
+        Self::Z
+    }
 }
 
 /// Alignment along an axis.
@@ -351,6 +417,12 @@ impl Axis3 {
     pub const North: Axis3 = Axis3::Z;
 }
 
+impl Default for Axis3 {
+    fn default() -> Self {
+        Self::Y
+    }
+}
+
 /// The top and bottom surfaces of the voxel volume populated by the block.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Surface2 {
@@ -358,14 +430,20 @@ pub enum Surface2 {
     Up,
 }
 
+impl Default for Surface2 {
+    fn default() -> Self {
+        Self::Up
+    }
+}
+
 impl TryFrom<Direction> for Surface2 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
             Direction::Down => Ok(Self::Down),
             Direction::Up => Ok(Self::Up),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -379,8 +457,14 @@ pub enum Surface4 {
     West,
 }
 
+impl Default for Surface4 {
+    fn default() -> Self {
+        Self::North
+    }
+}
+
 impl TryFrom<Direction> for Surface4 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -388,7 +472,7 @@ impl TryFrom<Direction> for Surface4 {
             Direction::North => Ok(Self::North),
             Direction::South => Ok(Self::South),
             Direction::West => Ok(Self::West),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -403,8 +487,14 @@ pub enum Surface5 {
     West,
 }
 
+impl Default for Surface5 {
+    fn default() -> Self {
+        Self::Down
+    }
+}
+
 impl TryFrom<Direction> for Surface5 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -413,7 +503,7 @@ impl TryFrom<Direction> for Surface5 {
             Direction::North => Ok(Self::North),
             Direction::South => Ok(Self::South),
             Direction::West => Ok(Self::West),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -429,8 +519,14 @@ pub enum Surface6 {
     West,
 }
 
+impl Default for Surface6 {
+    fn default() -> Self {
+        Self::North
+    }
+}
+
 impl TryFrom<Direction> for Surface6 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -440,7 +536,7 @@ impl TryFrom<Direction> for Surface6 {
             Direction::South => Ok(Self::South),
             Direction::Up => Ok(Self::Up),
             Direction::West => Ok(Self::West),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -456,6 +552,12 @@ pub enum Edge8 {
     UpNorth,
     UpSouth,
     UpWest,
+}
+
+impl Default for Edge8 {
+    fn default() -> Self {
+        Self::DownNorth
+    }
 }
 
 impl From<i8> for Edge8 {
@@ -475,7 +577,7 @@ impl From<i8> for Edge8 {
 }
 
 impl TryFrom<Direction> for Edge8 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -487,7 +589,7 @@ impl TryFrom<Direction> for Edge8 {
             Direction::UpWest => Ok(Self::UpWest),
             Direction::UpSouth => Ok(Self::UpSouth),
             Direction::UpNorth => Ok(Self::UpNorth),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
@@ -510,8 +612,14 @@ pub enum SurfaceRotation12 {
     UpFacingWest,
 }
 
+impl Default for SurfaceRotation12 {
+    fn default() -> Self {
+        Self::North
+    }
+}
+
 impl TryFrom<Direction> for SurfaceRotation12 {
-    type Error = ();
+    type Error = DirectionError;
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
@@ -527,7 +635,7 @@ impl TryFrom<Direction> for SurfaceRotation12 {
             Direction::UpWest => Ok(Self::UpFacingWest),
             Direction::UpSouth => Ok(Self::UpFacingSouth),
             Direction::UpNorth => Ok(Self::UpFacingNorth),
-            _ => Err(()),
+            _ => Err(DirectionError::TryFrom(item)),
         }
     }
 }
