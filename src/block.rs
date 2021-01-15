@@ -1104,7 +1104,7 @@ impl Block {
             Self::PistonHead { facing, .. } => Direction::from(*facing) == direction,
             Self::Pumpkin { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneComparator { facing, .. } => Direction::from(*facing) == direction,
-            Self::RedstoneRepeater(repeater) => repeater.has_facing_of(&direction),
+            Self::RedstoneRepeater(repeater) => repeater.has_facing_of(direction),
             Self::RedstoneSubtractor { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneTorch { attached, .. } => {
                 Direction::from(*attached).opposite() == direction

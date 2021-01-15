@@ -629,112 +629,41 @@ fn v_1_12_2_block_group_6() {
     assert_block_eq(&excerpt, (12, 2, 5), &Block::cake_with_remaining_pieces(2));
     assert_block_eq(&excerpt, (12, 2, 6), &Block::cake_with_remaining_pieces(1));
 
+    fn check_repeater(we: &WorldExcerpt, at: (i64, i64, i64), delay: i8, dir: Direction) {
+        let block = we.get_block_at(at.into()).unwrap();
+        let repeater = RedstoneRepeater::try_from(block.clone()).unwrap();
+        assert!(
+            repeater.has_facing_of(dir)
+            && repeater.has_delay_of(delay)
+        );
+    }
+
     // NB 13 "redstone repeater":
     // * the one at (13, 0, 0) is locked
     // * the one at (13, 0, 3) is powered
-    assert_block_eq(&excerpt, (13, 0, 0), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(1)
-            .with_facing(&Direction::East)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 1), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(2)
-            .with_facing(&Direction::East)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 2), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(3)
-            .with_facing(&Direction::East)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 3), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(4)
-            .with_facing(&Direction::East)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 4), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(1)
-            .with_facing(&Direction::North)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 5), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(2)
-            .with_facing(&Direction::North)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 6), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(3)
-            .with_facing(&Direction::North)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 7), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(4)
-            .with_facing(&Direction::North)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 8), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(1)
-            .with_facing(&Direction::West)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 9), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(2)
-            .with_facing(&Direction::West)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 10), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(3)
-            .with_facing(&Direction::West)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 11), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(4)
-            .with_facing(&Direction::West)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 12), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(1)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 13), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(2)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 14), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(3)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (13, 0, 15), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(4)
-            .with_facing(&Direction::South)
-    ));
+    check_repeater(&excerpt, (13, 0, 0), 1, Direction::East);
+    check_repeater(&excerpt, (13, 0, 1), 2, Direction::East);
+    check_repeater(&excerpt, (13, 0, 2), 3, Direction::East);
+    check_repeater(&excerpt, (13, 0, 3), 4, Direction::East);
+    check_repeater(&excerpt, (13, 0, 4), 1, Direction::North);
+    check_repeater(&excerpt, (13, 0, 5), 2, Direction::North);
+    check_repeater(&excerpt, (13, 0, 6), 3, Direction::North);
+    check_repeater(&excerpt, (13, 0, 7), 4, Direction::North);
+    check_repeater(&excerpt, (13, 0, 8), 1, Direction::West);
+    check_repeater(&excerpt, (13, 0, 9), 2, Direction::West);
+    check_repeater(&excerpt, (13, 0, 10), 3, Direction::West);
+    check_repeater(&excerpt, (13, 0, 11), 4, Direction::West);
+    check_repeater(&excerpt, (13, 0, 12), 1, Direction::South);
+    check_repeater(&excerpt, (13, 0, 13), 2, Direction::South);
+    check_repeater(&excerpt, (13, 0, 14), 3, Direction::South);
+    check_repeater(&excerpt, (13, 0, 15), 4, Direction::South);
 
     // NB 14 "powered redstone repeater"
     // * the one at (14, 0, 3 is locked.
-    assert_block_eq(&excerpt, (14, 0, 0), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(1)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (14, 0, 1), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(2)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (14, 0, 2), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(3)
-            .with_facing(&Direction::South)
-    ));
-    assert_block_eq(&excerpt, (14, 0, 3), &Block::from(
-            RedstoneRepeater::new()
-            .with_delay(4)
-            .with_facing(&Direction::South)
-    ));
+    check_repeater(&excerpt, (14, 0, 0), 1, Direction::South);
+    check_repeater(&excerpt, (14, 0, 1), 2, Direction::South);
+    check_repeater(&excerpt, (14, 0, 2), 3, Direction::South);
+    check_repeater(&excerpt, (14, 0, 3), 4, Direction::South);
 
     assert_block_eq(&excerpt, (15, 0, 0), &Block::glass_with_colour(Colour::White));
     assert_block_eq(&excerpt, (15, 0, 1), &Block::glass_with_colour(Colour::Orange));
