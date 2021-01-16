@@ -893,7 +893,7 @@ impl Chunk {
                         }),
                         127 => Block::CocoaBeans {
                             growth_stage: Int0Through2::new((data[index] & 0xC) >> 2).unwrap(),
-                            facing: facing4_swne(data[index]),
+                            facing: facing4_nesw(data[index]),
                         },
                         128 => Block::Stairs(Stair {
                             material: StairMaterial::Sandstone,

@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 
 mod banner;
 mod bed;
+mod brewing_stand;
 mod chest;
 mod dispenser;
 mod door;
@@ -18,6 +19,7 @@ mod vines;
 
 pub use crate::block::banner::*;
 pub use crate::block::bed::*;
+pub use crate::block::brewing_stand::*;
 pub use crate::block::chest::*;
 pub use crate::block::dispenser::*;
 pub use crate::block::door::*;
@@ -34,7 +36,6 @@ pub use crate::block::vines::*;
 
 use crate::bounded_ints::*;
 use crate::colour::*;
-use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
@@ -106,15 +107,6 @@ impl RailShape {
             n => panic!("Invalid rail shape value: {}", n),
         }
     }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct BrewingStand {
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-    pub brew_time: i16, // TODO change to integer with valid range
-    pub fuel: i8,       // TODO change to integer with valid range
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -1184,6 +1176,14 @@ impl Block {
         }
     }
 
+    /// Returns true if the block is a brewing stand.
+    pub fn is_brewing_stand(&self) -> bool {
+        match self {
+            Self::BrewingStand(_) => true,
+            _ => false,
+        }
+    }
+
     /// Returns true if the block is a chest.
     pub fn is_chest(&self) -> bool {
         match self {
@@ -1196,6 +1196,14 @@ impl Block {
     pub fn is_dispenser(&self) -> bool {
         match self {
             Self::Dispenser(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is an enchanting table.
+    pub fn is_enchanting_table(&self) -> bool {
+        match self {
+            Self::EnchantingTable{ .. } => true,
             _ => false,
         }
     }

@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use mcprogedit::block::*;
-use mcprogedit::bounded_ints::Int0Through7;
+use mcprogedit::bounded_ints::*;
 use mcprogedit::colour::Colour;
 use mcprogedit::coordinates::BlockCoord;
 use mcprogedit::material::Material;
@@ -31,13 +31,23 @@ fn check_bed(we: &WorldExcerpt, at: (i64, i64, i64), fac: Direction, col: Colour
     assert!(bed.end == end);
 }
 
+fn check_stairs_multiple(excerpt: &WorldExcerpt, at: (i64, i64, i64), material: Material) {
+    let (x, y, z) = at;
+    check_stairs(&excerpt, (x, y, z), Direction::DownEast, material);
+    check_stairs(&excerpt, (x, y, z+1), Direction::UpEast, material);
+    check_stairs(&excerpt, (x, y, z+2), Direction::DownNorth, material);
+    check_stairs(&excerpt, (x, y, z+3), Direction::UpNorth, material);
+    check_stairs(&excerpt, (x, y, z+4), Direction::DownWest, material);
+    check_stairs(&excerpt, (x, y, z+5), Direction::UpWest, material);
+    check_stairs(&excerpt, (x, y, z+6), Direction::DownSouth, material);
+    check_stairs(&excerpt, (x, y, z+7), Direction::UpSouth, material);
+}
+
 fn check_stairs(we: &WorldExcerpt, at: (i64, i64, i64), dir: Direction, mat: Material) {
     let block = we.get_block_at(at.into()).unwrap();
-    assert!(
-        block.is_stairs()
-        && block.has_facing_of(dir)
-        && block.has_material_of(mat)
-    );
+    assert!(block.is_stairs());
+    assert!(block.has_facing_of(dir));
+    assert!(block.has_material_of(mat));
 }
 
 fn check_door(
@@ -368,14 +378,7 @@ fn v_1_12_2_block_group_4() {
     // NB Block ID 52 "mob spawner" should be here at x position 4,
     // but it is not present in the save file, and is also not implemented.
 
-    check_stairs(&excerpt, (5, 0, 0), Direction::DownEast, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 1), Direction::UpEast, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 2), Direction::DownNorth, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 3), Direction::UpNorth, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 4), Direction::DownWest, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 5), Direction::UpWest, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 6), Direction::DownSouth, Material::Oak);
-    check_stairs(&excerpt, (5, 0, 7), Direction::UpSouth, Material::Oak);
+    check_stairs_multiple(&excerpt, (5, 0, 0), Material::Oak);
 
     let block = excerpt.get_block_at((6, 0, 0).into()).unwrap();
     assert!(block.is_chest() && block.has_facing_of(Direction::West));
@@ -468,14 +471,7 @@ fn v_1_12_2_block_group_5() {
 
     assert_block_eq(&excerpt, (2, 1, 0), &Block::rail(RailShape::NorthSouth));
 
-    check_stairs(&excerpt, (3, 0, 0), Direction::DownEast, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 1), Direction::UpEast, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 2), Direction::DownNorth, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 3), Direction::UpNorth, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 4), Direction::DownWest, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 5), Direction::UpWest, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 6), Direction::DownSouth, Material::Cobblestone);
-    check_stairs(&excerpt, (3, 0, 7), Direction::UpSouth, Material::Cobblestone);
+    check_stairs_multiple(&excerpt, (3, 0, 0), Material::Cobblestone);
 
     let block = excerpt.get_block_at((4, 0, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::West));
@@ -776,25 +772,102 @@ fn v_1_12_2_block_group_7() {
     assert_block_eq(&excerpt, (11, 0, 8), &Block::oak_fence_gate_opened(Direction::West));
     assert_block_eq(&excerpt, (11, 0, 9), &Block::oak_fence_gate_opened(Direction::South));
 
-    check_stairs(&excerpt, (12, 0, 0), Direction::DownEast, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 1), Direction::UpEast, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 2), Direction::DownNorth, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 3), Direction::UpNorth, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 4), Direction::DownWest, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 5), Direction::UpWest, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 6), Direction::DownSouth, Material::Brick);
-    check_stairs(&excerpt, (12, 0, 7), Direction::UpSouth, Material::Brick);
+    check_stairs_multiple(&excerpt, (12, 0, 0), Material::Brick);
 
-    check_stairs(&excerpt, (13, 0, 0), Direction::DownEast, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 1), Direction::UpEast, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 2), Direction::DownNorth, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 3), Direction::UpNorth, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 4), Direction::DownWest, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 5), Direction::UpWest, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 6), Direction::DownSouth, Material::StoneBrick);
-    check_stairs(&excerpt, (13, 0, 7), Direction::UpSouth, Material::StoneBrick);
+    check_stairs_multiple(&excerpt, (13, 0, 0), Material::StoneBrick);
 
     assert_block_eq(&excerpt, (14, 0, 0), &Block::Mycelium);
 
     assert_block_eq(&excerpt, (15, 0, 0), &Block::LilyPad);
+}
+
+#[test]
+/// Import of blocks with id 112 through 127
+fn v_1_12_2_block_group_8() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (112, 56, 0), (16, 4, 16));
+
+    assert_block_eq(&excerpt, (0, 0, 0), &Block::NetherBricks);
+
+    assert_block_eq(&excerpt, (1, 0, 0), &Block::nether_brick_fence());
+
+    check_stairs_multiple(&excerpt, (2, 0, 0), Material::NetherBrick);
+
+    assert_block_eq(
+        &excerpt,
+        (3, 0, 0),
+        &Block::NetherWart {
+            growth_stage: Int0Through3::new_saturating(3),
+        },
+    );
+
+    assert!(excerpt.get_block_at((4, 0, 0).into()).unwrap().is_enchanting_table());
+
+    // NB brewing stand has a number of fields that should be tested,
+    // but in the current test map all of them are default.
+    assert!(excerpt.get_block_at((5, 0, 0).into()).unwrap().is_brewing_stand());
+
+    assert_block_eq(&excerpt, (6, 0, 0),
+        &Block::Cauldron { water_level: Int0Through3::new_saturating(0)});
+    assert_block_eq(&excerpt, (6, 0, 1),
+        &Block::Cauldron { water_level: Int0Through3::new_saturating(1)});
+    assert_block_eq(&excerpt, (6, 0, 2),
+        &Block::Cauldron { water_level: Int0Through3::new_saturating(2)});
+    assert_block_eq(&excerpt, (6, 0, 3),
+        &Block::Cauldron { water_level: Int0Through3::new_saturating(3)});
+
+    // NB 119 "end portal" not present in save file
+
+    assert_block_eq( &excerpt, (8, 0, 0),
+        &Block::EndPortalFrame { facing: Surface4::West, has_eye: false });
+    assert_block_eq( &excerpt, (8, 1, 0),
+        &Block::EndPortalFrame { facing: Surface4::South, has_eye: false });
+    assert_block_eq( &excerpt, (8, 2, 0),
+        &Block::EndPortalFrame { facing: Surface4::East, has_eye: false });
+    assert_block_eq( &excerpt, (8, 3, 0),
+        &Block::EndPortalFrame { facing: Surface4::North, has_eye: false });
+    assert_block_eq( &excerpt, (8, 0, 1),
+        &Block::EndPortalFrame { facing: Surface4::West, has_eye: true });
+    assert_block_eq( &excerpt, (8, 1, 1),
+        &Block::EndPortalFrame { facing: Surface4::South, has_eye: true });
+    assert_block_eq( &excerpt, (8, 2, 1),
+        &Block::EndPortalFrame { facing: Surface4::East, has_eye: true });
+    assert_block_eq( &excerpt, (8, 3, 1),
+        &Block::EndPortalFrame { facing: Surface4::North, has_eye: true });
+
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::EndStone);
+
+    assert_block_eq(&excerpt, (10, 0, 0), &Block::DragonEgg);
+
+    assert_block_eq(&excerpt, (11, 0, 0), &Block::RedstoneLamp);
+
+    // NB 124 "lit redstone lamp" not tested: No on/off state stored.
+
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::double_slab(Material::Oak));
+    assert_block_eq(&excerpt, (13, 0, 1), &Block::double_slab(Material::Spruce));
+    assert_block_eq(&excerpt, (13, 0, 2), &Block::double_slab(Material::Birch));
+    assert_block_eq(&excerpt, (13, 0, 3), &Block::double_slab(Material::Jungle));
+    assert_block_eq(&excerpt, (13, 0, 4), &Block::double_slab(Material::Acacia));
+    assert_block_eq(&excerpt, (13, 0, 5), &Block::double_slab(Material::DarkOak));
+
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::bottom_slab(Material::Oak));
+    assert_block_eq(&excerpt, (14, 1, 0), &Block::top_slab(Material::Oak));
+    assert_block_eq(&excerpt, (14, 0, 1), &Block::bottom_slab(Material::Spruce));
+    assert_block_eq(&excerpt, (14, 1, 1), &Block::top_slab(Material::Spruce));
+    assert_block_eq(&excerpt, (14, 0, 2), &Block::bottom_slab(Material::Birch));
+    assert_block_eq(&excerpt, (14, 1, 2), &Block::top_slab(Material::Birch));
+    assert_block_eq(&excerpt, (14, 0, 3), &Block::bottom_slab(Material::Jungle));
+    assert_block_eq(&excerpt, (14, 1, 3), &Block::top_slab(Material::Jungle));
+    assert_block_eq(&excerpt, (14, 0, 4), &Block::bottom_slab(Material::Acacia));
+    assert_block_eq(&excerpt, (14, 1, 4), &Block::top_slab(Material::Acacia));
+    assert_block_eq(&excerpt, (14, 0, 5), &Block::bottom_slab(Material::DarkOak));
+    assert_block_eq(&excerpt, (14, 1, 5), &Block::top_slab(Material::DarkOak));
+
+    assert_block_eq(
+        &excerpt,
+        (15, 0, 0),
+        &Block::CocoaBeans {
+            growth_stage: Int0Through2::new_saturating(2),
+            facing: Surface4::South,
+        },
+    );
 }
