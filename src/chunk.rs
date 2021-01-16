@@ -978,7 +978,28 @@ impl Chunk {
                             growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                         },
                         143 => Block::Button(ButtonMaterial::Oak, facing6_dewsnu(data[index])),
-                        // TODO 144 skull // Deferred for now, too complicated
+                        144 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates).unwrap();
+
+                            match block_entity {
+                                BlockEntity::Skull {
+                                    skull_type, facing, ..
+                                } => Block::Head(Head {
+                                    variant: *skull_type,
+                                    placement: match data[index] {
+                                        1 => WallOrRotatedOnFloor::Floor(*facing),
+                                        2 => WallOrRotatedOnFloor::Wall(Surface4::North),
+                                        3 => WallOrRotatedOnFloor::Wall(Surface4::South),
+                                        4 => WallOrRotatedOnFloor::Wall(Surface4::West),
+                                        5 => WallOrRotatedOnFloor::Wall(Surface4::East),
+                                        n => panic!("Unknown data value for skull: {}", n),
+                                    },
+                                    waterlogged: false,
+                                }),
+                                _ => panic!("Wrong block entity variant for skull / head"),
+                            }
+                        }
                         145 => Block::Anvil {
                             facing: facing4_swne(data[index]),
                             damage: match data[index] & 0b1100 {

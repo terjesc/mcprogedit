@@ -1,12 +1,14 @@
 use std::collections::HashMap;
 
-use crate::block::{BannerPattern, ColouredPattern, Flower, Grass, Hinge, Pitch, PottedPlant};
+use crate::block::{
+    BannerPattern, ColouredPattern, Flower, Grass, HeadVariant, Hinge, Pitch, PottedPlant,
+};
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::nbt_lookup::*;
-use crate::positioning::Surface4;
+use crate::positioning::{Direction16, Surface4};
 use crate::status_effect::StatusEffect;
 
 // Block entity, aka "tile entity". Contains additional block data, a bit
@@ -113,7 +115,11 @@ pub enum BlockEntity {
         colour: Colour,
         text: Vec<String>, // NB: Four strings, format is "compound object" as "JSON text".
     },
-    Skull,
+    Skull {
+        common: CommonTags,
+        skull_type: HeadVariant,
+        facing: Direction16,
+    },
     Smoker {
         tags: FurnaceTags,
     },
@@ -519,9 +525,20 @@ impl BlockEntity {
         }
     }
 
-    fn skull_from_nbt_value(_value: &nbt::Value) -> Self {
-        // TODO (deferred as too complicated)
-        BlockEntity::Skull
+    fn skull_from_nbt_value(value: &nbt::Value) -> Self {
+        BlockEntity::Skull {
+            common: CommonTags::from_nbt_value(&value),
+            skull_type: match nbt_value_lookup_byte(&value, "SkullType").unwrap() {
+                0 => HeadVariant::SkeletonSkull,
+                1 => HeadVariant::WitherSkeletonSkull,
+                2 => HeadVariant::ZombieHead,
+                3 => HeadVariant::PlayerHead,
+                4 => HeadVariant::CreeperHead,
+                5 => HeadVariant::DragonHead,
+                n => panic!("Unknown SkullType value of {}", n),
+            },
+            facing: Direction16::from(nbt_value_lookup_byte(&value, "Rot").unwrap()).opposite(),
+        }
     }
 
     fn smoker_from_nbt_value(value: &nbt::Value) -> Self {
@@ -571,7 +588,7 @@ impl BlockEntity {
             Self::Piston => None,
             Self::ShulkerBox { tags } => Some(tags.common.coordinates()),
             Self::Sign { common, .. } => Some(common.coordinates()),
-            Self::Skull => None,
+            Self::Skull { common, .. } => Some(common.coordinates()),
             Self::Smoker { tags } => Some(tags.common.coordinates()),
             Self::StructureBlock => None,
             // Internal mcprogedit block entities do not contain x, y, z tags

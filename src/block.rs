@@ -9,6 +9,7 @@ mod door;
 mod dropper;
 mod flower_pot;
 mod furnace;
+mod head;
 mod hopper;
 mod noteblock;
 mod redstone_repeater;
@@ -27,6 +28,7 @@ pub use crate::block::door::*;
 pub use crate::block::dropper::*;
 pub use crate::block::flower_pot::*;
 pub use crate::block::furnace::*;
+pub use crate::block::head::*;
 pub use crate::block::hopper::*;
 pub use crate::block::noteblock::*;
 pub use crate::block::redstone_repeater::*;
@@ -221,23 +223,6 @@ pub struct CommandBlock {
     pub variant: CommandBlockVariant,
     pub conditional: bool,
     pub facing: Surface6,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum HeadVariant {
-    CreeperHead,
-    DragonHead,
-    PlayerHead,
-    SkeletonSkull,
-    WitherSkeletonSkull,
-    ZombieHead,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Head {
-    pub variant: HeadVariant,
-    pub placement: WallOrRotatedOnFloor,
-    pub waterlogged: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -1079,7 +1064,7 @@ impl Block {
             Self::Furnace(furnace) => furnace.has_facing_of(direction),
             Self::GlazedTerracotta { facing, .. } => Direction::from(*facing) == direction,
             Self::GrindStone(rotation) => Direction::from(*rotation) == direction,
-            // TODO Head
+            Self::Head(head) => head.has_facing_of(direction),
             Self::Hopper(hopper) => hopper.has_facing_of(direction),
             Self::JackOLantern { facing, .. } => Direction::from(*facing) == direction,
             Self::Ladder { facing, .. } => Direction::from(*facing) == direction,

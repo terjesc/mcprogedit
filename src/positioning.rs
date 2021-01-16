@@ -285,6 +285,30 @@ pub enum Direction16 {
     SouthSouthEast = 15,
 }
 
+impl Direction16 {
+    /// Returns an instance of the opposite direction.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Self::East => Self::West,
+            Self::EastNorthEast => Self::WestSouthWest,
+            Self::EastSouthEast => Self::WestNorthWest,
+            Self::North => Self::South,
+            Self::NorthEast => Self::SouthWest,
+            Self::NorthNorthEast => Self::SouthSouthWest,
+            Self::NorthNorthWest => Self::SouthSouthEast,
+            Self::NorthWest => Self::SouthEast,
+            Self::South => Self::North,
+            Self::SouthEast => Self::NorthWest,
+            Self::SouthSouthEast => Self::NorthNorthWest,
+            Self::SouthSouthWest => Self::NorthNorthEast,
+            Self::SouthWest => Self::NorthEast,
+            Self::West => Self::East,
+            Self::WestNorthWest => Self::EastSouthEast,
+            Self::WestSouthWest => Self::EastNorthEast,
+        }
+    }
+}
+
 impl Default for Direction16 {
     fn default() -> Self {
         Self::North
@@ -373,6 +397,19 @@ pub enum WallOrRotatedOnFloor {
     Floor(Direction16),
     /// The block is mounted on a side surface of the voxel containing it.
     Wall(Surface4),
+}
+
+impl WallOrRotatedOnFloor {
+    pub fn is_on_floor(&self) -> bool {
+        match self {
+            Self::Floor(_) => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_on_wall(&self) -> bool {
+        !self.is_on_floor()
+    }
 }
 
 impl Default for WallOrRotatedOnFloor {
