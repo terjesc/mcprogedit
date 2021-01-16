@@ -710,7 +710,7 @@ impl Chunk {
                             colour: Some(((data[index] & 0xF) as i32).into()),
                         },
                         // All trapdoors
-                        96 | 167 => Block::Trapdoor {
+                        96 | 167 => Block::Trapdoor(Trapdoor {
                             hinge_at: trapdoor_hinge_at(data[index]),
                             open: data[index] & 0x4 == 0x4,
                             waterlogged: false,
@@ -719,7 +719,7 @@ impl Chunk {
                                 167 => DoorMaterial::Iron,
                                 _ => unreachable!(),
                             },
-                        },
+                        }),
                         97 => match data[index] {
                             0 => Block::InfestedStone,
                             1 => Block::InfestedCobblestone,
@@ -767,7 +767,7 @@ impl Chunk {
                                 Int0Through7::new(data[index] & 0x7).unwrap(),
                             ),
                         },
-                        106 => Block::Vines {
+                        106 => Block::Vines(Vines {
                             anchored_at: DirectionFlags6 {
                                 east: data[index] & 0x8 == 0x8,
                                 down: false,
@@ -776,7 +776,7 @@ impl Chunk {
                                 up: false,
                                 west: data[index] & 0x2 == 0x2,
                             },
-                        },
+                        }),
                         // All fence gates
                         107 | 183..=187 => Block::FenceGate {
                             facing: facing4_swne(data[index]),

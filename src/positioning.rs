@@ -341,6 +341,16 @@ impl TryFrom<Direction> for Direction16 {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct DirectionFlags6 {
+    pub east: bool,
+    pub down: bool,
+    pub north: bool,
+    pub south: bool,
+    pub up: bool,
+    pub west: bool,
+}
+
 /// Position and rotation for blocks that can either be put on top of the block below,
 /// or attached to the side of a horizontally adjacent block.
 ///

@@ -55,8 +55,8 @@ fn check_door(
     let top_door = Door::try_from(top_block.clone()).unwrap();
     assert!(bottom_door.has_material_of(&mat));
     assert!(top_door.has_material_of(&mat));
-    assert!(bottom_door.has_facing_of(&fac));
-    assert!(top_door.has_facing_of(&fac));
+    assert!(bottom_door.has_facing_of(fac));
+    assert!(top_door.has_facing_of(fac));
     assert!(bottom_door.is_hinged_at(&hinge));
     assert!(top_door.is_hinged_at(&hinge));
     assert!(bottom_door.is_bottom_half());
@@ -681,4 +681,120 @@ fn v_1_12_2_block_group_6() {
     assert_block_eq(&excerpt, (15, 0, 13), &Block::glass_with_colour(Colour::Green));
     assert_block_eq(&excerpt, (15, 0, 14), &Block::glass_with_colour(Colour::Red));
     assert_block_eq(&excerpt, (15, 0, 15), &Block::glass_with_colour(Colour::Black));
+}
+
+fn check_trapdoor(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    material: Material,
+    hinge_at: Edge8,
+    closed: bool,
+) {
+    let block = excerpt.get_block_at(at.into()).unwrap();
+    let trapdoor = Trapdoor::try_from(block.clone()).unwrap();
+    assert!(trapdoor.has_hinge_at(hinge_at));
+    assert!(trapdoor.has_material_of(material));
+    assert_eq!(closed, trapdoor.is_closed());
+}
+
+fn check_vines(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    direction: Direction,
+) {
+    let block = excerpt.get_block_at(at.into()).unwrap();
+    let vines = Vines::try_from(block.clone()).unwrap();
+    assert!(vines.is_touching_surface(direction));
+}
+
+#[test]
+/// Import of blocks with id 96 through 111
+fn v_1_12_2_block_group_7() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (96, 56, 0), (16, 4, 16));
+
+    check_trapdoor(&excerpt, (0, 0, 0), Material::Oak, Edge8::DownEast, true);
+    check_trapdoor(&excerpt, (0, 0, 1), Material::Oak, Edge8::DownNorth, true);
+    check_trapdoor(&excerpt, (0, 0, 2), Material::Oak, Edge8::DownWest, true);
+    check_trapdoor(&excerpt, (0, 0, 3), Material::Oak, Edge8::DownSouth, true);
+    check_trapdoor(&excerpt, (0, 0, 4), Material::Oak, Edge8::UpEast, true);
+    check_trapdoor(&excerpt, (0, 0, 5), Material::Oak, Edge8::UpNorth, true);
+    check_trapdoor(&excerpt, (0, 0, 6), Material::Oak, Edge8::UpWest, true);
+    check_trapdoor(&excerpt, (0, 0, 7), Material::Oak, Edge8::UpSouth, true);
+    check_trapdoor(&excerpt, (0, 0, 8), Material::Oak, Edge8::DownEast, false);
+    check_trapdoor(&excerpt, (0, 0, 9), Material::Oak, Edge8::DownNorth, false);
+    check_trapdoor(&excerpt, (0, 0, 10), Material::Oak, Edge8::DownWest, false);
+    check_trapdoor(&excerpt, (0, 0, 11), Material::Oak, Edge8::DownSouth, false);
+    check_trapdoor(&excerpt, (0, 0, 12), Material::Oak, Edge8::UpEast, false);
+    check_trapdoor(&excerpt, (0, 0, 13), Material::Oak, Edge8::UpNorth, false);
+    check_trapdoor(&excerpt, (0, 0, 14), Material::Oak, Edge8::UpWest, false);
+    check_trapdoor(&excerpt, (0, 0, 15), Material::Oak, Edge8::UpSouth, false);
+
+    assert_block_eq(&excerpt, (1, 0, 0), &Block::InfestedStone);
+    assert_block_eq(&excerpt, (1, 0, 1), &Block::InfestedCobblestone);
+    assert_block_eq(&excerpt, (1, 0, 2), &Block::InfestedStoneBricks);
+    assert_block_eq(&excerpt, (1, 0, 3), &Block::InfestedMossyStoneBricks);
+    assert_block_eq(&excerpt, (1, 0, 4), &Block::InfestedCrackedStoneBricks);
+    assert_block_eq(&excerpt, (1, 0, 5), &Block::InfestedChiseledStoneBricks);
+
+    assert_block_eq(&excerpt, (2, 0, 0), &Block::StoneBricks);
+    assert_block_eq(&excerpt, (2, 0, 1), &Block::MossyStoneBricks);
+    assert_block_eq(&excerpt, (2, 0, 2), &Block::CrackedStoneBricks);
+    assert_block_eq(&excerpt, (2, 0, 3), &Block::ChiseledStoneBricks);
+
+    // NB 99 "brown mushroom block" not in save file
+    // NB 100 "red mushroom block" not in save file
+
+    assert_block_eq(&excerpt, (5, 0, 0), &Block::iron_bars());
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::glass_pane());
+
+    assert_block_eq(&excerpt, (7, 0, 0), &Block::Melon);
+
+    assert_block_eq(
+        &excerpt,
+        (8, 0, 0),
+        &Block::PumpkinStem { state: StemState::Growing(Int0Through7::new_saturating(2)) },
+    );
+
+    assert_block_eq(
+        &excerpt,
+        (9, 0, 0),
+        &Block::MelonStem { state: StemState::Growing(Int0Through7::new_saturating(5)) },
+    );
+
+    check_vines(&excerpt, (10, 0, 0), Direction::East);
+    check_vines(&excerpt, (10, 1, 0), Direction::North);
+    check_vines(&excerpt, (10, 2, 0), Direction::West);
+    check_vines(&excerpt, (10, 3, 0), Direction::South);
+
+    assert_block_eq(&excerpt, (11, 0, 2), &Block::oak_fence_gate(Direction::East));
+    assert_block_eq(&excerpt, (11, 0, 3), &Block::oak_fence_gate(Direction::North));
+    assert_block_eq(&excerpt, (11, 0, 4), &Block::oak_fence_gate(Direction::West));
+    assert_block_eq(&excerpt, (11, 0, 5), &Block::oak_fence_gate(Direction::South));
+    assert_block_eq(&excerpt, (11, 0, 6), &Block::oak_fence_gate_opened(Direction::East));
+    assert_block_eq(&excerpt, (11, 0, 7), &Block::oak_fence_gate_opened(Direction::North));
+    assert_block_eq(&excerpt, (11, 0, 8), &Block::oak_fence_gate_opened(Direction::West));
+    assert_block_eq(&excerpt, (11, 0, 9), &Block::oak_fence_gate_opened(Direction::South));
+
+    check_stairs(&excerpt, (12, 0, 0), Direction::DownEast, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 1), Direction::UpEast, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 2), Direction::DownNorth, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 3), Direction::UpNorth, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 4), Direction::DownWest, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 5), Direction::UpWest, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 6), Direction::DownSouth, Material::Brick);
+    check_stairs(&excerpt, (12, 0, 7), Direction::UpSouth, Material::Brick);
+
+    check_stairs(&excerpt, (13, 0, 0), Direction::DownEast, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 1), Direction::UpEast, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 2), Direction::DownNorth, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 3), Direction::UpNorth, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 4), Direction::DownWest, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 5), Direction::UpWest, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 6), Direction::DownSouth, Material::StoneBrick);
+    check_stairs(&excerpt, (13, 0, 7), Direction::UpSouth, Material::StoneBrick);
+
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::Mycelium);
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::LilyPad);
 }

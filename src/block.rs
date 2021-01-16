@@ -13,6 +13,8 @@ mod redstone_repeater;
 mod shulker_box;
 mod sign;
 mod stair;
+mod trapdoor;
+mod vines;
 
 pub use crate::block::banner::*;
 pub use crate::block::bed::*;
@@ -27,6 +29,8 @@ pub use crate::block::redstone_repeater::*;
 pub use crate::block::shulker_box::*;
 pub use crate::block::sign::*;
 pub use crate::block::stair::*;
+pub use crate::block::trapdoor::*;
+pub use crate::block::vines::*;
 
 use crate::bounded_ints::*;
 use crate::colour::*;
@@ -206,17 +210,6 @@ impl Log {
 bounded_integer! {
     #[repr(i8)]
     pub struct HoneyLevel { 0..=5 }
-}
-
-// TODO consider using BitSet here
-#[derive(Clone, Debug, PartialEq)]
-pub struct DirectionFlags6 {
-    pub east: bool,
-    pub down: bool,
-    pub north: bool,
-    pub south: bool,
-    pub up: bool,
-    pub west: bool,
 }
 
 pub type ChorusPlantConnections = DirectionFlags6;
@@ -767,12 +760,7 @@ pub enum Block {
     Torch {
         attached: Surface5,
     },
-    Trapdoor {
-        material: DoorMaterial,
-        hinge_at: Edge8,
-        open: bool,
-        waterlogged: bool,
-    },
+    Trapdoor(Trapdoor),
     TrappedChest(Box<Chest>),
     Tripwire,
     TripwireHook {
@@ -786,10 +774,7 @@ pub enum Block {
         growth_stage: Int0Through25,
     },
     TwistingVinesPlant,
-    Vines {
-        // NB should attach to all neighbouring blocks by default
-        anchored_at: DirectionFlags6,
-    },
+    Vines(Vines),
     Wall {
         material: WallMaterial,
         waterlogged: bool,
@@ -846,6 +831,15 @@ impl Block {
         }
     }
 
+    /// Returns an opened acacia fence gate with the doors facing in the given direction.
+    pub fn acacia_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Acacia,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
+        }
+    }
+
     /// Returns a Leaves block of the Acacia variant.
     pub fn acacia_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -893,6 +887,15 @@ impl Block {
             material: WoodMaterial::Birch,
             facing: Surface4::try_from(facing).unwrap(),
             open: false,
+        }
+    }
+
+    /// Returns an opened birch fence gate with the doors facing in the given direction.
+    pub fn birch_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Birch,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
         }
     }
 
@@ -976,6 +979,15 @@ impl Block {
         }
     }
 
+    /// Returns an opened dark oak fence gate with the doors facing in the given direction.
+    pub fn dark_oak_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::DarkOak,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
+        }
+    }
+
     /// Returns a Leaves block of the Dark Oak variant.
     pub fn dark_oak_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -1038,6 +1050,22 @@ impl Block {
         Self::Glass { colour: None }
     }
 
+    /// Returns an uncoloured glass pane.
+    pub fn glass_pane() -> Self {
+        Self::GlassPane {
+            colour: None,
+            waterlogged: false,
+        }
+    }
+
+    /// Returns a glass pane of the given colour.
+    pub fn glass_pane_with_colour(colour: Colour) -> Self {
+        Self::GlassPane {
+            colour: Some(colour),
+            waterlogged: false,
+        }
+    }
+
     /// Returns a glass block of the given colour.
     pub fn glass_with_colour(colour: Colour) -> Self {
         Self::Glass {
@@ -1083,7 +1111,7 @@ impl Block {
             Self::CocoaBeans { facing, .. } => Direction::from(*facing) == direction,
             Self::CoralFan { facing, .. } => Direction::from(*facing) == direction,
             Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
-            Self::Door(door) => door.has_facing_of(&direction),
+            Self::Door(door) => door.has_facing_of(direction),
             Self::Dropper(dropper) => dropper.has_facing_of(direction),
             Self::EndPortalFrame { facing, .. } => Direction::from(*facing) == direction,
             Self::EndRod { facing, .. } => Direction::from(*facing) == direction,
@@ -1143,9 +1171,16 @@ impl Block {
             Self::Sign(sign) => sign.has_material_of(material),
             Self::Slab(slab) => slab.has_material_of(material),
             Self::Stairs(stair) => stair.has_material_of(material),
-            Self::Trapdoor { material: mat, .. } => Material::from(*mat) == material,
+            Self::Trapdoor(trapdoor) => trapdoor.has_material_of(material),
             Self::Wall { material: mat, .. } => Material::from(*mat) == material,
             _ => false,
+        }
+    }
+
+    /// Returns an iron bars block..
+    pub fn iron_bars() -> Self {
+        Self::IronBars {
+            waterlogged: false,
         }
     }
 
@@ -1272,6 +1307,15 @@ impl Block {
         }
     }
 
+    /// Returns an opened jungle fence gate with the doors facing in the given direction.
+    pub fn jungle_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Jungle,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
+        }
+    }
+
     /// Returns a Leaves block of the Jungle variant.
     pub fn jungle_leaves(persistent: bool) -> Self {
         Self::Leaves {
@@ -1366,6 +1410,15 @@ impl Block {
             material: WoodMaterial::Oak,
             facing: Surface4::try_from(facing).unwrap(),
             open: false,
+        }
+    }
+
+    /// Returns an opened oak fence gate with the doors facing in the given direction.
+    pub fn oak_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Oak,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
         }
     }
 
@@ -1570,6 +1623,15 @@ impl Block {
             material: WoodMaterial::Spruce,
             facing: Surface4::try_from(facing).unwrap(),
             open: false,
+        }
+    }
+
+    /// Returns an opened spruce fence gate with the doors facing in the given direction.
+    pub fn spruce_fence_gate_opened(facing: Direction) -> Self {
+        Self::FenceGate {
+            material: WoodMaterial::Spruce,
+            facing: Surface4::try_from(facing).unwrap(),
+            open: true,
         }
     }
 

@@ -18,8 +18,11 @@ impl Door {
         self.open = false;
     }
 
-    pub fn has_facing_of(&self, facing: &Direction) -> bool {
-        *facing == self.facing.clone().into()
+    pub fn has_facing_of<T>(&self, facing: T) -> bool
+    where
+        T: Copy + Into<Direction>,
+    {
+        Into::<Direction>::into(self.facing) == Into::<Direction>::into(facing)
     }
 
     pub fn has_material_of(&self, material: &Material) -> bool {
