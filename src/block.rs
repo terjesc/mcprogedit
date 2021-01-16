@@ -1138,9 +1138,7 @@ impl Block {
 
     /// Returns an iron bars block..
     pub fn iron_bars() -> Self {
-        Self::IronBars {
-            waterlogged: false,
-        }
+        Self::IronBars { waterlogged: false }
     }
 
     /// Returns true if the block is a beacon.
@@ -1178,7 +1176,7 @@ impl Block {
     /// Returns true if the block is an enchanting table.
     pub fn is_enchanting_table(&self) -> bool {
         match self {
-            Self::EnchantingTable{ .. } => true,
+            Self::EnchantingTable { .. } => true,
             _ => false,
         }
     }
@@ -1186,7 +1184,7 @@ impl Block {
     /// Returns true if the block is an ender chest.
     pub fn is_ender_chest(&self) -> bool {
         match self {
-            Self::EnderChest{ .. } => true,
+            Self::EnderChest { .. } => true,
             _ => false,
         }
     }
@@ -1401,10 +1399,7 @@ impl Block {
 
     /// Returns a oak button of the given placemnet.
     pub fn oak_button(direction: Direction) -> Self {
-        Self::Button(
-            ButtonMaterial::Oak,
-            Surface6::try_from(direction).unwrap(),
-        )
+        Self::Button(ButtonMaterial::Oak, Surface6::try_from(direction).unwrap())
     }
 
     /// Returns an oak fence.

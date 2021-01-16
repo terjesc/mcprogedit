@@ -970,7 +970,7 @@ impl Chunk {
                             } else {
                                 Block::FlowerPot(FlowerPot { plant: None })
                             }
-                        },
+                        }
                         141 => Block::Carrots {
                             growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                         },

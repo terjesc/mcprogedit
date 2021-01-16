@@ -127,7 +127,7 @@ impl RedstoneRepeater {
     /// ```
     pub fn try_set_facing<T>(&mut self, direction: T) -> Result<Surface4, DirectionError>
     where
-        T: Copy + Into<Direction>
+        T: Copy + Into<Direction>,
     {
         let direction = Into::<Direction>::into(direction);
         match Surface4::try_from(direction) {

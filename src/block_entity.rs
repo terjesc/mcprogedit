@@ -420,7 +420,8 @@ impl BlockEntity {
                 _ => {
                     eprintln!(
                         "Unknown flower pot tile entity: [Item={:?}, Data={:?}]",
-                        group.as_str(), plant
+                        group.as_str(),
+                        plant
                     );
                     None
                 }
