@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::block::{BannerPattern, ColouredPattern, Flower, Grass, Hinge, Pitch};
+use crate::block::{BannerPattern, ColouredPattern, Flower, Grass, Hinge, Pitch, PottedPlant};
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
@@ -79,6 +79,10 @@ pub enum BlockEntity {
     },
     EndPortal {
         common: CommonTags,
+    },
+    FlowerPot {
+        common: CommonTags,
+        plant: Option<PottedPlant>,
     },
     Furnace {
         tags: FurnaceTags,
@@ -172,6 +176,7 @@ impl BlockEntity {
                 "minecraft:ender_chest" => Self::ender_chest_from_nbt_value(&value),
                 "minecraft:end_gateway" => Self::end_gateway_from_nbt_value(&value),
                 "minecraft:end_portal" => Self::end_portal_from_nbt_value(&value),
+                "minecraft:flower_pot" => Self::flower_pot_from_nbt_value(&value),
                 "minecraft:furnace" => Self::furnace_from_nbt_value(&value),
                 "minecraft:hopper" => Self::hopper_from_nbt_value(&value),
                 "minecraft:jigsaw" => Self::jigsaw_from_nbt_value(&value),
@@ -186,7 +191,10 @@ impl BlockEntity {
                 "minecraft:smoker" => Self::smoker_from_nbt_value(&value),
                 "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(&value),
                 "minecraft:structure_block" => Self::structure_block_from_nbt_value(&value),
-                _ => BlockEntity::Unknown { id: Some(id) },
+                _ => {
+                    eprintln!("Unknown tile entity ID: {}", id);
+                    BlockEntity::Unknown { id: Some(id) }
+                }
             }
         } else {
             BlockEntity::Unknown { id: None }
@@ -374,6 +382,52 @@ impl BlockEntity {
         }
     }
 
+    /*
+        if let Some(id) = nbt_value_lookup_string(&value, "id") {
+            match id.as_str() {
+    */
+
+    fn flower_pot_from_nbt_value(value: &nbt::Value) -> Self {
+        let (group, plant) = (
+            nbt_value_lookup_string(&value, "Item").unwrap(),
+            nbt_value_lookup_int(&value, "Data").unwrap(),
+        );
+        BlockEntity::FlowerPot {
+            common: CommonTags::from_nbt_value(&value),
+            plant: match (group.as_str(), plant) {
+                ("minecraft:air", _) => None,
+                ("minecraft:brown_mushroom", _) => Some(PottedPlant::BrownMushroom),
+                ("minecraft:cactus", _) => Some(PottedPlant::Cactus),
+                ("minecraft:deadbush", _) => Some(PottedPlant::DeadBush),
+                ("minecraft:red_flower", 0) => Some(PottedPlant::Poppy),
+                ("minecraft:red_flower", 1) => Some(PottedPlant::BlueOrchid),
+                ("minecraft:red_flower", 2) => Some(PottedPlant::Allium),
+                ("minecraft:red_flower", 3) => Some(PottedPlant::AzureBluet),
+                ("minecraft:red_flower", 4) => Some(PottedPlant::TulipRed),
+                ("minecraft:red_flower", 5) => Some(PottedPlant::TulipOrange),
+                ("minecraft:red_flower", 6) => Some(PottedPlant::TulipWhite),
+                ("minecraft:red_flower", 7) => Some(PottedPlant::TulipPink),
+                ("minecraft:red_flower", 8) => Some(PottedPlant::OxeyeDaisy),
+                ("minecraft:red_mushroom", _) => Some(PottedPlant::RedMushroom),
+                ("minecraft:sapling", 0) => Some(PottedPlant::OakSapling),
+                ("minecraft:sapling", 1) => Some(PottedPlant::SpruceSapling),
+                ("minecraft:sapling", 2) => Some(PottedPlant::BirchSapling),
+                ("minecraft:sapling", 3) => Some(PottedPlant::JungleSapling),
+                ("minecraft:sapling", 4) => Some(PottedPlant::AcaciaSapling),
+                ("minecraft:sapling", 5) => Some(PottedPlant::DarkOakSapling),
+                ("minecraft:tallgrass", 2) => Some(PottedPlant::Fern),
+                ("minecraft:yellow_flower", _) => Some(PottedPlant::Dandelion),
+                _ => {
+                    eprintln!(
+                        "Unknown flower pot tile entity: [Item={:?}, Data={:?}]",
+                        group.as_str(), plant
+                    );
+                    None
+                }
+            },
+        }
+    }
+
     fn furnace_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Furnace {
             tags: FurnaceTags::from_nbt_value(&value),
@@ -506,6 +560,7 @@ impl BlockEntity {
             Self::EnderChest { common } => Some(common.coordinates()),
             Self::EndGateway { common, .. } => Some(common.coordinates()),
             Self::EndPortal { common } => Some(common.coordinates()),
+            Self::FlowerPot { common, .. } => Some(common.coordinates()),
             Self::Furnace { tags } => Some(tags.common.coordinates()),
             Self::Hopper { tags } => Some(tags.common.coordinates()),
             Self::Jukebox { common, .. } => Some(common.coordinates()),

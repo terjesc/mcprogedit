@@ -437,7 +437,7 @@ impl Chunk {
                             3 => Flower::AzureBluet,
                             4 => Flower::TulipRed,
                             5 => Flower::TulipOrange,
-                            6 => Flower::TulipLightGray,
+                            6 => Flower::TulipWhite,
                             7 => Flower::TulipPink,
                             8 => Flower::OxeyeDaisy,
                             n => panic!("Unkown red flower data variant: {}", n),
@@ -961,6 +961,16 @@ impl Chunk {
                         // TODO 140 flower pot
                         // - Needs block entity (tile entity)
                         // - Pots placed prior to 1.7 have contents in data value
+                        140 => {
+                            let coordinates = Self::coordinates(section_y_index, xz_offset, index);
+                            let block_entity = block_entities.get(&coordinates);
+
+                            if let Some(BlockEntity::FlowerPot { plant, .. }) = block_entity {
+                                Block::FlowerPot(FlowerPot { plant: *plant })
+                            } else {
+                                Block::FlowerPot(FlowerPot { plant: None })
+                            }
+                        },
                         141 => Block::Carrots {
                             growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                         },

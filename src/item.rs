@@ -484,7 +484,7 @@ impl Item {
                 3 => ItemKind::Flower(Flower::AzureBluet),
                 4 => ItemKind::Flower(Flower::TulipRed),
                 5 => ItemKind::Flower(Flower::TulipOrange),
-                6 => ItemKind::Flower(Flower::TulipLightGray),
+                6 => ItemKind::Flower(Flower::TulipWhite),
                 7 => ItemKind::Flower(Flower::TulipPink),
                 8 => ItemKind::Flower(Flower::OxeyeDaisy),
                 9 => ItemKind::Flower(Flower::Cornflower),

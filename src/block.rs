@@ -7,6 +7,7 @@ mod chest;
 mod dispenser;
 mod door;
 mod dropper;
+mod flower_pot;
 mod furnace;
 mod hopper;
 mod noteblock;
@@ -24,6 +25,7 @@ pub use crate::block::chest::*;
 pub use crate::block::dispenser::*;
 pub use crate::block::door::*;
 pub use crate::block::dropper::*;
+pub use crate::block::flower_pot::*;
 pub use crate::block::furnace::*;
 pub use crate::block::hopper::*;
 pub use crate::block::noteblock::*;
@@ -127,7 +129,7 @@ pub enum Flower {
     RoseBushTop,
     SunflowerBottom,
     SunflowerTop,
-    TulipLightGray,
+    TulipWhite,
     TulipOrange,
     TulipPink,
     TulipRed,
@@ -241,39 +243,6 @@ pub struct Head {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Jukebox {
     pub record: Option<Item>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum PottedPlant {
-    AcaciaSapling,
-    Allium,
-    AzureBluet,
-    Bamboo,
-    BirchSapling,
-    BlueOrchid,
-    BrownMushroom,
-    Cactus,
-    Cornflower,
-    CrimsonFungus,
-    CrimsonRoots,
-    Dandelion,
-    DarkOakSapling,
-    DeadBush,
-    Fern,
-    JungleSapling,
-    LilyOfTheValley,
-    OakSapling,
-    OxeyeDaisy,
-    Poppy,
-    RedMushroom,
-    SpruceSapling,
-    TulipOrange,
-    TulipPink,
-    TulipRed,
-    TulipWhite,
-    WarpedFungus,
-    Warpedroots,
-    WitherRose,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -487,9 +456,7 @@ pub enum Block {
     },
     FletchingTable,
     Flower(Flower),
-    FlowerPot {
-        plant: Option<PottedPlant>,
-    },
+    FlowerPot(FlowerPot),
     FrostedIce,
     Furnace(Box<Furnace>),
     GildedBlackstone,
@@ -1176,6 +1143,14 @@ impl Block {
         }
     }
 
+    /// Returns true if the block is a beacon.
+    pub fn is_beacon(&self) -> bool {
+        match self {
+            Self::Beacon { .. } => true,
+            _ => false,
+        }
+    }
+
     /// Returns true if the block is a brewing stand.
     pub fn is_brewing_stand(&self) -> bool {
         match self {
@@ -1204,6 +1179,14 @@ impl Block {
     pub fn is_enchanting_table(&self) -> bool {
         match self {
             Self::EnchantingTable{ .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is an ender chest.
+    pub fn is_ender_chest(&self) -> bool {
+        match self {
+            Self::EnderChest{ .. } => true,
             _ => false,
         }
     }
@@ -1275,6 +1258,18 @@ impl Block {
     pub fn is_torch(&self) -> bool {
         match self {
             Self::Torch { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a wall.
+    ///
+    /// Please note that walls are not full blocks; Wall is the type of block
+    /// that represents e.g. stone walls, often used for fencing. Their
+    /// collision box is narrower than a block, but extends higher upwards.
+    pub fn is_wall(&self) -> bool {
+        match self {
+            Self::Wall { .. } => true,
             _ => false,
         }
     }
@@ -1402,6 +1397,14 @@ impl Block {
             material: FenceMaterial::NetherBrick,
             waterlogged: false,
         }
+    }
+
+    /// Returns a oak button of the given placemnet.
+    pub fn oak_button(direction: Direction) -> Self {
+        Self::Button(
+            ButtonMaterial::Oak,
+            Surface6::try_from(direction).unwrap(),
+        )
     }
 
     /// Returns an oak fence.

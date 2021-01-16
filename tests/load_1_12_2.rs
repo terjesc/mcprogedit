@@ -307,7 +307,7 @@ fn v_1_12_2_block_group_3() {
     assert_block_eq(&excerpt, (6, 0, 3), &Block::Flower(Flower::AzureBluet));
     assert_block_eq(&excerpt, (6, 0, 4), &Block::Flower(Flower::TulipRed));
     assert_block_eq(&excerpt, (6, 0, 5), &Block::Flower(Flower::TulipOrange));
-    assert_block_eq(&excerpt, (6, 0, 6), &Block::Flower(Flower::TulipLightGray));
+    assert_block_eq(&excerpt, (6, 0, 6), &Block::Flower(Flower::TulipWhite));
     assert_block_eq(&excerpt, (6, 0, 7), &Block::Flower(Flower::TulipPink));
     assert_block_eq(&excerpt, (6, 0, 8), &Block::Flower(Flower::OxeyeDaisy));
 
@@ -870,4 +870,107 @@ fn v_1_12_2_block_group_8() {
             facing: Surface4::South,
         },
     );
+}
+
+#[test]
+/// Import of blocks with id 128 through 143
+fn v_1_12_2_block_group_9() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (128, 56, 0), (16, 5, 16));
+
+    check_stairs_multiple(&excerpt, (0, 0, 0), Material::Sandstone);
+
+    assert_block_eq(&excerpt, (1, 0, 0), &Block::EmeraldOre);
+
+    let block = excerpt.get_block_at((2, 0, 0).into()).unwrap();
+    assert!(block.is_ender_chest() && block.has_facing_of(Direction::West));
+    let block = excerpt.get_block_at((2, 1, 0).into()).unwrap();
+    assert!(block.is_ender_chest() && block.has_facing_of(Direction::South));
+    let block = excerpt.get_block_at((2, 2, 0).into()).unwrap();
+    assert!(block.is_ender_chest() && block.has_facing_of(Direction::East));
+    let block = excerpt.get_block_at((2, 3, 0).into()).unwrap();
+    assert!(block.is_ender_chest() && block.has_facing_of(Direction::North));
+
+    // NB Tripwire hooks only have facing implemented at the moment, but there are
+    // several additional tripwire hooks in the save file, in different states.
+    assert_block_eq(&excerpt, (3, 0, 4), &Block::TripwireHook { facing: Surface4::West });
+    assert_block_eq(&excerpt, (3, 1, 4), &Block::TripwireHook { facing: Surface4::South });
+    assert_block_eq(&excerpt, (3, 2, 4), &Block::TripwireHook { facing: Surface4::East });
+    assert_block_eq(&excerpt, (3, 3, 4), &Block::TripwireHook { facing: Surface4::North });
+
+    assert_block_eq(&excerpt, (4, 0, 0), &Block::Tripwire);
+
+    assert_block_eq(&excerpt, (5, 0, 0), &Block::BlockOfEmerald);
+
+    check_stairs_multiple(&excerpt, (6, 0, 0), Material::Spruce);
+
+    check_stairs_multiple(&excerpt, (7, 0, 0), Material::Birch);
+
+    check_stairs_multiple(&excerpt, (8, 0, 0), Material::Jungle);
+
+    // TODO 9: NB 137 "command block" not implemented and not in save file
+
+    assert!(excerpt.get_block_at((10, 0, 0).into()).unwrap().is_beacon());
+
+    let block = excerpt.get_block_at((11, 0, 0).into()).unwrap();
+    assert!(block.is_wall() && block.has_material_of(Material::Cobblestone));
+    let block = excerpt.get_block_at((11, 0, 1).into()).unwrap();
+    assert!(block.is_wall() && block.has_material_of(Material::MossyCobblestone));
+
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 0).into()).unwrap().clone());
+    assert!(pot.unwrap().is_empty());
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 1).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::Poppy));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 2).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::Dandelion));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 3).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::OakSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 4).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::SpruceSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 5).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::BirchSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 6).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::JungleSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 7).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::RedMushroom));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 8).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::BrownMushroom));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 9).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::Cactus));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 10).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::DeadBush));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 11).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::Fern));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 12).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::AcaciaSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 13).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::DarkOakSapling));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 0).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::BlueOrchid));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 1).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::Allium));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 2).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::AzureBluet));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 3).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::TulipRed));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 4).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::TulipOrange));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 5).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::TulipWhite));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 6).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::TulipPink));
+    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 7).into()).unwrap().clone());
+    assert!(pot.unwrap().has_plant_of(PottedPlant::OxeyeDaisy));
+
+    assert_block_eq(&excerpt, (13, 0, 0),
+        &Block::Carrots { growth_stage: Int0Through7::new_saturating(0)});
+
+    assert_block_eq(&excerpt, (14, 0, 0),
+        &Block::Potatoes { growth_stage: Int0Through7::new_saturating(1)});
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::oak_button(Direction::Up));
+    assert_block_eq(&excerpt, (15, 1, 4), &Block::oak_button(Direction::West));
+    assert_block_eq(&excerpt, (15, 2, 4), &Block::oak_button(Direction::South));
+    assert_block_eq(&excerpt, (15, 3, 4), &Block::oak_button(Direction::East));
+    assert_block_eq(&excerpt, (15, 4, 4), &Block::oak_button(Direction::North));
+    assert_block_eq(&excerpt, (15, 1, 5), &Block::oak_button(Direction::Down));
 }
