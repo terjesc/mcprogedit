@@ -1034,7 +1034,7 @@ impl Chunk {
                             material: PressurePlateMaterial::Iron,
                         },
                         149 | 150 => {
-                            let facing = facing4_swne(data[index]);
+                            let facing = facing4_nesw(data[index]);
                             if data[index] & 0x4 == 0x4 {
                                 Block::RedstoneSubtractor { facing }
                             } else {
@@ -1043,7 +1043,7 @@ impl Chunk {
                         }
                         151 => Block::DaylightDetector,
                         152 => Block::BlockOfRedstone,
-                        153 => Block::NetherQuartzOre,
+                        153 => Block::QuartzOre,
                         154 => {
                             let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                             let block_entity = block_entities.get(&coordinates).unwrap();
@@ -1059,7 +1059,20 @@ impl Chunk {
                                 _ => panic!("Wrong block entity variant for hopper"),
                             }
                         }
-                        155 => Block::BlockOfQuartz,
+                        155 => match data[index] {
+                            0 => Block::BlockOfQuartz,
+                            1 => Block::ChiseledQuartzBlock,
+                            2 => Block::QuartzPillar {
+                                alignment: Axis3::Y,
+                            },
+                            3 => Block::QuartzPillar {
+                                alignment: Axis3::X,
+                            },
+                            4 => Block::QuartzPillar {
+                                alignment: Axis3::Z,
+                            },
+                            n => panic!("Unknown data value for quartz block: {}", n),
+                        },
                         156 => Block::Stairs(Stair {
                             material: StairMaterial::Quartz,
                             position: (data[index] & 0x7).into(),

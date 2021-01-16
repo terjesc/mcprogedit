@@ -540,7 +540,6 @@ pub enum Block {
     NetherPortal {
         alignment: Option<Axis2>,
     },
-    NetherQuartzOre,
     NetherSprouts,
     NetherWart {
         growth_stage: Int0Through3,
@@ -591,7 +590,8 @@ pub enum Block {
         alignment: Axis3,
     },
     QuartzBricks,
-    QuartsPillar {
+    QuartzOre,
+    QuartzPillar {
         alignment: Axis3,
     },
     Rail {
@@ -814,6 +814,14 @@ impl Block {
         Self::Sapling {
             material: SaplingMaterial::Acacia,
             growth_stage: Int0Through1::MIN,
+        }
+    }
+
+    /// Returns an activator rail of the specified shape.
+    pub fn activator_rail(shape: RailShape) -> Self {
+        Self::Rail {
+            variant: RailType::Activator,
+            shape,
         }
     }
 
@@ -1158,6 +1166,14 @@ impl Block {
         }
     }
 
+    /// Returns true if the block is a dropper.
+    pub fn is_dropper(&self) -> bool {
+        match self {
+            Self::Dropper(_) => true,
+            _ => false,
+        }
+    }
+
     /// Returns true if the block is an enchanting table.
     pub fn is_enchanting_table(&self) -> bool {
         match self {
@@ -1178,6 +1194,14 @@ impl Block {
     pub fn is_furnace(&self) -> bool {
         match self {
             Self::Furnace(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a hopper.
+    pub fn is_hopper(&self) -> bool {
+        match self {
+            Self::Hopper(_) => true,
             _ => false,
         }
     }
@@ -1241,6 +1265,14 @@ impl Block {
     pub fn is_torch(&self) -> bool {
         match self {
             Self::Torch { .. } => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is a trapped chest.
+    pub fn is_trapped_chest(&self) -> bool {
+        match self {
+            Self::TrappedChest(_) => true,
             _ => false,
         }
     }
@@ -1665,6 +1697,13 @@ impl Block {
             ButtonMaterial::Stone,
             Surface6::try_from(direction).unwrap(),
         )
+    }
+
+    /// Returns a terracotta block of the given colour.
+    pub fn terracotta_with_colour(colour: Colour) -> Self {
+        Self::Terracotta {
+            colour: Some(colour),
+        }
     }
 
     /// Returns a top slab of the specified material.

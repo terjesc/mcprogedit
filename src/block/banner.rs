@@ -25,6 +25,14 @@ impl Banner {
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.placement.clone().into()
     }
+
+    pub fn is_on_floor(&self) -> bool {
+        self.placement.is_on_floor()
+    }
+
+    pub fn is_on_wall(&self) -> bool {
+        self.placement.is_on_wall()
+    }
 }
 
 impl TryFrom<Block> for Banner {
