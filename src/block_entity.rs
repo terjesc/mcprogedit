@@ -228,6 +228,8 @@ impl BlockEntity {
             common: CommonTags::from_nbt_value(&value),
             colour: if let Some(colour) = nbt_value_lookup_string(&value, "Color") {
                 Colour::from(colour.as_str())
+            } else if let Some(colour) = nbt_value_lookup_int(&value, "Base") {
+                Colour::from(15 - colour)
             } else {
                 Colour::White
             },

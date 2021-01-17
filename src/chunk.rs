@@ -559,7 +559,7 @@ impl Chunk {
                                         material: WoodMaterial::Oak,
                                         placement,
                                         waterlogged: false,
-                                        colour: colour.clone(),
+                                        colour: *colour,
                                         // TODO something reasonable instead of JSON text
                                         text1: text.get(0).unwrap_or(&String::new()).to_string(),
                                         text2: text.get(1).unwrap_or(&String::new()).to_string(),
@@ -1215,7 +1215,7 @@ impl Chunk {
                                     patterns,
                                     ..
                                 } => Block::Banner(Box::new(Banner {
-                                    colour: colour.clone(),
+                                    colour: *colour,
                                     custom_name: custom_name.clone(),
                                     placement: if block == 176 {
                                         WallOrRotatedOnFloor::Floor((data[index] & 0xF).into())
@@ -1228,7 +1228,12 @@ impl Chunk {
                             }
                         }
                         178 => Block::InvertedDaylightDetector,
-                        179 => Block::RedSandstone,
+                        179 => match data[index] {
+                            0 => Block::RedSandstone,
+                            1 => Block::ChiseledRedSandstone,
+                            2 => Block::SmoothRedSandstone,
+                            n => panic!("Unknown data variant for red sandstone block: {}", n),
+                        },
                         180 => Block::Stairs(Stair {
                             material: StairMaterial::RedSandstone,
                             position: (data[index] & 0x7).into(),
@@ -1254,12 +1259,12 @@ impl Chunk {
                         198 => Block::EndRod {
                             facing: facing6_dunswe(data[index]),
                         },
-                        199 => Block::ChorusPlant {
+                        199 => Block::ChorusPlant(ChorusPlant {
                             // TODO actually figure out how to parse connections
                             // For now:
                             // - use same as mushroom caps, and hope for the best...
                             connections: mushroom_caps(data[index]),
-                        },
+                        }),
                         200 => Block::ChorusFlower {
                             growth_stage: Int0Through5::new(data[index]).unwrap(),
                         },
@@ -1339,10 +1344,10 @@ impl Chunk {
                             }
                         }
                         // All glazed terracotta colours
-                        block_id @ 235..=250 => Block::GlazedTerracotta {
+                        block_id @ 235..=250 => Block::GlazedTerracotta(GlazedTerracotta {
                             colour: ((block_id - 235) as i32).into(),
                             facing: facing4_swne(data[index]),
-                        },
+                        }),
                         251 => Block::Concrete {
                             colour: ((data[index] & 0xF) as i32).into(),
                         },

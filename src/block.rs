@@ -4,11 +4,13 @@ mod banner;
 mod bed;
 mod brewing_stand;
 mod chest;
+mod chorus_plant;
 mod dispenser;
 mod door;
 mod dropper;
 mod flower_pot;
 mod furnace;
+mod glazed_terracotta;
 mod head;
 mod hopper;
 mod noteblock;
@@ -23,11 +25,13 @@ pub use crate::block::banner::*;
 pub use crate::block::bed::*;
 pub use crate::block::brewing_stand::*;
 pub use crate::block::chest::*;
+pub use crate::block::chorus_plant::*;
 pub use crate::block::dispenser::*;
 pub use crate::block::door::*;
 pub use crate::block::dropper::*;
 pub use crate::block::flower_pot::*;
 pub use crate::block::furnace::*;
+pub use crate::block::glazed_terracotta::*;
 pub use crate::block::head::*;
 pub use crate::block::hopper::*;
 pub use crate::block::noteblock::*;
@@ -344,9 +348,7 @@ pub enum Block {
     ChorusFlower {
         growth_stage: Int0Through5,
     },
-    ChorusPlant {
-        connections: ChorusPlantConnections,
-    },
+    ChorusPlant(ChorusPlant),
     Clay,
     CoalOre,
     CoarseDirt,
@@ -453,10 +455,7 @@ pub enum Block {
         colour: Option<Colour>,
         waterlogged: bool,
     },
-    GlazedTerracotta {
-        colour: Colour,
-        facing: Surface4,
-    },
+    GlazedTerracotta(GlazedTerracotta),
     Glowstone,
     GoldOre,
     Granite,
@@ -919,6 +918,16 @@ impl Block {
         Self::Carpet { colour }
     }
 
+    /// Returns a concrete block of the given colour.
+    pub fn concrete_with_colour(colour: Colour) -> Self {
+        Self::Concrete { colour }
+    }
+
+    /// Returns a concrete powder block of the given colour.
+    pub fn concrete_powder_with_colour(colour: Colour) -> Self {
+        Self::ConcretePowder { colour }
+    }
+
     /// Returns a dark oak fence.
     pub fn dark_oak_fence() -> Self {
         Self::Fence {
@@ -1042,7 +1051,7 @@ impl Block {
             Self::GlassPane {
                 colour: Some(c), ..
             } => *c == colour,
-            Self::GlazedTerracotta { colour: c, .. } => *c == colour,
+            Self::GlazedTerracotta(gt) => gt.has_colour_of(colour),
             Self::ShulkerBox(shulker_box) => shulker_box.has_colour_of(colour),
             Self::Sign(sign) => sign.has_colour_of(colour),
             Self::Terracotta { colour: Some(c) } => *c == colour,
@@ -1075,7 +1084,7 @@ impl Block {
             Self::EnderChest { facing, .. } => Direction::from(*facing) == direction,
             Self::FenceGate { facing, .. } => Direction::from(*facing) == direction,
             Self::Furnace(furnace) => furnace.has_facing_of(direction),
-            Self::GlazedTerracotta { facing, .. } => Direction::from(*facing) == direction,
+            Self::GlazedTerracotta(gt) => gt.has_facing_of(direction),
             Self::GrindStone(rotation) => Direction::from(*rotation) == direction,
             Self::Head(head) => head.has_facing_of(direction),
             Self::Hopper(hopper) => hopper.has_facing_of(direction),
@@ -1207,6 +1216,14 @@ impl Block {
     pub fn is_hopper(&self) -> bool {
         match self {
             Self::Hopper(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the block is an observer.
+    pub fn is_observer(&self) -> bool {
+        match self {
+            Self::Observer { .. } => true,
             _ => false,
         }
     }

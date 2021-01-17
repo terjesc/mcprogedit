@@ -9,7 +9,6 @@ use thiserror::Error;
 // TODO Consider if appropriate here, as not really positioning... more configuration...
 // SlabVariant (3) - up/down/double
 // RailShape (10) - all the different rail configuration options
-// DirectionFlags6 (2^6 = 64) - each cube surface can be in one of two states
 // ChorusPlantdirections = DirectionFlags6
 // FireFace = DirectionFlags6
 

@@ -50,6 +50,24 @@ fn check_stairs(we: &WorldExcerpt, at: (i64, i64, i64), dir: Direction, mat: Mat
     assert!(block.has_material_of(mat));
 }
 
+#[rustfmt::skip]
+fn check_closed_doors(excerpt: &WorldExcerpt, at: (i64, i64, i64), material: Material) {
+    let (x, y, z) = at;
+    check_door(&excerpt, (x, y, z + 0), Direction::West, material, Hinge::Left, true);
+    check_door(&excerpt, (x, y, z + 1), Direction::West, material, Hinge::Right, true);
+    check_door(&excerpt, (x, y, z + 2), Direction::East, material, Hinge::Right, true);
+    check_door(&excerpt, (x, y, z + 3), Direction::East, material, Hinge::Left, true);
+}
+
+#[rustfmt::skip]
+fn check_open_doors(excerpt: &WorldExcerpt, at: (i64, i64, i64), material: Material) {
+    let (x, y, z) = at;
+    check_door(&excerpt, (x, y, z + 0), Direction::West, material, Hinge::Left, false);
+    check_door(&excerpt, (x, y, z + 1), Direction::West, material, Hinge::Right, false);
+    check_door(&excerpt, (x, y, z + 2), Direction::East, material, Hinge::Right, false);
+    check_door(&excerpt, (x, y, z + 3), Direction::East, material, Hinge::Left, false);
+}
+
 fn check_door(
     excerpt: &WorldExcerpt,
     at: (i64, i64, i64),
@@ -468,14 +486,8 @@ fn v_1_12_2_block_group_4() {
 fn v_1_12_2_block_group_5() {
     let excerpt = load_excerpt("tests/saves/1_12_2/", (64, 56, 0), (16, 11, 16));
 
-    check_door(&excerpt, (0, 0, 0), Direction::West, Material::Oak, Hinge::Left, true);
-    check_door(&excerpt, (0, 0, 1), Direction::West, Material::Oak, Hinge::Right, true);
-    check_door(&excerpt, (0, 0, 2), Direction::East, Material::Oak, Hinge::Right, true);
-    check_door(&excerpt, (0, 0, 3), Direction::East, Material::Oak, Hinge::Left, true);
-    check_door(&excerpt, (0, 0, 4), Direction::West, Material::Oak, Hinge::Left, false);
-    check_door(&excerpt, (0, 0, 5), Direction::West, Material::Oak, Hinge::Right, false);
-    check_door(&excerpt, (0, 0, 6), Direction::East, Material::Oak, Hinge::Right, false);
-    check_door(&excerpt, (0, 0, 7), Direction::East, Material::Oak, Hinge::Left, false);
+    check_closed_doors(&excerpt, (0, 0, 0), Material::Oak);
+    check_open_doors(&excerpt, (0, 0, 4), Material::Oak);
 
     assert_block_eq(&excerpt, (1, 0, 0), &Block::ladder(Direction::West));
     assert_block_eq(&excerpt, (1, 1, 0), &Block::ladder(Direction::South));
@@ -724,6 +736,18 @@ fn check_vines(excerpt: &WorldExcerpt, at: (i64, i64, i64), direction: Direction
     assert!(vines.is_touching_surface(direction));
 }
 
+fn check_fence_gate_multiple(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    f: &dyn Fn(Direction) -> Block,
+) {
+    let (x, y, z) = at;
+    assert_block_eq(&excerpt, (x, y, z + 0), &f(Direction::East));
+    assert_block_eq(&excerpt, (x, y, z + 1), &f(Direction::North));
+    assert_block_eq(&excerpt, (x, y, z + 2), &f(Direction::West));
+    assert_block_eq(&excerpt, (x, y, z + 3), &f(Direction::South));
+}
+
 #[test]
 #[rustfmt::skip]
 /// Import of blocks with id 96 through 111
@@ -764,14 +788,8 @@ fn v_1_12_2_block_group_7() {
     check_vines(&excerpt, (10, 2, 0), Direction::West);
     check_vines(&excerpt, (10, 3, 0), Direction::South);
 
-    assert_block_eq(&excerpt, (11, 0, 2), &Block::oak_fence_gate(Direction::East));
-    assert_block_eq(&excerpt, (11, 0, 3), &Block::oak_fence_gate(Direction::North));
-    assert_block_eq(&excerpt, (11, 0, 4), &Block::oak_fence_gate(Direction::West));
-    assert_block_eq(&excerpt, (11, 0, 5), &Block::oak_fence_gate(Direction::South));
-    assert_block_eq(&excerpt, (11, 0, 6), &Block::oak_fence_gate_opened(Direction::East));
-    assert_block_eq(&excerpt, (11, 0, 7), &Block::oak_fence_gate_opened(Direction::North));
-    assert_block_eq(&excerpt, (11, 0, 8), &Block::oak_fence_gate_opened(Direction::West));
-    assert_block_eq(&excerpt, (11, 0, 9), &Block::oak_fence_gate_opened(Direction::South));
+    check_fence_gate_multiple(&excerpt, (11, 0, 2), &Block::oak_fence_gate);
+    check_fence_gate_multiple(&excerpt, (11, 0, 6), &Block::oak_fence_gate_opened);
 
     check_stairs_multiple(&excerpt, (12, 0, 0), Material::Brick);
 
@@ -1191,4 +1209,306 @@ fn v_1_12_2_block_group_11() {
     assert_block_eq(&excerpt, (15, 1, 4), &Block::Flower(Flower::RoseBushTop));
     assert_block_eq(&excerpt, (15, 0, 5), &Block::Flower(Flower::PeonyBottom));
     assert_block_eq(&excerpt, (15, 1, 5), &Block::Flower(Flower::PeonyTop));
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 176 through 191
+fn v_1_12_2_block_group_12() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (176, 56, 0), (16, 4, 16));
+
+    fn check_banner(we: &WorldExcerpt, at: (i64, i64, i64), colour: Colour, dir: Direction) {
+        let block = we.get_block_at(at.into()).unwrap();
+        let banner = Banner::try_from(block.clone()).unwrap();
+        assert!(banner.has_colour_of(colour));
+        assert!(banner.has_facing_of(dir));
+    }
+
+    check_banner(&excerpt, (0, 0, 0), Colour::White, Direction::South);
+    check_banner(&excerpt, (0, 0, 1), Colour::Orange, Direction::SouthSouthWest);
+    check_banner(&excerpt, (0, 0, 2), Colour::Magenta, Direction::SouthWest);
+    check_banner(&excerpt, (0, 0, 3), Colour::LightBlue, Direction::WestSouthWest);
+    check_banner(&excerpt, (0, 0, 4), Colour::Yellow, Direction::West);
+    check_banner(&excerpt, (0, 0, 5), Colour::Lime, Direction::WestNorthWest);
+    check_banner(&excerpt, (0, 0, 6), Colour::Pink, Direction::NorthWest);
+    check_banner(&excerpt, (0, 0, 7), Colour::Gray, Direction::NorthNorthWest);
+    check_banner(&excerpt, (0, 0, 8), Colour::LightGray, Direction::North);
+    check_banner(&excerpt, (0, 0, 9), Colour::Cyan, Direction::NorthNorthEast);
+    check_banner(&excerpt, (0, 0, 10), Colour::Purple, Direction::NorthEast);
+    check_banner(&excerpt, (0, 0, 11), Colour::Blue, Direction::EastNorthEast);
+    check_banner(&excerpt, (0, 0, 12), Colour::Brown, Direction::East);
+    check_banner(&excerpt, (0, 0, 13), Colour::Green, Direction::EastSouthEast);
+    check_banner(&excerpt, (0, 0, 14), Colour::Red, Direction::SouthEast);
+    check_banner(&excerpt, (0, 0, 15), Colour::Black, Direction::SouthSouthEast);
+
+    check_banner(&excerpt, (1, 0, 0), Colour::LightGray, Direction::West);
+    check_banner(&excerpt, (1, 1, 0), Colour::LightGray, Direction::South);
+    check_banner(&excerpt, (1, 2, 0), Colour::LightGray, Direction::East);
+    check_banner(&excerpt, (1, 3, 0), Colour::LightGray, Direction::North);
+
+    assert_block_eq(&excerpt, (2, 1, 0), &Block::InvertedDaylightDetector);
+
+    assert_block_eq(&excerpt, (3, 0, 0), &Block::RedSandstone);
+    assert_block_eq(&excerpt, (3, 0, 1), &Block::ChiseledRedSandstone);
+    assert_block_eq(&excerpt, (3, 0, 2), &Block::SmoothRedSandstone);
+
+    check_stairs_multiple(&excerpt, (4, 0, 0), Material::RedSandstone);
+
+    assert_block_eq(&excerpt, (5, 0, 0), &Block::double_slab(Material::RedSandstone));
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::bottom_slab(Material::RedSandstone));
+    assert_block_eq(&excerpt, (6, 1, 0), &Block::top_slab(Material::RedSandstone));
+
+    check_fence_gate_multiple(&excerpt, (7, 0, 0), &Block::spruce_fence_gate);
+    check_fence_gate_multiple(&excerpt, (7, 0, 4), &Block::spruce_fence_gate_opened);
+
+    check_fence_gate_multiple(&excerpt, (8, 0, 0), &Block::birch_fence_gate);
+    check_fence_gate_multiple(&excerpt, (8, 0, 4), &Block::birch_fence_gate_opened);
+
+    check_fence_gate_multiple(&excerpt, (9, 0, 0), &Block::jungle_fence_gate);
+    check_fence_gate_multiple(&excerpt, (9, 0, 4), &Block::jungle_fence_gate_opened);
+
+    check_fence_gate_multiple(&excerpt, (10, 0, 0), &Block::dark_oak_fence_gate);
+    check_fence_gate_multiple(&excerpt, (10, 0, 4), &Block::dark_oak_fence_gate_opened);
+
+    check_fence_gate_multiple(&excerpt, (11, 0, 0), &Block::acacia_fence_gate);
+    check_fence_gate_multiple(&excerpt, (11, 0, 4), &Block::acacia_fence_gate_opened);
+
+    assert_block_eq(&excerpt, (12, 0, 0), &Block::spruce_fence());
+
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::birch_fence());
+
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::jungle_fence());
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::dark_oak_fence());
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 192 through 207
+fn v_1_12_2_block_group_13() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (192, 56, 0), (16, 6, 16));
+
+    assert_block_eq(&excerpt, (0, 0, 0), &Block::acacia_fence());
+
+    check_door(&excerpt, (1, 0, 0), Direction::West, Material::Spruce, Hinge::Left, true);
+    check_door(&excerpt, (1, 0, 1), Direction::West, Material::Spruce, Hinge::Right, true);
+
+    check_door(&excerpt, (2, 0, 0), Direction::West, Material::Birch, Hinge::Left, true);
+    check_door(&excerpt, (2, 0, 1), Direction::West, Material::Birch, Hinge::Right, true);
+
+    check_door(&excerpt, (3, 0, 0), Direction::West, Material::Jungle, Hinge::Left, true);
+    check_door(&excerpt, (3, 0, 1), Direction::West, Material::Jungle, Hinge::Right, true);
+
+    check_door(&excerpt, (4, 0, 0), Direction::West, Material::Acacia, Hinge::Left, true);
+    check_door(&excerpt, (4, 0, 1), Direction::West, Material::Acacia, Hinge::Right, true);
+
+    check_door(&excerpt, (5, 0, 0), Direction::West, Material::DarkOak, Hinge::Left, true);
+    check_door(&excerpt, (5, 0, 1), Direction::West, Material::DarkOak, Hinge::Right, true);
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::EndRod { facing: Surface6::Up });
+    assert_block_eq(&excerpt, (6, 1, 0), &Block::EndRod { facing: Surface6::South });
+    assert_block_eq(&excerpt, (6, 2, 0), &Block::EndRod { facing: Surface6::East });
+    assert_block_eq(&excerpt, (6, 3, 0), &Block::EndRod { facing: Surface6::North });
+    assert_block_eq(&excerpt, (6, 4, 0), &Block::EndRod { facing: Surface6::West });
+    assert_block_eq(&excerpt, (6, 5, 0), &Block::EndRod { facing: Surface6::Down });
+
+    // TODO chorus plant: Need to figure out how to parse connections...
+    //fn check_chorus_plant(excerpt: &WorldExcerpt, at: (i64, i64, i64), direction: Direction) {
+    //    let block = excerpt.get_block_at(at.into()).unwrap();
+    //    let chorus_plant = ChorusPlant::try_from(block.clone()).unwrap();
+    //    assert!(chorus_plant.is_touching_surface(direction));
+    //}
+    //check_chorus_plant(&excerpt, (7, 0, 0), Direction::Down);
+    //check_chorus_plant(&excerpt, (7, 0, 0), Direction::East);
+
+    assert_block_eq(&excerpt, (8, 0, 0),
+        &Block::ChorusFlower { growth_stage: Int0Through5::new_saturating(0) });
+
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::PurpurBlock);
+
+    // NB other alignments not present in savefile
+    assert_block_eq(&excerpt, (10, 0, 0),
+        &Block::PurpurPillar { alignment: Axis3::Y });
+
+    check_stairs_multiple(&excerpt, (11, 0, 0), Material::Purpur);
+
+    assert_block_eq(&excerpt, (12, 0, 0), &Block::double_slab(Material::Purpur));
+
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::bottom_slab(Material::Purpur));
+    assert_block_eq(&excerpt, (13, 1, 0), &Block::top_slab(Material::Purpur));
+
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::EndStoneBricks);
+
+    assert_block_eq(&excerpt, (15, 0, 0),
+        &Block::Beetroots { growth_stage: Int0Through3::new_saturating(0) });
+}
+
+fn check_shulker_box_multiple(excerpt: &WorldExcerpt, at: (i64, i64, i64), colour: Colour) {
+    let (x, y, z) = at;
+    check_shulker_box(&excerpt, (x, y, z + 0), Direction::Up, colour);
+    check_shulker_box(&excerpt, (x, y, z + 1), Direction::West, colour);
+    check_shulker_box(&excerpt, (x, y, z + 2), Direction::South, colour);
+    check_shulker_box(&excerpt, (x, y, z + 3), Direction::East, colour);
+    check_shulker_box(&excerpt, (x, y, z + 4), Direction::North, colour);
+    check_shulker_box(&excerpt, (x, y, z + 5), Direction::Down, colour);
+}
+
+fn check_shulker_box(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    direction: Direction,
+    colour: Colour,
+) {
+    let block = excerpt.get_block_at(at.into()).unwrap();
+    let shulker_box = ShulkerBox::try_from(block.clone()).unwrap();
+    assert!(shulker_box.has_facing_of(direction));
+    assert!(shulker_box.has_colour_of(colour));
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 208 through 223
+fn v_1_12_2_block_group_14() {
+    // NB This block group uses an excerpt on a Y level one below the other excerpts!
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (208, 55, 0), (16, 4, 16));
+
+    assert_block_eq(&excerpt, (0, 0, 0), &Block::GrassPath);
+
+    // NB 209 "end gateway" is not in the savefile
+    // NB 210 "repeating command block" is not in the savefile, and not implemented
+    // NB 212 "chain command block" is not in the savefile, and not implemented
+
+    assert_block_eq(&excerpt, (4, 1, 0), &Block::FrostedIce);
+
+    assert_block_eq(&excerpt, (5, 1, 0), &Block::MagmaBlock);
+
+    assert_block_eq(&excerpt, (6, 1, 0), &Block::NetherWartBlock);
+
+    assert_block_eq(&excerpt, (7, 1, 0), &Block::RedNetherBricks);
+
+    assert_block_eq(&excerpt, (8, 1, 0), &Block::BoneBlock { alignment: Axis3::Y });
+    assert_block_eq(&excerpt, (8, 2, 0), &Block::BoneBlock { alignment: Axis3::Z });
+    assert_block_eq(&excerpt, (8, 3, 0), &Block::BoneBlock { alignment: Axis3::X });
+
+    // NB 218 "structure void" is not in the savefile
+
+    let block = excerpt.get_block_at((10, 1, 0).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::East));
+    let block = excerpt.get_block_at((10, 1, 2).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::North));
+    let block = excerpt.get_block_at((10, 1, 4).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::West));
+    let block = excerpt.get_block_at((10, 1, 6).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::South));
+    let block = excerpt.get_block_at((10, 1, 8).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::Down));
+    let block = excerpt.get_block_at((10, 1, 10).into()).unwrap();
+    assert!(block.is_observer() && block.has_facing_of(Direction::Up));
+
+    check_shulker_box_multiple(&excerpt, (11, 1, 0), Colour::White);
+
+    check_shulker_box_multiple(&excerpt, (12, 1, 0), Colour::Orange);
+
+    check_shulker_box_multiple(&excerpt, (13, 1, 0), Colour::Magenta);
+
+    check_shulker_box_multiple(&excerpt, (14, 1, 0), Colour::LightBlue);
+
+    check_shulker_box_multiple(&excerpt, (15, 1, 0), Colour::Yellow);
+}
+
+fn check_glazed_terracotta_multiple(excerpt: &WorldExcerpt, at: (i64, i64, i64), colour: Colour) {
+    let (x, y, z) = at;
+    check_glazed_terracotta(&excerpt, (x, y, z + 0), Direction::West, colour);
+    check_glazed_terracotta(&excerpt, (x, y, z + 1), Direction::South, colour);
+    check_glazed_terracotta(&excerpt, (x, y, z + 2), Direction::East, colour);
+    check_glazed_terracotta(&excerpt, (x, y, z + 3), Direction::North, colour);
+}
+
+fn check_glazed_terracotta(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    direction: Direction,
+    colour: Colour,
+) {
+    let block = excerpt.get_block_at(at.into()).unwrap();
+    let glazed_terracotta = GlazedTerracotta::try_from(block.clone()).unwrap();
+    assert!(glazed_terracotta.has_facing_of(direction));
+    assert!(glazed_terracotta.has_colour_of(colour));
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 224 through 239
+fn v_1_12_2_block_group_15() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (224, 56, 0), (16, 1, 16));
+
+    check_shulker_box_multiple(&excerpt, (0, 0, 0), Colour::Lime);
+
+    check_shulker_box_multiple(&excerpt, (1, 0, 0), Colour::Pink);
+
+    check_shulker_box_multiple(&excerpt, (2, 0, 0), Colour::Gray);
+
+    check_shulker_box_multiple(&excerpt, (3, 0, 0), Colour::LightGray);
+
+    check_shulker_box_multiple(&excerpt, (4, 0, 0), Colour::Cyan);
+
+    check_shulker_box_multiple(&excerpt, (5, 0, 0), Colour::Purple);
+
+    check_shulker_box_multiple(&excerpt, (6, 0, 0), Colour::Blue);
+
+    check_shulker_box_multiple(&excerpt, (7, 0, 0), Colour::Brown);
+
+    check_shulker_box_multiple(&excerpt, (8, 0, 0), Colour::Green);
+
+    check_shulker_box_multiple(&excerpt, (9, 0, 0), Colour::Red);
+
+    check_shulker_box_multiple(&excerpt, (10, 0, 0), Colour::Black);
+
+    check_glazed_terracotta_multiple(&excerpt, (11, 0, 0), Colour::White);
+
+    check_glazed_terracotta_multiple(&excerpt, (12, 0, 0), Colour::Orange);
+
+    check_glazed_terracotta_multiple(&excerpt, (13, 0, 0), Colour::Magenta);
+
+    check_glazed_terracotta_multiple(&excerpt, (14, 0, 0), Colour::LightBlue);
+
+    check_glazed_terracotta_multiple(&excerpt, (15, 0, 0), Colour::Yellow);
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 240 through 255
+fn v_1_12_2_block_group_16() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (240, 56, 0), (16, 1, 16));
+
+    check_glazed_terracotta_multiple(&excerpt, (0, 0, 0), Colour::Lime);
+
+    check_glazed_terracotta_multiple(&excerpt, (1, 0, 0), Colour::Pink);
+
+    check_glazed_terracotta_multiple(&excerpt, (2, 0, 0), Colour::Gray);
+
+    check_glazed_terracotta_multiple(&excerpt, (3, 0, 0), Colour::LightGray);
+
+    check_glazed_terracotta_multiple(&excerpt, (4, 0, 0), Colour::Cyan);
+
+    check_glazed_terracotta_multiple(&excerpt, (5, 0, 0), Colour::Purple);
+
+    check_glazed_terracotta_multiple(&excerpt, (6, 0, 0), Colour::Blue);
+
+    check_glazed_terracotta_multiple(&excerpt, (7, 0, 0), Colour::Brown);
+
+    check_glazed_terracotta_multiple(&excerpt, (8, 0, 0), Colour::Green);
+
+    check_glazed_terracotta_multiple(&excerpt, (9, 0, 0), Colour::Red);
+
+    check_glazed_terracotta_multiple(&excerpt, (10, 0, 0), Colour::Black);
+
+    check_with_colour_multiple(&excerpt, (11, 0, 0), &Block::concrete_with_colour);
+
+    check_with_colour_multiple(&excerpt, (12, 0, 0), &Block::concrete_powder_with_colour);
+
+    // NB Block ID 253 is unused.
+    // NB Block ID 254 is unused.
+    // NB 255 "structure block" is not implemented, and not in save file.
 }
