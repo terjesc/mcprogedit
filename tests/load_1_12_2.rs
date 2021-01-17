@@ -254,6 +254,30 @@ fn v_1_12_2_block_group_2() {
     assert_block_eq(&excerpt, (15, 0, 2), &Block::Grass(Grass::Fern));
 }
 
+fn check_with_colour_multiple(
+    excerpt: &WorldExcerpt,
+    at: (i64, i64, i64),
+    f: &dyn Fn(Colour) -> Block,
+) {
+    let (x, y, z) = at;
+    assert_block_eq(&excerpt, (x, y, z + 0), &f(Colour::White));
+    assert_block_eq(&excerpt, (x, y, z + 1), &f(Colour::Orange));
+    assert_block_eq(&excerpt, (x, y, z + 2), &f(Colour::Magenta));
+    assert_block_eq(&excerpt, (x, y, z + 3), &f(Colour::LightBlue));
+    assert_block_eq(&excerpt, (x, y, z + 4), &f(Colour::Yellow));
+    assert_block_eq(&excerpt, (x, y, z + 5), &f(Colour::Lime));
+    assert_block_eq(&excerpt, (x, y, z + 6), &f(Colour::Pink));
+    assert_block_eq(&excerpt, (x, y, z + 7), &f(Colour::Gray));
+    assert_block_eq(&excerpt, (x, y, z + 8), &f(Colour::LightGray));
+    assert_block_eq(&excerpt, (x, y, z + 9), &f(Colour::Cyan));
+    assert_block_eq(&excerpt, (x, y, z + 10), &f(Colour::Purple));
+    assert_block_eq(&excerpt, (x, y, z + 11), &f(Colour::Blue));
+    assert_block_eq(&excerpt, (x, y, z + 12), &f(Colour::Brown));
+    assert_block_eq(&excerpt, (x, y, z + 13), &f(Colour::Green));
+    assert_block_eq(&excerpt, (x, y, z + 14), &f(Colour::Red));
+    assert_block_eq(&excerpt, (x, y, z + 15), &f(Colour::Black));
+}
+
 #[test]
 #[rustfmt::skip]
 /// Import of blocks with id 32 through 47
@@ -278,22 +302,7 @@ fn v_1_12_2_block_group_3() {
     let block = excerpt.get_block_at((2, 0, 4).into()).unwrap();
     assert!(block.is_piston_head() && block.has_facing_of(Direction::East));
 
-    assert_block_eq(&excerpt, (3, 0, 0), &Block::wool_with_colour(Colour::White));
-    assert_block_eq(&excerpt, (3, 0, 1), &Block::wool_with_colour(Colour::Orange));
-    assert_block_eq(&excerpt, (3, 0, 2), &Block::wool_with_colour(Colour::Magenta));
-    assert_block_eq(&excerpt, (3, 0, 3), &Block::wool_with_colour(Colour::LightBlue));
-    assert_block_eq(&excerpt, (3, 0, 4), &Block::wool_with_colour(Colour::Yellow));
-    assert_block_eq(&excerpt, (3, 0, 5), &Block::wool_with_colour(Colour::Lime));
-    assert_block_eq(&excerpt, (3, 0, 6), &Block::wool_with_colour(Colour::Pink));
-    assert_block_eq(&excerpt, (3, 0, 7), &Block::wool_with_colour(Colour::Gray));
-    assert_block_eq(&excerpt, (3, 0, 8), &Block::wool_with_colour(Colour::LightGray));
-    assert_block_eq(&excerpt, (3, 0, 9), &Block::wool_with_colour(Colour::Cyan));
-    assert_block_eq(&excerpt, (3, 0, 10), &Block::wool_with_colour(Colour::Purple));
-    assert_block_eq(&excerpt, (3, 0, 11), &Block::wool_with_colour(Colour::Blue));
-    assert_block_eq(&excerpt, (3, 0, 12), &Block::wool_with_colour(Colour::Brown));
-    assert_block_eq(&excerpt, (3, 0, 13), &Block::wool_with_colour(Colour::Green));
-    assert_block_eq(&excerpt, (3, 0, 14), &Block::wool_with_colour(Colour::Red));
-    assert_block_eq(&excerpt, (3, 0, 15), &Block::wool_with_colour(Colour::Black));
+    check_with_colour_multiple(&excerpt, (3, 0, 0), &Block::wool_with_colour);
 
     // NB block with ID 36, which should be here at x position 4,
     // is not implemented and is not present in the save file.
@@ -666,22 +675,33 @@ fn v_1_12_2_block_group_6() {
     check_repeater(&excerpt, (14, 0, 2), 3, Direction::South);
     check_repeater(&excerpt, (14, 0, 3), 4, Direction::South);
 
-    assert_block_eq(&excerpt, (15, 0, 0), &Block::glass_with_colour(Colour::White));
-    assert_block_eq(&excerpt, (15, 0, 1), &Block::glass_with_colour(Colour::Orange));
-    assert_block_eq(&excerpt, (15, 0, 2), &Block::glass_with_colour(Colour::Magenta));
-    assert_block_eq(&excerpt, (15, 0, 3), &Block::glass_with_colour(Colour::LightBlue));
-    assert_block_eq(&excerpt, (15, 0, 4), &Block::glass_with_colour(Colour::Yellow));
-    assert_block_eq(&excerpt, (15, 0, 5), &Block::glass_with_colour(Colour::Lime));
-    assert_block_eq(&excerpt, (15, 0, 6), &Block::glass_with_colour(Colour::Pink));
-    assert_block_eq(&excerpt, (15, 0, 7), &Block::glass_with_colour(Colour::Gray));
-    assert_block_eq(&excerpt, (15, 0, 8), &Block::glass_with_colour(Colour::LightGray));
-    assert_block_eq(&excerpt, (15, 0, 9), &Block::glass_with_colour(Colour::Cyan));
-    assert_block_eq(&excerpt, (15, 0, 10), &Block::glass_with_colour(Colour::Purple));
-    assert_block_eq(&excerpt, (15, 0, 11), &Block::glass_with_colour(Colour::Blue));
-    assert_block_eq(&excerpt, (15, 0, 12), &Block::glass_with_colour(Colour::Brown));
-    assert_block_eq(&excerpt, (15, 0, 13), &Block::glass_with_colour(Colour::Green));
-    assert_block_eq(&excerpt, (15, 0, 14), &Block::glass_with_colour(Colour::Red));
-    assert_block_eq(&excerpt, (15, 0, 15), &Block::glass_with_colour(Colour::Black));
+    check_with_colour_multiple(&excerpt, (15, 0, 0), &Block::glass_with_colour);
+}
+
+fn check_trapdoor_multiple(excerpt: &WorldExcerpt, at: (i64, i64, i64), material: Material) {
+    let (x, y, z) = at;
+    check_trapdoor(&excerpt, (x, y, z + 0), material, Edge8::DownEast, true);
+    check_trapdoor(&excerpt, (x, y, z + 1), material, Edge8::DownNorth, true);
+    check_trapdoor(&excerpt, (x, y, z + 2), material, Edge8::DownWest, true);
+    check_trapdoor(&excerpt, (x, y, z + 3), material, Edge8::DownSouth, true);
+    check_trapdoor(&excerpt, (x, y, z + 4), material, Edge8::UpEast, true);
+    check_trapdoor(&excerpt, (x, y, z + 5), material, Edge8::UpNorth, true);
+    check_trapdoor(&excerpt, (x, y, z + 6), material, Edge8::UpWest, true);
+    check_trapdoor(&excerpt, (x, y, z + 7), material, Edge8::UpSouth, true);
+    check_trapdoor(&excerpt, (x, y, z + 8), material, Edge8::DownEast, false);
+    if material == Material::Iron {
+        // There is an error in the save file, for Iron trapdoors.
+        // Should be fixed in save file, then check DownNorth for all on this position.
+        check_trapdoor(&excerpt, (x, y, z + 9), material, Edge8::UpNorth, false);
+    } else {
+        check_trapdoor(&excerpt, (x, y, z + 9), material, Edge8::DownNorth, false);
+    }
+    check_trapdoor(&excerpt, (x, y, z + 10), material, Edge8::DownWest, false);
+    check_trapdoor(&excerpt, (x, y, z + 11), material, Edge8::DownSouth, false);
+    check_trapdoor(&excerpt, (x, y, z + 12), material, Edge8::UpEast, false);
+    check_trapdoor(&excerpt, (x, y, z + 13), material, Edge8::UpNorth, false);
+    check_trapdoor(&excerpt, (x, y, z + 14), material, Edge8::UpWest, false);
+    check_trapdoor(&excerpt, (x, y, z + 15), material, Edge8::UpSouth, false);
 }
 
 fn check_trapdoor(
@@ -710,22 +730,7 @@ fn check_vines(excerpt: &WorldExcerpt, at: (i64, i64, i64), direction: Direction
 fn v_1_12_2_block_group_7() {
     let excerpt = load_excerpt("tests/saves/1_12_2/", (96, 56, 0), (16, 4, 16));
 
-    check_trapdoor(&excerpt, (0, 0, 0), Material::Oak, Edge8::DownEast, true);
-    check_trapdoor(&excerpt, (0, 0, 1), Material::Oak, Edge8::DownNorth, true);
-    check_trapdoor(&excerpt, (0, 0, 2), Material::Oak, Edge8::DownWest, true);
-    check_trapdoor(&excerpt, (0, 0, 3), Material::Oak, Edge8::DownSouth, true);
-    check_trapdoor(&excerpt, (0, 0, 4), Material::Oak, Edge8::UpEast, true);
-    check_trapdoor(&excerpt, (0, 0, 5), Material::Oak, Edge8::UpNorth, true);
-    check_trapdoor(&excerpt, (0, 0, 6), Material::Oak, Edge8::UpWest, true);
-    check_trapdoor(&excerpt, (0, 0, 7), Material::Oak, Edge8::UpSouth, true);
-    check_trapdoor(&excerpt, (0, 0, 8), Material::Oak, Edge8::DownEast, false);
-    check_trapdoor(&excerpt, (0, 0, 9), Material::Oak, Edge8::DownNorth, false);
-    check_trapdoor(&excerpt, (0, 0, 10), Material::Oak, Edge8::DownWest, false);
-    check_trapdoor(&excerpt, (0, 0, 11), Material::Oak, Edge8::DownSouth, false);
-    check_trapdoor(&excerpt, (0, 0, 12), Material::Oak, Edge8::UpEast, false);
-    check_trapdoor(&excerpt, (0, 0, 13), Material::Oak, Edge8::UpNorth, false);
-    check_trapdoor(&excerpt, (0, 0, 14), Material::Oak, Edge8::UpWest, false);
-    check_trapdoor(&excerpt, (0, 0, 15), Material::Oak, Edge8::UpSouth, false);
+    check_trapdoor_multiple(&excerpt, (0, 0, 0), Material::Oak);
 
     assert_block_eq(&excerpt, (1, 0, 0), &Block::InfestedStone);
     assert_block_eq(&excerpt, (1, 0, 1), &Block::InfestedCobblestone);
@@ -1125,20 +1130,65 @@ fn v_1_12_2_block_group_10() {
     let block = excerpt.get_block_at((14, 0, 10).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::Down));
 
-    assert_block_eq(&excerpt, (15, 0, 0), &Block::terracotta_with_colour(Colour::White));
-    assert_block_eq(&excerpt, (15, 0, 1), &Block::terracotta_with_colour(Colour::Orange));
-    assert_block_eq(&excerpt, (15, 0, 2), &Block::terracotta_with_colour(Colour::Magenta));
-    assert_block_eq(&excerpt, (15, 0, 3), &Block::terracotta_with_colour(Colour::LightBlue));
-    assert_block_eq(&excerpt, (15, 0, 4), &Block::terracotta_with_colour(Colour::Yellow));
-    assert_block_eq(&excerpt, (15, 0, 5), &Block::terracotta_with_colour(Colour::Lime));
-    assert_block_eq(&excerpt, (15, 0, 6), &Block::terracotta_with_colour(Colour::Pink));
-    assert_block_eq(&excerpt, (15, 0, 7), &Block::terracotta_with_colour(Colour::Gray));
-    assert_block_eq(&excerpt, (15, 0, 8), &Block::terracotta_with_colour(Colour::LightGray));
-    assert_block_eq(&excerpt, (15, 0, 9), &Block::terracotta_with_colour(Colour::Cyan));
-    assert_block_eq(&excerpt, (15, 0, 10), &Block::terracotta_with_colour(Colour::Purple));
-    assert_block_eq(&excerpt, (15, 0, 11), &Block::terracotta_with_colour(Colour::Blue));
-    assert_block_eq(&excerpt, (15, 0, 12), &Block::terracotta_with_colour(Colour::Brown));
-    assert_block_eq(&excerpt, (15, 0, 13), &Block::terracotta_with_colour(Colour::Green));
-    assert_block_eq(&excerpt, (15, 0, 14), &Block::terracotta_with_colour(Colour::Red));
-    assert_block_eq(&excerpt, (15, 0, 15), &Block::terracotta_with_colour(Colour::Black));
+    check_with_colour_multiple(&excerpt, (15, 0, 0), &Block::terracotta_with_colour);
+}
+
+#[test]
+#[rustfmt::skip]
+/// Import of blocks with id 160 through 175
+fn v_1_12_2_block_group_11() {
+    let excerpt = load_excerpt("tests/saves/1_12_2/", (160, 56, 0), (16, 3, 16));
+
+    check_with_colour_multiple(&excerpt, (0, 0, 0), &Block::glass_pane_with_colour);
+
+    assert_block_eq(&excerpt, (1, 0, 0), &Block::acacia_leaves(true));
+    assert_block_eq(&excerpt, (1, 0, 1), &Block::dark_oak_leaves(true));
+
+    assert_block_eq(&excerpt, (2, 0, 0), &Block::acacia_log(Axis3::Y));
+    assert_block_eq(&excerpt, (2, 1, 0), &Block::acacia_log(Axis3::Z));
+    assert_block_eq(&excerpt, (2, 2, 0), &Block::acacia_log(Axis3::X));
+    assert_block_eq(&excerpt, (2, 0, 1), &Block::dark_oak_log(Axis3::Y));
+    assert_block_eq(&excerpt, (2, 1, 1), &Block::dark_oak_log(Axis3::Z));
+    assert_block_eq(&excerpt, (2, 2, 1), &Block::dark_oak_log(Axis3::X));
+
+    check_stairs_multiple(&excerpt, (3, 0, 0), Material::Acacia);
+
+    check_stairs_multiple(&excerpt, (4, 0, 0), Material::DarkOak);
+
+    assert_block_eq(&excerpt, (5, 0, 0), &Block::BlockOfSlime);
+
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::Barrier);
+
+    check_trapdoor_multiple(&excerpt, (7, 0, 0), Material::Iron);
+
+    assert_block_eq(&excerpt, (8, 0, 0), &Block::Prismarine);
+    assert_block_eq(&excerpt, (8, 0, 1), &Block::PrismarineBricks);
+    assert_block_eq(&excerpt, (8, 0, 2), &Block::DarkPrismarine);
+
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::SeaLantern);
+
+    assert_block_eq(&excerpt, (10, 0, 0), &Block::HayBale { alignment: Axis3::Y });
+    assert_block_eq(&excerpt, (10, 1, 0), &Block::HayBale { alignment: Axis3::Z });
+    assert_block_eq(&excerpt, (10, 2, 0), &Block::HayBale { alignment: Axis3::X });
+
+    check_with_colour_multiple(&excerpt, (11, 0, 0), &Block::carpet_with_colour);
+
+    assert_block_eq(&excerpt, (12, 0, 0), &Block::terracotta());
+
+    assert_block_eq(&excerpt, (13, 0, 0), &Block::BlockOfCoal);
+
+    assert_block_eq(&excerpt, (14, 0, 0), &Block::PackedIce);
+
+    assert_block_eq(&excerpt, (15, 0, 0), &Block::Flower(Flower::SunflowerBottom));
+    assert_block_eq(&excerpt, (15, 1, 0), &Block::Flower(Flower::SunflowerTop));
+    assert_block_eq(&excerpt, (15, 0, 1), &Block::Flower(Flower::LilacBottom));
+    assert_block_eq(&excerpt, (15, 1, 1), &Block::Flower(Flower::LilacTop));
+    assert_block_eq(&excerpt, (15, 0, 2), &Block::Grass(Grass::TallGrassBottom));
+    assert_block_eq(&excerpt, (15, 1, 2), &Block::Grass(Grass::TallGrassTop));
+    assert_block_eq(&excerpt, (15, 0, 3), &Block::Grass(Grass::LargeFernBottom));
+    assert_block_eq(&excerpt, (15, 1, 3), &Block::Grass(Grass::LargeFernTop));
+    assert_block_eq(&excerpt, (15, 0, 4), &Block::Flower(Flower::RoseBushBottom));
+    assert_block_eq(&excerpt, (15, 1, 4), &Block::Flower(Flower::RoseBushTop));
+    assert_block_eq(&excerpt, (15, 0, 5), &Block::Flower(Flower::PeonyBottom));
+    assert_block_eq(&excerpt, (15, 1, 5), &Block::Flower(Flower::PeonyTop));
 }

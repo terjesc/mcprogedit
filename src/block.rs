@@ -293,6 +293,7 @@ pub enum Block {
     BlockOfNetherite,
     BlockOfQuartz,
     BlockOfRedstone,
+    BlockOfSlime,
     BlueIce,
     BoneBlock {
         alignment: Axis3,
@@ -642,7 +643,6 @@ pub enum Block {
     ShulkerBox(Box<ShulkerBox>),
     Sign(Box<Sign>),
     Slab(Slab),
-    SlimeBlock,
     SmithingTable,
     Smoker {
         facing: Surface4,
@@ -912,6 +912,11 @@ impl Block {
         Self::Cactus {
             growth_stage: Int0Through15::MIN,
         }
+    }
+
+    /// Returns a carpet of the given colour.
+    pub fn carpet_with_colour(colour: Colour) -> Self {
+        Self::Carpet { colour }
     }
 
     /// Returns a dark oak fence.
@@ -1697,6 +1702,11 @@ impl Block {
             ButtonMaterial::Stone,
             Surface6::try_from(direction).unwrap(),
         )
+    }
+
+    /// Returns an uncoloured terracotta block.
+    pub fn terracotta() -> Self {
+        Self::Terracotta { colour: None }
     }
 
     /// Returns a terracotta block of the given colour.

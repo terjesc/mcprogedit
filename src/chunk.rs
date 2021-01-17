@@ -1133,13 +1133,13 @@ impl Chunk {
                             position: (data[index] & 0x7).into(),
                             waterlogged: false,
                         }),
-                        165 => Block::SlimeBlock,
+                        165 => Block::BlockOfSlime,
                         166 => Block::Barrier,
                         // 167 iron trapdoor - already handled
                         168 => match data[index] {
                             0 => Block::Prismarine,
-                            1 => Block::DarkPrismarine,
-                            2 => Block::PrismarineBricks,
+                            1 => Block::PrismarineBricks,
+                            2 => Block::DarkPrismarine,
                             n => panic!("Unknown data value for prismarine: {}", n),
                         },
                         169 => Block::SeaLantern,
