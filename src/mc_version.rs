@@ -699,7 +699,7 @@ static ID2STR: phf::Map<i32, &'static str> = phf_map! {
 };
 
 /// Minecraft version.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Eq)]
 pub struct McVersion {
     id: i32,
 }

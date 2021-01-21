@@ -175,7 +175,7 @@ impl Region {
         );
     }
 
-    fn chunk_coords_from_index(index: usize) -> ChunkCoord {
+    fn _chunk_coords_from_index(index: usize) -> ChunkCoord {
         ChunkCoord::from((index as i64 % 32, index as i64 / 32))
     }
 
@@ -223,10 +223,10 @@ mod tests {
 
     #[test]
     fn test_chunk_coords_from_index() {
-        assert_eq!(Region::chunk_coords_from_index(0), ChunkCoord::from((0, 0)));
-        assert_eq!(Region::chunk_coords_from_index(31), ChunkCoord::from((31, 0)));
-        assert_eq!(Region::chunk_coords_from_index(992), ChunkCoord::from((0, 31)));
-        assert_eq!(Region::chunk_coords_from_index(1023), ChunkCoord::from((31, 31)));
+        assert_eq!(Region::_chunk_coords_from_index(0), ChunkCoord::from((0, 0)));
+        assert_eq!(Region::_chunk_coords_from_index(31), ChunkCoord::from((31, 0)));
+        assert_eq!(Region::_chunk_coords_from_index(992), ChunkCoord::from((0, 31)));
+        assert_eq!(Region::_chunk_coords_from_index(1023), ChunkCoord::from((31, 31)));
     }
 
     #[test]
