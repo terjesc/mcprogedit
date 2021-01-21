@@ -19,6 +19,6 @@ pub mod material;
 pub mod mc_version;
 mod nbt_lookup;
 pub mod positioning;
-mod region;
+pub mod region;
 pub mod status_effect;
 pub mod world_excerpt;

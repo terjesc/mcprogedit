@@ -8,6 +8,9 @@ use mcprogedit::material::Material;
 use mcprogedit::positioning::*;
 use mcprogedit::world_excerpt::WorldExcerpt;
 
+const INPUT_FILE: &str = "tests/saves/1_12_2/";
+//const INPUT_FILE: &str = "tests/output/1_12_2/";
+
 fn load_excerpt(path: &str, at: (i64, i64, i64), size: (i64, i64, i64)) -> WorldExcerpt {
     let save_directory = std::path::Path::new(path);
     WorldExcerpt::from_save(
@@ -97,7 +100,7 @@ fn check_door(
 #[rustfmt::skip]
 /// Import of blocks with id 0 through 15
 fn v_1_12_2_block_group_1() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (0, 56, 0), (16, 2, 8));
+    let excerpt = load_excerpt(INPUT_FILE, (0, 56, 0), (16, 2, 8));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::Air);
 
@@ -165,7 +168,7 @@ fn v_1_12_2_block_group_1() {
 #[rustfmt::skip]
 /// Import of blocks with id 16 through 31
 fn v_1_12_2_block_group_2() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (16, 56, 0), (16, 5, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (16, 56, 0), (16, 5, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::CoalOre);
 
@@ -300,7 +303,7 @@ fn check_with_colour_multiple(
 #[rustfmt::skip]
 /// Import of blocks with id 32 through 47
 fn v_1_12_2_block_group_3() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (32, 56, 0), (16, 2, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (32, 56, 0), (16, 2, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::DeadBush);
 
@@ -381,7 +384,7 @@ fn v_1_12_2_block_group_3() {
 #[rustfmt::skip]
 /// Import of blocks with id 48 through 63
 fn v_1_12_2_block_group_4() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (48, 56, 0), (16, 5, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (48, 56, 0), (16, 5, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::MossyCobblestone);
 
@@ -484,7 +487,7 @@ fn v_1_12_2_block_group_4() {
 #[rustfmt::skip]
 /// Import of blocks with id 64 through 79
 fn v_1_12_2_block_group_5() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (64, 56, 0), (16, 11, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (64, 56, 0), (16, 11, 16));
 
     check_closed_doors(&excerpt, (0, 0, 0), Material::Oak);
     check_open_doors(&excerpt, (0, 0, 4), Material::Oak);
@@ -597,7 +600,7 @@ fn v_1_12_2_block_group_5() {
 #[rustfmt::skip]
 /// Import of blocks with id 80 through 95
 fn v_1_12_2_block_group_6() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (80, 56, 0), (16, 3, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (80, 56, 0), (16, 3, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::SnowBlock);
 
@@ -752,7 +755,7 @@ fn check_fence_gate_multiple(
 #[rustfmt::skip]
 /// Import of blocks with id 96 through 111
 fn v_1_12_2_block_group_7() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (96, 56, 0), (16, 4, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (96, 56, 0), (16, 4, 16));
 
     check_trapdoor_multiple(&excerpt, (0, 0, 0), Material::Oak);
 
@@ -804,7 +807,7 @@ fn v_1_12_2_block_group_7() {
 #[rustfmt::skip]
 /// Import of blocks with id 112 through 127
 fn v_1_12_2_block_group_8() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (112, 56, 0), (16, 4, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (112, 56, 0), (16, 4, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::NetherBricks);
 
@@ -889,7 +892,7 @@ fn v_1_12_2_block_group_8() {
 #[rustfmt::skip]
 /// Import of blocks with id 128 through 143
 fn v_1_12_2_block_group_9() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (128, 56, 0), (16, 5, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (128, 56, 0), (16, 5, 16));
 
     check_stairs_multiple(&excerpt, (0, 0, 0), Material::Sandstone);
 
@@ -1015,7 +1018,7 @@ fn check_wall_skull(we: &WorldExcerpt, at: (i64, i64, i64), head: HeadVariant, d
 #[rustfmt::skip]
 /// Import of blocks with id 144 through 159
 fn v_1_12_2_block_group_10() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (144, 56, 0), (16, 8, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (144, 56, 0), (16, 8, 16));
 
     {
         use Direction::*;
@@ -1155,7 +1158,7 @@ fn v_1_12_2_block_group_10() {
 #[rustfmt::skip]
 /// Import of blocks with id 160 through 175
 fn v_1_12_2_block_group_11() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (160, 56, 0), (16, 3, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (160, 56, 0), (16, 3, 16));
 
     check_with_colour_multiple(&excerpt, (0, 0, 0), &Block::glass_pane_with_colour);
 
@@ -1215,7 +1218,7 @@ fn v_1_12_2_block_group_11() {
 #[rustfmt::skip]
 /// Import of blocks with id 176 through 191
 fn v_1_12_2_block_group_12() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (176, 56, 0), (16, 4, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (176, 56, 0), (16, 4, 16));
 
     fn check_banner(we: &WorldExcerpt, at: (i64, i64, i64), colour: Colour, dir: Direction) {
         let block = we.get_block_at(at.into()).unwrap();
@@ -1287,7 +1290,7 @@ fn v_1_12_2_block_group_12() {
 #[rustfmt::skip]
 /// Import of blocks with id 192 through 207
 fn v_1_12_2_block_group_13() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (192, 56, 0), (16, 6, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (192, 56, 0), (16, 6, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::acacia_fence());
 
@@ -1371,7 +1374,7 @@ fn check_shulker_box(
 /// Import of blocks with id 208 through 223
 fn v_1_12_2_block_group_14() {
     // NB This block group uses an excerpt on a Y level one below the other excerpts!
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (208, 55, 0), (16, 4, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (208, 55, 0), (16, 4, 16));
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::GrassPath);
 
@@ -1441,7 +1444,7 @@ fn check_glazed_terracotta(
 #[rustfmt::skip]
 /// Import of blocks with id 224 through 239
 fn v_1_12_2_block_group_15() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (224, 56, 0), (16, 1, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (224, 56, 0), (16, 1, 16));
 
     check_shulker_box_multiple(&excerpt, (0, 0, 0), Colour::Lime);
 
@@ -1480,7 +1483,7 @@ fn v_1_12_2_block_group_15() {
 #[rustfmt::skip]
 /// Import of blocks with id 240 through 255
 fn v_1_12_2_block_group_16() {
-    let excerpt = load_excerpt("tests/saves/1_12_2/", (240, 56, 0), (16, 1, 16));
+    let excerpt = load_excerpt(INPUT_FILE, (240, 56, 0), (16, 1, 16));
 
     check_glazed_terracotta_multiple(&excerpt, (0, 0, 0), Colour::Lime);
 
