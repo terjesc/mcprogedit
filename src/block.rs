@@ -1216,159 +1216,162 @@ impl Block {
 
     /// Returns true if the block cannot be moved through and fills the full block space.
     pub fn is_solid(&self) -> bool {
-        matches!(self, Self::AncientDebris
-            | Self::Andesite
-            | Self::Barrel { .. }
-            | Self::Basalt { .. }
-            | Self::Bedrock
-            | Self::Beehive { .. }
-            | Self::BeeNest { .. }
-            | Self::Blackstone
-            | Self::BlastFurnace(_)
-            | Self::BlockOfCoal
-            | Self::BlockOfDiamond
-            | Self::BlockOfEmerald
-            | Self::BlockOfGold
-            | Self::BlockOfIron
-            | Self::BlockOfNetherite
-            | Self::BlockOfQuartz
-            | Self::BlockOfRedstone
-            | Self::BlockOfSlime
-            | Self::BlueIce
-            | Self::BoneBlock { .. }
-            | Self::Bookshelf
-            | Self::BrickBlock
-            | Self::BrownMushroomBlock { .. }
-            | Self::Cactus { .. }
-            | Self::CarvedPumpkin { .. }
-            | Self::ChiseledNetherBricks
-            | Self::ChiseledPolishedBlackstone
-            | Self::ChiseledQuartzBlock
-            | Self::ChiseledRedSandstone
-            | Self::ChiseledSandstone
-            | Self::ChiseledStoneBricks
-            | Self::Clay
-            | Self::CoalOre
-            | Self::CoarseDirt
-            | Self::Cobblestone
-            | Self::CommandBlock(_)
-            | Self::Concrete { .. }
-            | Self::ConcretePowder { .. }
-            | Self::CoralBlock { .. }
-            | Self::CrackedNetherBricks
-            | Self::CrackedPolishedBlackstoneBricks
-            | Self::CrackedStoneBricks
-            | Self::CraftingTable
-            | Self::CryingObsidian
-            | Self::CutRedSandstone
-            | Self::CutSandstone
-            | Self::DarkPrismarine
-            | Self::DiamondOre
-            | Self::Diorite
-            | Self::Dirt
-            | Self::Dispenser(_)
-            | Self::DriedKelpBlock
-            | Self::Dropper(_)
-            | Self::EmeraldOre
-            | Self::EndStone
-            | Self::EndStoneBricks
-            | Self::FletchingTable
-            | Self::FrostedIce
-            | Self::Furnace(_)
-            | Self::GildedBlackstone
-            | Self::Glass { .. }
-            | Self::GlazedTerracotta(_)
-            | Self::Glowstone
-            | Self::GoldOre
-            | Self::Granite
-            | Self::Grass(_)
-            | Self::GrassBlock
-            | Self::Gravel
-            | Self::HayBale { .. }
-            | Self::HoneyBlock
-            | Self::HoneycombBlock
-            | Self::Ice
-            | Self::InfestedChiseledStoneBricks
-            | Self::InfestedCobblestone
-            | Self::InfestedCrackedStoneBricks
-            | Self::InfestedMossyStoneBricks
-            | Self::InfestedStone
-            | Self::InfestedStoneBricks
-            | Self::IronOre
-            | Self::JackOLantern { .. }
-            | Self::Jukebox(_)
-            | Self::LapisLazuliBlock
-            | Self::LapisLazuliOre
-            | Self::Leaves { .. }
-            | Self::Log(_)
-            | Self::Loom { .. }
-            | Self::MagmaBlock
-            | Self::Melon
-            | Self::MossyCobblestone
-            | Self::MossyStoneBricks
-            | Self::MushroomStem { .. }
-            | Self::Mycelium
-            | Self::NetherBricks
-            | Self::NetherGoldOre
-            | Self::NetherWartBlock
-            | Self::Netherrack
-            | Self::Noteblock(_)
-            | Self::Observer { .. }
-            | Self::Obsidian
-            | Self::PackedIce
-            | Self::Piston { .. }
-            | Self::Planks { .. }
-            | Self::Podzol
-            | Self::PolishedAndesite
-            | Self::PolishedBasalt { .. }
-            | Self::PolishedBlackstone
-            | Self::PolishedBlackstoneBricks
-            | Self::PolishedDiorite
-            | Self::PolishedGranite
-            | Self::Prismarine
-            | Self::PrismarineBricks
-            | Self::Pumpkin { .. }
-            | Self::PurpurBlock
-            | Self::PurpurPillar { .. }
-            | Self::QuartzBricks
-            | Self::QuartzOre
-            | Self::QuartzPillar { .. }
-            | Self::RedMushroomBlock { .. }
-            | Self::RedNetherBricks
-            | Self::RedSand
-            | Self::RedSandstone
-            | Self::RedstoneLamp
-            | Self::RedstoneOre
-            | Self::RespawnAnchor { .. }
-            | Self::Sand
-            | Self::Sandstone
-            | Self::SeaLantern
-            | Self::Shroomlight
-            | Self::ShulkerBox(_)
-            | Self::Slab(Slab {
-                position: SlabVariant::Double,
-                ..
-            })
-            | Self::SmithingTable
-            | Self::Smoker { .. }
-            | Self::SmoothQuartz
-            | Self::SmoothRedSandstone
-            | Self::SmoothSandstone
-            | Self::SmoothStone
-            | Self::SnowBlock
-            | Self::SoulSand
-            | Self::SoulSoil
-            | Self::Spawner
-            | Self::Sponge
-            | Self::StickyPiston { .. }
-            | Self::Stone
-            | Self::StoneBricks
-            | Self::Target
-            | Self::Terracotta { .. }
-            | Self::TNT
-            | Self::WarpedWartBlock
-            | Self::WetSponge
-            | Self::Wool { .. })
+        matches!(
+            self,
+            Self::AncientDebris
+                | Self::Andesite
+                | Self::Barrel { .. }
+                | Self::Basalt { .. }
+                | Self::Bedrock
+                | Self::Beehive { .. }
+                | Self::BeeNest { .. }
+                | Self::Blackstone
+                | Self::BlastFurnace(_)
+                | Self::BlockOfCoal
+                | Self::BlockOfDiamond
+                | Self::BlockOfEmerald
+                | Self::BlockOfGold
+                | Self::BlockOfIron
+                | Self::BlockOfNetherite
+                | Self::BlockOfQuartz
+                | Self::BlockOfRedstone
+                | Self::BlockOfSlime
+                | Self::BlueIce
+                | Self::BoneBlock { .. }
+                | Self::Bookshelf
+                | Self::BrickBlock
+                | Self::BrownMushroomBlock { .. }
+                | Self::Cactus { .. }
+                | Self::CarvedPumpkin { .. }
+                | Self::ChiseledNetherBricks
+                | Self::ChiseledPolishedBlackstone
+                | Self::ChiseledQuartzBlock
+                | Self::ChiseledRedSandstone
+                | Self::ChiseledSandstone
+                | Self::ChiseledStoneBricks
+                | Self::Clay
+                | Self::CoalOre
+                | Self::CoarseDirt
+                | Self::Cobblestone
+                | Self::CommandBlock(_)
+                | Self::Concrete { .. }
+                | Self::ConcretePowder { .. }
+                | Self::CoralBlock { .. }
+                | Self::CrackedNetherBricks
+                | Self::CrackedPolishedBlackstoneBricks
+                | Self::CrackedStoneBricks
+                | Self::CraftingTable
+                | Self::CryingObsidian
+                | Self::CutRedSandstone
+                | Self::CutSandstone
+                | Self::DarkPrismarine
+                | Self::DiamondOre
+                | Self::Diorite
+                | Self::Dirt
+                | Self::Dispenser(_)
+                | Self::DriedKelpBlock
+                | Self::Dropper(_)
+                | Self::EmeraldOre
+                | Self::EndStone
+                | Self::EndStoneBricks
+                | Self::FletchingTable
+                | Self::FrostedIce
+                | Self::Furnace(_)
+                | Self::GildedBlackstone
+                | Self::Glass { .. }
+                | Self::GlazedTerracotta(_)
+                | Self::Glowstone
+                | Self::GoldOre
+                | Self::Granite
+                | Self::Grass(_)
+                | Self::GrassBlock
+                | Self::Gravel
+                | Self::HayBale { .. }
+                | Self::HoneyBlock
+                | Self::HoneycombBlock
+                | Self::Ice
+                | Self::InfestedChiseledStoneBricks
+                | Self::InfestedCobblestone
+                | Self::InfestedCrackedStoneBricks
+                | Self::InfestedMossyStoneBricks
+                | Self::InfestedStone
+                | Self::InfestedStoneBricks
+                | Self::IronOre
+                | Self::JackOLantern { .. }
+                | Self::Jukebox(_)
+                | Self::LapisLazuliBlock
+                | Self::LapisLazuliOre
+                | Self::Leaves { .. }
+                | Self::Log(_)
+                | Self::Loom { .. }
+                | Self::MagmaBlock
+                | Self::Melon
+                | Self::MossyCobblestone
+                | Self::MossyStoneBricks
+                | Self::MushroomStem { .. }
+                | Self::Mycelium
+                | Self::NetherBricks
+                | Self::NetherGoldOre
+                | Self::NetherWartBlock
+                | Self::Netherrack
+                | Self::Noteblock(_)
+                | Self::Observer { .. }
+                | Self::Obsidian
+                | Self::PackedIce
+                | Self::Piston { .. }
+                | Self::Planks { .. }
+                | Self::Podzol
+                | Self::PolishedAndesite
+                | Self::PolishedBasalt { .. }
+                | Self::PolishedBlackstone
+                | Self::PolishedBlackstoneBricks
+                | Self::PolishedDiorite
+                | Self::PolishedGranite
+                | Self::Prismarine
+                | Self::PrismarineBricks
+                | Self::Pumpkin { .. }
+                | Self::PurpurBlock
+                | Self::PurpurPillar { .. }
+                | Self::QuartzBricks
+                | Self::QuartzOre
+                | Self::QuartzPillar { .. }
+                | Self::RedMushroomBlock { .. }
+                | Self::RedNetherBricks
+                | Self::RedSand
+                | Self::RedSandstone
+                | Self::RedstoneLamp
+                | Self::RedstoneOre
+                | Self::RespawnAnchor { .. }
+                | Self::Sand
+                | Self::Sandstone
+                | Self::SeaLantern
+                | Self::Shroomlight
+                | Self::ShulkerBox(_)
+                | Self::Slab(Slab {
+                    position: SlabVariant::Double,
+                    ..
+                })
+                | Self::SmithingTable
+                | Self::Smoker { .. }
+                | Self::SmoothQuartz
+                | Self::SmoothRedSandstone
+                | Self::SmoothSandstone
+                | Self::SmoothStone
+                | Self::SnowBlock
+                | Self::SoulSand
+                | Self::SoulSoil
+                | Self::Spawner
+                | Self::Sponge
+                | Self::StickyPiston { .. }
+                | Self::Stone
+                | Self::StoneBricks
+                | Self::Target
+                | Self::Terracotta { .. }
+                | Self::TNT
+                | Self::WarpedWartBlock
+                | Self::WetSponge
+                | Self::Wool { .. }
+        )
     }
 
     /// Returns true if the block is a stair.

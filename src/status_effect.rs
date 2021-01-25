@@ -120,18 +120,20 @@ impl StatusEffect {
     }
 
     pub fn is_negative(&self) -> bool {
-        matches!(self, StatusEffect::Slowness
-            | StatusEffect::MiningFatigue
-            | StatusEffect::Weakness
-            | StatusEffect::InstantDamage
-            | StatusEffect::Nausea
-            | StatusEffect::Blindness
-            | StatusEffect::Hunger
-            | StatusEffect::Poison
-            | StatusEffect::Wither
-            | StatusEffect::Levitation
-            | StatusEffect::BadLuck
-            | StatusEffect::BadOmen
+        matches!(
+            self,
+            StatusEffect::Slowness
+                | StatusEffect::MiningFatigue
+                | StatusEffect::Weakness
+                | StatusEffect::InstantDamage
+                | StatusEffect::Nausea
+                | StatusEffect::Blindness
+                | StatusEffect::Hunger
+                | StatusEffect::Poison
+                | StatusEffect::Wither
+                | StatusEffect::Levitation
+                | StatusEffect::BadLuck
+                | StatusEffect::BadOmen
         )
     }
 
