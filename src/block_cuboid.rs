@@ -1,4 +1,5 @@
 use crate::block::Block;
+use crate::height_map::HeightMap;
 
 #[derive(Debug)]
 pub struct BlockCuboid {
@@ -38,7 +39,7 @@ impl BlockCuboid {
         }
     }
 
-    pub fn get_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
+    pub fn _get_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
         if let Some(index) = self.index(coordinates) {
             self.blocks.get_mut(index)
         } else {
@@ -79,6 +80,26 @@ impl BlockCuboid {
                 }
             }
         }
+    }
+
+    pub fn height_map(&self) -> HeightMap {
+        let mut height_map = HeightMap::new((self.x_dim, self.z_dim));
+
+        for x in 0..self.x_dim {
+            for z in 0..self.z_dim {
+                let mut height = 0;
+                //for y in std::iter::range_step(self.y_dim as i32, 0, -1) {
+                for y in (0..self.y_dim).rev() {
+                    if let Some(Block::Air) = self.get((x, y as usize, z)) {
+                        height = y;
+                        break;
+                    }
+                }
+                height_map.set_height((x, z), height as u32);
+            }
+        }
+
+        height_map
     }
 
     fn index(&self, (x, y, z): (usize, usize, usize)) -> Option<usize> {

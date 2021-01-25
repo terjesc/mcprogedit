@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
-use crate::chunk::Chunk;
 use crate::bounded_ints::*;
+use crate::chunk::Chunk;
 use crate::colour::Colour;
-use crate::coordinates::{BlockCoord, ChunkCoord};
+use crate::coordinates::{BlockColumnCoord, BlockCoord, ChunkCoord};
 use crate::material::*;
 use crate::nbt_lookup::*;
 use crate::positioning::*;
@@ -26,7 +26,101 @@ impl Chunk {
         local_coordinates + chunk_offset
     }
 
-    pub(crate) fn pseudo_block_entities(
+    /// Generates tile entities for all blocks in the chunk, and returns them
+    /// in an NBT list value ready for inclusion in the pre flattening chunk format.
+    pub(crate) fn pre_flattening_tile_entities(&self) -> nbt::Value {
+        let (x_dim, y_dim, z_dim) = self.blocks.dim();
+
+        let chunk_offset_blocks: BlockColumnCoord = self.global_pos.into();
+
+        let mut tile_entities = Vec::new();
+
+        for x in 0..x_dim {
+            let block_x = chunk_offset_blocks.0 as i32 + x as i32;
+            for y in 0..y_dim {
+                for z in 0..z_dim {
+                    let block_z = chunk_offset_blocks.1 as i32 + z as i32;
+                    match self.blocks.get((x, y, z)) {
+                        None => (),
+                        Some(Block::Banner(banner)) => {
+                            if let Some(value) = banner
+                                .to_block_entity((block_x, y as i32, block_z))
+                                .to_nbt_value()
+                            {
+                                tile_entities.push(value);
+                            }
+                        }
+                        // TODO add handling of other blocks with entities
+                        //Some(block) => println!("Block found: {:?}", block),
+                        _ => (),
+                    }
+                }
+            }
+        }
+        nbt::Value::List(tile_entities)
+    }
+
+    /// Generates section NBT tags for the blocks in the chunk, and returns them
+    /// in an NBT list value ready for inclusion in the pre flattening chunk format.
+    pub(crate) fn pre_flattening_sections(&self) -> nbt::Value {
+        let mut sections = Vec::new();
+
+        // TODO We only need sections 0..=N, where section N is the highest
+        // section with a non-air block in it. For now we write all blocks.
+        for y in 0..=15 {
+            sections.push(self.pre_flattening_section(y));
+        }
+
+        nbt::Value::List(sections)
+    }
+
+    /// Generates an individual section NBT tag from the chunk.
+    fn pre_flattening_section(&self, y: i8) -> nbt::Value {
+        let blocks = vec![0i8; 4096];
+        let add = vec![0i8; 2048];
+        let data = vec![0i8; 2048];
+
+        let block_light = vec![0i8; 2048];
+        let sky_light = vec![0i8; 2048];
+
+        // A section is a TAG_Compound containing:
+        // - "Y" TAG_Byte index 0 to 15 (bottom to top)
+        // - "Blocks" TAG_Byte_Array 4096 bytes, one per block
+        // - "Add" TAG_Byte_Array 2048 bytes, half byte per block
+        // - "Data" TAG_Byte_Array 2048 bytes, half byte per block
+        // - "BlockLight" TAG_Byte_Array 2048 bytes, half byte per block
+        // - "SkyLight" TAG_Byte_Array 2048 bytes, half byte per block
+
+        let mut section = nbt::Map::new();
+        section.insert("Y".into(), nbt::Value::Byte(y));
+        section.insert("Blocks".into(), nbt::Value::ByteArray(blocks));
+        section.insert("Add".into(), nbt::Value::ByteArray(add));
+        section.insert("Data".into(), nbt::Value::ByteArray(data));
+        section.insert("BlockLight".into(), nbt::Value::ByteArray(block_light));
+        section.insert("SkyLight".into(), nbt::Value::ByteArray(sky_light));
+
+        nbt::Value::Compound(section)
+    }
+
+    /// Generates custom block entities later used by chunk section parsing.
+    ///
+    /// These "pseudo" block entities are not part of the game save format, and
+    /// they are strictly internal to mcprogedit. Their sole purpose is to solve
+    /// the following parsing challenge:
+    ///
+    /// Some blocks, e.g. doors, depend on neighbouring block data for their state.
+    /// This is problematic when the neighbouring block is in a different section.
+    ///
+    /// The solution is to run a preparatory pass over all sections, and store
+    /// data needed by neighbouring blocks in special "pseudo" block entities,
+    /// that are inserted into the collection of "real" block entities. Since the
+    /// collection of block entities is global to the whole chunk, this gives the
+    /// section parser access to the needed data regardless of what section it
+    /// originated from.
+    ///
+    /// Accessing neighbour block data is therefore done the same way as accessing
+    /// block entity data.
+    pub(crate) fn pre_flattening_pseudo_block_entities(
         section: &nbt::Value,
         chunk_position: &ChunkCoord,
     ) -> HashMap<BlockCoord, BlockEntity> {
@@ -119,7 +213,7 @@ impl Chunk {
     // large flowers. Those structures have some metadata in the top block, and
     // some metadata in the bottom block, while the internal mcprogedit format
     // keeps all data in both blocks.
-    pub(crate) fn section_into_block_cuboid(
+    pub(crate) fn pre_flattening_section_into_block_cuboid(
         section: &nbt::Value,
         block_entities: &HashMap<BlockCoord, BlockEntity>,
         chunk_position: &ChunkCoord,
@@ -855,9 +949,6 @@ impl Chunk {
                             },
                             waterlogged: false,
                         },
-                        // TODO 140 flower pot
-                        // - Needs block entity (tile entity)
-                        // - Pots placed prior to 1.7 have contents in data value
                         140 => {
                             let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                             let block_entity = block_entities.get(&coordinates);
@@ -1167,9 +1258,6 @@ impl Chunk {
                         },
                         201 => Block::PurpurBlock,
                         202 => Block::PurpurPillar {
-                            // TODO actually figure out how to parse direction
-                            // For now:
-                            // - guess that it is the same as for hay bales
                             alignment: match data[index] {
                                 0 => Axis3::Y,
                                 4 => Axis3::X,
@@ -1398,9 +1486,9 @@ impl Chunk {
             // Prepare direction flags
             let east = (data <= 9 && (data % 3) == 0) || data == 10 || data >= 14;
             let down = data >= 14;
-            let north = (data >= 1 && data <= 3) || data == 10 || data >= 14;
-            let south = (data >= 7 && data <= 10) || data >= 14;
-            let up = (data >= 1 && data <= 9) || data >= 14;
+            let north = (1..=3).contains(&data) || data == 10 || data >= 14;
+            let south = (7..=10).contains(&data) || data >= 14;
+            let up = (1..=9).contains(&data) || data >= 14;
             let west = (data <= 10 && (data % 3) == 1) || data >= 14;
 
             // Create and return value
@@ -1437,6 +1525,20 @@ fn _bytes_to_packed_nibbles(bytes: &[i8]) -> Vec<i8> {
         .map(|c| c.iter().fold(0i8, |acc, x| (acc >> 4) + ((x & 0x0F) << 4)))
         .collect()
 }
+
+/*
+/// Put the four lowest bits of `nibble` into the nibble position `index`
+fn set_nibble(vec: &mut Vec<i8>, nibble: i8, index: usize) {
+    let byte_index = index / 2;
+    if index % 2 == 0 {
+        // least significant nibble
+        vec[byte_index] = (vec[byte_index] & 0xF0) | (nibble & 0x0F);
+    } else {
+        // most significant nibble
+        vec[byte_index] = (vec[byte_index] & 0x0F) | ((nibble << 4) & 0xF0);
+    };
+}
+*/
 
 #[cfg(test)]
 mod tests {

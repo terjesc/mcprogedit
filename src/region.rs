@@ -16,6 +16,12 @@ pub struct Region {
 }
 
 impl Region {
+    pub fn new() -> Self {
+        Self {
+            chunks: HashMap::new(),
+        }
+    }
+
     pub fn load_from_file(region_file_path: &std::path::Path) -> Self {
         let mut region_file = File::open(region_file_path)
             .unwrap_or_else(|_| panic!("Unable to open region file {:?}", region_file_path));
@@ -90,15 +96,22 @@ impl Region {
     }
 
     pub fn save_to_file(&self, region_file_path: &std::path::Path) {
-        let mut region_file = OpenOptions::new().write(true).create(true).open(region_file_path)
+        let mut region_file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(region_file_path)
             .unwrap_or_else(|_| panic!("Unable to create region file {:?}", region_file_path));
 
         let mut next_chunk_offset_sections = 2;
 
         for (
             local_chunk_coordinates,
-            InternalChunkData { timestamp, data: raw_chunk_data }
-        ) in &self.chunks {
+            InternalChunkData {
+                timestamp,
+                data: raw_chunk_data,
+            },
+        ) in &self.chunks
+        {
             // Calculate the index for location data and timestamp data for this chunk.
             let index = Self::index_from_chunk_coords(*local_chunk_coordinates);
 
@@ -136,18 +149,22 @@ impl Region {
             region_file
                 .seek(SeekFrom::Start(data_offset_bytes as u64))
                 .unwrap_or_else(|_| panic!("Could not seek to chunk at {}", data_offset_bytes));
-            region_file.write_u32::<BigEndian>(chunk_header.length).unwrap();
+            region_file
+                .write_u32::<BigEndian>(chunk_header.length)
+                .unwrap();
             region_file.write_u8(chunk_header.compression).unwrap();
             region_file.write_all(&data).unwrap();
             region_file.write_all(&padding).unwrap();
 
             // Write timestamp
-            region_file.seek(SeekFrom::Start((SECTOR_LEN_BYTES + index * 4) as u64))
+            region_file
+                .seek(SeekFrom::Start((SECTOR_LEN_BYTES + index * 4) as u64))
                 .unwrap_or_else(|_| panic!("Could not seek to timestamp index {}", index));
             region_file.write_u32::<BigEndian>(*timestamp).unwrap();
 
             // Write location
-            region_file.seek(SeekFrom::Start((index * 4) as u64))
+            region_file
+                .seek(SeekFrom::Start((index * 4) as u64))
                 .unwrap_or_else(|_| panic!("Could not seek to location index {}", index));
             region_file.write_u24::<BigEndian>(location.offset).unwrap();
             region_file.write_u8(location.sector_count).unwrap();
@@ -164,7 +181,7 @@ impl Region {
         }
     }
 
-    pub fn _set_chunk_data(&mut self, local_chunk_coordinates: &ChunkCoord, data: RawChunkData) {
+    pub fn set_chunk_data(&mut self, local_chunk_coordinates: &ChunkCoord, data: RawChunkData) {
         let timestamp = SystemTime::now()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap()
@@ -181,6 +198,12 @@ impl Region {
 
     fn index_from_chunk_coords(chunk_coordinates: ChunkCoord) -> usize {
         (chunk_coordinates.0 + 32 * chunk_coordinates.1) as usize
+    }
+}
+
+impl Default for Region {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -210,7 +233,6 @@ struct ChunkHeader {
     compression: u8,
 }
 
-
 impl fmt::Debug for Location {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_fmt(format_args!("L({}:{})", self.offset, self.sector_count))
@@ -223,18 +245,39 @@ mod tests {
 
     #[test]
     fn test_chunk_coords_from_index() {
-        assert_eq!(Region::_chunk_coords_from_index(0), ChunkCoord::from((0, 0)));
-        assert_eq!(Region::_chunk_coords_from_index(31), ChunkCoord::from((31, 0)));
-        assert_eq!(Region::_chunk_coords_from_index(992), ChunkCoord::from((0, 31)));
-        assert_eq!(Region::_chunk_coords_from_index(1023), ChunkCoord::from((31, 31)));
+        assert_eq!(
+            Region::_chunk_coords_from_index(0),
+            ChunkCoord::from((0, 0)),
+        );
+        assert_eq!(
+            Region::_chunk_coords_from_index(31),
+            ChunkCoord::from((31, 0))
+        );
+        assert_eq!(
+            Region::_chunk_coords_from_index(992),
+            ChunkCoord::from((0, 31))
+        );
+        assert_eq!(
+            Region::_chunk_coords_from_index(1023),
+            ChunkCoord::from((31, 31))
+        );
     }
 
     #[test]
     fn test_index_from_chunk_coords() {
         assert_eq!(Region::index_from_chunk_coords(ChunkCoord::from((0, 0))), 0);
-        assert_eq!(Region::index_from_chunk_coords(ChunkCoord::from((31, 0))), 31);
-        assert_eq!(Region::index_from_chunk_coords(ChunkCoord::from((0, 31))), 992);
-        assert_eq!(Region::index_from_chunk_coords(ChunkCoord::from((31, 31))), 1023);
+        assert_eq!(
+            Region::index_from_chunk_coords(ChunkCoord::from((31, 0))),
+            31
+        );
+        assert_eq!(
+            Region::index_from_chunk_coords(ChunkCoord::from((0, 31))),
+            992
+        );
+        assert_eq!(
+            Region::index_from_chunk_coords(ChunkCoord::from((31, 31))),
+            1023
+        );
     }
 
     // TODO Needs testing of writing region. Can get a half-decent test through

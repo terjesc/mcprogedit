@@ -207,11 +207,7 @@ impl Log {
     }
 }
 
-bounded_integer! {
-    #[repr(i8)]
-    pub struct HoneyLevel { 0..=5 }
-}
-
+pub type HoneyLevel = Int0Through5;
 pub type ChorusPlantConnections = DirectionFlags6;
 pub type FireFace = DirectionFlags6;
 
@@ -1150,153 +1146,249 @@ impl Block {
 
     /// Returns true if the block is a beacon.
     pub fn is_beacon(&self) -> bool {
-        match self {
-            Self::Beacon { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Beacon { .. })
     }
 
     /// Returns true if the block is a brewing stand.
     pub fn is_brewing_stand(&self) -> bool {
-        match self {
-            Self::BrewingStand(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::BrewingStand(_))
     }
 
     /// Returns true if the block is a chest.
     pub fn is_chest(&self) -> bool {
-        match self {
-            Self::Chest(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Chest(_))
     }
 
     /// Returns true if the block is a dispenser.
     pub fn is_dispenser(&self) -> bool {
-        match self {
-            Self::Dispenser(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Dispenser(_))
     }
 
     /// Returns true if the block is a dropper.
     pub fn is_dropper(&self) -> bool {
-        match self {
-            Self::Dropper(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Dropper(_))
     }
 
     /// Returns true if the block is an enchanting table.
     pub fn is_enchanting_table(&self) -> bool {
-        match self {
-            Self::EnchantingTable { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::EnchantingTable { .. })
     }
 
     /// Returns true if the block is an ender chest.
     pub fn is_ender_chest(&self) -> bool {
-        match self {
-            Self::EnderChest { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::EnderChest { .. })
     }
 
     /// Returns true if the block is a furnace.
     pub fn is_furnace(&self) -> bool {
-        match self {
-            Self::Furnace(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Furnace(_))
     }
 
     /// Returns true if the block is a hopper.
     pub fn is_hopper(&self) -> bool {
-        match self {
-            Self::Hopper(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Hopper(_))
     }
 
     /// Returns true if the block is an observer.
     pub fn is_observer(&self) -> bool {
-        match self {
-            Self::Observer { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Observer { .. })
     }
 
     /// Returns true if the block is a piston (base).
     pub fn is_piston(&self) -> bool {
-        match self {
-            Self::Piston { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Piston { .. })
     }
 
     /// Returns true if the block is a piston head.
     pub fn is_piston_head(&self) -> bool {
-        match self {
-            Self::PistonHead { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::PistonHead { .. })
     }
 
     /// Returns true if the block is a redstone torch.
     pub fn is_redstone_torch(&self) -> bool {
-        match self {
-            Self::RedstoneTorch { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::RedstoneTorch { .. })
     }
 
     /// Returns true if the block is a sign.
     pub fn is_sign(&self) -> bool {
-        match self {
-            Self::Sign(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Sign(_))
+    }
+
+    /// Returns true if the block cannot be moved through and fills the full block space.
+    pub fn is_solid(&self) -> bool {
+        matches!(self, Self::AncientDebris
+            | Self::Andesite
+            | Self::Barrel { .. }
+            | Self::Basalt { .. }
+            | Self::Bedrock
+            | Self::Beehive { .. }
+            | Self::BeeNest { .. }
+            | Self::Blackstone
+            | Self::BlastFurnace(_)
+            | Self::BlockOfCoal
+            | Self::BlockOfDiamond
+            | Self::BlockOfEmerald
+            | Self::BlockOfGold
+            | Self::BlockOfIron
+            | Self::BlockOfNetherite
+            | Self::BlockOfQuartz
+            | Self::BlockOfRedstone
+            | Self::BlockOfSlime
+            | Self::BlueIce
+            | Self::BoneBlock { .. }
+            | Self::Bookshelf
+            | Self::BrickBlock
+            | Self::BrownMushroomBlock { .. }
+            | Self::Cactus { .. }
+            | Self::CarvedPumpkin { .. }
+            | Self::ChiseledNetherBricks
+            | Self::ChiseledPolishedBlackstone
+            | Self::ChiseledQuartzBlock
+            | Self::ChiseledRedSandstone
+            | Self::ChiseledSandstone
+            | Self::ChiseledStoneBricks
+            | Self::Clay
+            | Self::CoalOre
+            | Self::CoarseDirt
+            | Self::Cobblestone
+            | Self::CommandBlock(_)
+            | Self::Concrete { .. }
+            | Self::ConcretePowder { .. }
+            | Self::CoralBlock { .. }
+            | Self::CrackedNetherBricks
+            | Self::CrackedPolishedBlackstoneBricks
+            | Self::CrackedStoneBricks
+            | Self::CraftingTable
+            | Self::CryingObsidian
+            | Self::CutRedSandstone
+            | Self::CutSandstone
+            | Self::DarkPrismarine
+            | Self::DiamondOre
+            | Self::Diorite
+            | Self::Dirt
+            | Self::Dispenser(_)
+            | Self::DriedKelpBlock
+            | Self::Dropper(_)
+            | Self::EmeraldOre
+            | Self::EndStone
+            | Self::EndStoneBricks
+            | Self::FletchingTable
+            | Self::FrostedIce
+            | Self::Furnace(_)
+            | Self::GildedBlackstone
+            | Self::Glass { .. }
+            | Self::GlazedTerracotta(_)
+            | Self::Glowstone
+            | Self::GoldOre
+            | Self::Granite
+            | Self::Grass(_)
+            | Self::GrassBlock
+            | Self::Gravel
+            | Self::HayBale { .. }
+            | Self::HoneyBlock
+            | Self::HoneycombBlock
+            | Self::Ice
+            | Self::InfestedChiseledStoneBricks
+            | Self::InfestedCobblestone
+            | Self::InfestedCrackedStoneBricks
+            | Self::InfestedMossyStoneBricks
+            | Self::InfestedStone
+            | Self::InfestedStoneBricks
+            | Self::IronOre
+            | Self::JackOLantern { .. }
+            | Self::Jukebox(_)
+            | Self::LapisLazuliBlock
+            | Self::LapisLazuliOre
+            | Self::Leaves { .. }
+            | Self::Log(_)
+            | Self::Loom { .. }
+            | Self::MagmaBlock
+            | Self::Melon
+            | Self::MossyCobblestone
+            | Self::MossyStoneBricks
+            | Self::MushroomStem { .. }
+            | Self::Mycelium
+            | Self::NetherBricks
+            | Self::NetherGoldOre
+            | Self::NetherWartBlock
+            | Self::Netherrack
+            | Self::Noteblock(_)
+            | Self::Observer { .. }
+            | Self::Obsidian
+            | Self::PackedIce
+            | Self::Piston { .. }
+            | Self::Planks { .. }
+            | Self::Podzol
+            | Self::PolishedAndesite
+            | Self::PolishedBasalt { .. }
+            | Self::PolishedBlackstone
+            | Self::PolishedBlackstoneBricks
+            | Self::PolishedDiorite
+            | Self::PolishedGranite
+            | Self::Prismarine
+            | Self::PrismarineBricks
+            | Self::Pumpkin { .. }
+            | Self::PurpurBlock
+            | Self::PurpurPillar { .. }
+            | Self::QuartzBricks
+            | Self::QuartzOre
+            | Self::QuartzPillar { .. }
+            | Self::RedMushroomBlock { .. }
+            | Self::RedNetherBricks
+            | Self::RedSand
+            | Self::RedSandstone
+            | Self::RedstoneLamp
+            | Self::RedstoneOre
+            | Self::RespawnAnchor { .. }
+            | Self::Sand
+            | Self::Sandstone
+            | Self::SeaLantern
+            | Self::Shroomlight
+            | Self::ShulkerBox(_)
+            | Self::Slab(Slab {
+                position: SlabVariant::Double,
+                ..
+            })
+            | Self::SmithingTable
+            | Self::Smoker { .. }
+            | Self::SmoothQuartz
+            | Self::SmoothRedSandstone
+            | Self::SmoothSandstone
+            | Self::SmoothStone
+            | Self::SnowBlock
+            | Self::SoulSand
+            | Self::SoulSoil
+            | Self::Spawner
+            | Self::Sponge
+            | Self::StickyPiston { .. }
+            | Self::Stone
+            | Self::StoneBricks
+            | Self::Target
+            | Self::Terracotta { .. }
+            | Self::TNT
+            | Self::WarpedWartBlock
+            | Self::WetSponge
+            | Self::Wool { .. })
     }
 
     /// Returns true if the block is a stair.
     pub fn is_stairs(&self) -> bool {
-        match self {
-            Self::Stairs(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Stairs(_))
     }
 
     /// Returns true if the block is a sticky piston (base).
     pub fn is_sticky_piston(&self) -> bool {
-        match self {
-            Self::StickyPiston { .. } => true,
-            _ => false,
-        }
-    }
-
-    /// Returns a sugar cane block.
-    pub fn sugar_cane() -> Self {
-        Self::SugarCane {
-            growth_stage: Int0Through15::MIN,
-        }
+        matches!(self, Self::StickyPiston { .. })
     }
 
     /// Returns true if the block is a torch.
     pub fn is_torch(&self) -> bool {
-        match self {
-            Self::Torch { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Torch { .. })
     }
 
     /// Returns true if the block is a trapped chest.
     pub fn is_trapped_chest(&self) -> bool {
-        match self {
-            Self::TrappedChest(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::TrappedChest(_))
     }
 
     /// Returns true if the block is a wall.
@@ -1305,10 +1397,7 @@ impl Block {
     /// that represents e.g. stone walls, often used for fencing. Their
     /// collision box is narrower than a block, but extends higher upwards.
     pub fn is_wall(&self) -> bool {
-        match self {
-            Self::Wall { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Wall { .. })
     }
 
     /// Returns a jack o'lantern facing in the given direction.
@@ -1719,6 +1808,13 @@ impl Block {
             ButtonMaterial::Stone,
             Surface6::try_from(direction).unwrap(),
         )
+    }
+
+    /// Returns a sugar cane block.
+    pub fn sugar_cane() -> Self {
+        Self::SugarCane {
+            growth_stage: Int0Through15::MIN,
+        }
     }
 
     /// Returns an uncoloured terracotta block.

@@ -1,3 +1,5 @@
+#![allow(clippy::manual_range_contains)]
+
 //! Integer data types with limited range of values.
 
 bounded_integer! {

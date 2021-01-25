@@ -400,10 +400,7 @@ pub enum WallOrRotatedOnFloor {
 
 impl WallOrRotatedOnFloor {
     pub fn is_on_floor(&self) -> bool {
-        match self {
-            Self::Floor(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Floor(_))
     }
 
     pub fn is_on_wall(&self) -> bool {

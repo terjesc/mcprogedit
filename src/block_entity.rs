@@ -207,6 +207,14 @@ impl BlockEntity {
         }
     }
 
+    pub fn to_nbt_value(&self) -> Option<nbt::Value> {
+        match self {
+            Self::Banner { .. } => self.banner_to_nbt_value(),
+            // TODO add more block entity types
+            _ => None,
+        }
+    }
+
     fn banner_from_nbt_value(value: &nbt::Value) -> Self {
         let mut patterns = Vec::new();
 
@@ -235,6 +243,34 @@ impl BlockEntity {
             },
             custom_name: nbt_value_lookup_string(&value, "CustomName"),
             patterns,
+        }
+    }
+
+    fn banner_to_nbt_value(&self) -> Option<nbt::Value> {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(7);
+        if let Self::Banner {
+            common,
+            colour,
+            custom_name,
+            patterns,
+        } = self
+        {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+
+            entity.insert("Base".into(), nbt::Value::Int(15 - i32::from(*colour)));
+
+            if let Some(name) = custom_name {
+                entity.insert("CustomName".into(), nbt::Value::String(name.clone()));
+            }
+
+            // TODO Add all TAG_Compound("Color", "Pattern") to the patterns list
+            entity.insert("Patterns".into(), nbt::Value::List(Vec::new()));
+
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
         }
     }
 
@@ -490,11 +526,7 @@ impl BlockEntity {
         BlockEntity::Noteblock {
             common: CommonTags::from_nbt_value(&value),
             note: Pitch::from_value(nbt_value_lookup_byte(&value, "note").unwrap() as u8),
-            powered: if let Some(0) = nbt_value_lookup_byte(&value, "powered") {
-                false
-            } else {
-                true
-            },
+            powered: !matches!(nbt_value_lookup_byte(&value, "powered"), Some(0)),
         }
     }
 
@@ -605,11 +637,11 @@ impl BlockEntity {
 // Tags present for all block entities.
 #[derive(Clone, Debug)]
 pub struct CommonTags {
-    id: String,        // block entity ID
-    x: i32,            // chunk local x coordinate
-    y: i32,            // chunk local y coordinate
-    z: i32,            // chunk local z coordinate
-    keep_packed: bool, // 1 indicates invalidated block entity
+    pub(crate) id: String,        // block entity ID
+    pub(crate) x: i32,            // chunk local x coordinate
+    pub(crate) y: i32,            // chunk local y coordinate
+    pub(crate) z: i32,            // chunk local z coordinate
+    pub(crate) keep_packed: bool, // 1 indicates invalidated block entity
 }
 
 impl CommonTags {
@@ -621,6 +653,17 @@ impl CommonTags {
             z: nbt_value_lookup_int(&value, "z").unwrap(),
             keep_packed: nbt_value_lookup_byte(&value, "keepPacked").unwrap_or(0) != 0,
         }
+    }
+
+    fn to_nbt_values(&self) -> Vec<(String, nbt::Value)> {
+        let mut nbt_values = Vec::with_capacity(5);
+        nbt_values.push(("id".into(), nbt::Value::String(self.id.clone())));
+        nbt_values.push(("x".into(), nbt::Value::Int(self.x)));
+        nbt_values.push(("y".into(), nbt::Value::Int(self.y)));
+        nbt_values.push(("z".into(), nbt::Value::Int(self.z)));
+        let keep_packed = if self.keep_packed { 1 } else { 0 };
+        nbt_values.push(("keepPacked".into(), nbt::Value::Byte(keep_packed)));
+        nbt_values
     }
 
     fn coordinates(&self) -> BlockCoord {

@@ -42,6 +42,29 @@ impl From<i32> for Colour {
     }
 }
 
+impl From<Colour> for i32 {
+    fn from(colour: Colour) -> i32 {
+        match colour {
+            Colour::White => 0,
+            Colour::Orange => 1,
+            Colour::Magenta => 2,
+            Colour::LightBlue => 3,
+            Colour::Yellow => 4,
+            Colour::Lime => 5,
+            Colour::Pink => 6,
+            Colour::Gray => 7,
+            Colour::LightGray => 8,
+            Colour::Cyan => 9,
+            Colour::Purple => 10,
+            Colour::Blue => 11,
+            Colour::Brown => 12,
+            Colour::Green => 13,
+            Colour::Red => 14,
+            Colour::Black => 15,
+        }
+    }
+}
+
 impl From<&str> for Colour {
     fn from(colour_string: &str) -> Self {
         match colour_string {

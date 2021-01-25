@@ -116,15 +116,11 @@ impl From<&str> for StatusEffect {
 
 impl StatusEffect {
     pub fn is_neutral(&self) -> bool {
-        match self {
-            StatusEffect::Glowing => true,
-            _ => false,
-        }
+        matches!(self, StatusEffect::Glowing)
     }
 
     pub fn is_negative(&self) -> bool {
-        match self {
-            StatusEffect::Slowness
+        matches!(self, StatusEffect::Slowness
             | StatusEffect::MiningFatigue
             | StatusEffect::Weakness
             | StatusEffect::InstantDamage
@@ -135,9 +131,8 @@ impl StatusEffect {
             | StatusEffect::Wither
             | StatusEffect::Levitation
             | StatusEffect::BadLuck
-            | StatusEffect::BadOmen => true,
-            _ => false,
-        }
+            | StatusEffect::BadOmen
+        )
     }
 
     pub fn is_positive(&self) -> bool {

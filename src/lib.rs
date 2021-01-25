@@ -4,6 +4,7 @@ extern crate bounded_integer;
 extern crate static_assertions;
 
 pub mod arguments;
+pub mod biome;
 pub mod block;
 mod block_cuboid;
 mod block_entity;
@@ -13,6 +14,7 @@ mod chunk;
 pub mod colour;
 pub mod coordinates;
 pub mod enchantment;
+pub mod height_map;
 pub mod inventory;
 pub mod item;
 pub mod material;

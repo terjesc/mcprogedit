@@ -2,7 +2,7 @@
 
 use crate::block::Block;
 use crate::block_cuboid::BlockCuboid;
-use crate::chunk::Chunk;
+use crate::chunk::{Chunk, RawChunkData};
 use crate::coordinates::*;
 use crate::nbt_lookup::*;
 use crate::region::Region;
@@ -23,7 +23,7 @@ impl WorldExcerpt {
         }
     }
 
-    fn dim(&self) -> (usize, usize, usize) {
+    pub fn dim(&self) -> (usize, usize, usize) {
         self.blocks.dim()
     }
 
@@ -61,13 +61,10 @@ impl WorldExcerpt {
         // TODO candidates for refactoring: All this bounds stuff.
         // Define the bounds in a more useful way than two points.
         struct Bounds {
-            x_min: i64,
-            x_max: i64,
-            y_min: i64,
-            y_max: i64,
-            z_min: i64,
-            z_max: i64,
-        };
+            x: (i64, i64),
+            y: (i64, i64),
+            z: (i64, i64),
+        }
 
         // Point conversions, to chunk and region coordinates
         let column_p1: BlockColumnCoord = p1.into();
@@ -79,37 +76,40 @@ impl WorldExcerpt {
 
         // Inclusive block bounds, using global coordinates
         let global_block_bounds = Bounds {
-            x_min: i64::min(p1.0, p2.0),
-            x_max: i64::max(p1.0, p2.0),
-            y_min: i64::min(p1.1, p2.1),
-            y_max: i64::max(p1.1, p2.1),
-            z_min: i64::min(p1.2, p2.2),
-            z_max: i64::max(p1.2, p2.2),
+            x: (i64::min(p1.0, p2.0), i64::max(p1.0, p2.0)),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (i64::min(p1.2, p2.2), i64::max(p1.2, p2.2)),
         };
 
         // Inclusive chunk bounds, using global coordinates
         let global_chunk_bounds = Bounds {
-            x_min: i64::min(chunk_p1.0, chunk_p2.0),
-            x_max: i64::max(chunk_p1.0, chunk_p2.0),
-            y_min: i64::min(p1.1, p2.1),
-            y_max: i64::max(p1.1, p2.1),
-            z_min: i64::min(chunk_p1.1, chunk_p2.1),
-            z_max: i64::max(chunk_p1.1, chunk_p2.1),
+            x: (
+                i64::min(chunk_p1.0, chunk_p2.0),
+                i64::max(chunk_p1.0, chunk_p2.0),
+            ),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (
+                i64::min(chunk_p1.1, chunk_p2.1),
+                i64::max(chunk_p1.1, chunk_p2.1),
+            ),
         };
 
         // Inclusive region bounds, using global coordinates,
         let region_bounds = Bounds {
-            x_min: i64::min(region_p1.0, region_p2.0),
-            x_max: i64::max(region_p1.0, region_p2.0),
-            y_min: i64::min(p1.1, p2.1),
-            y_max: i64::max(p1.1, p2.1),
-            z_min: i64::min(region_p1.1, region_p2.1),
-            z_max: i64::max(region_p1.1, region_p2.1),
+            x: (
+                i64::min(region_p1.0, region_p2.0),
+                i64::max(region_p1.0, region_p2.0),
+            ),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (
+                i64::min(region_p1.1, region_p2.1),
+                i64::max(region_p1.1, region_p2.1),
+            ),
         };
 
         // Iterate through the (existing) region files within the bound
-        for region_x in region_bounds.x_min..=region_bounds.x_max {
-            for region_z in region_bounds.z_min..=region_bounds.z_max {
+        for region_x in region_bounds.x.0..=region_bounds.x.1 {
+            for region_z in region_bounds.z.0..=region_bounds.z.1 {
                 println!("Importing region {}, {}", region_x, region_z);
 
                 // Check if there actually is a region file for the given region
@@ -130,17 +130,20 @@ impl WorldExcerpt {
                 let region_coords: RegionCoord = (region_x, region_z).into();
                 let chunk_offset: ChunkCoord = region_coords.into();
                 let in_region_chunk_bounds = Bounds {
-                    x_min: i64::max(global_chunk_bounds.x_min - chunk_offset.0, 0),
-                    x_max: i64::min(global_chunk_bounds.x_max - chunk_offset.0, 31),
-                    y_min: global_chunk_bounds.y_min,
-                    y_max: global_chunk_bounds.y_max,
-                    z_min: i64::max(global_chunk_bounds.z_min - chunk_offset.1, 0),
-                    z_max: i64::min(global_chunk_bounds.z_max - chunk_offset.1, 31),
+                    x: (
+                        i64::max(global_chunk_bounds.x.0 - chunk_offset.0, 0),
+                        i64::min(global_chunk_bounds.x.1 - chunk_offset.0, 31),
+                    ),
+                    y: (global_chunk_bounds.y.0, global_chunk_bounds.y.1),
+                    z: (
+                        i64::max(global_chunk_bounds.z.0 - chunk_offset.1, 0),
+                        i64::min(global_chunk_bounds.z.1 - chunk_offset.1, 31),
+                    ),
                 };
 
                 // Handle those chunks
-                for chunk_x in in_region_chunk_bounds.x_min..=in_region_chunk_bounds.x_max {
-                    for chunk_z in in_region_chunk_bounds.z_min..=in_region_chunk_bounds.z_max {
+                for chunk_x in in_region_chunk_bounds.x.0..=in_region_chunk_bounds.x.1 {
+                    for chunk_z in in_region_chunk_bounds.z.0..=in_region_chunk_bounds.z.1 {
                         //println!("Handling (region internal) chunk {}, {}", chunk_x, chunk_z);
 
                         // Parse the raw chunk data into a chunk object
@@ -150,9 +153,9 @@ impl WorldExcerpt {
                         // Paste the blocks from the chunk
                         let chunk_offset: BlockCoord = chunk.chunk_coordinates().into();
                         let chunk_offset_in_blocks = (
-                            chunk_offset.0 - global_block_bounds.x_min,
-                            chunk_offset.1 - global_block_bounds.y_min,
-                            chunk_offset.2 - global_block_bounds.z_min,
+                            chunk_offset.0 - global_block_bounds.x.0,
+                            chunk_offset.1 - global_block_bounds.y.0,
+                            chunk_offset.2 - global_block_bounds.z.0,
                         );
                         world_excerpt
                             .blocks
@@ -166,6 +169,156 @@ impl WorldExcerpt {
 
         // Return the constructed WorldExcerpt
         world_excerpt
+    }
+
+    /// Writes the contents of the WorldExcerpt to a Minecraft world save.
+    ///
+    /// Pastes the contents of the world excerpt into a world saved at `world_directory`,
+    /// positioned so that the excerpt corner with the lowest integer coordinates are
+    /// put at world block coordinates `p`.
+    pub fn to_save(&self, p: BlockCoord, world_directory: &std::path::Path) {
+        // Check that the world directory exists.
+        if !world_directory.is_dir() {
+            panic!("Not a world save directory: {:?}", world_directory);
+        }
+
+        // Find and check that level.dat exists.
+        let level_dat_file = world_directory.join("level.dat");
+        if !level_dat_file.is_file() {
+            panic!("Not a valid world.dat file: {:?}", level_dat_file);
+        }
+
+        // TODO candidate for refactoring: Read level.dat into LevelDat struct.
+        let mut level_dat = std::fs::File::open(level_dat_file).expect("Unable to open level.dat");
+        let level_dat_blob = nbt::Blob::from_gzip_reader(&mut level_dat)
+            .expect("Unable to parse level.dat contents");
+
+        let _data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
+            .unwrap_or_else(|| panic!("level.dat Data/DataVersion not found"));
+
+        let (dx, dy, dz) = self.dim();
+        let (dx, dy, dz) = (dx as i64, dy as i64, dz as i64);
+        let p1 = p;
+        let p2: BlockCoord = (p1.0 + dx, p1.1 + dy, p1.2 + dz).into();
+
+        // TODO copypasted from from_save, should be refactored!
+        // TODO candidates for refactoring: All this bounds stuff.
+        // Define the bounds in a more useful way than two points.
+        struct Bounds {
+            x: (i64, i64),
+            y: (i64, i64),
+            z: (i64, i64),
+        }
+
+        // Point conversions, to chunk and region coordinates
+        let column_p1: BlockColumnCoord = p1.into();
+        let chunk_p1: ChunkCoord = column_p1.into();
+        let region_p1: RegionCoord = chunk_p1.into();
+        let column_p2: BlockColumnCoord = p2.into();
+        let chunk_p2: ChunkCoord = column_p2.into();
+        let region_p2: RegionCoord = chunk_p2.into();
+
+        // Inclusive block bounds, using global coordinates
+        let global_block_bounds = Bounds {
+            x: (i64::min(p1.0, p2.0), i64::max(p1.0, p2.0)),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (i64::min(p1.2, p2.2), i64::max(p1.2, p2.2)),
+        };
+
+        // Inclusive chunk bounds, using global coordinates
+        let global_chunk_bounds = Bounds {
+            x: (
+                i64::min(chunk_p1.0, chunk_p2.0),
+                i64::max(chunk_p1.0, chunk_p2.0),
+            ),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (
+                i64::min(chunk_p1.1, chunk_p2.1),
+                i64::max(chunk_p1.1, chunk_p2.1),
+            ),
+        };
+
+        // Inclusive region bounds, using global coordinates,
+        let region_bounds = Bounds {
+            x: (
+                i64::min(region_p1.0, region_p2.0),
+                i64::max(region_p1.0, region_p2.0),
+            ),
+            y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
+            z: (
+                i64::min(region_p1.1, region_p2.1),
+                i64::max(region_p1.1, region_p2.1),
+            ),
+        };
+        // TODO copypaste from from_save() ended here
+
+        // TODO
+        // For each region:
+        // - load if exists, or create new one
+        // - for each chunk with overlap:
+        //      - fetch chunk
+        //      - paste into chunk
+        //      - put chunk back
+        // - write region
+
+        // Iterate through region files within the bound, creating new ones as needed.
+        for region_x in region_bounds.x.0..=region_bounds.x.1 {
+            for region_z in region_bounds.z.0..=region_bounds.z.1 {
+                println!("Importing region {}, {}", region_x, region_z);
+
+                // Check if there actually is a region file for the given region
+                let region_file_name = format!("r.{}.{}.mca", region_x, region_z);
+                let region_file = world_directory.join("region/").join(&region_file_name);
+
+                let mut region = if region_file.is_file() {
+                    Region::load_from_file(&region_file)
+                } else {
+                    Region::new()
+                };
+
+                // TODO copypaste from from_save(), consider refactoring.
+                // Figure out what chunks overlaps with the bounding box,
+                // expressed in chunk coordinates relative to the region.
+                let region_coords: RegionCoord = (region_x, region_z).into();
+                let chunk_offset: ChunkCoord = region_coords.into();
+                let in_region_chunk_bounds = Bounds {
+                    x: (
+                        i64::max(global_chunk_bounds.x.0 - chunk_offset.0, 0),
+                        i64::min(global_chunk_bounds.x.1 - chunk_offset.0, 31),
+                    ),
+                    y: (global_chunk_bounds.y.0, global_chunk_bounds.y.1),
+                    z: (
+                        i64::max(global_chunk_bounds.z.0 - chunk_offset.1, 0),
+                        i64::min(global_chunk_bounds.z.1 - chunk_offset.1, 31),
+                    ),
+                };
+                // TODO copypaste from from_save() ended here.
+
+                // Handle those chunks
+                for chunk_x in in_region_chunk_bounds.x.0..=in_region_chunk_bounds.x.1 {
+                    for chunk_z in in_region_chunk_bounds.z.0..=in_region_chunk_bounds.z.1 {
+                        // Get the chunk, or create a new one if empty
+                        let chunk_data = region.chunk_data(&(chunk_x, chunk_z).into());
+                        let chunk = match chunk_data {
+                            RawChunkData::Empty => Chunk::new((chunk_x, chunk_z).into()),
+                            _ => Chunk::from_raw_chunk_data(&chunk_data),
+                        };
+
+                        // TODO paste blocks into chunk
+
+                        // TODO Move or copy entities into the chunk
+
+                        // TODO Put chunk back into region
+                        // create RawChunkData from Chunk
+                        let chunk_data = chunk.raw_chunk_zlib();
+                        region.set_chunk_data(&(chunk_x, chunk_z).into(), chunk_data);
+                    }
+                }
+
+                // TODO write back region
+                //region.save_to_file(&region_file);
+            }
+        }
     }
 
     /// Creates a new `WorldExcerpt` from a schematic file.
@@ -185,7 +338,7 @@ impl WorldExcerpt {
     }
 
     /// Get a copy of the block at location `at`.
-    pub fn get_block_at(&self, at: BlockCoord) -> Option<&Block> {
+    pub fn block_at(&self, at: BlockCoord) -> Option<&Block> {
         self.blocks
             .get((at.0 as usize, at.1 as usize, at.2 as usize))
     }
@@ -200,7 +353,6 @@ impl WorldExcerpt {
     }
 
     //TODO functions for:
-    // - pasting the WorldExcerpt into an existing world save
     // - exporting the WorldExcerpt to a schematic file
 }
 
@@ -216,7 +368,7 @@ mod tests {
 
         fn run_test_at(excerpt: &mut WorldExcerpt, at: BlockCoord, block: Block) {
             excerpt.set_block_at(at, block.clone());
-            let block_read_back = excerpt.get_block_at(at).unwrap();
+            let block_read_back = excerpt.block_at(at).unwrap();
             if block != *block_read_back {
                 panic!("block != block_read_back @ {:?}", at);
             }

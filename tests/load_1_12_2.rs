@@ -22,12 +22,12 @@ fn load_excerpt(path: &str, at: (i64, i64, i64), size: (i64, i64, i64)) -> World
 }
 
 fn assert_block_eq(excerpt: &WorldExcerpt, at: (i64, i64, i64), block: &Block) {
-    assert_eq!(excerpt.get_block_at(at.into()), Some(block));
+    assert_eq!(excerpt.block_at(at.into()), Some(block));
 }
 
 #[rustfmt::skip]
 fn check_bed(we: &WorldExcerpt, at: (i64, i64, i64), fac: Direction, col: Colour, end: BedEnd) {
-    let block = we.get_block_at(at.into()).unwrap();
+    let block = we.block_at(at.into()).unwrap();
     let bed = Bed::try_from(block.clone()).unwrap();
     assert!(bed.has_facing_of(fac));
     assert!(bed.has_colour_of(col));
@@ -47,7 +47,7 @@ fn check_stairs_multiple(excerpt: &WorldExcerpt, at: (i64, i64, i64), material: 
 }
 
 fn check_stairs(we: &WorldExcerpt, at: (i64, i64, i64), dir: Direction, mat: Material) {
-    let block = we.get_block_at(at.into()).unwrap();
+    let block = we.block_at(at.into()).unwrap();
     assert!(block.is_stairs());
     assert!(block.has_facing_of(dir));
     assert!(block.has_material_of(mat));
@@ -80,8 +80,8 @@ fn check_door(
     closed: bool,
 ) {
     let at = at.into();
-    let bottom_block = excerpt.get_block_at(at).unwrap();
-    let top_block = excerpt.get_block_at(at + (0, 1, 0).into()).unwrap();
+    let bottom_block = excerpt.block_at(at).unwrap();
+    let top_block = excerpt.block_at(at + (0, 1, 0).into()).unwrap();
     let bottom_door = Door::try_from(bottom_block.clone()).unwrap();
     let top_door = Door::try_from(top_block.clone()).unwrap();
     assert!(bottom_door.has_material_of(&mat));
@@ -199,17 +199,17 @@ fn v_1_12_2_block_group_2() {
 
     assert_block_eq(&excerpt, (6, 0, 0), &Block::LapisLazuliBlock);
 
-    let block = excerpt.get_block_at((7, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 0).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((7, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 2).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((7, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 4).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((7, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 6).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((7, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 8).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((7, 0, 10).into()).unwrap();
+    let block = excerpt.block_at((7, 0, 10).into()).unwrap();
     assert!(block.is_dispenser() && block.has_facing_of(Direction::Down));
 
     assert_block_eq(&excerpt, (8, 0, 0), &Block::Sandstone);
@@ -217,7 +217,7 @@ fn v_1_12_2_block_group_2() {
     assert_block_eq(&excerpt, (8, 0, 2), &Block::SmoothSandstone);
 
     fn check_noteblock(excerpt: &WorldExcerpt, at: (i64, i64, i64), pitch: Pitch) {
-        let block = excerpt.get_block_at(at.into()).unwrap();
+        let block = excerpt.block_at(at.into()).unwrap();
         let noteblock = Noteblock::try_from(block.clone()).unwrap();
         assert!(noteblock.has_pitch_of(pitch));
     }
@@ -256,17 +256,17 @@ fn v_1_12_2_block_group_2() {
 
     assert_block_eq(&excerpt, (12, 0, 0), &Block::detector_rail(RailShape::EastWest));
 
-    let block = excerpt.get_block_at((13, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 0).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((13, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 2).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((13, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 4).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((13, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 6).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((13, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 8).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((13, 0, 10).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 10).into()).unwrap();
     assert!(block.is_sticky_piston() && block.has_facing_of(Direction::Down));
 
     assert_block_eq(&excerpt, (14, 0, 0), &Block::Cobweb);
@@ -307,20 +307,20 @@ fn v_1_12_2_block_group_3() {
 
     assert_block_eq(&excerpt, (0, 0, 0), &Block::DeadBush);
 
-    let block = excerpt.get_block_at((1, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 0).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((1, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 2).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((1, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 4).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((1, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 6).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((1, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 8).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((1, 0, 10).into()).unwrap();
+    let block = excerpt.block_at((1, 0, 10).into()).unwrap();
     assert!(block.is_piston() && block.has_facing_of(Direction::Down));
 
-    let block = excerpt.get_block_at((2, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 4).into()).unwrap();
     assert!(block.is_piston_head() && block.has_facing_of(Direction::East));
 
     check_with_colour_multiple(&excerpt, (3, 0, 0), &Block::wool_with_colour);
@@ -390,15 +390,15 @@ fn v_1_12_2_block_group_4() {
 
     assert_block_eq(&excerpt, (1, 0, 0), &Block::Obsidian);
 
-    let block = excerpt.get_block_at((2, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 0).into()).unwrap();
     assert!(block.is_torch() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((2, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 1, 0).into()).unwrap();
     assert!(block.is_torch() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((2, 2, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 2, 0).into()).unwrap();
     assert!(block.is_torch() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((2, 3, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 3, 0).into()).unwrap();
     assert!(block.is_torch() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((2, 4, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 4, 0).into()).unwrap();
     assert!(block.is_torch() && block.has_facing_of(Direction::North));
 
     let mut fire_block = Block::fire();
@@ -410,16 +410,16 @@ fn v_1_12_2_block_group_4() {
 
     check_stairs_multiple(&excerpt, (5, 0, 0), Material::Oak);
 
-    let block = excerpt.get_block_at((6, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((6, 0, 0).into()).unwrap();
     assert!(block.is_chest());
     assert!(block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((6, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((6, 1, 0).into()).unwrap();
     assert!(block.is_chest());
     assert!(block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((6, 2, 0).into()).unwrap();
+    let block = excerpt.block_at((6, 2, 0).into()).unwrap();
     assert!(block.is_chest());
     assert!(block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((6, 3, 0).into()).unwrap();
+    let block = excerpt.block_at((6, 3, 0).into()).unwrap();
     assert!(block.is_chest());
     assert!(block.has_facing_of(Direction::North));
 
@@ -437,49 +437,49 @@ fn v_1_12_2_block_group_4() {
     assert_block_eq(&excerpt, (12, 0, 0),
         &Block::Farmland { wetness: Int0Through7::new(7).unwrap() });
 
-    let block = excerpt.get_block_at((13, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 0).into()).unwrap();
     assert!(block.is_furnace() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((13, 0, 1).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 1).into()).unwrap();
     assert!(block.is_furnace() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((13, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 2).into()).unwrap();
     assert!(block.is_furnace() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((13, 0, 3).into()).unwrap();
+    let block = excerpt.block_at((13, 0, 3).into()).unwrap();
     assert!(block.is_furnace() && block.has_facing_of(Direction::North));
 
     // NB Block ID 62 "lit furnace" should be here at x position 14,
     // but it is not present in the save file.
 
-    let block = excerpt.get_block_at((15, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((15, 0, 1).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 1).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthSouthWest));
-    let block = excerpt.get_block_at((15, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 2).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthWest));
-    let block = excerpt.get_block_at((15, 0, 3).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 3).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::WestSouthWest));
-    let block = excerpt.get_block_at((15, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 4).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((15, 0, 5).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 5).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::WestNorthWest));
-    let block = excerpt.get_block_at((15, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 6).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::NorthWest));
-    let block = excerpt.get_block_at((15, 0, 7).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 7).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::NorthNorthWest));
-    let block = excerpt.get_block_at((15, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 8).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((15, 0, 9).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 9).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::NorthNorthEast));
-    let block = excerpt.get_block_at((15, 0, 10).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 10).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::NorthEast));
-    let block = excerpt.get_block_at((15, 0, 11).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 11).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::EastNorthEast));
-    let block = excerpt.get_block_at((15, 0, 12).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 12).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((15, 0, 13).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 13).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::EastSouthEast));
-    let block = excerpt.get_block_at((15, 0, 14).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 14).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthEast));
-    let block = excerpt.get_block_at((15, 0, 15).into()).unwrap();
+    let block = excerpt.block_at((15, 0, 15).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::SouthSouthEast));
 }
 
@@ -501,13 +501,13 @@ fn v_1_12_2_block_group_5() {
 
     check_stairs_multiple(&excerpt, (3, 0, 0), Material::Cobblestone);
 
-    let block = excerpt.get_block_at((4, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((4, 0, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((4, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((4, 1, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((4, 2, 0).into()).unwrap();
+    let block = excerpt.block_at((4, 2, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((4, 3, 0).into()).unwrap();
+    let block = excerpt.block_at((4, 3, 0).into()).unwrap();
     assert!(block.is_sign() && block.has_facing_of(Direction::North));
 
     // Mounted on the bottom (attached to block below)
@@ -555,26 +555,26 @@ fn v_1_12_2_block_group_5() {
     // NB "lit" status of redstone torch is not implemented.
     // "unlit" variants are present in the save file, however, for future implementation.
     // Lit torches
-    let block = excerpt.get_block_at((12, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 0, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((12, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 1, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((12, 2, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 2, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((12, 3, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 3, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((12, 4, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 4, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::North));
     // Unlit torches
-    let block = excerpt.get_block_at((12, 6, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 6, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((12, 7, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 7, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((12, 8, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 8, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((12, 9, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 9, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((12, 10, 0).into()).unwrap();
+    let block = excerpt.block_at((12, 10, 0).into()).unwrap();
     assert!(block.is_redstone_torch() && block.has_facing_of(Direction::North));
 
     assert_block_eq(&excerpt, (13, 0, 0), &Block::stone_button(Direction::Up));
@@ -658,7 +658,7 @@ fn v_1_12_2_block_group_6() {
     assert_block_eq(&excerpt, (12, 2, 6), &Block::cake_with_remaining_pieces(1));
 
     fn check_repeater(we: &WorldExcerpt, at: (i64, i64, i64), delay: i8, dir: Direction) {
-        let block = we.get_block_at(at.into()).unwrap();
+        let block = we.block_at(at.into()).unwrap();
         let repeater = RedstoneRepeater::try_from(block.clone()).unwrap();
         assert!(repeater.has_facing_of(dir) && repeater.has_delay_of(delay));
     }
@@ -726,7 +726,7 @@ fn check_trapdoor(
     hinge_at: Edge8,
     closed: bool,
 ) {
-    let block = excerpt.get_block_at(at.into()).unwrap();
+    let block = excerpt.block_at(at.into()).unwrap();
     let trapdoor = Trapdoor::try_from(block.clone()).unwrap();
     assert!(trapdoor.has_hinge_at(hinge_at));
     assert!(trapdoor.has_material_of(material));
@@ -734,7 +734,7 @@ fn check_trapdoor(
 }
 
 fn check_vines(excerpt: &WorldExcerpt, at: (i64, i64, i64), direction: Direction) {
-    let block = excerpt.get_block_at(at.into()).unwrap();
+    let block = excerpt.block_at(at.into()).unwrap();
     let vines = Vines::try_from(block.clone()).unwrap();
     assert!(vines.is_touching_surface(direction));
 }
@@ -818,11 +818,11 @@ fn v_1_12_2_block_group_8() {
     assert_block_eq(&excerpt, (3, 0, 0),
         &Block::NetherWart { growth_stage: Int0Through3::new_saturating(3) });
 
-    assert!(excerpt.get_block_at((4, 0, 0).into()).unwrap().is_enchanting_table());
+    assert!(excerpt.block_at((4, 0, 0).into()).unwrap().is_enchanting_table());
 
     // NB brewing stand has a number of fields that should be tested,
     // but in the current test map all of them are default.
-    assert!(excerpt.get_block_at((5, 0, 0).into()).unwrap().is_brewing_stand());
+    assert!(excerpt.block_at((5, 0, 0).into()).unwrap().is_brewing_stand());
 
     assert_block_eq(&excerpt, (6, 0, 0),
         &Block::Cauldron { water_level: Int0Through3::new_saturating(0) });
@@ -898,13 +898,13 @@ fn v_1_12_2_block_group_9() {
 
     assert_block_eq(&excerpt, (1, 0, 0), &Block::EmeraldOre);
 
-    let block = excerpt.get_block_at((2, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 0).into()).unwrap();
     assert!(block.is_ender_chest() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((2, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 1, 0).into()).unwrap();
     assert!(block.is_ender_chest() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((2, 2, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 2, 0).into()).unwrap();
     assert!(block.is_ender_chest() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((2, 3, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 3, 0).into()).unwrap();
     assert!(block.is_ender_chest() && block.has_facing_of(Direction::North));
 
     // NB Tripwire hooks only have facing implemented at the moment, but there are
@@ -926,56 +926,56 @@ fn v_1_12_2_block_group_9() {
 
     // TODO 9: NB 137 "command block" not implemented and not in save file
 
-    assert!(excerpt.get_block_at((10, 0, 0).into()).unwrap().is_beacon());
+    assert!(excerpt.block_at((10, 0, 0).into()).unwrap().is_beacon());
 
-    let block = excerpt.get_block_at((11, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((11, 0, 0).into()).unwrap();
     assert!(block.is_wall() && block.has_material_of(Material::Cobblestone));
-    let block = excerpt.get_block_at((11, 0, 1).into()).unwrap();
+    let block = excerpt.block_at((11, 0, 1).into()).unwrap();
     assert!(block.is_wall() && block.has_material_of(Material::MossyCobblestone));
 
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 0).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 0).into()).unwrap().clone());
     assert!(pot.unwrap().is_empty());
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 1).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 1).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::Poppy));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 2).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 2).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::Dandelion));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 3).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 3).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::OakSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 4).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 4).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::SpruceSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 5).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 5).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::BirchSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 6).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 6).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::JungleSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 7).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 7).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::RedMushroom));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 8).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 8).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::BrownMushroom));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 9).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 9).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::Cactus));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 10).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 10).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::DeadBush));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 11).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 11).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::Fern));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 12).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 12).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::AcaciaSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 0, 13).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 0, 13).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::DarkOakSapling));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 0).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 0).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::BlueOrchid));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 1).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 1).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::Allium));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 2).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 2).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::AzureBluet));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 3).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 3).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::TulipRed));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 4).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 4).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::TulipOrange));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 5).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 5).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::TulipWhite));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 6).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 6).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::TulipPink));
-    let pot = FlowerPot::try_from(excerpt.get_block_at((12, 2, 7).into()).unwrap().clone());
+    let pot = FlowerPot::try_from(excerpt.block_at((12, 2, 7).into()).unwrap().clone());
     assert!(pot.unwrap().has_plant_of(PottedPlant::OxeyeDaisy));
 
     assert_block_eq(&excerpt, (13, 0, 0),
@@ -999,7 +999,7 @@ fn check_skull(
     direction: Direction,
     is_on_floor: bool,
 ) {
-    let block = excerpt.get_block_at(at.into()).unwrap();
+    let block = excerpt.block_at(at.into()).unwrap();
     let head = Head::try_from(block.clone()).unwrap();
     assert!(head.has_variant_of(head_variant));
     assert!(head.has_facing_of(direction));
@@ -1072,16 +1072,16 @@ fn v_1_12_2_block_group_10() {
     assert_block_eq(&excerpt, (1, 3, 2),
         &Block::Anvil { facing: Surface4::West, damage: AnvilDamage::VeryDamaged });
 
-    let block = excerpt.get_block_at((2, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 0).into()).unwrap();
     assert!(block.is_trapped_chest());
     assert!(block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((2, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 2).into()).unwrap();
     assert!(block.is_trapped_chest());
     assert!(block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((2, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 4).into()).unwrap();
     assert!(block.is_trapped_chest());
     assert!(block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((2, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((2, 0, 6).into()).unwrap();
     assert!(block.is_trapped_chest());
     assert!(block.has_facing_of(Direction::North));
 
@@ -1117,15 +1117,15 @@ fn v_1_12_2_block_group_10() {
 
     assert_block_eq(&excerpt, (9, 0, 0), &Block::QuartzOre);
 
-    let block = excerpt.get_block_at((10, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((10, 0, 0).into()).unwrap();
     assert!(block.is_hopper() && block.has_facing_of(Direction::Down));
-    let block = excerpt.get_block_at((10, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((10, 0, 2).into()).unwrap();
     assert!(block.is_hopper() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((10, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((10, 0, 4).into()).unwrap();
     assert!(block.is_hopper() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((10, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((10, 0, 6).into()).unwrap();
     assert!(block.is_hopper() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((10, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((10, 0, 8).into()).unwrap();
     assert!(block.is_hopper() && block.has_facing_of(Direction::South));
 
     assert_block_eq(&excerpt, (11, 0, 0), &Block::BlockOfQuartz);
@@ -1138,17 +1138,17 @@ fn v_1_12_2_block_group_10() {
 
     assert_block_eq(&excerpt, (13, 0, 0), &Block::activator_rail(RailShape::NorthSouth));
 
-    let block = excerpt.get_block_at((14, 0, 0).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 0).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((14, 0, 2).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 2).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((14, 0, 4).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 4).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((14, 0, 6).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 6).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((14, 0, 8).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 8).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::Up));
-    let block = excerpt.get_block_at((14, 0, 10).into()).unwrap();
+    let block = excerpt.block_at((14, 0, 10).into()).unwrap();
     assert!(block.is_dropper() && block.has_facing_of(Direction::Down));
 
     check_with_colour_multiple(&excerpt, (15, 0, 0), &Block::terracotta_with_colour);
@@ -1221,7 +1221,7 @@ fn v_1_12_2_block_group_12() {
     let excerpt = load_excerpt(INPUT_FILE, (176, 56, 0), (16, 4, 16));
 
     fn check_banner(we: &WorldExcerpt, at: (i64, i64, i64), colour: Colour, dir: Direction) {
-        let block = we.get_block_at(at.into()).unwrap();
+        let block = we.block_at(at.into()).unwrap();
         let banner = Banner::try_from(block.clone()).unwrap();
         assert!(banner.has_colour_of(colour));
         assert!(banner.has_facing_of(dir));
@@ -1318,7 +1318,7 @@ fn v_1_12_2_block_group_13() {
 
     // TODO chorus plant: Need to figure out how to parse connections...
     //fn check_chorus_plant(excerpt: &WorldExcerpt, at: (i64, i64, i64), direction: Direction) {
-    //    let block = excerpt.get_block_at(at.into()).unwrap();
+    //    let block = excerpt.block_at(at.into()).unwrap();
     //    let chorus_plant = ChorusPlant::try_from(block.clone()).unwrap();
     //    assert!(chorus_plant.is_touching_surface(direction));
     //}
@@ -1363,7 +1363,7 @@ fn check_shulker_box(
     direction: Direction,
     colour: Colour,
 ) {
-    let block = excerpt.get_block_at(at.into()).unwrap();
+    let block = excerpt.block_at(at.into()).unwrap();
     let shulker_box = ShulkerBox::try_from(block.clone()).unwrap();
     assert!(shulker_box.has_facing_of(direction));
     assert!(shulker_box.has_colour_of(colour));
@@ -1396,17 +1396,17 @@ fn v_1_12_2_block_group_14() {
 
     // NB 218 "structure void" is not in the savefile
 
-    let block = excerpt.get_block_at((10, 1, 0).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 0).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::East));
-    let block = excerpt.get_block_at((10, 1, 2).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 2).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::North));
-    let block = excerpt.get_block_at((10, 1, 4).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 4).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::West));
-    let block = excerpt.get_block_at((10, 1, 6).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 6).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::South));
-    let block = excerpt.get_block_at((10, 1, 8).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 8).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::Down));
-    let block = excerpt.get_block_at((10, 1, 10).into()).unwrap();
+    let block = excerpt.block_at((10, 1, 10).into()).unwrap();
     assert!(block.is_observer() && block.has_facing_of(Direction::Up));
 
     check_shulker_box_multiple(&excerpt, (11, 1, 0), Colour::White);
@@ -1434,7 +1434,7 @@ fn check_glazed_terracotta(
     direction: Direction,
     colour: Colour,
 ) {
-    let block = excerpt.get_block_at(at.into()).unwrap();
+    let block = excerpt.block_at(at.into()).unwrap();
     let glazed_terracotta = GlazedTerracotta::try_from(block.clone()).unwrap();
     assert!(glazed_terracotta.has_facing_of(direction));
     assert!(glazed_terracotta.has_colour_of(colour));

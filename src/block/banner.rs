@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
+use crate::block_entity::{BlockEntity, CommonTags};
 use crate::colour::*;
 use crate::positioning::*;
 
@@ -32,6 +33,22 @@ impl Banner {
 
     pub fn is_on_wall(&self) -> bool {
         self.placement.is_on_wall()
+    }
+
+    pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+        let (x, y, z) = at;
+        BlockEntity::Banner {
+            common: CommonTags {
+                id: "minecraft:banner".into(),
+                x,
+                y,
+                z,
+                keep_packed: false,
+            },
+            colour: self.colour,
+            custom_name: self.custom_name.clone(),
+            patterns: self.patterns.clone(),
+        }
     }
 }
 

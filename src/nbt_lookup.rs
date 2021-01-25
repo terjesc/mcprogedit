@@ -2,21 +2,7 @@
 pub fn nbt_blob_lookup(blob: &nbt::Blob, path: &'static str) -> Option<nbt::Value> {
     let mut parts = path.splitn(2, '/');
     let first = parts.next().unwrap();
-    let rest = match parts.next() {
-        Some(string) => string,
-        None => "",
-    };
-
-    /*
-    // This will probably be allowed some time in the future:
-    #![feature(str_split_once)]
-    let (first, rest) = {
-        match path.split_once('/') {
-            Some(partition) => partition,
-            None => (path, ""),
-        }
-    };
-    */
+    let rest = parts.next().unwrap_or("");
 
     // Get the value (if exists)
     let value = match blob.get(first) {
