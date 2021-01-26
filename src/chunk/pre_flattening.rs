@@ -10,8 +10,13 @@ use crate::coordinates::{BlockColumnCoord, BlockCoord, ChunkCoord};
 use crate::material::*;
 use crate::nbt_lookup::*;
 use crate::positioning::*;
+use crate::utils;
 
 impl Chunk {
+    /// Calculates the global block coordinates of the block at index `index`
+    /// of the "Blocks" and similar NBT tags, within section `section_y_index`
+    /// of the chunk whose local (0, 0, 0) coordinates are at global block
+    /// coordinates `chunk_offset`.
     fn coordinates(section_y_index: i64, chunk_offset: BlockCoord, index: usize) -> BlockCoord {
         // index = (y * X_LENGTH * Z_LENGTH) + (z * X_LENGTH) + x
         const X_LENGTH: i64 = 16;
@@ -24,6 +29,30 @@ impl Chunk {
         //println!("Looking for block entity at ({}, {}, {})", x, y, z);
         let local_coordinates: BlockCoord = (x, y, z).into();
         local_coordinates + chunk_offset
+    }
+
+    /// Calculates the index into the "Blocks" and similar NBT tags, for a block
+    /// within section `section_y_index`, located at chunk local coordinates
+    /// `local_block_coords`.
+    fn local_index(section_y_index: i64, local_block_coords: BlockCoord) -> usize {
+        const X_LENGTH: i64 = 16;
+        const Y_HEIGHT: i64 = 16;
+        const Z_LENGTH: i64 = 16;
+        let y_offset = section_y_index * Y_HEIGHT;
+        let (x, y, z) = (local_block_coords.0, local_block_coords.1, local_block_coords.2);
+        ((y - y_offset) * X_LENGTH * Z_LENGTH + z * X_LENGTH + x) as usize
+    }
+
+    /// Calculates the index into the "Blocks" and similar NBT tags, for a block
+    /// within section `section_y_index` of the chunk whose local (0, 0, 0)
+    /// coordinates are at global block coordinates `chunk_offset`.
+    fn global_index(
+        section_y_index: i64,
+        chunk_offset: BlockCoord,
+        global_block_coordinates: BlockCoord,
+    ) -> usize {
+        let local_coords = global_block_coordinates - chunk_offset;
+        Self::local_index(section_y_index, local_coords)
     }
 
     /// Generates tile entities for all blocks in the chunk, and returns them
@@ -40,7 +69,7 @@ impl Chunk {
             for y in 0..y_dim {
                 for z in 0..z_dim {
                     let block_z = chunk_offset_blocks.1 as i32 + z as i32;
-                    match self.blocks.get((x, y, z)) {
+                    match self.blocks.block_at((x, y, z)) {
                         None => (),
                         Some(Block::Banner(banner)) => {
                             if let Some(value) = banner
@@ -75,13 +104,84 @@ impl Chunk {
     }
 
     /// Generates an individual section NBT tag from the chunk.
-    fn pre_flattening_section(&self, y: i8) -> nbt::Value {
-        let blocks = vec![0i8; 4096];
-        let add = vec![0i8; 2048];
-        let data = vec![0i8; 2048];
+    fn pre_flattening_section(&self, section_y: i8) -> nbt::Value {
+        let mut blocks = vec![0u8; 4096];
+        // NB "Add" is never used, unless there are blocks from mods involved.
+        //let mut add = vec![0u8; 2048];
+        let mut data = vec![0u8; 2048];
 
-        let block_light = vec![0i8; 2048];
-        let sky_light = vec![0i8; 2048];
+        // Handle block IDs and block data
+        for x in 0..16 {
+            for z in 0..16 {
+                for y in (section_y as i64 * 16)..(16 + section_y as i64 * 16) {
+                    let index = Self::local_index(section_y as i64, (x, y, z).into());
+
+                    if let Some(block) = self.blocks
+                        .block_at((x as usize, y as usize, z as usize))
+                    {
+                        let (block_id, data_value) = match block {
+                            Block::Air => (0, 0),
+                            Block::Stone => (1, 0),
+                            Block::Granite => (1, 1),
+                            Block::PolishedGranite => (1, 2),
+                            Block::Diorite => (1, 3),
+                            Block::PolishedDiorite => (1, 4),
+                            Block::Andesite => (1, 5),
+                            Block::PolishedAndesite => (1, 6),
+                            Block::GrassBlock => (2, 0),
+                            Block::Dirt => (3, 0),
+                            Block::CoarseDirt => (3, 1),
+                            Block::Podzol => (3, 2),
+                            Block::Cobblestone => (4, 0),
+                            Block::Planks { material } => {
+                                match material {
+                                    WoodMaterial::Oak => (5, 0),
+                                    WoodMaterial::Spruce => (5, 1),
+                                    WoodMaterial::Birch => (5, 2),
+                                    WoodMaterial::Jungle => (5, 3),
+                                    WoodMaterial::Acacia => (5, 4),
+                                    WoodMaterial::DarkOak => (5, 5),
+                                    WoodMaterial::Crimson => (5, 0), // Fallback to oak
+                                    WoodMaterial::Warped => (5, 0), // Fallback to oak
+                                }
+                            },
+                            Block::Sapling { growth_stage, material } => {
+                                let data = (growth_stage.get() as u8) << 3;
+                                let data = data | match material {
+                                    SaplingMaterial::Oak => 0,
+                                    SaplingMaterial::Spruce => 1,
+                                    SaplingMaterial::Birch => 2,
+                                    SaplingMaterial::Jungle => 3,
+                                    SaplingMaterial::Acacia => 4,
+                                    SaplingMaterial::DarkOak => 5,
+                                    SaplingMaterial::Bamboo => 0, // Fallback to oak
+                                };
+                                (6, data)
+                            },
+                            Block::Bedrock => (7, 0),
+                            // TODO add more block types
+                            /*
+                            Block::Door(door) => {
+                                (match door.material {
+                                },
+                                match door.half {
+                                },
+                                )
+                            }
+                            */
+                            _ => (0, 0),
+                        };
+
+                        blocks[index] = block_id;
+                        utils::set_nibble(&mut data, data_value, index);
+                    }
+                }
+            }
+        }
+
+        // TODO Somehow fill block light and sky light with reasonable values...
+        let block_light = vec![0u8; 2048];
+        let sky_light = vec![0u8; 2048];
 
         // A section is a TAG_Compound containing:
         // - "Y" TAG_Byte index 0 to 15 (bottom to top)
@@ -91,10 +191,17 @@ impl Chunk {
         // - "BlockLight" TAG_Byte_Array 2048 bytes, half byte per block
         // - "SkyLight" TAG_Byte_Array 2048 bytes, half byte per block
 
+        // The NBT library for some reason needs Vec<i8>,
+        // even though these fields are series of bytes,
+        // and u8 is much easier to work with for that purpose...
+        let blocks = utils::vec_u8_into_vec_i8(blocks);
+        let data = utils::vec_u8_into_vec_i8(data);
+        let block_light = utils::vec_u8_into_vec_i8(block_light);
+        let sky_light = utils::vec_u8_into_vec_i8(sky_light);
+
         let mut section = nbt::Map::new();
-        section.insert("Y".into(), nbt::Value::Byte(y));
+        section.insert("Y".into(), nbt::Value::Byte(section_y));
         section.insert("Blocks".into(), nbt::Value::ByteArray(blocks));
-        section.insert("Add".into(), nbt::Value::ByteArray(add));
         section.insert("Data".into(), nbt::Value::ByteArray(data));
         section.insert("BlockLight".into(), nbt::Value::ByteArray(block_light));
         section.insert("SkyLight".into(), nbt::Value::ByteArray(sky_light));
@@ -1525,20 +1632,6 @@ fn _bytes_to_packed_nibbles(bytes: &[i8]) -> Vec<i8> {
         .map(|c| c.iter().fold(0i8, |acc, x| (acc >> 4) + ((x & 0x0F) << 4)))
         .collect()
 }
-
-/*
-/// Put the four lowest bits of `nibble` into the nibble position `index`
-fn set_nibble(vec: &mut Vec<i8>, nibble: i8, index: usize) {
-    let byte_index = index / 2;
-    if index % 2 == 0 {
-        // least significant nibble
-        vec[byte_index] = (vec[byte_index] & 0xF0) | (nibble & 0x0F);
-    } else {
-        // most significant nibble
-        vec[byte_index] = (vec[byte_index] & 0x0F) | ((nibble << 4) & 0xF0);
-    };
-}
-*/
 
 #[cfg(test)]
 mod tests {

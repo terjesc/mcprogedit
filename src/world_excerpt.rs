@@ -340,7 +340,7 @@ impl WorldExcerpt {
     /// Get a copy of the block at location `at`.
     pub fn block_at(&self, at: BlockCoord) -> Option<&Block> {
         self.blocks
-            .get((at.0 as usize, at.1 as usize, at.2 as usize))
+            .block_at((at.0 as usize, at.1 as usize, at.2 as usize))
     }
 
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.

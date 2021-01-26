@@ -31,7 +31,7 @@ impl BlockCuboid {
         self.blocks[index] = block;
     }
 
-    pub fn get(&self, coordinates: (usize, usize, usize)) -> Option<&Block> {
+    pub fn block_at(&self, coordinates: (usize, usize, usize)) -> Option<&Block> {
         if let Some(index) = self.index(coordinates) {
             self.blocks.get(index)
         } else {
@@ -39,7 +39,7 @@ impl BlockCuboid {
         }
     }
 
-    pub fn _get_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
+    pub fn _block_at_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
         if let Some(index) = self.index(coordinates) {
             self.blocks.get_mut(index)
         } else {
@@ -70,7 +70,7 @@ impl BlockCuboid {
                 let from_y = (to_y as i64 - offset.1) as usize;
                 for to_z in min.2..=max.2 {
                     let from_z = (to_z as i64 - offset.2) as usize;
-                    if let Some(block) = other.get((from_x, from_y, from_z)) {
+                    if let Some(block) = other.block_at((from_x, from_y, from_z)) {
                         if *block != Block::None {
                             self.insert((to_x, to_y, to_z), block.clone());
                         }
@@ -90,7 +90,7 @@ impl BlockCuboid {
                 let mut height = 0;
                 //for y in std::iter::range_step(self.y_dim as i32, 0, -1) {
                 for y in (0..self.y_dim).rev() {
-                    if let Some(Block::Air) = self.get((x, y as usize, z)) {
+                    if let Some(Block::Air) = self.block_at((x, y as usize, z)) {
                         height = y;
                         break;
                     }
