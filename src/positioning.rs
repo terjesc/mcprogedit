@@ -338,6 +338,29 @@ impl From<i8> for Direction16 {
     }
 }
 
+impl From<Direction16> for u8 {
+    fn from(direction: Direction16) -> u8 {
+        match direction {
+            Direction16::South => 0,
+            Direction16::SouthSouthWest => 1,
+            Direction16::SouthWest => 2,
+            Direction16::WestSouthWest => 3,
+            Direction16::West => 4,
+            Direction16::WestNorthWest => 5,
+            Direction16::NorthWest => 6,
+            Direction16::NorthNorthWest => 7,
+            Direction16::North => 8,
+            Direction16::NorthNorthEast => 9,
+            Direction16::NorthEast => 10,
+            Direction16::EastNorthEast => 11,
+            Direction16::East => 12,
+            Direction16::EastSouthEast => 13,
+            Direction16::SouthEast => 14,
+            Direction16::SouthSouthEast => 15,
+        }
+    }
+}
+
 impl TryFrom<Direction> for Direction16 {
     type Error = DirectionError;
 
@@ -615,6 +638,21 @@ impl From<i8> for Edge8 {
             6 => Edge8::UpSouth,
             7 => Edge8::UpNorth,
             _ => panic!("Invalid edge number: {}", edge_number),
+        }
+    }
+}
+
+impl From<Edge8> for u8 {
+    fn from(edge: Edge8) -> u8 {
+        match edge {
+            Edge8::DownEast => 0,
+            Edge8::DownWest => 1,
+            Edge8::DownSouth => 2,
+            Edge8::DownNorth => 3,
+            Edge8::UpEast => 4,
+            Edge8::UpWest => 5,
+            Edge8::UpSouth => 6,
+            Edge8::UpNorth => 7,
         }
     }
 }

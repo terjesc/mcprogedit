@@ -42,8 +42,8 @@ impl From<i32> for Colour {
     }
 }
 
-impl From<Colour> for i32 {
-    fn from(colour: Colour) -> i32 {
+impl From<Colour> for u8 {
+    fn from(colour: Colour) -> u8 {
         match colour {
             Colour::White => 0,
             Colour::Orange => 1,

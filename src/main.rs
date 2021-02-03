@@ -36,10 +36,10 @@ fn run() -> Result<()> {
             .expect("Could not read version compound.")
         {
             let id = version_c.get("Id").expect("Could not read id.");
-            let is_snapshot = match version_c.get("Snapshot").expect("Could not read snapshot.") {
-                nbt::Value::Byte(0) => false,
-                _ => true,
-            };
+            let is_snapshot = !matches!(
+                version_c.get("Snapshot").expect("Could not read snapshot."),
+                nbt::Value::Byte(0),
+            );
             let version_string = version_c
                 .get("Name")
                 .expect("Could not read version string.");

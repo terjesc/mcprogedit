@@ -159,17 +159,444 @@ impl Chunk {
                                 (6, data)
                             },
                             Block::Bedrock => (7, 0),
-                            // TODO add more block types
-                            /*
+                            Block::WaterSource => (9, 0),
+                            Block::Water { falling, level } => {
+                                let data = if *falling { 0x8 } else { 0 };
+                                let data = data | (8 - (level.get() as u8));
+                                (9, data)
+                            },
+                            Block::LavaSource => (11, 0),
+                            Block::Lava { falling, level } => {
+                                let data = if *falling { 0x8 } else { 0 };
+                                let data = data | (8 - (level.get() as u8));
+                                (11, data)
+                            },
+                            Block::Sand => (12, 0),
+                            Block::RedSand => (12, 1),
+                            Block::Gravel => (13, 0),
+                            Block::GoldOre => (14, 0),
+                            Block::IronOre => (15, 0),
+                            Block::CoalOre => (16, 0),
+                            Block::Log(Log { material, alignment, .. }) => {
+                                let data = match alignment {
+                                    Some(Axis3::Y) => 0,
+                                    Some(Axis3::X) => 1 << 2,
+                                    Some(Axis3::Z) => 2 << 2,
+                                    None => 3 << 2,
+                                };
+                                match material {
+                                    WoodMaterial::Oak => (17, data),
+                                    WoodMaterial::Spruce => (17, data | 1),
+                                    WoodMaterial::Birch => (17, data | 2),
+                                    WoodMaterial::Jungle => (17, data | 3),
+                                    WoodMaterial::Acacia => (162, data),
+                                    WoodMaterial::DarkOak => (162, data | 1),
+                                    WoodMaterial::Crimson => (17, data), // Fallback to oak
+                                    WoodMaterial::Warped => (17, data), // Fallback to oak
+                                }
+                            },
+                            Block::Leaves { material, persistent, .. } => {
+                                let data = if *persistent { 0x4 } else { 0 };
+                                match material {
+                                    LeavesMaterial::Oak => (18, data),
+                                    LeavesMaterial::Spruce => (18, data | 1),
+                                    LeavesMaterial::Birch => (18, data | 2),
+                                    LeavesMaterial::Jungle => (18, data | 3),
+                                    LeavesMaterial::Acacia => (161 , data),
+                                    LeavesMaterial::DarkOak => (161 , data | 1),
+                                }
+                            },
+                            Block::Sponge => (19, 0),
+                            Block::WetSponge => (19, 1),
+                            Block::Glass { colour } => {
+                                match colour {
+                                    None => (20, 0),
+                                    Some(colour) => {
+                                        (95, (*colour as i32) as u8)
+                                    },
+                                }
+                            },
+                            Block::LapisLazuliOre => (21, 0),
+                            Block::LapisLazuliBlock => (22, 0),
+                            Block::Dispenser(dispenser) => {
+                                (23, facing6_dunswe(&dispenser.facing))
+                            },
+                            Block::Sandstone => (24, 0),
+                            Block::ChiseledSandstone => (24, 1),
+                            Block::SmoothSandstone => (24, 2),
+                            Block::Noteblock(_) => (25, 0),
+                            Block::Bed(bed) => {
+                                let end_data = match bed.end {
+                                    BedEnd::Head => 0x8,
+                                    BedEnd::Foot => 0x0,
+                                };
+                                (26, facing4_swne(&bed.facing) | end_data)
+                            },
+                            Block::Rail { variant, shape, .. } => {
+                                let shape_data = shape.to_value();
+                                match variant {
+                                    RailType::Powered => (27, shape_data),
+                                    RailType::Detector => (28, shape_data),
+                                    RailType::Normal => (66, shape_data),
+                                    RailType::Activator => (157, shape_data),
+                                }
+                            },
+                            Block::StickyPiston { facing, extended, .. } => {
+                                let extended_data = match extended {
+                                    true => 0x8,
+                                    false => 0x0,
+                                };
+                                (29, facing6_dunswe(facing) & extended_data)
+                            },
+                            Block::Cobweb => (30, 0),
+                            Block::Grass(grass) => match grass {
+                                Grass::Grass => (31, 1),
+                                Grass::Fern => (31, 2),
+                                Grass::TallGrassBottom => (175, 3),
+                                Grass::TallGrassTop => (175, 3 | 8),
+                                Grass::LargeFernBottom => (175, 4),
+                                Grass::LargeFernTop => (175, 4 | 8),
+                            },
+                            Block::DeadBush => (32, 0),
+                            Block::Piston {facing, extended, .. } => {
+                                let extended_data = match extended {
+                                    true => 0x8,
+                                    false => 0x0,
+                                };
+                                (33, facing6_dunswe(facing) | extended_data)
+                            },
+                            Block::StickyPistonHead { facing } => {
+                                let sticky = 0x8;
+                                (34, sticky | facing6_dunswe(facing))
+                            },
+                            Block::PistonHead { facing } => {
+                                (34, facing6_dunswe(facing))
+                            },
+                            Block::Wool { colour } => {
+                                (35, (*colour).into())
+                            },
+                            // NB 36 "Block moved by Piston" not implemented
+                            Block::Flower(flower) => {
+                                match flower {
+                                    Flower::Dandelion => (37, 0),
+                                    Flower::Poppy => (38, 1),
+                                    Flower::BlueOrchid => (38, 2),
+                                    Flower::Allium => (38, 3),
+                                    Flower::AzureBluet => (38, 4),
+                                    Flower::TulipRed => (38, 5),
+                                    Flower::TulipOrange => (38, 6),
+                                    Flower::TulipWhite => (38, 7),
+                                    Flower::TulipPink => (38, 8),
+                                    Flower::OxeyeDaisy => (38, 9),
+                                    Flower::SunflowerBottom => (175, 0),
+                                    Flower::SunflowerTop => (175, 8),
+                                    Flower::LilacBottom => (175, 1),
+                                    Flower::LilacTop => (175, 1 | 8),
+                                    Flower::RoseBushBottom => (175, 4),
+                                    Flower::RoseBushTop => (175, 4 | 8),
+                                    Flower::PeonyBottom => (175, 5),
+                                    Flower::PeonyTop => (175, 5 | 8),
+                                    Flower::Cornflower
+                                    | Flower::LilyOfTheValley
+                                    | Flower::WitherRose => (37, 0), // Fallback to Dandelion
+                                }
+                            },
+                            Block::BrownMushroom => (39, 0),
+                            Block::RedMushroom => (40, 1),
+                            Block::BlockOfGold => (41, 2),
+                            Block::BlockOfIron => (42, 3),
+                            // TODO Slab is probably in need of refactoring...
+                            Block::Slab(slab) => {
+                                let position_data = match slab.position {
+                                    SlabVariant::Top => 0x8,
+                                    _ => 0x0,
+                                };
+                                let data = match slab.material {
+                                    SlabMaterial::SmoothStone
+                                    | SlabMaterial::Oak
+                                    | SlabMaterial::RedSandstone
+                                    | SlabMaterial::Purpur => position_data,
+                                    SlabMaterial::Sandstone
+                                    | SlabMaterial::Spruce => 1 | position_data,
+                                    SlabMaterial::PetrifiedOak
+                                    | SlabMaterial::Birch => 2 | position_data,
+                                    SlabMaterial::Cobblestone
+                                    | SlabMaterial::Jungle => 3 | position_data,
+                                    SlabMaterial::Brick
+                                    | SlabMaterial::Acacia => 4 | position_data,
+                                    SlabMaterial::StoneBrick
+                                    | SlabMaterial::DarkOak => 5 | position_data,
+                                    SlabMaterial::NetherBrick => 6 | position_data,
+                                    SlabMaterial::Quartz => 7 | position_data,
+                                    _ => position_data, // fallback to SmoothStone
+                                };
+                                let block_id = match slab.material {
+                                    SlabMaterial::SmoothStone
+                                    | SlabMaterial::Sandstone
+                                    | SlabMaterial::PetrifiedOak
+                                    | SlabMaterial::Cobblestone
+                                    | SlabMaterial::Brick
+                                    | SlabMaterial::StoneBrick
+                                    | SlabMaterial::NetherBrick
+                                    | SlabMaterial::Quartz => {
+                                        match slab.position {
+                                            SlabVariant::Double => 43,
+                                            _ => 44,
+                                        }
+                                    },
+                                    SlabMaterial::Spruce
+                                    | SlabMaterial::Birch
+                                    | SlabMaterial::Jungle
+                                    | SlabMaterial::Acacia
+                                    | SlabMaterial::DarkOak => {
+                                        match slab.position {
+                                            SlabVariant::Double => 125,
+                                            _ => 126,
+                                        }
+                                    },
+                                    SlabMaterial::RedSandstone => {
+                                        match slab.position {
+                                            SlabVariant::Double => 181,
+                                            _ => 182,
+                                        }
+                                    },
+                                    SlabMaterial::Purpur => {
+                                        match slab.position {
+                                            SlabVariant::Double => 204,
+                                            _ => 205,
+                                        }
+                                    },
+                                    // fallback to SmoothStone
+                                    _ => {
+                                        match slab.position {
+                                            SlabVariant::Double => 43,
+                                            _ => 44,
+                                        }
+                                    },
+                                };
+                                (block_id, data)
+                            },
+                            Block::BrickBlock => (45, 0),
+                            Block::TNT => (46, 0),
+                            Block::Bookshelf => (47, 0),
+                            Block::MossyCobblestone => (48, 0),
+                            Block::Obsidian => (49, 0),
+                            Block::Torch { attached } => {
+                                (50, facing5_xwensd(attached))
+                            },
+                            Block::Fire { age } => {
+                                (51, age.get() as u8)
+                            },
+                            // NB 52 mob spawner not implemented
+                            Block::Stairs(stair) => {
+                                let data = stair.position.into();
+                                match stair.material {
+                                    StairMaterial::Oak => (53, data),
+                                    StairMaterial::Cobblestone => (67, data),
+                                    StairMaterial::Brick => (108, data),
+                                    StairMaterial::StoneBrick => (109, data),
+                                    StairMaterial::NetherBrick => (114, data),
+                                    StairMaterial::Sandstone => (128, data),
+                                    StairMaterial::Spruce => (134, data),
+                                    StairMaterial::Birch => (135, data),
+                                    StairMaterial::Jungle => (136, data),
+                                    StairMaterial::Quartz => (156, data),
+                                    StairMaterial::Acacia => (163, data),
+                                    StairMaterial::DarkOak => (164, data),
+                                    StairMaterial::RedSandstone => (180, data),
+                                    StairMaterial::Purpur => (203, data),
+                                    _ => (53, data), // fallback to oak stairs
+                                }
+                            },
+                            Block::Chest(chest) => {
+                                (54, facing4_xxnswe(&chest.facing))
+                            },
+                            Block::RedstoneWire => (55, 0),
+                            Block::DiamondOre => (56, 0),
+                            Block::BlockOfDiamond => (57, 0),
+                            Block::CraftingTable => (58, 0),
+                            Block::Wheat { growth_stage } => (59, growth_stage.get() as u8),
+                            Block::Farmland { wetness } => (60, wetness.get() as u8),
+                            Block::Furnace(furnace) => {
+                                let block_id = if furnace.lit { 62 } else { 61 };
+                                (block_id, facing4_xxnswe(&furnace.facing))
+                            },
+                            Block::Sign(sign) => {
+                                match sign.placement {
+                                    WallOrRotatedOnFloor::Floor(facing) => {
+                                        (63, facing.into())
+                                    },
+                                    WallOrRotatedOnFloor::Wall(facing) => {
+                                        (68, facing4_xxnswe(&facing))
+                                    },
+                                }
+                            },
                             Block::Door(door) => {
-                                (match door.material {
-                                },
-                                match door.half {
-                                },
-                                )
+                                let data = match door.half {
+                                    DoorHalf::Upper => {
+                                        let upper = 0x8;
+                                        let hinge = match door.hinged_at {
+                                            Hinge::Right => 0x1,
+                                            Hinge::Left => 0x0,
+                                        };
+                                        upper | hinge
+                                    },
+                                    DoorHalf::Lower => {
+                                        let lower = 0x0;
+                                        let open = if door.open { 0x4 } else { 0x0 };
+                                        let facing = facing4_wnes(&door.facing);
+                                        lower | open | facing
+                                    },
+                                };
+                                let block_id = match door.material {
+                                    DoorMaterial::Oak => 64,
+                                    DoorMaterial::Iron => 71,
+                                    DoorMaterial::Spruce => 193,
+                                    DoorMaterial::Birch => 194,
+                                    DoorMaterial::Jungle => 195,
+                                    DoorMaterial::Acacia => 196,
+                                    DoorMaterial::DarkOak => 197,
+                                    _ => 64 // fallback to oak door
+                                };
+                                (block_id, data)
+                            },
+                            Block::Ladder { facing, .. } => {
+                                (65, facing4_xxnswe(facing))
+                            },
+                            // NB 66 normal rail already handled
+                            // NB 67 cobblestone stairs already handled
+                            // NB 68 standing sign already handled
+
+                            Block::Lever(facing, state) => {
+                                let state_data = match state {
+                                    OnOffState::On => 0x8,
+                                    OnOffState::Off => 0x0,
+                                };
+                                let data = state_data | lever_facing(&facing);
+                                (69, data)
+                            },
+                            Block::PressurePlate { material } => {
+                                match material {
+                                    PressurePlateMaterial::Stone => (70, 0),
+                                    PressurePlateMaterial::Oak => (72, 0),
+                                    PressurePlateMaterial::Gold => (147, 0),
+                                    PressurePlateMaterial::Iron => (148, 0),
+                                    _ => (72, 0), // fallback to oak pressure plate
+                                }
+                            },
+                            // NB 71 iron door already handled
+                            // NB 72 oak pressure plate already handled
+                            Block::RedstoneOre => (73, 0),
+                            // NB 74 lit redstone ore is not implemented
+                            // NB 75 unlit redstone torch is not implemented
+                            Block::RedstoneTorch { attached } => {
+                                (76, facing5_xwensd(&attached))
+                            },
+                            Block::Button(material, facing) => {
+                                let data = facing6_dewsnu(facing);
+                                match material {
+                                    ButtonMaterial::Stone => (77, data),
+                                    ButtonMaterial::Oak => (143, data),
+                                    _ => (143, data), // fallback to oak button
+                                }
+                            },
+                            Block::Snow { thickness } => {
+                                let data = (thickness.get() as u8) + 1;
+                                (78, data)
+                            },
+                            Block::Ice => (79, 0),
+                            Block::SnowBlock => (80, 0),
+                            Block::Cactus { growth_stage } => (81, growth_stage.get() as u8),
+                            Block::Clay => (82, 0),
+                            Block::SugarCane { growth_stage } => (83, growth_stage.get() as u8),
+                            Block::Jukebox(_) => (84, 0),
+                            Block::Fence { material, .. } => {
+                                match material {
+                                    FenceMaterial::Oak => (85, 0),
+                                    FenceMaterial::NetherBrick => (113, 0),
+                                    FenceMaterial::Spruce => (188, 0),
+                                    FenceMaterial::Birch => (189, 0),
+                                    FenceMaterial::Jungle => (190, 0),
+                                    FenceMaterial::DarkOak => (191, 0),
+                                    FenceMaterial::Acacia => (192, 0),
+                                    _ => (85, 0), // fallback to oak fence
+                                }
+                            },
+                            Block::Pumpkin { facing } => (86, facing4_swne(facing)),
+                            Block::Netherrack => (87, 0),
+                            Block::SoulSand => (88, 0),
+                            Block::Glowstone => (89, 0),
+                            Block::NetherPortal { .. } => (90, 0),
+                            Block::JackOLantern { facing } => (91, facing4_swne(facing)),
+                            Block::Cake { pieces } => (92, 7 - (pieces.get() as u8)),
+                            Block::RedstoneRepeater(repeater) => {
+                                let delay_data = (repeater.delay.get() as u8) << 2;
+                                let facing_data = facing4_nesw(&repeater.facing);
+                                (93, delay_data | facing_data)
+                            },
+                            // NB 94 powered redstone repeater not implemented
+                            //       (may be added to Block::RedstoneRepeater in the future)
+                            // NB 95 coloured class already handled
+                            Block::Trapdoor(trapdoor) => {
+                                let open_data = if trapdoor.open { 0x4 } else { 0x0 };
+                                let hinge_data = trapdoor_hinge_at(&trapdoor.hinge_at);
+                                let data = open_data | hinge_data;
+                                match trapdoor.material {
+                                    DoorMaterial::Oak => (96, data),
+                                    DoorMaterial::Iron => (167, data),
+                                    _ => (96, data), // fallback to oak trapdoor
+                                }
+                            },
+                            Block::InfestedStone => (97, 0),
+                            Block::InfestedCobblestone => (97, 1),
+                            Block::InfestedStoneBricks => (97, 2),
+                            Block::InfestedMossyStoneBricks => (97, 3),
+                            Block::InfestedCrackedStoneBricks => (97, 4),
+                            Block::InfestedChiseledStoneBricks => (97, 5),
+                            Block::StoneBricks => (98, 0),
+                            Block::MossyStoneBricks => (98, 1),
+                            Block::CrackedStoneBricks => (98, 2),
+                            Block::ChiseledStoneBricks => (98, 3),
+
+                            // TODO Add more block types!
+                            /*
+                        99 | 100 => match data[index] {
+                            stem @ 10 | stem @ 15 => Block::MushroomStem {
+                                stem_directions: mushroom_caps(stem),
+                            },
+                            cap => {
+                                let cap_directions = mushroom_caps(cap);
+                                if block == 99 {
+                                    Block::BrownMushroomBlock { cap_directions }
+                                } else if block == 100 {
+                                    Block::RedMushroomBlock { cap_directions }
+                                } else {
+                                    unreachable!();
+                                }
                             }
-                            */
-                            _ => (0, 0),
+                        },*/
+                            // NB 108 and 109  brick and stone brick stairs already handled
+                            // NB 113 nether brick fence already handled
+                            // NB 114 nether brick stairs already handled
+                            // NB 125 and 126 wooden slabs already handled
+                            // NB 128 sandstone stairs already handled
+                            // NB 134-136 spruce / birch / jungle stairs already handled
+                            // NB 143 oak button already handled
+                            // NB 147 and 148 gold / iron pressure plate already handled
+                            // NB 156 quartz stairs already handled
+                            // NB 157 activator rail already handled
+                            // NB 161 acacia / dark oak leaves already handled
+                            // NB 162 acacia / dark oak logs already handled
+                            // NB 163 and 164 acacia / dark oak stairs already handled
+                            // NB 180 red sandstone stairs already handled
+                            // NB 181 and 182 red sandstone slabs already handled
+                            // NB 188-192 spruce / birch / jungle / acacia / dark oak fences
+                            //            already handled
+                            // NB 193-197 spruce / birch / jungle / acacia / dark oak doors
+                            //            already handled
+                            // NB 203 purpur stairs already handled
+                            // NB 204 and 205 purpur slabs already handled
+                            _ => (0, 0), // fallback to air
                         };
 
                         blocks[index] = block_id;
@@ -206,7 +633,103 @@ impl Chunk {
         section.insert("BlockLight".into(), nbt::Value::ByteArray(block_light));
         section.insert("SkyLight".into(), nbt::Value::ByteArray(sky_light));
 
-        nbt::Value::Compound(section)
+        return nbt::Value::Compound(section);
+
+        fn facing4_nesw(facing: &Surface4) -> u8 {
+            match facing {
+                Surface4::North => 0,
+                Surface4::East => 1,
+                Surface4::South => 2,
+                Surface4::West => 3,
+            }
+        }
+
+        fn facing4_swne(facing: &Surface4) -> u8 {
+            match facing {
+                Surface4::South => 0,
+                Surface4::West => 1,
+                Surface4::North => 2,
+                Surface4::East => 3,
+            }
+        }
+
+        fn facing4_wnes(facing: &Surface4) -> u8 {
+            match facing {
+                Surface4::West => 0,
+                Surface4::North => 1,
+                Surface4::East => 2,
+                Surface4::South => 3,
+            }
+        }
+
+        fn facing4_xxnswe(facing: &Surface4) -> u8 {
+            match facing {
+                Surface4::North => 2,
+                Surface4::South => 3,
+                Surface4::West => 4,
+                Surface4::East => 5,
+            }
+        }
+
+        fn facing5_xwensd(facing: &Surface5) -> u8 {
+            match facing {
+                Surface5::West => 1,
+                Surface5::East => 2,
+                Surface5::North => 3,
+                Surface5::South => 4,
+                Surface5::Down => 5,
+            }
+        }
+
+        fn facing6_dewsnu(facing: &Surface6) -> u8 {
+            match facing {
+                Surface6::Down => 0,
+                Surface6::East => 1,
+                Surface6::West => 2,
+                Surface6::South => 3,
+                Surface6::North => 4,
+                Surface6::Up => 5,
+            }
+        }
+
+        fn facing6_dunswe(facing: &Surface6) -> u8 {
+            match facing {
+                Surface6::Down => 0,
+                Surface6::Up => 1,
+                Surface6::North => 2,
+                Surface6::South => 3,
+                Surface6::West => 4,
+                Surface6::East => 5,
+            }
+        }
+
+        fn lever_facing(facing: &SurfaceRotation12) -> u8 {
+            match facing {
+                SurfaceRotation12::DownFacingEast => 0,
+                SurfaceRotation12::East => 1,
+                SurfaceRotation12::West => 2,
+                SurfaceRotation12::South => 3,
+                SurfaceRotation12::North => 4,
+                SurfaceRotation12::UpFacingSouth => 5,
+                SurfaceRotation12::UpFacingEast => 6,
+                SurfaceRotation12::DownFacingSouth => 7,
+                facing => panic!("Unknown lever facing: {:?}", facing),
+            }
+        }
+
+        fn trapdoor_hinge_at(facing: &Edge8) -> u8 {
+            match facing {
+                Edge8::DownSouth => 0,
+                Edge8::DownNorth => 1,
+                Edge8::DownEast => 2,
+                Edge8::DownWest => 3,
+                Edge8::UpSouth => 8,
+                Edge8::UpNorth => 9,
+                Edge8::UpEast => 10,
+                Edge8::UpWest => 11,
+            }
+        }
+
     }
 
     /// Generates custom block entities later used by chunk section parsing.

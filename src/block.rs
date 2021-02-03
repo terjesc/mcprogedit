@@ -115,6 +115,21 @@ impl RailShape {
             n => panic!("Invalid rail shape value: {}", n),
         }
     }
+
+    pub fn to_value(&self) -> u8 {
+        match self {
+            Self::NorthSouth => 0,
+            Self::EastWest => 1,
+            Self::AscendingEast => 2,
+            Self::AscendingWest => 3,
+            Self::AscendingNorth => 4,
+            Self::AscendingSouth => 5,
+            Self::SouthEast => 6,
+            Self::SouthWest => 7,
+            Self::NorthWest => 8,
+            Self::NorthEast => 9,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]
