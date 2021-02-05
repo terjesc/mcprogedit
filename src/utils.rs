@@ -26,11 +26,11 @@ pub(crate) fn set_nibble(vec: &mut [u8], nibble: u8, index: usize) {
 /// which come as Vec<i8>, into the more handy Vec<u8> format (for bit
 /// manipulation, etc.)
 pub(crate) fn vec_i8_into_vec_u8(mut vec: Vec<i8>) -> Vec<u8> {
-        let p = vec.as_mut_ptr();
-        let len = vec.len();
-        let cap = vec.capacity();
-        std::mem::forget(vec);
-        unsafe { Vec::from_raw_parts(p as *mut u8, len, cap) }
+    let p = vec.as_mut_ptr();
+    let len = vec.len();
+    let cap = vec.capacity();
+    std::mem::forget(vec);
+    unsafe { Vec::from_raw_parts(p as *mut u8, len, cap) }
 }
 
 /// Convert Vec<u8> into Vec<i8>. Useful for making and manipulating byte arrays,
@@ -38,9 +38,9 @@ pub(crate) fn vec_i8_into_vec_u8(mut vec: Vec<i8>) -> Vec<u8> {
 /// for bit manipulation, while the latter format is the format required by the
 /// Hematite NBT library.
 pub(crate) fn vec_u8_into_vec_i8(mut vec: Vec<u8>) -> Vec<i8> {
-        let p = vec.as_mut_ptr();
-        let len = vec.len();
-        let cap = vec.capacity();
-        std::mem::forget(vec);
-        unsafe { Vec::from_raw_parts(p as *mut i8, len, cap) }
+    let p = vec.as_mut_ptr();
+    let len = vec.len();
+    let cap = vec.capacity();
+    std::mem::forget(vec);
+    unsafe { Vec::from_raw_parts(p as *mut i8, len, cap) }
 }

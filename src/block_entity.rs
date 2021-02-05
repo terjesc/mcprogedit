@@ -259,7 +259,10 @@ impl BlockEntity {
                 entity.insert(key, value);
             }
 
-            entity.insert("Base".into(), nbt::Value::Int((15 - u8::from(*colour)).into()));
+            entity.insert(
+                "Base".into(),
+                nbt::Value::Int((15 - u8::from(*colour)).into()),
+            );
 
             if let Some(name) = custom_name {
                 entity.insert("CustomName".into(), nbt::Value::String(name.clone()));

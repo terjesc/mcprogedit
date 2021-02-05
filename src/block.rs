@@ -543,6 +543,8 @@ pub enum Block {
     MossyStoneBricks,
     // TODO consider adding the MovingPiston technical block and block entity
     MushroomStem {
+        // TODO consider adding type of mushroom, or splitting into
+        // BrownMushroomStem and RedMushroomStem
         stem_directions: DirectionFlags6,
     },
     Mycelium,
