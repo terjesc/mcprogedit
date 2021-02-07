@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 
 mod banner;
+mod beacon;
 mod bed;
 mod brewing_stand;
 mod chest;
@@ -21,6 +22,7 @@ mod trapdoor;
 mod vines;
 
 pub use self::banner::*;
+pub use self::beacon::*;
 pub use self::bed::*;
 pub use self::brewing_stand::*;
 pub use self::chest::*;
@@ -45,15 +47,6 @@ use crate::colour::*;
 use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
-use crate::status_effect::StatusEffect;
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Beacon {
-    pub lock: Option<String>,
-    pub levels: i32, // TODO change type to integer with valid range
-    pub primary: Option<StatusEffect>,
-    pub secondary: Option<StatusEffect>,
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum SlabVariant {

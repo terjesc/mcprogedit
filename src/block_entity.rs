@@ -210,6 +210,7 @@ impl BlockEntity {
     pub fn to_nbt_value(&self) -> Option<nbt::Value> {
         match self {
             Self::Banner { .. } => self.banner_to_nbt_value(),
+            Self::Beacon { .. } => self.beacon_to_nbt_value(),
             // TODO add more block entity types
             _ => None,
         }
@@ -247,7 +248,7 @@ impl BlockEntity {
     }
 
     fn banner_to_nbt_value(&self) -> Option<nbt::Value> {
-        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(7);
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 2);
         if let Self::Banner {
             common,
             colour,
@@ -294,6 +295,43 @@ impl BlockEntity {
             secondary: nbt_value_lookup_int(&value, "Secondary")
                 .filter(|i| *i != 0)
                 .map(StatusEffect::from),
+        }
+    }
+
+    fn beacon_to_nbt_value(&self) -> Option<nbt::Value> {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 4);
+        if let Self::Beacon {
+            common,
+            lock,
+            levels,
+            primary,
+            secondary,
+        } = self
+        {
+            // Common tags
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+
+            if let Some(lock) = lock {
+                entity.insert("Lock".into(), nbt::Value::String(lock.clone()));
+            }
+
+            entity.insert("Levels".into(), nbt::Value::Int(*levels));
+
+            entity.insert(
+                "Primary".into(),
+                nbt::Value::Int(primary.map_or(0, |effect| effect.into())),
+            );
+
+            entity.insert(
+                "Secondary".into(),
+                nbt::Value::Int(secondary.map_or(0, |effect| effect.into())),
+            );
+
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
         }
     }
 

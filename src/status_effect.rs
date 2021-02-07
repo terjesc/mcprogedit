@@ -1,4 +1,4 @@
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum StatusEffect {
     Speed = 1,
     Slowness = 2,
@@ -70,6 +70,45 @@ impl From<i32> for StatusEffect {
             31 => StatusEffect::BadOmen,
             32 => StatusEffect::HeroOfTheVillage,
             _ => panic!("Invalid status effect number: {}", effect_number),
+        }
+    }
+}
+
+impl From<StatusEffect> for i32 {
+    fn from(effect: StatusEffect) -> i32 {
+        match effect {
+            StatusEffect::Speed => 1,
+            StatusEffect::Slowness => 2,
+            StatusEffect::Haste => 3,
+            StatusEffect::MiningFatigue => 4,
+            StatusEffect::Strength => 5,
+            StatusEffect::InstantHealth => 6,
+            StatusEffect::InstantDamage => 7,
+            StatusEffect::JumpBoost => 8,
+            StatusEffect::Nausea => 9,
+            StatusEffect::Regeneration => 10,
+            StatusEffect::Resistance => 11,
+            StatusEffect::FireResistance => 12,
+            StatusEffect::WaterBreathing => 13,
+            StatusEffect::Invisibility => 14,
+            StatusEffect::Blindness => 15,
+            StatusEffect::NightVision => 16,
+            StatusEffect::Hunger => 17,
+            StatusEffect::Weakness => 18,
+            StatusEffect::Poison => 19,
+            StatusEffect::Wither => 20,
+            StatusEffect::HealthBoost => 21,
+            StatusEffect::Absorption => 22,
+            StatusEffect::Saturation => 23,
+            StatusEffect::Glowing => 24,
+            StatusEffect::Levitation => 25,
+            StatusEffect::Luck => 26,
+            StatusEffect::BadLuck => 27,
+            StatusEffect::SlowFalling => 28,
+            StatusEffect::ConduitPower => 29,
+            StatusEffect::DolphinsGrace => 30,
+            StatusEffect::BadOmen => 31,
+            StatusEffect::HeroOfTheVillage => 32,
         }
     }
 }

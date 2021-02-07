@@ -73,19 +73,21 @@ impl Chunk {
             for y in 0..y_dim {
                 for z in 0..z_dim {
                     let block_z = chunk_offset_blocks.1 as i32 + z as i32;
-                    match self.blocks.block_at((x, y, z)) {
-                        None => (),
+                    let block_coordinates = (block_x, y as i32, block_z);
+                    let tile_entity_nbt = match self.blocks.block_at((x, y, z)) {
+                        None => None,
                         Some(Block::Banner(banner)) => {
-                            if let Some(value) = banner
-                                .to_block_entity((block_x, y as i32, block_z))
-                                .to_nbt_value()
-                            {
-                                tile_entities.push(value);
-                            }
+                            banner.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Beacon(beacon)) => {
+                            beacon.to_block_entity(block_coordinates).to_nbt_value()
                         }
                         // TODO add handling of other blocks with entities
-                        //Some(block) => println!("Block found: {:?}", block),
-                        _ => (),
+                        //Some(block) => { println!("Block found: {:?}", block); None },
+                        _ => None,
+                    };
+                    if let Some(value) = tile_entity_nbt {
+                        tile_entities.push(value);
                     }
                 }
             }
@@ -541,16 +543,16 @@ impl Chunk {
                             Block::ChiseledStoneBricks => (98, 3),
                             Block::BrownMushroomStem { stem_directions } => {
                                 (99, mushroom_stems(&stem_directions))
-                            },
+                            }
                             Block::BrownMushroomBlock { cap_directions } => {
                                 (99, mushroom_caps(&cap_directions))
-                            },
+                            }
                             Block::RedMushroomStem { stem_directions } => {
                                 (100, mushroom_stems(&stem_directions))
-                            },
+                            }
                             Block::RedMushroomBlock { cap_directions } => {
                                 (100, mushroom_caps(&cap_directions))
-                            },
+                            }
                             Block::IronBars { .. } => (101, 0),
                             Block::GlassPane { colour, .. } => match colour {
                                 None => (102, 0),
@@ -892,7 +894,9 @@ impl Chunk {
         }
 
         fn mushroom_caps(caps: &DirectionFlags6) -> u8 {
-            match (caps.north, caps.south, caps.east, caps.west, caps.up, caps.down) {
+            match (
+                caps.north, caps.south, caps.east, caps.west, caps.up, caps.down,
+            ) {
                 //north south  east   west   top    bottom
                 (false, false, false, false, false, false) => 0,
                 (true, false, false, true, true, false) => 1,
@@ -910,7 +914,14 @@ impl Chunk {
         }
 
         fn mushroom_stems(stems: &DirectionFlags6) -> u8 {
-            match (stems.north, stems.south, stems.east, stems.west, stems.up, stems.down) {
+            match (
+                stems.north,
+                stems.south,
+                stems.east,
+                stems.west,
+                stems.up,
+                stems.down,
+            ) {
                 //north south  east   west   top    bottom
                 (false, false, false, false, false, false) => 0,
                 (true, true, true, true, false, false) => 10,
@@ -1763,8 +1774,8 @@ impl Chunk {
                                 } => Block::Beacon(Box::new(Beacon {
                                     lock: lock.clone(),
                                     levels: *levels,
-                                    primary: primary.clone(),
-                                    secondary: secondary.clone(),
+                                    primary: *primary,
+                                    secondary: *secondary,
                                 })),
                                 _ => panic!("Wrong block entity variant for beacon"),
                             }
