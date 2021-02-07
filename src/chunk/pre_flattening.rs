@@ -312,7 +312,6 @@ impl Chunk {
                             Block::RedMushroom => (40, 1),
                             Block::BlockOfGold => (41, 2),
                             Block::BlockOfIron => (42, 3),
-                            // TODO Slab is probably in need of refactoring...
                             Block::Slab(slab) => {
                                 let position_data = match slab.position {
                                     SlabVariant::Top => 0x8,
@@ -383,7 +382,7 @@ impl Chunk {
                             Block::Obsidian => (49, 0),
                             Block::Torch { attached } => (50, facing5_xwensd(attached)),
                             Block::Fire { age } => (51, age.get() as u8),
-                            // NB 52 mob spawner not implemented
+                            // NB 52 mob spawner is not implemented
                             Block::Stairs(stair) => {
                                 let data = stair.position.into();
                                 match stair.material {
@@ -517,7 +516,7 @@ impl Chunk {
                                 let facing_data = facing4_nesw(&repeater.facing);
                                 (93, delay_data | facing_data)
                             }
-                            // NB 94 powered redstone repeater not implemented
+                            // NB 94 powered redstone repeater is not implemented
                             //       (may be added to Block::RedstoneRepeater in the future)
                             // 95 coloured class already handled
                             Block::Trapdoor(trapdoor) => {
@@ -540,14 +539,32 @@ impl Chunk {
                             Block::MossyStoneBricks => (98, 1),
                             Block::CrackedStoneBricks => (98, 2),
                             Block::ChiseledStoneBricks => (98, 3),
-                            // TODO 99-100 brown / red mushroom
+                            Block::BrownMushroomStem { stem_directions } => {
+                                (99, mushroom_stems(&stem_directions))
+                            },
+                            Block::BrownMushroomBlock { cap_directions } => {
+                                (99, mushroom_caps(&cap_directions))
+                            },
+                            Block::RedMushroomStem { stem_directions } => {
+                                (100, mushroom_stems(&stem_directions))
+                            },
+                            Block::RedMushroomBlock { cap_directions } => {
+                                (100, mushroom_caps(&cap_directions))
+                            },
                             Block::IronBars { .. } => (101, 0),
                             Block::GlassPane { colour, .. } => match colour {
                                 None => (102, 0),
                                 Some(colour) => (160, (*colour as i32) as u8),
                             },
                             Block::Melon => (103, 0),
-                            // TODO 104-105 pumpkin / melon stems
+                            Block::PumpkinStem { state } => match state {
+                                StemState::Growing(age) => (104, age.get() as u8),
+                                _ => (104, 7), // fallback to fully grown stem (not attached)
+                            },
+                            Block::MelonStem { state } => match state {
+                                StemState::Growing(age) => (105, age.get() as u8),
+                                _ => (105, 7), // fallback to fully grown stem (not attached)
+                            },
                             Block::Vines(vines) => {
                                 let mut data = if vines.anchored_at.east { 0x8 } else { 0x0 };
                                 data |= if vines.anchored_at.north { 0x4 } else { 0x0 };
@@ -592,7 +609,7 @@ impl Chunk {
                             Block::EndStone => (121, 0),
                             Block::DragonEgg => (122, 0),
                             Block::RedstoneLamp => (123, 0),
-                            // NB 124 lit redstone lamp not implemented
+                            // NB 124 lit redstone lamp is not implemented
                             // 125 and 126 wooden slabs already handled
                             Block::CocoaBeans {
                                 growth_stage,
@@ -609,7 +626,7 @@ impl Chunk {
                             Block::Tripwire => (132, 0),
                             Block::BlockOfEmerald => (133, 0),
                             // 134-136 spruce / birch / jungle stairs already handled
-                            // NB 137 command block not implemented
+                            // NB 137 command block is not implemented
                             Block::Beacon(_) => (138, 0),
                             Block::Wall { material, .. } => match material {
                                 WallMaterial::Cobblestone => (139, 0),
@@ -645,7 +662,7 @@ impl Chunk {
                             Block::RedstoneSubtractor { facing } => {
                                 (149, 0x4 | facing4_nesw(&facing))
                             }
-                            // NB 150 powered redstone comparator not implemented
+                            // NB 150 powered redstone comparator is not implemented
                             Block::DaylightDetector => (151, 0),
                             Block::BlockOfRedstone => (152, 0),
                             Block::QuartzOre => (153, 0),
@@ -704,7 +721,7 @@ impl Chunk {
                             // 193-197 spruce / birch / jungle / acacia / dark oak doors
                             //     already handled
                             Block::EndRod { facing } => (198, facing6_dunswe(&facing)),
-                            // TODO 199 ChorusPlant (same as mushrooms???)
+                            Block::ChorusPlant => (199, 0),
                             Block::ChorusFlower { growth_stage } => (200, growth_stage.get() as u8),
                             Block::PurpurBlock => (201, 0),
                             Block::PurpurPillar { alignment } => match alignment {
@@ -718,8 +735,8 @@ impl Chunk {
                             Block::Beetroots { growth_stage } => (207, growth_stage.get() as u8),
                             Block::GrassPath => (208, 0),
                             Block::EndGateway => (209, 0),
-                            // NB 210 repeating command block not implemented
-                            // NB 211 chain command block not implemented
+                            // NB 210 repeating command block is not implemented
+                            // NB 211 chain command block is not implemented
                             Block::FrostedIce => (212, 0),
                             Block::MagmaBlock => (213, 0),
                             Block::NetherWartBlock => (214, 0),
@@ -742,7 +759,7 @@ impl Chunk {
                             }
                             Block::Concrete { colour } => (251, *colour as u8),
                             Block::ConcretePowder { colour } => (252, *colour as u8),
-                            // NB 255 structure block not implemented
+                            // NB 255 structure block is not implemented
                             _ => (0, 0), // fallback to air
                         };
 
@@ -871,6 +888,34 @@ impl Chunk {
                 SurfaceRotation12::UpFacingEast => 6,
                 SurfaceRotation12::DownFacingSouth => 7,
                 facing => panic!("Unknown lever facing: {:?}", facing),
+            }
+        }
+
+        fn mushroom_caps(caps: &DirectionFlags6) -> u8 {
+            match (caps.north, caps.south, caps.east, caps.west, caps.up, caps.down) {
+                //north south  east   west   top    bottom
+                (false, false, false, false, false, false) => 0,
+                (true, false, false, true, true, false) => 1,
+                (true, false, false, false, true, false) => 2,
+                (true, false, true, false, true, false) => 3,
+                (false, false, false, true, true, false) => 4,
+                (false, false, false, false, true, false) => 5,
+                (false, false, true, false, true, false) => 6,
+                (false, true, false, true, true, false) => 7,
+                (false, true, false, false, true, false) => 8,
+                (false, true, true, false, true, false) => 9,
+                (true, true, true, true, true, true) => 14,
+                _ => 0, // fallback to all pores; could perhaps be improved
+            }
+        }
+
+        fn mushroom_stems(stems: &DirectionFlags6) -> u8 {
+            match (stems.north, stems.south, stems.east, stems.west, stems.up, stems.down) {
+                //north south  east   west   top    bottom
+                (false, false, false, false, false, false) => 0,
+                (true, true, true, true, false, false) => 10,
+                (true, true, true, true, true, true) => 15,
+                _ => 0, // fallback to all pores; could perhaps be improved
             }
         }
 
@@ -1513,20 +1558,21 @@ impl Chunk {
                             3 => Block::ChiseledStoneBricks,
                             n => panic!("Unknown stone brick data variant: {}", n),
                         },
-                        99 | 100 => match data[index] {
-                            stem @ 10 | stem @ 15 => Block::MushroomStem {
+                        99 => match data[index] {
+                            stem @ 10 | stem @ 15 => Block::BrownMushroomStem {
                                 stem_directions: mushroom_caps(stem),
                             },
-                            cap => {
-                                let cap_directions = mushroom_caps(cap);
-                                if block == 99 {
-                                    Block::BrownMushroomBlock { cap_directions }
-                                } else if block == 100 {
-                                    Block::RedMushroomBlock { cap_directions }
-                                } else {
-                                    unreachable!();
-                                }
-                            }
+                            cap => Block::BrownMushroomBlock {
+                                cap_directions: mushroom_caps(cap),
+                            },
+                        },
+                        100 => match data[index] {
+                            stem @ 10 | stem @ 15 => Block::RedMushroomStem {
+                                stem_directions: mushroom_caps(stem),
+                            },
+                            cap => Block::RedMushroomBlock {
+                                cap_directions: mushroom_caps(cap),
+                            },
                         },
                         101 => Block::IronBars { waterlogged: false },
                         102 => Block::GlassPane {
@@ -1628,7 +1674,7 @@ impl Chunk {
                         118 => Block::Cauldron {
                             water_level: Int0Through3::new(data[index] & 0x3).unwrap(),
                         },
-                        119 => Block::EndPortal, // TODO check if block entity data is needed
+                        119 => Block::EndPortal,
                         120 => Block::EndPortalFrame {
                             facing: facing4_swne(data[index]),
                             has_eye: data[index] & 0x4 == 0x4,
@@ -1681,7 +1727,6 @@ impl Chunk {
                         130 => Block::EnderChest {
                             facing: facing4_xxnswe(data[index]),
                             waterlogged: false,
-                            // TODO check if block entity data is needed
                         },
                         131 => Block::TripwireHook {
                             facing: facing4_swne(data[index]),
@@ -2033,12 +2078,7 @@ impl Chunk {
                         198 => Block::EndRod {
                             facing: facing6_dunswe(data[index]),
                         },
-                        199 => Block::ChorusPlant(ChorusPlant {
-                            // TODO actually figure out how to parse connections
-                            // For now:
-                            // - use same as mushroom caps, and hope for the best...
-                            connections: mushroom_caps(data[index]),
-                        }),
+                        199 => Block::ChorusPlant,
                         200 => Block::ChorusFlower {
                             growth_stage: Int0Through5::new(data[index]).unwrap(),
                         },

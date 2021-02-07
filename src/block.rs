@@ -4,7 +4,6 @@ mod banner;
 mod bed;
 mod brewing_stand;
 mod chest;
-mod chorus_plant;
 mod dispenser;
 mod door;
 mod dropper;
@@ -25,7 +24,6 @@ pub use self::banner::*;
 pub use self::bed::*;
 pub use self::brewing_stand::*;
 pub use self::chest::*;
-pub use self::chorus_plant::*;
 pub use self::dispenser::*;
 pub use self::door::*;
 pub use self::dropper::*;
@@ -223,7 +221,6 @@ impl Log {
 }
 
 pub type HoneyLevel = Int0Through5;
-pub type ChorusPlantConnections = DirectionFlags6;
 pub type FireFace = DirectionFlags6;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -320,6 +317,9 @@ pub enum Block {
     BrownMushroomBlock {
         cap_directions: DirectionFlags6,
     },
+    BrownMushroomStem {
+        stem_directions: DirectionFlags6,
+    },
     BubbleColumn {
         drag_direction: Surface2,
     }, // Is this even needed?
@@ -359,7 +359,7 @@ pub enum Block {
     ChorusFlower {
         growth_stage: Int0Through5,
     },
-    ChorusPlant(ChorusPlant),
+    ChorusPlant,
     Clay,
     CoalOre,
     CoarseDirt,
@@ -542,11 +542,6 @@ pub enum Block {
     MossyCobblestone,
     MossyStoneBricks,
     // TODO consider adding the MovingPiston technical block and block entity
-    MushroomStem {
-        // TODO consider adding type of mushroom, or splitting into
-        // BrownMushroomStem and RedMushroomStem
-        stem_directions: DirectionFlags6,
-    },
     Mycelium,
     NetherBricks,
     NetherGoldOre,
@@ -614,6 +609,9 @@ pub enum Block {
     RedMushroom,
     RedMushroomBlock {
         cap_directions: DirectionFlags6,
+    },
+    RedMushroomStem {
+        stem_directions: DirectionFlags6,
     },
     RedNetherBricks,
     RedSand,
@@ -1258,6 +1256,7 @@ impl Block {
                 | Self::Bookshelf
                 | Self::BrickBlock
                 | Self::BrownMushroomBlock { .. }
+                | Self::BrownMushroomStem { .. }
                 | Self::Cactus { .. }
                 | Self::CarvedPumpkin { .. }
                 | Self::ChiseledNetherBricks
@@ -1325,7 +1324,6 @@ impl Block {
                 | Self::Melon
                 | Self::MossyCobblestone
                 | Self::MossyStoneBricks
-                | Self::MushroomStem { .. }
                 | Self::Mycelium
                 | Self::NetherBricks
                 | Self::NetherGoldOre
@@ -1353,6 +1351,7 @@ impl Block {
                 | Self::QuartzOre
                 | Self::QuartzPillar { .. }
                 | Self::RedMushroomBlock { .. }
+                | Self::RedMushroomStem { .. }
                 | Self::RedNetherBricks
                 | Self::RedSand
                 | Self::RedSandstone
