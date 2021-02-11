@@ -219,7 +219,7 @@ impl WorldExcerpt {
         let region_p2: RegionCoord = chunk_p2.into();
 
         // Inclusive block bounds, using global coordinates
-        let global_block_bounds = Bounds {
+        let _global_block_bounds = Bounds {
             x: (i64::min(p1.0, p2.0), i64::max(p1.0, p2.0)),
             y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
             z: (i64::min(p1.2, p2.2), i64::max(p1.2, p2.2)),

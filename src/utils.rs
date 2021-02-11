@@ -1,7 +1,7 @@
 //! General utility functions for internal use throughout mcprogedit.
 
 /// Get the nibble at nibble position `index`.
-pub(crate) fn nibble(vec: &[u8], index: usize) -> u8 {
+pub(crate) fn _nibble(vec: &[u8], index: usize) -> u8 {
     let byte_index = index / 2;
     if index % 2 == 0 {
         vec[byte_index] & 0x0F
@@ -25,7 +25,7 @@ pub(crate) fn set_nibble(vec: &mut [u8], nibble: u8, index: usize) {
 /// Convert Vec<i8> into Vec<u8>. Useful for converting Hematite NBT byte arrays,
 /// which come as Vec<i8>, into the more handy Vec<u8> format (for bit
 /// manipulation, etc.)
-pub(crate) fn vec_i8_into_vec_u8(mut vec: Vec<i8>) -> Vec<u8> {
+pub(crate) fn _vec_i8_into_vec_u8(mut vec: Vec<i8>) -> Vec<u8> {
     let p = vec.as_mut_ptr();
     let len = vec.len();
     let cap = vec.capacity();

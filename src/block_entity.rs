@@ -210,7 +210,41 @@ impl BlockEntity {
     pub fn to_nbt_value(&self) -> Option<nbt::Value> {
         match self {
             Self::Banner { .. } => self.banner_to_nbt_value(),
+            Self::Barrel { .. } => self.barrel_to_nbt_value(),
             Self::Beacon { .. } => self.beacon_to_nbt_value(),
+            Self::Bed { .. } => self.bed_to_nbt_value(),
+            //Self::Beehive { .. } => self.beehive_to_nbt_value(),
+            //Self::Bell { .. } => self.bell_to_nbt_value(),
+            Self::BlastFurnace { .. } => self.blast_furnace_to_nbt_value(),
+            Self::BrewingStand { .. } => self.brewing_stand_to_nbt_value(),
+            //Self::Campfire { .. } => self.campfire_to_nbt_value(),
+            Self::Chest { .. } => self.chest_to_nbt_value(),
+            Self::Comparator { .. } => self.comparator_to_nbt_value(),
+            Self::CommandBlock { .. } => self.command_block_to_nbt_value(),
+            //Self::Conduit { .. } => self.conduit_to_nbt_value(),
+            Self::DaylightDetector { .. } => self.daylight_detector_to_nbt_value(),
+            Self::Dispenser { .. } => self.dispenser_to_nbt_value(),
+            Self::Dropper { .. } => self.dropper_to_nbt_value(),
+            Self::EnchantingTable { .. } => self.enchanting_table_to_nbt_value(),
+            Self::EnderChest { .. } => self.ender_chest_to_nbt_value(),
+            Self::EndGateway { .. } => self.end_gateway_to_nbt_value(),
+            Self::EndPortal { .. } => self.end_portal_to_nbt_value(),
+            Self::FlowerPot { .. } => self.flower_pot_to_nbt_value(),
+            Self::Furnace { .. } => self.furnace_to_nbt_value(),
+            Self::Hopper { .. } => self.hopper_to_nbt_value(),
+            //Self::Jigsaw { .. } => self.jigsaw_to_nbt_value(),
+            Self::Jukebox { .. } => self.jukebox_to_nbt_value(),
+            Self::Lectern { .. } => self.lectern_to_nbt_value(),
+            Self::MobSpawner { .. } => self.mob_spawner_to_nbt_value(),
+            Self::Noteblock { .. } => self.noteblock_to_nbt_value(),
+            Self::Piston { .. } => self.piston_to_nbt_value(),
+            Self::ShulkerBox { .. } => self.shulker_box_to_nbt_value(),
+            Self::Sign { .. } => self.sign_to_nbt_value(),
+            Self::Skull { .. } => self.skull_to_nbt_value(),
+            Self::Smoker { .. } => self.smoker_to_nbt_value(),
+            //Self::SoulCampfire { .. } => self.soul_campfire_to_nbt_value(),
+            Self::StructureBlock { .. } => self.structure_block_to_nbt_value(),
+
             // TODO add more block entity types
             _ => None,
         }
@@ -253,7 +287,7 @@ impl BlockEntity {
             common,
             colour,
             custom_name,
-            patterns,
+            patterns: _,
         } = self
         {
             for (key, value) in common.to_nbt_values() {
@@ -282,6 +316,11 @@ impl BlockEntity {
         BlockEntity::Barrel {
             tags: ChestTags::from_nbt_value(&value),
         }
+    }
+
+    fn barrel_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn beacon_from_nbt_value(value: &nbt::Value) -> Self {
@@ -342,11 +381,21 @@ impl BlockEntity {
         }
     }
 
+    fn bed_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn beehive_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
             id: nbt_value_lookup_string(&value, "id"),
         }
+    }
+
+    fn _beehive_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)
@@ -356,10 +405,20 @@ impl BlockEntity {
         }
     }
 
+    fn _bell_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn blast_furnace_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::BlastFurnace {
             tags: FurnaceTags::from_nbt_value(&value),
         }
+    }
+
+    fn blast_furnace_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn brewing_stand_from_nbt_value(value: &nbt::Value) -> Self {
@@ -379,6 +438,11 @@ impl BlockEntity {
         }
     }
 
+    fn brewing_stand_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn campfire_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
@@ -386,9 +450,28 @@ impl BlockEntity {
         }
     }
 
+    fn _campfire_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn chest_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Chest {
             tags: ChestTags::from_nbt_value(&value),
+        }
+    }
+
+    fn chest_to_nbt_value(&self) -> Option<nbt::Value> {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Chest { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
         }
     }
 
@@ -399,9 +482,19 @@ impl BlockEntity {
         }
     }
 
+    fn comparator_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn command_block_from_nbt_value(_value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::CommandBlock
+    }
+
+    fn command_block_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)
@@ -411,10 +504,20 @@ impl BlockEntity {
         }
     }
 
+    fn _conduit_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn daylight_detector_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::DaylightDetector {
             common: CommonTags::from_nbt_value(&value),
         }
+    }
+
+    fn daylight_detector_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn dispenser_from_nbt_value(value: &nbt::Value) -> Self {
@@ -423,10 +526,20 @@ impl BlockEntity {
         }
     }
 
+    fn dispenser_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn dropper_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Dropper {
             tags: ChestTags::from_nbt_value(&value),
         }
+    }
+
+    fn dropper_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn enchanting_table_from_nbt_value(value: &nbt::Value) -> Self {
@@ -436,10 +549,20 @@ impl BlockEntity {
         }
     }
 
+    fn enchanting_table_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn ender_chest_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EnderChest {
             common: CommonTags::from_nbt_value(&value),
         }
+    }
+
+    fn ender_chest_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn end_gateway_from_nbt_value(value: &nbt::Value) -> Self {
@@ -461,10 +584,20 @@ impl BlockEntity {
         }
     }
 
+    fn end_gateway_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn end_portal_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EndPortal {
             common: CommonTags::from_nbt_value(&value),
         }
+    }
+
+    fn end_portal_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     /*
@@ -514,10 +647,20 @@ impl BlockEntity {
         }
     }
 
+    fn flower_pot_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn furnace_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Furnace {
             tags: FurnaceTags::from_nbt_value(&value),
         }
+    }
+
+    fn furnace_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn hopper_from_nbt_value(value: &nbt::Value) -> Self {
@@ -526,11 +669,21 @@ impl BlockEntity {
         }
     }
 
+    fn hopper_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn jigsaw_from_nbt_value(value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::Unknown {
             id: nbt_value_lookup_string(&value, "id"),
         }
+    }
+
+    fn _jigsaw_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
@@ -542,6 +695,11 @@ impl BlockEntity {
                 None
             },
         }
+    }
+
+    fn jukebox_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn lectern_from_nbt_value(value: &nbt::Value) -> Self {
@@ -558,9 +716,19 @@ impl BlockEntity {
         }
     }
 
+    fn lectern_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn mob_spawner_from_nbt_value(_value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::MobSpawner
+    }
+
+    fn mob_spawner_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn noteblock_from_nbt_value(value: &nbt::Value) -> Self {
@@ -571,15 +739,30 @@ impl BlockEntity {
         }
     }
 
+    fn noteblock_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn piston_from_nbt_value(_value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::Piston
+    }
+
+    fn piston_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn shulker_box_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::ShulkerBox {
             tags: ChestTags::from_nbt_value(&value),
         }
+    }
+
+    fn shulker_box_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn sign_from_nbt_value(value: &nbt::Value) -> Self {
@@ -600,6 +783,11 @@ impl BlockEntity {
         }
     }
 
+    fn sign_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn skull_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Skull {
             common: CommonTags::from_nbt_value(&value),
@@ -616,10 +804,20 @@ impl BlockEntity {
         }
     }
 
+    fn skull_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn smoker_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Smoker {
             tags: FurnaceTags::from_nbt_value(&value),
         }
+    }
+
+    fn smoker_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)
@@ -629,9 +827,19 @@ impl BlockEntity {
         }
     }
 
+    fn _soul_campfire_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
+    }
+
     fn structure_block_from_nbt_value(_value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::StructureBlock
+    }
+
+    fn structure_block_to_nbt_value(&self) -> Option<nbt::Value> {
+        // TODO
+        unimplemented!()
     }
 
     fn coordinates(&self) -> Option<BlockCoord> {
@@ -715,12 +923,12 @@ impl CommonTags {
 // Tags present for all "chest similar" block entities, e.g. Chest, Dropper, etc.
 #[derive(Clone, Debug)]
 pub struct ChestTags {
-    common: CommonTags,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-    loot_table: Option<()>,      // TODO support for loot tables
-    loot_table_seed: Option<()>, // TODO support for loot tables
+    pub(crate) common: CommonTags,
+    pub(crate) custom_name: Option<String>,
+    pub(crate) lock: Option<String>,
+    pub(crate) items: Inventory,
+    pub(crate) loot_table: Option<()>,      // TODO support for loot tables
+    pub(crate) loot_table_seed: Option<()>, // TODO support for loot tables
 }
 
 impl ChestTags {
@@ -738,6 +946,20 @@ impl ChestTags {
             loot_table: None,      // TODO
             loot_table_seed: None, // TODO
         }
+    }
+
+    fn to_nbt_values(&self) -> Vec<(String, nbt::Value)> {
+        let mut nbt_values = self.common.to_nbt_values();
+        if let Some(name) = &self.custom_name {
+            nbt_values.push(("CustomName".into(), nbt::Value::String(name.clone())));
+        }
+        if let Some(lock) = &self.lock {
+            nbt_values.push(("Lock".into(), nbt::Value::String(lock.clone())));
+        }
+        nbt_values.push(("Items".into(), self.items.to_nbt_value()));
+        // TODO support for loot tables
+        // TODO support for loot tables
+        nbt_values
     }
 }
 

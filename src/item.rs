@@ -671,6 +671,14 @@ impl Item {
             kind,
         }
     }
+
+    pub(crate) fn to_nbt_value(&self) -> nbt::Value {
+        let mut item: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(4);
+        //TODO fill "id" and "tag" fields
+        // For now: everything is an apple!
+        item.insert("id".into(), nbt::Value::String("minecraft:apple".into()));
+        nbt::Value::Compound(item)
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

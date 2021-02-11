@@ -135,6 +135,7 @@ impl Chunk {
 
     /// Creates a chunk from raw chunk (NBT) data.
     // NB only pre-flattening chunk loading as of yet
+    // TODO Move pre-flattening import implementation to the pre-flattening file.
     pub fn from_raw_chunk_data(data: &RawChunkData) -> Self {
         let nbt = data.to_nbt();
 

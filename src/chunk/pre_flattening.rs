@@ -50,7 +50,7 @@ impl Chunk {
     /// Calculates the index into the "Blocks" and similar NBT tags, for a block
     /// within section `section_y_index` of the chunk whose local (0, 0, 0)
     /// coordinates are at global block coordinates `chunk_offset`.
-    fn global_index(
+    fn _global_index(
         section_y_index: i64,
         chunk_offset: BlockCoord,
         global_block_coordinates: BlockCoord,
@@ -81,6 +81,9 @@ impl Chunk {
                         }
                         Some(Block::Beacon(beacon)) => {
                             beacon.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Chest(chest)) => {
+                            chest.to_block_entity(block_coordinates).to_nbt_value()
                         }
                         // TODO add handling of other blocks with entities
                         //Some(block) => { println!("Block found: {:?}", block); None },
