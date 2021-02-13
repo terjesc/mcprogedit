@@ -199,7 +199,7 @@ impl WorldExcerpt {
         let (dx, dy, dz) = self.dim();
         let (dx, dy, dz) = (dx as i64, dy as i64, dz as i64);
         let p1 = p;
-        let p2: BlockCoord = (p1.0 + dx, p1.1 + dy, p1.2 + dz).into();
+        let p2: BlockCoord = (p1.0 + dx - 1, p1.1 + dy - 1, p1.2 + dz - 1).into();
 
         // TODO copypasted from from_save, should be refactored!
         // TODO candidates for refactoring: All this bounds stuff.
@@ -219,7 +219,7 @@ impl WorldExcerpt {
         let region_p2: RegionCoord = chunk_p2.into();
 
         // Inclusive block bounds, using global coordinates
-        let _global_block_bounds = Bounds {
+        let global_block_bounds = Bounds {
             x: (i64::min(p1.0, p2.0), i64::max(p1.0, p2.0)),
             y: (i64::min(p1.1, p2.1), i64::max(p1.1, p2.1)),
             z: (i64::min(p1.2, p2.2), i64::max(p1.2, p2.2)),
@@ -299,24 +299,31 @@ impl WorldExcerpt {
                     for chunk_z in in_region_chunk_bounds.z.0..=in_region_chunk_bounds.z.1 {
                         // Get the chunk, or create a new one if empty
                         let chunk_data = region.chunk_data(&(chunk_x, chunk_z).into());
-                        let chunk = match chunk_data {
+                        let mut chunk = match chunk_data {
                             RawChunkData::Empty => Chunk::new((chunk_x, chunk_z).into()),
                             _ => Chunk::from_raw_chunk_data(&chunk_data),
                         };
 
-                        // TODO paste blocks into chunk
+                        // Paste blocks into chunk
+                        let chunk_coordinates: ChunkCoord = (chunk_x, chunk_z).into();
+                        let chunk_block_coordinates: BlockColumnCoord = chunk_coordinates.into();
+                        let offset = (
+                            global_block_bounds.x.0 - chunk_block_coordinates.0,
+                            global_block_bounds.y.0,
+                            global_block_bounds.z.0 - chunk_block_coordinates.1,
+                        );
+                        chunk.blocks.paste(offset, &self.blocks);
 
                         // TODO Move or copy entities into the chunk
 
-                        // TODO Put chunk back into region
-                        // create RawChunkData from Chunk
+                        // Put chunk back into region
                         let chunk_data = chunk.raw_chunk_zlib();
                         region.set_chunk_data(&(chunk_x, chunk_z).into(), chunk_data);
                     }
                 }
 
                 // TODO write back region
-                //region.save_to_file(&region_file);
+                region.save_to_file(&region_file);
             }
         }
     }
@@ -345,8 +352,12 @@ impl WorldExcerpt {
 
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.
     ///
+    /// The corner of `other` with the lowest numbered coordinates, is aligned at block
+    /// coordinates `at` relative to the world excerpt. Only the parts of `other` that
+    /// then overlaps with the world excerpt are pasted.
+    ///
     /// Empty blocks ([`Block::None`](crate::block::Block::None)) are not copied over,
-    /// allowing for pasting non-rectangular cuboid selections.
+    /// allowing for pasting other selection shapes than rectangular cuboids.
     pub fn paste(&mut self, at: BlockCoord, other: &WorldExcerpt) {
         self.blocks.paste((at.0, at.1, at.2), &other.blocks);
         // TODO also handle / copy entities within the world excerpts

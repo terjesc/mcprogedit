@@ -4,12 +4,14 @@ use std::str::FromStr;
 use std::time::SystemTime;
 
 use crate::biome::Biome;
+use crate::block::Block;
 use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
 use crate::coordinates::ChunkCoord;
 use crate::height_map::HeightMap;
 use crate::mc_version::McVersion;
 use crate::nbt_lookup::*;
+use crate::utils;
 
 #[derive(Clone)]
 pub enum RawChunkData {
@@ -55,7 +57,7 @@ pub struct Chunk {
     _last_update: i64,
     //biome: BiomeMapping,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
-    blocks: BlockCuboid,
+    pub(crate) blocks: BlockCuboid,
     biomes: Option<Vec<Biome>>,
 }
 
@@ -88,16 +90,11 @@ impl Chunk {
             .as_secs();
 
         // Biomes needs some extra handling...
-        let mut biomes: Vec<u8> = match &self.biomes {
+        let biomes: Vec<u8> = match &self.biomes {
             Some(biomes) => biomes.iter().map(|biome| u8::from(*biome)).collect(),
             None => vec![Biome::Plains.into(); 256],
         };
-        // Hack to convert biomes from Vec<u8> to Vec<i8>, as that is what hematite-nbt needs...
-        let p = biomes.as_mut_ptr();
-        let len = biomes.len();
-        let cap = biomes.capacity();
-        std::mem::forget(biomes);
-        let biomes = unsafe { Vec::from_raw_parts(p as *mut i8, len, cap) };
+        let biomes = utils::vec_u8_into_vec_i8(biomes);
 
         // Various calculations
         let sections = self.pre_flattening_sections();
@@ -173,7 +170,7 @@ impl Chunk {
         }
 
         // Second pass: Collect the full set of (finished) blocks
-        let mut block_cuboid = BlockCuboid::new((16, 256, 16));
+        let mut block_cuboid = BlockCuboid::new_filled((16, 256, 16), Block::Air);
         for section in sections {
             Chunk::pre_flattening_section_into_block_cuboid(
                 &section,

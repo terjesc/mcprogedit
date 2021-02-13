@@ -11,9 +11,13 @@ pub struct BlockCuboid {
 
 impl BlockCuboid {
     pub fn new((x_dim, y_dim, z_dim): (usize, usize, usize)) -> Self {
+        Self::new_filled((x_dim, y_dim, z_dim), Block::None)
+    }
+
+    pub fn new_filled((x_dim, y_dim, z_dim): (usize, usize, usize), block: Block) -> Self {
         let blocks_len = x_dim * y_dim * z_dim;
         let mut blocks = Vec::with_capacity(blocks_len);
-        blocks.resize(blocks_len, Block::None);
+        blocks.resize(blocks_len, block);
         Self {
             blocks,
             x_dim,
@@ -49,8 +53,12 @@ impl BlockCuboid {
 
     /// Paste the contents of a different BlockCuboid into this BlockCuboid.
     ///
+    /// The corner of `other` with the lowest numbered coordinates, is aligned at block
+    /// coordinates `at` relative to the block cuboid. Only the parts of `other` that
+    /// then overlaps with the block cuboid are pasted.
+    ///
     /// Empty blocks ([`Block::None`](crate::block::Block::None)) are not copied over,
-    /// allowing for pasting non-rectangular cuboid selections.
+    /// allowing for pasting other selection shapes than rectangular cuboids.
     pub fn paste(&mut self, offset: (i64, i64, i64), other: &Self) {
         // Calculate the spans relative to self, for where blocks are to be pasted in.
         let min = (

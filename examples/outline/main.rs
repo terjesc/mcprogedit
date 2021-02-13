@@ -5,6 +5,7 @@ use std::path::Path;
 
 use mcprogedit::block::*;
 use mcprogedit::colour::Colour;
+use mcprogedit::coordinates::BlockCoord;
 use mcprogedit::world_excerpt::WorldExcerpt;
 
 fn main() {
@@ -23,11 +24,13 @@ fn main() {
     let z_len = matches.value_of("dz").map(parse_i64_or_exit).unwrap();
 
     // Import the given area from the given save file directory
+    println!("Importing from {:?}", input_directory);
     let mut excerpt = WorldExcerpt::from_save(
         (x, y, z).into(),
-        (x + x_len, y + y_len, z + z_len).into(),
+        (x + x_len - 1, y + y_len - 1, z + z_len - 1).into(),
         Path::new(input_directory),
     );
+    println!("Imported world excerpt of dimensions {:?}", excerpt.dim());
 
     // Modify the world excerpt:
     // Replace all solid blocks along the edge of the excerpt, with red concrete.
@@ -84,9 +87,38 @@ fn main() {
             );
         }
     }
+    // Wireframe
+    for x in 0..x_len {
+        set_border_block(&mut excerpt, &(x, 0, 0).into());
+        set_border_block(&mut excerpt, &(x, y_len - 1, 0).into());
+        set_border_block(&mut excerpt, &(x, 0, z_len - 1).into());
+        set_border_block(&mut excerpt, &(x, y_len - 1, z_len - 1).into());
+    }
+    for y in 0..y_len {
+        set_border_block(&mut excerpt, &(0, y, 0).into());
+        set_border_block(&mut excerpt, &(x_len - 1, y, 0).into());
+        set_border_block(&mut excerpt, &(0, y, z_len - 1).into());
+        set_border_block(&mut excerpt, &(x_len - 1, y, z_len - 1).into());
+    }
+    for z in 0..z_len {
+        set_border_block(&mut excerpt, &(0, 0, z).into());
+        set_border_block(&mut excerpt, &(x_len - 1, 0, z).into());
+        set_border_block(&mut excerpt, &(0, y_len - 1, z).into());
+        set_border_block(&mut excerpt, &(x_len - 1, y_len - 1, z).into());
+    }
 
     // Export the modified world excerpt to the given save file directory
+    println!("Exporting to {:?}", input_directory);
     excerpt.to_save((x, y, z).into(), Path::new(output_directory));
+}
+
+fn set_border_block(excerpt: &mut WorldExcerpt, at: &BlockCoord) {
+    let block = if (at.0 + at.1 + at.2) % 4 <= 1 {
+        Block::concrete_with_colour(Colour::Yellow)
+    } else {
+        Block::concrete_with_colour(Colour::Black)
+    };
+    excerpt.set_block_at(*at, block);
 }
 
 fn parse_i64_or_exit(string: &str) -> i64 {
