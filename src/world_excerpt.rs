@@ -10,7 +10,7 @@ use crate::region::Region;
 extern crate nbt;
 
 /// Structure for holding blocks and entities, representing a piece of a Minecraft world.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct WorldExcerpt {
     blocks: BlockCuboid,
 }

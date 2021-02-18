@@ -1,7 +1,7 @@
 use crate::block::Block;
 use crate::height_map::HeightMap;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BlockCuboid {
     blocks: Vec<Block>,
     x_dim: usize,
@@ -31,8 +31,15 @@ impl BlockCuboid {
     }
 
     pub fn insert(&mut self, coordinates: (usize, usize, usize), block: Block) {
-        let index = self.index(coordinates).unwrap();
-        self.blocks[index] = block;
+        if let Some(index) = self.index(coordinates) {
+            self.blocks[index] = block;
+        } else {
+            eprintln!(
+                "[warning] failed to set block {:?} at invalid coordinates {:?}",
+                block,
+                coordinates,
+            );
+        }
     }
 
     pub fn block_at(&self, coordinates: (usize, usize, usize)) -> Option<&Block> {

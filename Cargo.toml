@@ -20,3 +20,4 @@ thiserror = "1.0.23"
 
 [dev-dependencies]
 clap = "2.33.3"
+rand = "0.8.0"
