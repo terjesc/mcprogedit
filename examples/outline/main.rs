@@ -108,7 +108,7 @@ fn main() {
     }
 
     // Export the modified world excerpt to the given save file directory
-    println!("Exporting to {:?}", input_directory);
+    println!("Exporting to {:?}", output_directory);
     excerpt.to_save((x, y, z).into(), Path::new(output_directory));
 }
 
