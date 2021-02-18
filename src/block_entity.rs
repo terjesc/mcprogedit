@@ -468,7 +468,6 @@ impl BlockEntity {
             for (key, value) in tags.to_nbt_values() {
                 entity.insert(key, value);
             }
-
             Some(nbt::Value::Compound(entity))
         } else {
             None
@@ -527,8 +526,16 @@ impl BlockEntity {
     }
 
     fn dispenser_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Dispenser { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn dropper_from_nbt_value(value: &nbt::Value) -> Self {
@@ -538,8 +545,16 @@ impl BlockEntity {
     }
 
     fn dropper_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Dropper { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn enchanting_table_from_nbt_value(value: &nbt::Value) -> Self {
@@ -670,8 +685,16 @@ impl BlockEntity {
     }
 
     fn hopper_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Hopper { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn jigsaw_from_nbt_value(value: &nbt::Value) -> Self {
@@ -740,8 +763,23 @@ impl BlockEntity {
     }
 
     fn noteblock_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 2);
+        if let Self::Noteblock {
+            common,
+            note,
+            powered,
+        } = self
+        {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            entity.insert("note".into(), nbt::Value::Byte(note.to_i8()));
+            let powered = if *powered { 1 } else { 0 };
+            entity.insert("powered".into(), nbt::Value::Byte(powered));
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn piston_from_nbt_value(_value: &nbt::Value) -> Self {
@@ -761,8 +799,16 @@ impl BlockEntity {
     }
 
     fn shulker_box_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::ShulkerBox { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn sign_from_nbt_value(value: &nbt::Value) -> Self {

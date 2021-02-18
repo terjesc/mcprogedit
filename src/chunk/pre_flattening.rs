@@ -85,6 +85,21 @@ impl Chunk {
                         Some(Block::Chest(chest)) => {
                             chest.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::Dispenser(dispenser)) => {
+                            dispenser.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Dropper(dropper)) => {
+                            dropper.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Hopper(hopper)) => {
+                            hopper.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Noteblock(noteblock)) => {
+                            noteblock.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::ShulkerBox(shulker_box)) => {
+                            shulker_box.to_block_entity(block_coordinates).to_nbt_value()
+                        }
                         // TODO add handling of other blocks with entities
                         //Some(block) => { println!("Block found: {:?}", block); None },
                         _ => None,
@@ -1214,7 +1229,7 @@ impl Chunk {
 
                             if let BlockEntity::Noteblock { note, .. } = block_entity {
                                 Block::Noteblock(Noteblock {
-                                    pitch: note.clone(),
+                                    pitch: *note,
                                 })
                             } else {
                                 panic!("Wrong block entity variant for note block")

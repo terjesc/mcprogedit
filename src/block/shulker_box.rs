@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
+use crate::block_entity::{BlockEntity, ChestTags, CommonTags};
 use crate::colour::Colour;
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface6};
@@ -21,6 +22,26 @@ impl ShulkerBox {
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.facing.clone().into()
+    }
+
+    pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+        let (x, y, z) = at;
+        BlockEntity::ShulkerBox {
+            tags: ChestTags {
+                common: CommonTags {
+                    id: "minecraft:shulker_box".into(),
+                    x,
+                    y,
+                    z,
+                    keep_packed: false,
+                },
+                custom_name: self.custom_name.clone(),
+                lock: self.custom_name.clone(),
+                items: self.items.clone(),
+                loot_table: None,      // TODO
+                loot_table_seed: None, // TODO
+            }
+        }
     }
 }
 
