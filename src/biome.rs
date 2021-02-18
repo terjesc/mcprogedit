@@ -138,7 +138,7 @@ impl From<u8> for Biome {
 impl From<Biome> for u8 {
     fn from(biome: Biome) -> u8 {
         match biome {
-            Biome::None => panic!("Unable to convert Biome::None to u8."),
+            Biome::None => 255,
             Biome::Ocean => 0,
             Biome::Plains => 1,
             Biome::Desert => 2,

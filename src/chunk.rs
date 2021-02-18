@@ -55,7 +55,6 @@ pub struct Chunk {
     data_version: McVersion,
     global_pos: ChunkCoord,
     _last_update: i64,
-    //biome: BiomeMapping,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
     pub(crate) blocks: BlockCuboid,
     biomes: Option<Vec<Biome>>,
@@ -152,6 +151,9 @@ impl Chunk {
             .unwrap_or_else(|| panic!("Level/TileEntities not found"));
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
 
+        let biomes: Option<Vec<Biome>> = nbt_blob_lookup_byte_array(&nbt, "Level/Biomes")
+            .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect());
+
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|| panic!("Level/Sections not found"));
 
@@ -186,8 +188,7 @@ impl Chunk {
             global_pos,
             _last_update,
             blocks: block_cuboid,
-            // TODO actually load biomes
-            biomes: None,
+            biomes,
         }
     }
 
