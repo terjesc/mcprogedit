@@ -103,9 +103,9 @@ impl BlockCuboid {
         for x in 0..self.x_dim {
             for z in 0..self.z_dim {
                 let mut height = 0;
-                //for y in std::iter::range_step(self.y_dim as i32, 0, -1) {
                 for y in (0..self.y_dim).rev() {
                     if let Some(Block::Air) = self.block_at((x, y as usize, z)) {
+                    } else {
                         height = y;
                         break;
                     }
