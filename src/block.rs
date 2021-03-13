@@ -13,6 +13,7 @@ mod furnace;
 mod glazed_terracotta;
 mod head;
 mod hopper;
+mod light;
 mod noteblock;
 mod redstone_repeater;
 mod shulker_box;
