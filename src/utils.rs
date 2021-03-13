@@ -33,6 +33,17 @@ pub(crate) fn _vec_i8_into_vec_u8(mut vec: Vec<i8>) -> Vec<u8> {
     unsafe { Vec::from_raw_parts(p as *mut u8, len, cap) }
 }
 
+/// Convert Vec<i32> into Vec<u32>. Useful for converting Hematite NBT int arrays,
+/// which come as Vec<i32>, into the more handy Vec<u32> format (for bit
+/// manipulation, etc.)
+pub(crate) fn vec_i32_into_vec_u32(mut vec: Vec<i32>) -> Vec<u32> {
+    let p = vec.as_mut_ptr();
+    let len = vec.len();
+    let cap = vec.capacity();
+    std::mem::forget(vec);
+    unsafe { Vec::from_raw_parts(p as *mut u32, len, cap) }
+}
+
 /// Convert Vec<u8> into Vec<i8>. Useful for making and manipulating byte arrays,
 /// that are later to be added to an NBT tag, as the former format is best suited
 /// for bit manipulation, while the latter format is the format required by the
@@ -43,4 +54,16 @@ pub(crate) fn vec_u8_into_vec_i8(mut vec: Vec<u8>) -> Vec<i8> {
     let cap = vec.capacity();
     std::mem::forget(vec);
     unsafe { Vec::from_raw_parts(p as *mut i8, len, cap) }
+}
+
+/// Convert Vec<u32> into Vec<i32>. Useful for making and manipulating int arrays,
+/// that are later to be added to an NBT tag, as the former format is best suited
+/// for bit manipulation, while the latter format is the format required by the
+/// Hematite NBT library.
+pub(crate) fn _vec_u32_into_vec_i32(mut vec: Vec<u32>) -> Vec<i32> {
+    let p = vec.as_mut_ptr();
+    let len = vec.len();
+    let cap = vec.capacity();
+    std::mem::forget(vec);
+    unsafe { Vec::from_raw_parts(p as *mut i32, len, cap) }
 }
