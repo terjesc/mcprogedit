@@ -35,13 +35,13 @@ fn main() {
     // Modify the world excerpt:
     // Replace all solid blocks along the edge of the excerpt, with red concrete.
     fn replace_solid(excerpt: &mut WorldExcerpt, at: (i64, i64, i64), replacement: Block) {
-        let (x, y, z) = at;
-        if let Some(block) = excerpt.block_at((x, y, z).into()) {
+        if let Some(block) = excerpt.block_at(at.into()) {
             if block.is_solid() {
-                excerpt.set_block_at((x, y, z).into(), replacement);
+                excerpt.set_block_at(at.into(), replacement);
             }
         }
     }
+
     // Surfaces in the xy plane
     for x in 0..x_len {
         for y in 0..y_len {
@@ -57,6 +57,7 @@ fn main() {
             );
         }
     }
+
     // Surfaces in the xz plane
     for x in 0..x_len {
         for z in 0..z_len {
@@ -72,6 +73,7 @@ fn main() {
             );
         }
     }
+
     // Surfaces in the yz plane
     for y in 0..y_len {
         for z in 0..z_len {
@@ -87,6 +89,7 @@ fn main() {
             );
         }
     }
+
     // Wireframe
     for x in 0..x_len {
         set_border_block(&mut excerpt, &(x, 0, 0).into());
