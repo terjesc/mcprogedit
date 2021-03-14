@@ -97,12 +97,16 @@ impl BlockCuboid {
         }
     }
 
+    /// Generate and return a height map for the block cuboid, relative to the bottom
+    /// layer of blocks in the block cuboid.
     pub fn height_map(&self) -> HeightMap {
         let mut height_map = HeightMap::new((self.x_dim, self.z_dim));
 
         for x in 0..self.x_dim {
             for z in 0..self.z_dim {
                 let mut height = 0;
+
+                // Quckly drill down through the air
                 for y in (0..self.y_dim).rev() {
                     if let Some(Block::Air) = self.block_at((x, y as usize, z)) {
                     } else {
@@ -110,6 +114,17 @@ impl BlockCuboid {
                         break;
                     }
                 }
+
+                // Accurately find the first opaque block
+                for y in (0..=height).rev() {
+                    if let Some(block) = self.block_at((x, y as usize, z)) {
+                        if block.is_affecting_sky_light() {
+                            height = y + 1;
+                            break;
+                        }
+                    }
+                }
+
                 height_map.set_height((x, z), height as u32);
             }
         }
