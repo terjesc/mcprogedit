@@ -4,6 +4,7 @@ use crate::block::Block;
 use crate::block_cuboid::BlockCuboid;
 use crate::chunk::{Chunk, RawChunkData};
 use crate::coordinates::*;
+use crate::height_map::HeightMap;
 use crate::nbt_lookup::*;
 use crate::region::Region;
 
@@ -348,6 +349,11 @@ impl WorldExcerpt {
     pub fn block_at(&self, at: BlockCoord) -> Option<&Block> {
         self.blocks
             .block_at((at.0 as usize, at.1 as usize, at.2 as usize))
+    }
+
+    /// Generate and return a height map of the world excerpt.
+    pub fn height_map(&self) -> HeightMap {
+        self.blocks.height_map()
     }
 
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.

@@ -1,4 +1,9 @@
-#[derive(Debug)]
+use std::fmt;
+
+use crate::utils::vec_i32_into_vec_u32;
+
+//#[derive(Debug)]
+#[derive(Clone)]
 pub struct HeightMap {
     heights: Vec<u32>,
     x_dim: usize,
@@ -13,6 +18,23 @@ impl HeightMap {
             heights,
             x_dim,
             z_dim,
+        }
+    }
+
+    /// Create a new heightmap from a HeightMap NBT tag
+    /// * NB Pre-flattening heightmap NBT format!
+    pub fn from_nbt_value(nbt: nbt::Value) -> Self {
+        let (x_dim, z_dim) = (16, 16);
+        if let nbt::Value::IntArray(heights) = nbt {
+            let heights = vec_i32_into_vec_u32(heights);
+
+            Self {
+                heights,
+                x_dim,
+                z_dim,
+            }
+        } else {
+            panic!("Unexpected nbt value type for height map.");
         }
     }
 
@@ -63,5 +85,17 @@ impl From<HeightMap> for Vec<i32> {
         let cap = heights.capacity();
         std::mem::forget(heights);
         unsafe { Vec::from_raw_parts(p as *mut i32, len, cap) }
+    }
+}
+
+// Attempt to get a bit more reasonable printing of Height Maps
+// (They are 2D-vectors stored in a 1D-vector.)
+// TODO Ideally they should get printed similar to a spreadsheet
+impl fmt::Debug for HeightMap {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.heights
+            .chunks(self.x_dim)
+            .fold(&mut f.debug_list(), |b, e| b.entry(&e))
+            .finish()
     }
 }
