@@ -791,8 +791,8 @@ impl Chunk {
         }
 
         // TODO Somehow fill block light and sky light with reasonable values...
-        let block_light = vec![15u8; 2048];
-        let sky_light = vec![15u8; 2048];
+        let block_light = vec![0xFFu8; 2048];
+        let sky_light = vec![0xFFu8; 2048];
 
         // A section is a TAG_Compound containing:
         // - "Y" TAG_Byte index 0 to 15 (bottom to top)
