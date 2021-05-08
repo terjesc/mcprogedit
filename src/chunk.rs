@@ -104,8 +104,8 @@ impl Chunk {
         level.insert("xPos".into(), nbt::Value::Int(self.global_pos.0 as i32));
         level.insert("zPos".into(), nbt::Value::Int(self.global_pos.1 as i32));
         level.insert("LastUpdate".into(), nbt::Value::Long(last_update as i64));
-        level.insert("LightPopulated".into(), nbt::Value::Byte(0));
-        level.insert("TerrainPopulated".into(), nbt::Value::Byte(0));
+        level.insert("LightPopulated".into(), nbt::Value::Byte(1));
+        level.insert("TerrainPopulated".into(), nbt::Value::Byte(1));
         level.insert("V".into(), nbt::Value::Byte(1));
         level.insert("InhabitedTime".into(), nbt::Value::Long(0));
         level.insert("Biomes".into(), nbt::Value::ByteArray(biomes));
