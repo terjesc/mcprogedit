@@ -306,15 +306,15 @@ impl Chunk {
                             Block::Flower(flower) => {
                                 match flower {
                                     Flower::Dandelion => (37, 0),
-                                    Flower::Poppy => (38, 1),
-                                    Flower::BlueOrchid => (38, 2),
-                                    Flower::Allium => (38, 3),
-                                    Flower::AzureBluet => (38, 4),
-                                    Flower::TulipRed => (38, 5),
-                                    Flower::TulipOrange => (38, 6),
-                                    Flower::TulipWhite => (38, 7),
-                                    Flower::TulipPink => (38, 8),
-                                    Flower::OxeyeDaisy => (38, 9),
+                                    Flower::Poppy => (38, 0),
+                                    Flower::BlueOrchid => (38, 1),
+                                    Flower::Allium => (38, 2),
+                                    Flower::AzureBluet => (38, 3),
+                                    Flower::TulipRed => (38, 4),
+                                    Flower::TulipOrange => (38, 5),
+                                    Flower::TulipWhite => (38, 6),
+                                    Flower::TulipPink => (38, 7),
+                                    Flower::OxeyeDaisy => (38, 8),
                                     Flower::SunflowerBottom => (175, 0),
                                     Flower::SunflowerTop => (175, 8),
                                     Flower::LilacBottom => (175, 1),
@@ -1291,7 +1291,15 @@ impl Chunk {
                             6 => Flower::TulipWhite,
                             7 => Flower::TulipPink,
                             8 => Flower::OxeyeDaisy,
-                            n => panic!("Unkown red flower data variant: {}", n),
+                            n => {
+                                eprintln!(
+                                    "[warning] unknown red flower data variant {:?} at index {:?}",
+                                    n,
+                                    index,
+                                    // TODO give info about coordinates?
+                                );
+                                Flower::Poppy
+                            },
                         }),
                         39 => Block::BrownMushroom,
                         40 => Block::RedMushroom,
