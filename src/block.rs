@@ -13,7 +13,6 @@ mod furnace;
 mod glazed_terracotta;
 mod head;
 mod hopper;
-mod light;
 mod noteblock;
 mod redstone_repeater;
 mod shulker_box;
@@ -21,6 +20,9 @@ mod sign;
 mod stair;
 mod trapdoor;
 mod vines;
+
+mod foilage;
+mod light;
 
 pub use self::banner::*;
 pub use self::beacon::*;
@@ -1849,6 +1851,13 @@ impl Block {
             position: SlabVariant::Top,
             waterlogged: false,
         })
+    }
+
+    /// Returns a torch facing up.
+    pub fn torch() -> Self {
+        Self::Torch {
+            attached: Surface5::Down,
+        }
     }
 
     /// Returns a Water or WaterSource block with the given water level.
