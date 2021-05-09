@@ -29,6 +29,30 @@ impl std::ops::Sub for BlockCoord {
     }
 }
 
+impl std::ops::Mul<i64> for BlockCoord {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        BlockCoord(self.0 * rhs, self.1 * rhs, self.2 * rhs)
+    }
+}
+
+impl std::ops::Mul<BlockCoord> for i64 {
+    type Output = BlockCoord;
+
+    fn mul(self, rhs: BlockCoord) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl std::ops::Div<i64> for BlockCoord {
+    type Output = BlockCoord;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        BlockCoord(self.0 / rhs, self.1 / rhs, self.2 / rhs)
+    }
+}
+
 impl From<&ChunkCoord> for BlockCoord {
     fn from(chunk: &ChunkCoord) -> Self {
         Self(chunk.0 << 4, 0, chunk.1 << 4)
