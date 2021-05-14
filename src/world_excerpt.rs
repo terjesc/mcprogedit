@@ -307,6 +307,7 @@ impl WorldExcerpt {
 
                         // Paste blocks into chunk
                         let chunk_coordinates: ChunkCoord = (chunk_x, chunk_z).into();
+                        let chunk_coordinates = chunk_coordinates + chunk_offset;
                         let chunk_block_coordinates: BlockColumnCoord = chunk_coordinates.into();
                         let offset = (
                             global_block_bounds.x.0 - chunk_block_coordinates.0,
