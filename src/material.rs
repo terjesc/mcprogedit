@@ -372,6 +372,22 @@ impl TryFrom<Material> for LeavesMaterial {
     }
 }
 
+impl TryFrom<WoodMaterial> for LeavesMaterial {
+    type Error = ();
+
+    fn try_from(item: WoodMaterial) -> Result<Self, Self::Error> {
+        match item {
+            WoodMaterial::Acacia => Ok(Self::Acacia),
+            WoodMaterial::Birch => Ok(Self::Birch),
+            WoodMaterial::DarkOak => Ok(Self::DarkOak),
+            WoodMaterial::Jungle => Ok(Self::Jungle),
+            WoodMaterial::Oak => Ok(Self::Oak),
+            WoodMaterial::Spruce => Ok(Self::Spruce),
+            _ => Err(()),
+        }
+    }
+}
+
 /// All materials.
 ///
 /// Convertible to and from all other material types.
@@ -1507,6 +1523,21 @@ impl TryFrom<Material> for WoodMaterial {
             Material::Spruce => Ok(Self::Spruce),
             Material::Warped => Ok(Self::Warped),
             _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<LeavesMaterial> for WoodMaterial {
+    type Error = ();
+
+    fn try_from(item: LeavesMaterial) -> Result<Self, Self::Error> {
+        match item {
+            LeavesMaterial::Acacia => Ok(Self::Acacia),
+            LeavesMaterial::Birch => Ok(Self::Birch),
+            LeavesMaterial::DarkOak => Ok(Self::DarkOak),
+            LeavesMaterial::Jungle => Ok(Self::Jungle),
+            LeavesMaterial::Oak => Ok(Self::Oak),
+            LeavesMaterial::Spruce => Ok(Self::Spruce),
         }
     }
 }
