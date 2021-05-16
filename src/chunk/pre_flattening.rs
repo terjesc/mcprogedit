@@ -329,9 +329,9 @@ impl Chunk {
                                 }
                             }
                             Block::BrownMushroom => (39, 0),
-                            Block::RedMushroom => (40, 1),
-                            Block::BlockOfGold => (41, 2),
-                            Block::BlockOfIron => (42, 3),
+                            Block::RedMushroom => (40, 0),
+                            Block::BlockOfGold => (41, 0),
+                            Block::BlockOfIron => (42, 0),
                             Block::Slab(slab) => {
                                 let position_data = match slab.position {
                                     SlabVariant::Top => 0x8,
