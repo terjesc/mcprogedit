@@ -281,10 +281,10 @@ impl Chunk {
                             Block::Grass(grass) => match grass {
                                 Grass::Grass => (31, 1),
                                 Grass::Fern => (31, 2),
-                                Grass::TallGrassBottom => (175, 3),
-                                Grass::TallGrassTop => (175, 3 | 8),
-                                Grass::LargeFernBottom => (175, 4),
-                                Grass::LargeFernTop => (175, 4 | 8),
+                                Grass::TallGrassBottom => (175, 2),
+                                Grass::TallGrassTop => (175, 8),
+                                Grass::LargeFernBottom => (175, 3),
+                                Grass::LargeFernTop => (175, 8),
                             },
                             Block::DeadBush => (32, 0),
                             Block::Piston {
@@ -318,11 +318,11 @@ impl Chunk {
                                     Flower::SunflowerBottom => (175, 0),
                                     Flower::SunflowerTop => (175, 8),
                                     Flower::LilacBottom => (175, 1),
-                                    Flower::LilacTop => (175, 1 | 8),
+                                    Flower::LilacTop => (175, 8),
                                     Flower::RoseBushBottom => (175, 4),
-                                    Flower::RoseBushTop => (175, 4 | 8),
+                                    Flower::RoseBushTop => (175, 8),
                                     Flower::PeonyBottom => (175, 5),
-                                    Flower::PeonyTop => (175, 5 | 8),
+                                    Flower::PeonyTop => (175, 8),
                                     Flower::Cornflower
                                     | Flower::LilyOfTheValley
                                     | Flower::WitherRose => (37, 0), // Fallback to Dandelion
@@ -2023,8 +2023,8 @@ impl Chunk {
                                 // bottom block; pseudo block entity is found here
                                 coordinates
                             };
-                            match block_entities.get(&entity_coordinates).unwrap() {
-                                BlockEntity::PseudoFlowerBottom(bottom_flower) => {
+                            match block_entities.get(&entity_coordinates) {
+                                Some(BlockEntity::PseudoFlowerBottom(bottom_flower)) => {
                                     if (data[index] & 0x8) == 0x8 {
                                         let top_flower = match bottom_flower {
                                             Flower::LilacBottom => Flower::LilacTop,
@@ -2032,7 +2032,7 @@ impl Chunk {
                                             Flower::RoseBushBottom => Flower::RoseBushTop,
                                             Flower::SunflowerBottom => Flower::SunflowerTop,
                                             variant => panic!(
-                                                "Unexpected grass variant for bottom grass: {:?}",
+                                                "Unexpected flower variant for bottom flower: {:?}",
                                                 variant,
                                             ),
                                         };
@@ -2041,7 +2041,7 @@ impl Chunk {
                                         Block::Flower(bottom_flower.clone())
                                     }
                                 }
-                                BlockEntity::PseudoGrassBottom(bottom_grass) => {
+                                Some(BlockEntity::PseudoGrassBottom(bottom_grass)) => {
                                     if (data[index] & 0x8) == 0x8 {
                                         let top_grass = match bottom_grass {
                                             Grass::LargeFernBottom => Grass::LargeFernTop,
@@ -2056,7 +2056,18 @@ impl Chunk {
                                         Block::Grass(bottom_grass.clone())
                                     }
                                 }
-                                _ => panic!("Wrong block entity variant for flower or grass"),
+                                Some(_) => {
+                                    panic!(
+                                        "Wrong block entity variant for flower or grass, at {:?}",
+                                        coordinates,
+                                    );
+                                }
+                                None => {
+                                    panic!(
+                                        "Missing block entity for flower or grass, at {:?}",
+                                        coordinates,
+                                    );
+                                }
                             }
                         }
                         // Banners
