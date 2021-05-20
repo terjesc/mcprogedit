@@ -1,10 +1,10 @@
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct BlockCoord(pub i64, pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct BlockColumnCoord(pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct ChunkCoord(pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct RegionCoord(pub i64, pub i64);
 
 impl From<(i64, i64, i64)> for BlockCoord {
