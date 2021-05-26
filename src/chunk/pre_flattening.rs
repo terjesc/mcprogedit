@@ -2057,16 +2057,18 @@ impl Chunk {
                                     }
                                 }
                                 Some(_) => {
-                                    panic!(
+                                    eprintln!(
                                         "Wrong block entity variant for flower or grass, at {:?}",
                                         coordinates,
                                     );
+                                    Block::Air
                                 }
                                 None => {
-                                    panic!(
+                                    eprintln!(
                                         "Missing block entity for flower or grass, at {:?}",
                                         coordinates,
                                     );
+                                    Block::Air
                                 }
                             }
                         }
