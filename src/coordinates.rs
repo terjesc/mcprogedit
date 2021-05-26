@@ -46,7 +46,7 @@ impl std::ops::Mul<BlockCoord> for i64 {
 }
 
 impl std::ops::Div<i64> for BlockCoord {
-    type Output = BlockCoord;
+    type Output = Self;
 
     fn div(self, rhs: i64) -> Self::Output {
         BlockCoord(self.0 / rhs, self.1 / rhs, self.2 / rhs)
@@ -78,6 +78,30 @@ impl std::ops::Sub for BlockColumnCoord {
 
     fn sub(self, other: Self) -> Self {
         Self(self.0 - other.0, self.1 - other.1)
+    }
+}
+
+impl std::ops::Mul<i64> for BlockColumnCoord {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        BlockColumnCoord(self.0 * rhs, self.1 * rhs)
+    }
+}
+
+impl std::ops::Mul<BlockColumnCoord> for i64 {
+    type Output = BlockColumnCoord;
+
+    fn mul(self, rhs: BlockColumnCoord) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl std::ops::Div<i64> for BlockColumnCoord {
+    type Output = Self;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        BlockColumnCoord(self.0 / rhs, self.1 / rhs)
     }
 }
 
