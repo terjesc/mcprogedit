@@ -336,8 +336,12 @@ impl WorldExcerpt {
     }
 
     /// Creates a new `WorldExcerpt` from part of an existing `WorldExcerpt`.
-    pub fn from_world_excerpt(_p1: BlockCoord, _p2: BlockCoord, _other: &WorldExcerpt) -> Self {
-        unimplemented!();
+    pub fn from_world_excerpt(
+        p1: (usize, usize, usize),
+        p2: (usize, usize, usize),
+        other: &WorldExcerpt,
+    ) -> Self {
+        Self { blocks: BlockCuboid::from_block_cuboid(p1, p2, &other.blocks) }
     }
 
     /// Set the block at location `at` to the provided block.

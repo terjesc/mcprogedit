@@ -97,6 +97,47 @@ impl BlockCuboid {
         }
     }
 
+    /// Creates a new `BlockCuboid` from part of an existing `BlockCuboid`.
+    pub fn from_block_cuboid(
+        p1: (usize, usize, usize),
+        p2: (usize, usize, usize),
+        other: &Self,
+    ) -> Self {
+        let min = (
+            usize::min(p1.0, p2.0),
+            usize::min(p1.1, p2.1),
+            usize::min(p1.2, p2.2),
+        );
+        let max = (
+            usize::max(p1.0, p2.0),
+            usize::max(p1.1, p2.1),
+            usize::max(p1.2, p2.2),
+        );
+
+        let dimensions = (max.0 - min.0, max.1 - min.1, max.2 - min.2);
+
+        let mut cuboid = Self::new(dimensions);
+
+        for from_x in min.0..=max.0 {
+            let to_x = from_x - min.0;
+            for from_y in min.1..=max.1 {
+                let to_y = from_y - min.1;
+                for from_z in min.2..=max.2 {
+                    let to_z = from_z - min.2;
+                    if let Some(block) = other.block_at((from_x, from_y, from_z)) {
+                        if *block != Block::None {
+                            cuboid.insert((to_x, to_y, to_z), block.clone());
+                        }
+                    } else {
+                        eprintln!("[warning] Tried to paste block from invalid source position ({}, {}, {})", from_x, from_y, from_z);
+                    }
+                }
+            }
+        }
+
+        cuboid
+    }
+
     /// Generate and return a height map for the block cuboid, relative to the bottom
     /// layer of blocks in the block cuboid.
     pub fn height_map(&self) -> HeightMap {
