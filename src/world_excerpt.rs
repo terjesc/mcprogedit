@@ -374,6 +374,11 @@ impl WorldExcerpt {
         // TODO also handle / copy entities within the world excerpts
     }
 
+    /// Replace all occurrences of the given block with the given replacement.
+    pub fn replace(&mut self, search_for: &Block, replace_with: &Block) {
+        self.blocks.replace(search_for, replace_with);
+    }
+
     //TODO functions for:
     // - exporting the WorldExcerpt to a schematic file
 }

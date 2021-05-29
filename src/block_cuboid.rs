@@ -173,6 +173,21 @@ impl BlockCuboid {
         height_map
     }
 
+    /// Replace all occurrences of the given block with the given replacement.
+    pub fn replace(&mut self, search_for: &Block, replace_with: &Block) {
+        for x in 0..self.x_dim {
+            for y in 0..self.y_dim {
+                for z in 0..self.z_dim {
+                    if let Some(found_block) = self.block_at((x, y, z)) {
+                        if *search_for == *found_block {
+                            self.insert((x, y, z), replace_with.clone());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fn index(&self, (x, y, z): (usize, usize, usize)) -> Option<usize> {
         if x >= self.x_dim || y >= self.y_dim || z >= self.z_dim {
             None
