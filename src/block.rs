@@ -765,7 +765,7 @@ assert_eq_size!(Block, i128);
 
 impl Block {
     /// Returns an acacia fence.
-    pub fn acacia_fence() -> Self {
+    pub const fn acacia_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Acacia,
             waterlogged: false,
@@ -809,14 +809,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Acacia variant.
-    pub fn acacia_planks() -> Self {
+    pub const fn acacia_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Acacia,
         }
     }
 
     /// Returns a Sapling block of the Acacia variant.
-    pub fn acacia_sapling() -> Self {
+    pub const fn acacia_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Acacia,
             growth_stage: Int0Through1::MIN,
@@ -832,7 +832,7 @@ impl Block {
     }
 
     /// Returns a birch fence.
-    pub fn birch_fence() -> Self {
+    pub const fn birch_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Birch,
             waterlogged: false,
@@ -876,14 +876,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Birch variant.
-    pub fn birch_planks() -> Self {
+    pub const fn birch_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Birch,
         }
     }
 
     /// Returns a Sapling block of the Birch variant.
-    pub fn birch_sapling() -> Self {
+    pub const fn birch_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Birch,
             growth_stage: Int0Through1::MIN,
@@ -900,7 +900,7 @@ impl Block {
     }
 
     /// Returns a (full) cake.
-    pub fn cake() -> Self {
+    pub const fn cake() -> Self {
         Self::Cake {
             pieces: Int1Through7::MAX,
         }
@@ -914,7 +914,7 @@ impl Block {
     }
 
     /// Returns a cactus block.
-    pub fn cactus() -> Self {
+    pub const fn cactus() -> Self {
         Self::Cactus {
             growth_stage: Int0Through15::MIN,
         }
@@ -936,7 +936,7 @@ impl Block {
     }
 
     /// Returns a dark oak fence.
-    pub fn dark_oak_fence() -> Self {
+    pub const fn dark_oak_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::DarkOak,
             waterlogged: false,
@@ -980,14 +980,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Dark Oak variant.
-    pub fn dark_oak_planks() -> Self {
+    pub const fn dark_oak_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::DarkOak,
         }
     }
 
     /// Returns a Sapling block of the Dark Oak variant.
-    pub fn dark_oak_sapling() -> Self {
+    pub const fn dark_oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::DarkOak,
             growth_stage: Int0Through1::MIN,
@@ -1012,19 +1012,19 @@ impl Block {
     }
 
     /// Returns a fire block of minimum age.
-    pub fn fire() -> Self {
+    pub const fn fire() -> Self {
         Self::Fire {
             age: Int0Through15::MIN,
         }
     }
 
     /// Returns an uncoloured glass block.
-    pub fn glass() -> Self {
+    pub const fn glass() -> Self {
         Self::Glass { colour: None }
     }
 
     /// Returns an uncoloured glass pane.
-    pub fn glass_pane() -> Self {
+    pub const fn glass_pane() -> Self {
         Self::GlassPane {
             colour: None,
             waterlogged: false,
@@ -1151,7 +1151,7 @@ impl Block {
     }
 
     /// Returns an iron bars block..
-    pub fn iron_bars() -> Self {
+    pub const fn iron_bars() -> Self {
         Self::IronBars { waterlogged: false }
     }
 
@@ -1435,7 +1435,7 @@ impl Block {
     }
 
     /// Returns an jungle fence.
-    pub fn jungle_fence() -> Self {
+    pub const fn jungle_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Jungle,
             waterlogged: false,
@@ -1479,14 +1479,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Jungle variant.
-    pub fn jungle_planks() -> Self {
+    pub const fn jungle_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Jungle,
         }
     }
 
     /// Returns a Sapling block of the Jungle variant.
-    pub fn jungle_sapling() -> Self {
+    pub const fn jungle_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Jungle,
             growth_stage: Int0Through1::MIN,
@@ -1533,7 +1533,7 @@ impl Block {
     }
 
     /// Returns a nether brick fence.
-    pub fn nether_brick_fence() -> Self {
+    pub const fn nether_brick_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::NetherBrick,
             waterlogged: false,
@@ -1546,7 +1546,7 @@ impl Block {
     }
 
     /// Returns an oak fence.
-    pub fn oak_fence() -> Self {
+    pub const fn oak_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Oak,
             waterlogged: false,
@@ -1590,14 +1590,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Oak variant.
-    pub fn oak_planks() -> Self {
+    pub const fn oak_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Oak,
         }
     }
 
     /// Returns a Sapling block of the Oak variant.
-    pub fn oak_sapling() -> Self {
+    pub const fn oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Oak,
             growth_stage: Int0Through1::MIN,
@@ -1745,7 +1745,7 @@ impl Block {
     }
 
     /// Returns a one layer thick snow block.
-    pub fn snow_layer() -> Self {
+    pub const fn snow_layer() -> Self {
         Self::Snow {
             thickness: Int1Through8::MIN,
         }
@@ -1759,7 +1759,7 @@ impl Block {
     }
 
     /// Returns a spruce fence.
-    pub fn spruce_fence() -> Self {
+    pub const fn spruce_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Spruce,
             waterlogged: false,
@@ -1803,14 +1803,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Spruce variant.
-    pub fn spruce_planks() -> Self {
+    pub const fn spruce_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Spruce,
         }
     }
 
     /// Returns a Sapling block of the Spruce variant.
-    pub fn spruce_sapling() -> Self {
+    pub const fn spruce_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Spruce,
             growth_stage: Int0Through1::MIN,
@@ -1826,14 +1826,14 @@ impl Block {
     }
 
     /// Returns a sugar cane block.
-    pub fn sugar_cane() -> Self {
+    pub const fn sugar_cane() -> Self {
         Self::SugarCane {
             growth_stage: Int0Through15::MIN,
         }
     }
 
     /// Returns an uncoloured terracotta block.
-    pub fn terracotta() -> Self {
+    pub const fn terracotta() -> Self {
         Self::Terracotta { colour: None }
     }
 
@@ -1854,7 +1854,7 @@ impl Block {
     }
 
     /// Returns a torch facing up.
-    pub fn torch() -> Self {
+    pub const fn torch() -> Self {
         Self::Torch {
             attached: Surface5::Down,
         }
@@ -1883,7 +1883,7 @@ impl Block {
     }
 
     /// Returns a wheat block of minimum age.
-    pub fn wheat() -> Self {
+    pub const fn wheat() -> Self {
         Self::Wheat {
             growth_stage: Int0Through7::MIN,
         }
