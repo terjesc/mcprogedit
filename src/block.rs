@@ -51,14 +51,14 @@ use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SlabVariant {
     Bottom,
     Double,
     Top,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Slab {
     pub material: SlabMaterial,
     pub position: SlabVariant,
@@ -71,7 +71,7 @@ impl Slab {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RailType {
     Activator,
     Detector,
@@ -79,7 +79,7 @@ pub enum RailType {
     Powered,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum RailShape {
     EastWest,
     NorthEast,
@@ -126,7 +126,7 @@ impl RailShape {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Flower {
     Allium,
     AzureBluet,
@@ -151,7 +151,7 @@ pub enum Flower {
     WitherRose,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Grass {
     Fern,
     Grass,
@@ -161,14 +161,14 @@ pub enum Grass {
     TallGrassTop,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Seagrass {
     Seagrass,
     TallSeagrassBottom,
     TallSeagrassTop,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum AnvilDamage {
     Intact,
     SlightlyDamaged,
@@ -195,7 +195,7 @@ pub enum StemState {
     Attached(Surface4),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BambooLeaves {
     None,
     Small,
@@ -219,7 +219,7 @@ impl Log {
 pub type HoneyLevel = Int0Through5;
 pub type FireFace = DirectionFlags6;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CommandBlockVariant {
     ChainedCommandBlock,
     CommandBlock,
@@ -238,7 +238,7 @@ pub struct Jukebox {
     pub record: Option<Item>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum OnOffState {
     On,
     Off,
