@@ -159,7 +159,7 @@ impl BlockCuboid {
                 // Accurately find the first opaque block
                 for y in (0..=height).rev() {
                     if let Some(block) = self.block_at((x, y as usize, z)) {
-                        if block.is_affecting_sky_light() {
+                        if block.is_affecting_sky_light_old() {
                             height = y + 1;
                             break;
                         }

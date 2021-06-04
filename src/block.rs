@@ -650,10 +650,7 @@ pub enum Block {
     Sign(Box<Sign>),
     Slab(Slab),
     SmithingTable,
-    Smoker {
-        facing: Surface4,
-        lit: bool,
-    }, // TODO add block entity
+    Smoker(Box<Furnace>),
     SmoothQuartz,
     SmoothRedSandstone,
     SmoothSandstone,
@@ -1112,7 +1109,7 @@ impl Block {
             }
             Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
             Self::Sign(sign) => sign.has_facing_of(direction),
-            Self::Smoker { facing, .. } => Direction::from(*facing) == direction,
+            Self::Smoker(furnace) => furnace.has_facing_of(direction),
             Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
             Self::SoulLantern { mounted_at } => Direction::from(*mounted_at) == direction,
             Self::SoulTorch { attached, .. } => Direction::from(*attached).opposite() == direction,
