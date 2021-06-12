@@ -2,7 +2,7 @@ use crate::block::Block;
 
 impl Block {
     pub fn is_foilage(&self) -> bool {
-        match self {
+        matches! (self,
             Block::Snow { .. }
             | Block::Lava { .. }
             | Block::LavaSource
@@ -69,8 +69,7 @@ impl Block {
             | Block::WeepingVinesPlant
             | Block::Wheat { .. }
             | Block::JigsawBlock { .. }
-            | Block::StructureBlock => true,
-            _ => false,
-        }
+            | Block::StructureBlock
+        )
     }
 }

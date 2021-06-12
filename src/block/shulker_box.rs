@@ -21,7 +21,7 @@ impl ShulkerBox {
     }
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
+        facing == self.facing.into()
     }
 
     pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {

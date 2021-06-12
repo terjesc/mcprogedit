@@ -67,7 +67,7 @@ pub struct Slab {
 
 impl Slab {
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 }
 
@@ -110,7 +110,7 @@ impl RailShape {
         }
     }
 
-    pub fn to_value(&self) -> u8 {
+    pub fn to_value(self) -> u8 {
         match self {
             Self::NorthSouth => 0,
             Self::EastWest => 1,
@@ -212,7 +212,7 @@ pub struct Log {
 
 impl Log {
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 }
 

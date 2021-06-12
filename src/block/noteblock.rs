@@ -101,7 +101,7 @@ impl Pitch {
         }
     }
 
-    pub fn to_i8(&self) -> i8 {
+    pub fn to_i8(self) -> i8 {
         match self {
             Pitch::Fs0 => 0,
             Pitch::G0 => 1,

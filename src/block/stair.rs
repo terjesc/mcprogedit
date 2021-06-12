@@ -16,11 +16,11 @@ pub struct Stair {
 
 impl Stair {
     pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.position.clone().into()
+        facing == self.position.into()
     }
 
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 }
 

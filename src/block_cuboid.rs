@@ -129,7 +129,7 @@ impl BlockCuboid {
                             cuboid.insert((to_x, to_y, to_z), block.clone());
                         }
                     } else {
-                        eprintln!("[warning] Tried to paste block from invalid source position ({}, {}, {})", from_x, from_y, from_z);
+                        eprintln!("[warning] Tried to copy block from invalid source position ({}, {}, {})", from_x, from_y, from_z);
                     }
                 }
             }

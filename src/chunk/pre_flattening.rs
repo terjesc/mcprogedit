@@ -2038,7 +2038,7 @@ impl Chunk {
                                         };
                                         Block::Flower(top_flower)
                                     } else {
-                                        Block::Flower(bottom_flower.clone())
+                                        Block::Flower(*bottom_flower)
                                     }
                                 }
                                 Some(BlockEntity::PseudoGrassBottom(bottom_grass)) => {
@@ -2053,7 +2053,7 @@ impl Chunk {
                                         };
                                         Block::Grass(top_grass)
                                     } else {
-                                        Block::Grass(bottom_grass.clone())
+                                        Block::Grass(*bottom_grass)
                                     }
                                 }
                                 Some(_) => {

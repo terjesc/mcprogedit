@@ -12,7 +12,7 @@ pub struct Head {
 
 impl Head {
     pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.placement.clone().into()
+        facing == self.placement.into()
     }
 
     pub fn has_variant_of(&self, variant: HeadVariant) -> bool {

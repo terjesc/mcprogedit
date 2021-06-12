@@ -23,11 +23,11 @@ impl Sign {
     }
 
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.placement.clone().into()
+        facing == self.placement.into()
     }
 }
 

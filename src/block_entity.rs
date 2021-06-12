@@ -712,11 +712,7 @@ impl BlockEntity {
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Jukebox {
             common: CommonTags::from_nbt_value(&value),
-            record: if let Some(value) = nbt_value_lookup(&value, "RecordItem") {
-                Some(Item::from_nbt_value(&value))
-            } else {
-                None
-            },
+            record: nbt_value_lookup(&value, "RecordItem").map(|value| Item::from_nbt_value(&value)),
         }
     }
 
@@ -728,14 +724,10 @@ impl BlockEntity {
     fn lectern_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Lectern {
             common: CommonTags::from_nbt_value(&value),
-            book: if let Some(book_value) = nbt_value_lookup(&value, "Book") {
-                Some((
+            book: nbt_value_lookup(&value, "Book").map(|book_value| (
                     Item::from_nbt_value(&book_value),
                     nbt_value_lookup_int(&value, "Page").unwrap(),
-                ))
-            } else {
-                None
-            },
+                )),
         }
     }
 

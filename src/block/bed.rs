@@ -17,7 +17,7 @@ impl Bed {
     }
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
-        facing == self.facing.clone().into()
+        facing == self.facing.into()
     }
 }
 

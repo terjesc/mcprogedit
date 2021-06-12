@@ -26,7 +26,7 @@ impl Door {
     }
 
     pub fn has_material_of(&self, material: &Material) -> bool {
-        *material == self.material.clone().into()
+        *material == self.material.into()
     }
 
     pub fn is_bottom_half(&self) -> bool {
