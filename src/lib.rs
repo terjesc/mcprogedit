@@ -17,6 +17,7 @@ pub mod enchantment;
 pub mod height_map;
 pub mod inventory;
 pub mod item;
+mod light_cuboid;
 pub mod material;
 pub mod mc_version;
 mod nbt_lookup;

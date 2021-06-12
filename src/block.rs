@@ -22,7 +22,7 @@ mod trapdoor;
 mod vines;
 
 mod foilage;
-mod light;
+pub(crate) mod light;
 
 pub use self::banner::*;
 pub use self::beacon::*;
