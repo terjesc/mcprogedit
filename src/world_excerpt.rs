@@ -5,6 +5,7 @@ use crate::block_cuboid::BlockCuboid;
 use crate::chunk::{Chunk, RawChunkData};
 use crate::coordinates::*;
 use crate::height_map::HeightMap;
+use crate::light_cuboid::LightCuboid;
 use crate::nbt_lookup::*;
 use crate::region::Region;
 
@@ -14,6 +15,8 @@ extern crate nbt;
 #[derive(Clone, Debug)]
 pub struct WorldExcerpt {
     blocks: BlockCuboid,
+    pub(crate) block_light: LightCuboid,
+    pub(crate) sky_light: LightCuboid,
 }
 
 impl WorldExcerpt {
@@ -21,6 +24,8 @@ impl WorldExcerpt {
     pub fn new(x: usize, y: usize, z: usize) -> Self {
         WorldExcerpt {
             blocks: BlockCuboid::new((x, y, z)),
+            block_light: LightCuboid::new((x, y, z)),
+            sky_light: LightCuboid::new((x, y, z)),
         }
     }
 
@@ -160,7 +165,13 @@ impl WorldExcerpt {
                         );
                         world_excerpt
                             .blocks
-                            .paste(chunk_offset_in_blocks, chunk.blocks());
+                            .paste(chunk_offset_in_blocks, &chunk.blocks);
+                        world_excerpt
+                            .block_light
+                            .paste(chunk_offset_in_blocks.into(), &chunk.block_light);
+                        world_excerpt
+                            .sky_light
+                            .paste(chunk_offset_in_blocks.into(), &chunk.sky_light);
 
                         // TODO Move or copy the entities from the chunk
                     }
@@ -341,7 +352,13 @@ impl WorldExcerpt {
         p2: (usize, usize, usize),
         other: &WorldExcerpt,
     ) -> Self {
-        Self { blocks: BlockCuboid::from_block_cuboid(p1, p2, &other.blocks) }
+        let p1_coord = BlockCoord(p1.0 as i64, p1.1 as i64, p1.2 as i64);
+        let p2_coord = BlockCoord(p2.0 as i64, p2.1 as i64, p2.2 as i64);
+        Self {
+            blocks: BlockCuboid::from_block_cuboid(p1, p2, &other.blocks),
+            block_light: LightCuboid::from_light_cuboid(p1_coord, p2_coord, &other.block_light),
+            sky_light: LightCuboid::from_light_cuboid(p1_coord, p2_coord, &other.sky_light),
+        }
     }
 
     /// Set the block at location `at` to the provided block.

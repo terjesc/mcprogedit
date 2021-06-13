@@ -76,10 +76,6 @@ impl Chunk {
         }
     }
 
-    pub fn blocks(&self) -> &BlockCuboid {
-        &self.blocks
-    }
-
     pub fn chunk_coordinates(&self) -> &ChunkCoord {
         &self.global_pos
     }
