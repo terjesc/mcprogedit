@@ -7,6 +7,7 @@ use crate::bounded_ints::*;
 use crate::chunk::Chunk;
 use crate::colour::Colour;
 use crate::coordinates::{BlockColumnCoord, BlockCoord, ChunkCoord};
+use crate::light_cuboid::LightCuboid;
 use crate::material::*;
 use crate::nbt_lookup::*;
 use crate::positioning::*;
@@ -120,6 +121,8 @@ impl Chunk {
 
         // TODO We only need sections 0..=N, where section N is the highest
         // section with a non-air block in it. For now we write all blocks.
+        // (There might also be need for storing light data in air, extending
+        // the required volume by (almost) one section upwards.)
         for y in 0..=15 {
             sections.push(self.pre_flattening_section(y));
         }
@@ -2376,6 +2379,34 @@ impl Chunk {
                 up,
                 west,
             }
+        }
+    }
+
+    pub(crate) fn pre_flattening_fill_light_cuboids_from_section(
+        section: &nbt::Value,
+        block_light: &mut LightCuboid,
+        sky_light: &mut LightCuboid,
+    ) {
+        // Parse relevant NBT data
+        let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
+        let section_block_light = packed_nibbles_to_bytes(
+            &nbt_value_lookup_byte_array(&section, "BlockLight")
+                .unwrap_or_else(|| vec![0; 2048]),
+        );
+        let section_sky_light = packed_nibbles_to_bytes(
+            &nbt_value_lookup_byte_array(&section, "SkyLight")
+                .unwrap_or_else(|| vec![0; 2048]),
+        );
+        let local_xz_offset = BlockCoord(0, 0, 0);
+
+        // Fill relevant areas of block_light and sky_light
+        for (index, value) in section_block_light.iter().enumerate() {
+            let coordinates = Self::coordinates(section_y_index, local_xz_offset, index);
+            block_light.set_light_level_at(coordinates, *value as u8);
+        }
+        for (index, value) in section_sky_light.iter().enumerate() {
+            let coordinates = Self::coordinates(section_y_index, local_xz_offset, index);
+            sky_light.set_light_level_at(coordinates, *value as u8);
         }
     }
 }

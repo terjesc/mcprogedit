@@ -9,6 +9,7 @@ use crate::block_cuboid::BlockCuboid;
 use crate::block_entity::BlockEntity;
 use crate::coordinates::ChunkCoord;
 use crate::height_map::HeightMap;
+use crate::light_cuboid::LightCuboid;
 use crate::mc_version::McVersion;
 use crate::nbt_lookup::*;
 use crate::utils;
@@ -57,6 +58,8 @@ pub struct Chunk {
     _last_update: i64,
     //entities: HashMap<BlockCoord, Vec<Entity>>,
     pub(crate) blocks: BlockCuboid,
+    pub(crate) block_light: LightCuboid,
+    pub(crate) sky_light: LightCuboid,
     biomes: Option<Vec<Biome>>,
 }
 
@@ -67,6 +70,8 @@ impl Chunk {
             global_pos: chunk_position,
             _last_update: 0,
             blocks: BlockCuboid::new((16, 256, 16)),
+            block_light: LightCuboid::new((16, 256, 16)),
+            sky_light: LightCuboid::new((16, 256, 16)),
             biomes: None,
         }
     }
@@ -173,12 +178,25 @@ impl Chunk {
 
         // Second pass: Collect the full set of (finished) blocks
         let mut block_cuboid = BlockCuboid::new_filled((16, 256, 16), Block::Air);
-        for section in sections {
+        for section in &sections {
+            // TODO rename to pre_flattening_fill_block_cuboid_from_section
             Chunk::pre_flattening_section_into_block_cuboid(
                 &section,
                 &block_entities,
                 &global_pos,
                 &mut block_cuboid,
+            );
+        }
+
+        // Get block light and sky light data out from the sections
+        let mut block_light = LightCuboid::new((16, 256, 16));
+        let mut sky_light = LightCuboid::new((16, 256, 16));
+
+        for section in &sections {
+            Chunk::pre_flattening_fill_light_cuboids_from_section(
+                &section,
+                &mut block_light,
+                &mut sky_light,
             );
         }
 
@@ -188,6 +206,8 @@ impl Chunk {
             global_pos,
             _last_update,
             blocks: block_cuboid,
+            block_light,
+            sky_light,
             biomes,
         }
     }
