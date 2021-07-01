@@ -1387,10 +1387,10 @@ impl Chunk {
                         },
                         61 | 62 => {
                             let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                            let block_entity = block_entities.get(&coordinates).unwrap();
+                            let block_entity = block_entities.get(&coordinates);
 
                             match block_entity {
-                                BlockEntity::Furnace { tags } => {
+                                Some(BlockEntity::Furnace { tags }) => {
                                     Block::Furnace(Box::new(Furnace {
                                         facing: facing4_xxnswe(data[index]),
                                         lit: block == 62,
@@ -1402,7 +1402,8 @@ impl Chunk {
                                         cook_time_total: tags.cook_time_total,
                                     }))
                                 }
-                                _ => panic!("Wrong block entity variant for chest"),
+                                _ => Block::Sponge,
+                                //_ => panic!("Wrong block entity variant for chest"),
                             }
                         }
                         // Both block variants of signs
@@ -1691,24 +1692,25 @@ impl Chunk {
                         }
                         117 => {
                             let coordinates = Self::coordinates(section_y_index, xz_offset, index);
-                            let block_entity = block_entities.get(&coordinates).unwrap();
+                            let block_entity = block_entities.get(&coordinates);
 
                             match block_entity {
-                                BlockEntity::BrewingStand {
+                                Some(BlockEntity::BrewingStand {
                                     custom_name,
                                     lock,
                                     items,
                                     brew_time,
                                     fuel,
                                     ..
-                                } => Block::BrewingStand(Box::new(BrewingStand {
+                                }) => Block::BrewingStand(Box::new(BrewingStand {
                                     custom_name: custom_name.clone(),
                                     lock: lock.clone(),
                                     items: items.clone(),
                                     brew_time: *brew_time,
                                     fuel: *fuel,
                                 })),
-                                _ => panic!("Wrong block entity variant for brewing stand"),
+                                _ => Block::Sponge,
+                                //_ => panic!("Wrong block entity variant for brewing stand"),
                             }
                         }
                         118 => Block::Cauldron {
