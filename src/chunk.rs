@@ -168,7 +168,7 @@ impl Chunk {
         // in one block but used for another. This may cross section boundaries.
         for section in &sections {
             block_entities.extend(
-                Chunk::pre_flattening_pseudo_block_entities(&section, &global_pos).into_iter(),
+                Chunk::pre_flattening_pseudo_block_entities(section, &global_pos).into_iter(),
             );
         }
 
@@ -177,7 +177,7 @@ impl Chunk {
         for section in &sections {
             // TODO rename to pre_flattening_fill_block_cuboid_from_section
             Chunk::pre_flattening_section_into_block_cuboid(
-                &section,
+                section,
                 &block_entities,
                 &global_pos,
                 &mut block_cuboid,
@@ -190,7 +190,7 @@ impl Chunk {
 
         for section in &sections {
             Chunk::pre_flattening_fill_light_cuboids_from_section(
-                &section,
+                section,
                 &mut block_light,
                 &mut sky_light,
             );

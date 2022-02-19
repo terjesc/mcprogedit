@@ -140,7 +140,7 @@ pub enum BlockEntity {
 
 impl BlockEntity {
     pub fn map_from_nbt_list(list: &nbt::Value) -> HashMap<BlockCoord, Self> {
-        Self::vec_from_nbt_list(&list)
+        Self::vec_from_nbt_list(list)
             .iter()
             .map(|entity| (entity.coordinates(), entity))
             .filter(|(coord, _entity)| coord.is_some())
@@ -152,7 +152,7 @@ impl BlockEntity {
         if let nbt::Value::List(block_entities) = list {
             block_entities
                 .iter()
-                .map(|nbt| BlockEntity::from_nbt_value(nbt))
+                .map(BlockEntity::from_nbt_value)
                 .collect()
         } else {
             Vec::new()
@@ -160,43 +160,43 @@ impl BlockEntity {
     }
 
     pub fn from_nbt_value(value: &nbt::Value) -> Self {
-        if let Some(id) = nbt_value_lookup_string(&value, "id") {
+        if let Some(id) = nbt_value_lookup_string(value, "id") {
             match id.as_str() {
-                "minecraft:banner" => Self::banner_from_nbt_value(&value),
-                "minecraft:barrel" => Self::barrel_from_nbt_value(&value),
-                "minecraft:beacon" => Self::beacon_from_nbt_value(&value),
-                "minecraft:bed" => Self::bed_from_nbt_value(&value),
-                "minecraft:beehive" => Self::beehive_from_nbt_value(&value),
-                "minecraft:bell" => Self::bell_from_nbt_value(&value),
-                "minecraft:blast_furnace" => Self::blast_furnace_from_nbt_value(&value),
-                "minecraft:brewing_stand" => Self::brewing_stand_from_nbt_value(&value),
-                "minecraft:campfire" => Self::campfire_from_nbt_value(&value),
-                "minecraft:chest" => Self::chest_from_nbt_value(&value),
-                "minecraft:comparator" => Self::comparator_from_nbt_value(&value),
-                "minecraft:command_block" => Self::command_block_from_nbt_value(&value),
-                "minecraft:conduit" => Self::conduit_from_nbt_value(&value),
-                "minecraft:daylight_detector" => Self::daylight_detector_from_nbt_value(&value),
-                "minecraft:dispenser" => Self::dispenser_from_nbt_value(&value),
-                "minecraft:dropper" => Self::dropper_from_nbt_value(&value),
-                "minecraft:enchanting_table" => Self::enchanting_table_from_nbt_value(&value),
-                "minecraft:ender_chest" => Self::ender_chest_from_nbt_value(&value),
-                "minecraft:end_gateway" => Self::end_gateway_from_nbt_value(&value),
-                "minecraft:end_portal" => Self::end_portal_from_nbt_value(&value),
-                "minecraft:flower_pot" => Self::flower_pot_from_nbt_value(&value),
-                "minecraft:furnace" => Self::furnace_from_nbt_value(&value),
-                "minecraft:hopper" => Self::hopper_from_nbt_value(&value),
-                "minecraft:jigsaw" => Self::jigsaw_from_nbt_value(&value),
-                "minecraft:jukebox" => Self::jukebox_from_nbt_value(&value),
-                "minecraft:lectern" => Self::lectern_from_nbt_value(&value),
-                "minecraft:mob_spawner" => Self::mob_spawner_from_nbt_value(&value),
-                "minecraft:noteblock" => Self::noteblock_from_nbt_value(&value),
-                "minecraft:piston" => Self::piston_from_nbt_value(&value),
-                "minecraft:shulker_box" => Self::shulker_box_from_nbt_value(&value),
-                "minecraft:sign" => Self::sign_from_nbt_value(&value),
-                "minecraft:skull" => Self::skull_from_nbt_value(&value),
-                "minecraft:smoker" => Self::smoker_from_nbt_value(&value),
-                "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(&value),
-                "minecraft:structure_block" => Self::structure_block_from_nbt_value(&value),
+                "minecraft:banner" => Self::banner_from_nbt_value(value),
+                "minecraft:barrel" => Self::barrel_from_nbt_value(value),
+                "minecraft:beacon" => Self::beacon_from_nbt_value(value),
+                "minecraft:bed" => Self::bed_from_nbt_value(value),
+                "minecraft:beehive" => Self::beehive_from_nbt_value(value),
+                "minecraft:bell" => Self::bell_from_nbt_value(value),
+                "minecraft:blast_furnace" => Self::blast_furnace_from_nbt_value(value),
+                "minecraft:brewing_stand" => Self::brewing_stand_from_nbt_value(value),
+                "minecraft:campfire" => Self::campfire_from_nbt_value(value),
+                "minecraft:chest" => Self::chest_from_nbt_value(value),
+                "minecraft:comparator" => Self::comparator_from_nbt_value(value),
+                "minecraft:command_block" => Self::command_block_from_nbt_value(value),
+                "minecraft:conduit" => Self::conduit_from_nbt_value(value),
+                "minecraft:daylight_detector" => Self::daylight_detector_from_nbt_value(value),
+                "minecraft:dispenser" => Self::dispenser_from_nbt_value(value),
+                "minecraft:dropper" => Self::dropper_from_nbt_value(value),
+                "minecraft:enchanting_table" => Self::enchanting_table_from_nbt_value(value),
+                "minecraft:ender_chest" => Self::ender_chest_from_nbt_value(value),
+                "minecraft:end_gateway" => Self::end_gateway_from_nbt_value(value),
+                "minecraft:end_portal" => Self::end_portal_from_nbt_value(value),
+                "minecraft:flower_pot" => Self::flower_pot_from_nbt_value(value),
+                "minecraft:furnace" => Self::furnace_from_nbt_value(value),
+                "minecraft:hopper" => Self::hopper_from_nbt_value(value),
+                "minecraft:jigsaw" => Self::jigsaw_from_nbt_value(value),
+                "minecraft:jukebox" => Self::jukebox_from_nbt_value(value),
+                "minecraft:lectern" => Self::lectern_from_nbt_value(value),
+                "minecraft:mob_spawner" => Self::mob_spawner_from_nbt_value(value),
+                "minecraft:noteblock" => Self::noteblock_from_nbt_value(value),
+                "minecraft:piston" => Self::piston_from_nbt_value(value),
+                "minecraft:shulker_box" => Self::shulker_box_from_nbt_value(value),
+                "minecraft:sign" => Self::sign_from_nbt_value(value),
+                "minecraft:skull" => Self::skull_from_nbt_value(value),
+                "minecraft:smoker" => Self::smoker_from_nbt_value(value),
+                "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(value),
+                "minecraft:structure_block" => Self::structure_block_from_nbt_value(value),
                 _ => {
                     eprintln!("Unknown tile entity ID: {}", id);
                     BlockEntity::Unknown { id: Some(id) }
@@ -253,7 +253,7 @@ impl BlockEntity {
     fn banner_from_nbt_value(value: &nbt::Value) -> Self {
         let mut patterns = Vec::new();
 
-        if let Some(pattern_entries) = nbt_value_lookup_list(&value, "Patterns") {
+        if let Some(pattern_entries) = nbt_value_lookup_list(value, "Patterns") {
             for pattern_entry in pattern_entries {
                 let pattern = ColouredPattern {
                     colour: Colour::from(nbt_value_lookup_int(&pattern_entry, "Color").unwrap()),
@@ -268,15 +268,15 @@ impl BlockEntity {
         }
 
         BlockEntity::Banner {
-            common: CommonTags::from_nbt_value(&value),
-            colour: if let Some(colour) = nbt_value_lookup_string(&value, "Color") {
+            common: CommonTags::from_nbt_value(value),
+            colour: if let Some(colour) = nbt_value_lookup_string(value, "Color") {
                 Colour::from(colour.as_str())
-            } else if let Some(colour) = nbt_value_lookup_int(&value, "Base") {
+            } else if let Some(colour) = nbt_value_lookup_int(value, "Base") {
                 Colour::from(15 - colour)
             } else {
                 Colour::White
             },
-            custom_name: nbt_value_lookup_string(&value, "CustomName"),
+            custom_name: nbt_value_lookup_string(value, "CustomName"),
             patterns,
         }
     }
@@ -314,7 +314,7 @@ impl BlockEntity {
 
     fn barrel_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Barrel {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -325,13 +325,13 @@ impl BlockEntity {
 
     fn beacon_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Beacon {
-            common: CommonTags::from_nbt_value(&value),
-            lock: nbt_value_lookup_string(&value, "Lock"),
-            levels: nbt_value_lookup_int(&value, "Levels").unwrap(),
-            primary: nbt_value_lookup_int(&value, "Primary")
+            common: CommonTags::from_nbt_value(value),
+            lock: nbt_value_lookup_string(value, "Lock"),
+            levels: nbt_value_lookup_int(value, "Levels").unwrap(),
+            primary: nbt_value_lookup_int(value, "Primary")
                 .filter(|i| *i != 0)
                 .map(StatusEffect::from),
-            secondary: nbt_value_lookup_int(&value, "Secondary")
+            secondary: nbt_value_lookup_int(value, "Secondary")
                 .filter(|i| *i != 0)
                 .map(StatusEffect::from),
         }
@@ -376,8 +376,8 @@ impl BlockEntity {
 
     fn bed_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Bed {
-            common: CommonTags::from_nbt_value(&value),
-            colour: Colour::from(nbt_value_lookup_int(&value, "color").unwrap()),
+            common: CommonTags::from_nbt_value(value),
+            colour: Colour::from(nbt_value_lookup_int(value, "color").unwrap()),
         }
     }
 
@@ -389,7 +389,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn beehive_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -401,7 +401,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn bell_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -412,7 +412,7 @@ impl BlockEntity {
 
     fn blast_furnace_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::BlastFurnace {
-            tags: FurnaceTags::from_nbt_value(&value),
+            tags: FurnaceTags::from_nbt_value(value),
         }
     }
 
@@ -422,19 +422,19 @@ impl BlockEntity {
     }
 
     fn brewing_stand_from_nbt_value(value: &nbt::Value) -> Self {
-        let items = if let Some(items) = nbt_value_lookup_list(&value, "Items") {
+        let items = if let Some(items) = nbt_value_lookup_list(value, "Items") {
             Inventory::from_nbt_value_vec(&items)
         } else {
             Inventory::new()
         };
 
         BlockEntity::BrewingStand {
-            common: CommonTags::from_nbt_value(&value),
-            custom_name: nbt_value_lookup_string(&value, "CustomName"),
-            lock: nbt_value_lookup_string(&value, "Lock"),
+            common: CommonTags::from_nbt_value(value),
+            custom_name: nbt_value_lookup_string(value, "CustomName"),
+            lock: nbt_value_lookup_string(value, "Lock"),
             items,
-            brew_time: nbt_value_lookup_short(&value, "BrewTime").unwrap(),
-            fuel: nbt_value_lookup_byte(&value, "Fuel").unwrap(),
+            brew_time: nbt_value_lookup_short(value, "BrewTime").unwrap(),
+            fuel: nbt_value_lookup_byte(value, "Fuel").unwrap(),
         }
     }
 
@@ -446,7 +446,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn campfire_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -457,7 +457,7 @@ impl BlockEntity {
 
     fn chest_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Chest {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -476,8 +476,8 @@ impl BlockEntity {
 
     fn comparator_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Comparator {
-            common: CommonTags::from_nbt_value(&value),
-            output_signal: nbt_value_lookup_int(&value, "OutputSignal").unwrap(),
+            common: CommonTags::from_nbt_value(value),
+            output_signal: nbt_value_lookup_int(value, "OutputSignal").unwrap(),
         }
     }
 
@@ -499,7 +499,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn conduit_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -510,7 +510,7 @@ impl BlockEntity {
 
     fn daylight_detector_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::DaylightDetector {
-            common: CommonTags::from_nbt_value(&value),
+            common: CommonTags::from_nbt_value(value),
         }
     }
 
@@ -521,7 +521,7 @@ impl BlockEntity {
 
     fn dispenser_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Dispenser {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -540,7 +540,7 @@ impl BlockEntity {
 
     fn dropper_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Dropper {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -559,8 +559,8 @@ impl BlockEntity {
 
     fn enchanting_table_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EnchantingTable {
-            common: CommonTags::from_nbt_value(&value),
-            custom_name: nbt_value_lookup_string(&value, "CustomName"),
+            common: CommonTags::from_nbt_value(value),
+            custom_name: nbt_value_lookup_string(value, "CustomName"),
         }
     }
 
@@ -571,7 +571,7 @@ impl BlockEntity {
 
     fn ender_chest_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EnderChest {
-            common: CommonTags::from_nbt_value(&value),
+            common: CommonTags::from_nbt_value(value),
         }
     }
 
@@ -582,18 +582,18 @@ impl BlockEntity {
 
     fn end_gateway_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EndGateway {
-            common: CommonTags::from_nbt_value(&value),
-            age: nbt_value_lookup_long(&value, "Age").unwrap(),
-            exact_teleport: match nbt_value_lookup_byte(&value, "ExactTeleport") {
+            common: CommonTags::from_nbt_value(value),
+            age: nbt_value_lookup_long(value, "Age").unwrap(),
+            exact_teleport: match nbt_value_lookup_byte(value, "ExactTeleport") {
                 Some(0) => false,
                 Some(1) => true,
                 Some(n) => panic!("Unknown ExactTeleport value of {}", n),
                 None => panic!("ExactTeleport nbt value not found"),
             },
             exit_portal: (
-                nbt_value_lookup_int(&value, "ExitPortal/X").unwrap() as i64,
-                nbt_value_lookup_int(&value, "ExitPortal/Y").unwrap() as i64,
-                nbt_value_lookup_int(&value, "ExitPortal/Z").unwrap() as i64,
+                nbt_value_lookup_int(value, "ExitPortal/X").unwrap() as i64,
+                nbt_value_lookup_int(value, "ExitPortal/Y").unwrap() as i64,
+                nbt_value_lookup_int(value, "ExitPortal/Z").unwrap() as i64,
             )
                 .into(),
         }
@@ -606,7 +606,7 @@ impl BlockEntity {
 
     fn end_portal_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EndPortal {
-            common: CommonTags::from_nbt_value(&value),
+            common: CommonTags::from_nbt_value(value),
         }
     }
 
@@ -622,11 +622,11 @@ impl BlockEntity {
 
     fn flower_pot_from_nbt_value(value: &nbt::Value) -> Self {
         let (group, plant) = (
-            nbt_value_lookup_string(&value, "Item").unwrap(),
-            nbt_value_lookup_int(&value, "Data").unwrap(),
+            nbt_value_lookup_string(value, "Item").unwrap(),
+            nbt_value_lookup_int(value, "Data").unwrap(),
         );
         BlockEntity::FlowerPot {
-            common: CommonTags::from_nbt_value(&value),
+            common: CommonTags::from_nbt_value(value),
             plant: match (group.as_str(), plant) {
                 ("minecraft:air", _) => None,
                 ("minecraft:brown_mushroom", _) => Some(PottedPlant::BrownMushroom),
@@ -669,7 +669,7 @@ impl BlockEntity {
 
     fn furnace_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Furnace {
-            tags: FurnaceTags::from_nbt_value(&value),
+            tags: FurnaceTags::from_nbt_value(value),
         }
     }
 
@@ -680,7 +680,7 @@ impl BlockEntity {
 
     fn hopper_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Hopper {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -700,7 +700,7 @@ impl BlockEntity {
     fn jigsaw_from_nbt_value(value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -711,8 +711,8 @@ impl BlockEntity {
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Jukebox {
-            common: CommonTags::from_nbt_value(&value),
-            record: nbt_value_lookup(&value, "RecordItem").map(|value| Item::from_nbt_value(&value)),
+            common: CommonTags::from_nbt_value(value),
+            record: nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)),
         }
     }
 
@@ -723,10 +723,10 @@ impl BlockEntity {
 
     fn lectern_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Lectern {
-            common: CommonTags::from_nbt_value(&value),
-            book: nbt_value_lookup(&value, "Book").map(|book_value| (
+            common: CommonTags::from_nbt_value(value),
+            book: nbt_value_lookup(value, "Book").map(|book_value| (
                     Item::from_nbt_value(&book_value),
-                    nbt_value_lookup_int(&value, "Page").unwrap(),
+                    nbt_value_lookup_int(value, "Page").unwrap(),
                 )),
         }
     }
@@ -748,9 +748,9 @@ impl BlockEntity {
 
     fn noteblock_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Noteblock {
-            common: CommonTags::from_nbt_value(&value),
-            note: Pitch::from_value(nbt_value_lookup_byte(&value, "note").unwrap() as u8),
-            powered: !matches!(nbt_value_lookup_byte(&value, "powered"), Some(0)),
+            common: CommonTags::from_nbt_value(value),
+            note: Pitch::from_value(nbt_value_lookup_byte(value, "note").unwrap() as u8),
+            powered: !matches!(nbt_value_lookup_byte(value, "powered"), Some(0)),
         }
     }
 
@@ -786,7 +786,7 @@ impl BlockEntity {
 
     fn shulker_box_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::ShulkerBox {
-            tags: ChestTags::from_nbt_value(&value),
+            tags: ChestTags::from_nbt_value(value),
         }
     }
 
@@ -805,18 +805,18 @@ impl BlockEntity {
 
     fn sign_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Sign {
-            common: CommonTags::from_nbt_value(&value),
-            colour: if let Some(colour) = nbt_value_lookup_string(&value, "Color") {
+            common: CommonTags::from_nbt_value(value),
+            colour: if let Some(colour) = nbt_value_lookup_string(value, "Color") {
                 Colour::from(colour.as_str())
             } else {
                 Colour::Black
             },
             // TODO handle text in a better manner than to expose "compound object" JSON
             text: vec![
-                nbt_value_lookup_string(&value, "Text1").unwrap_or_default(),
-                nbt_value_lookup_string(&value, "Text2").unwrap_or_default(),
-                nbt_value_lookup_string(&value, "Text3").unwrap_or_default(),
-                nbt_value_lookup_string(&value, "Text4").unwrap_or_default(),
+                nbt_value_lookup_string(value, "Text1").unwrap_or_default(),
+                nbt_value_lookup_string(value, "Text2").unwrap_or_default(),
+                nbt_value_lookup_string(value, "Text3").unwrap_or_default(),
+                nbt_value_lookup_string(value, "Text4").unwrap_or_default(),
             ],
         }
     }
@@ -828,8 +828,8 @@ impl BlockEntity {
 
     fn skull_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Skull {
-            common: CommonTags::from_nbt_value(&value),
-            skull_type: match nbt_value_lookup_byte(&value, "SkullType").unwrap() {
+            common: CommonTags::from_nbt_value(value),
+            skull_type: match nbt_value_lookup_byte(value, "SkullType").unwrap() {
                 0 => HeadVariant::SkeletonSkull,
                 1 => HeadVariant::WitherSkeletonSkull,
                 2 => HeadVariant::ZombieHead,
@@ -838,7 +838,7 @@ impl BlockEntity {
                 5 => HeadVariant::DragonHead,
                 n => panic!("Unknown SkullType value of {}", n),
             },
-            facing: Direction16::from(nbt_value_lookup_byte(&value, "Rot").unwrap()).opposite(),
+            facing: Direction16::from(nbt_value_lookup_byte(value, "Rot").unwrap()).opposite(),
         }
     }
 
@@ -849,7 +849,7 @@ impl BlockEntity {
 
     fn smoker_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Smoker {
-            tags: FurnaceTags::from_nbt_value(&value),
+            tags: FurnaceTags::from_nbt_value(value),
         }
     }
 
@@ -861,7 +861,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn soul_campfire_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(&value, "id"),
+            id: nbt_value_lookup_string(value, "id"),
         }
     }
 
@@ -934,11 +934,11 @@ pub struct CommonTags {
 impl CommonTags {
     fn from_nbt_value(value: &nbt::Value) -> Self {
         Self {
-            id: nbt_value_lookup_string(&value, "id").unwrap(),
-            x: nbt_value_lookup_int(&value, "x").unwrap(),
-            y: nbt_value_lookup_int(&value, "y").unwrap(),
-            z: nbt_value_lookup_int(&value, "z").unwrap(),
-            keep_packed: nbt_value_lookup_byte(&value, "keepPacked").unwrap_or(0) != 0,
+            id: nbt_value_lookup_string(value, "id").unwrap(),
+            x: nbt_value_lookup_int(value, "x").unwrap(),
+            y: nbt_value_lookup_int(value, "y").unwrap(),
+            z: nbt_value_lookup_int(value, "z").unwrap(),
+            keep_packed: nbt_value_lookup_byte(value, "keepPacked").unwrap_or(0) != 0,
         }
     }
 
@@ -973,10 +973,10 @@ impl ChestTags {
     fn from_nbt_value(value: &nbt::Value) -> Self {
         //chest_tags_from_nbt_value!(value)
         Self {
-            common: CommonTags::from_nbt_value(&value),
-            custom_name: nbt_value_lookup_string(&value, "CustomName"),
-            lock: nbt_value_lookup_string(&value, "Lock"),
-            items: if let Some(items) = nbt_value_lookup_list(&value, "Items") {
+            common: CommonTags::from_nbt_value(value),
+            custom_name: nbt_value_lookup_string(value, "CustomName"),
+            lock: nbt_value_lookup_string(value, "Lock"),
+            items: if let Some(items) = nbt_value_lookup_list(value, "Items") {
                 Inventory::from_nbt_value_vec(&items)
             } else {
                 Inventory::new()
@@ -1016,20 +1016,20 @@ pub struct FurnaceTags {
 
 impl FurnaceTags {
     fn from_nbt_value(value: &nbt::Value) -> Self {
-        let items = if let Some(items) = nbt_value_lookup_list(&value, "Items") {
+        let items = if let Some(items) = nbt_value_lookup_list(value, "Items") {
             Inventory::from_nbt_value_vec(&items)
         } else {
             Inventory::new()
         };
 
         Self {
-            common: CommonTags::from_nbt_value(&value),
-            custom_name: nbt_value_lookup_string(&value, "CustomName"),
-            lock: nbt_value_lookup_string(&value, "Lock"),
+            common: CommonTags::from_nbt_value(value),
+            custom_name: nbt_value_lookup_string(value, "CustomName"),
+            lock: nbt_value_lookup_string(value, "Lock"),
             items,
-            burn_time: nbt_value_lookup_short(&value, "BurnTime").unwrap(),
-            cook_time: nbt_value_lookup_short(&value, "CookTime").unwrap(),
-            cook_time_total: nbt_value_lookup_short(&value, "CookTimeTotal").unwrap(),
+            burn_time: nbt_value_lookup_short(value, "BurnTime").unwrap(),
+            cook_time: nbt_value_lookup_short(value, "CookTime").unwrap(),
+            cook_time_total: nbt_value_lookup_short(value, "CookTimeTotal").unwrap(),
         }
     }
 }

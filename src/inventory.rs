@@ -30,8 +30,8 @@ impl Inventory {
     pub(crate) fn from_nbt_value_vec(list: &[nbt::Value]) -> Self {
         let mut slots = HashMap::new();
         for item in list {
-            let slot = nbt_value_lookup_byte(&item, "Slot").unwrap();
-            slots.insert(slot, ItemStack::from_nbt_value(&item));
+            let slot = nbt_value_lookup_byte(item, "Slot").unwrap();
+            slots.insert(slot, ItemStack::from_nbt_value(item));
         }
         Inventory { slots }
     }
@@ -75,8 +75,8 @@ struct ItemStack {
 
 impl ItemStack {
     pub fn from_nbt_value(value: &nbt::Value) -> Self {
-        let count = nbt_value_lookup_byte(&value, "Count").unwrap();
-        let item = Item::from_nbt_value(&value);
+        let count = nbt_value_lookup_byte(value, "Count").unwrap();
+        let item = Item::from_nbt_value(value);
 
         Self { item, count }
     }

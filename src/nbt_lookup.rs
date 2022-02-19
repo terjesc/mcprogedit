@@ -11,7 +11,7 @@ pub fn nbt_blob_lookup(blob: &nbt::Blob, path: &'static str) -> Option<nbt::Valu
     };
 
     if !rest.is_empty() {
-        nbt_value_lookup(&value, rest)
+        nbt_value_lookup(value, rest)
     } else {
         Some(value.clone())
     }

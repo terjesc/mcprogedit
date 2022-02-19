@@ -153,7 +153,7 @@ impl Region {
                 .write_u32::<BigEndian>(chunk_header.length)
                 .unwrap();
             region_file.write_u8(chunk_header.compression).unwrap();
-            region_file.write_all(&data).unwrap();
+            region_file.write_all(data).unwrap();
             region_file.write_all(&padding).unwrap();
 
             // Write timestamp

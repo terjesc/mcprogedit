@@ -479,7 +479,7 @@ impl Chunk {
                                     OnOffState::On => 0x8,
                                     OnOffState::Off => 0x0,
                                 };
-                                let data = state_data | lever_facing(&facing);
+                                let data = state_data | lever_facing(facing);
                                 (69, data)
                             }
                             Block::PressurePlate { material } => {
@@ -496,7 +496,7 @@ impl Chunk {
                             Block::RedstoneOre => (73, 0),
                             // NB 74 lit redstone ore is not implemented
                             // NB 75 unlit redstone torch is not implemented
-                            Block::RedstoneTorch { attached } => (76, facing5_xwensd(&attached)),
+                            Block::RedstoneTorch { attached } => (76, facing5_xwensd(attached)),
                             Block::Button(material, facing) => {
                                 let data = facing6_dewsnu(facing);
                                 match material {
@@ -563,16 +563,16 @@ impl Chunk {
                             Block::CrackedStoneBricks => (98, 2),
                             Block::ChiseledStoneBricks => (98, 3),
                             Block::BrownMushroomStem { stem_directions } => {
-                                (99, mushroom_stems(&stem_directions))
+                                (99, mushroom_stems(stem_directions))
                             }
                             Block::BrownMushroomBlock { cap_directions } => {
-                                (99, mushroom_caps(&cap_directions))
+                                (99, mushroom_caps(cap_directions))
                             }
                             Block::RedMushroomStem { stem_directions } => {
-                                (100, mushroom_stems(&stem_directions))
+                                (100, mushroom_stems(stem_directions))
                             }
                             Block::RedMushroomBlock { cap_directions } => {
-                                (100, mushroom_caps(&cap_directions))
+                                (100, mushroom_caps(cap_directions))
                             }
                             Block::IronBars { .. } => (101, 0),
                             Block::GlassPane { colour, .. } => match colour {
@@ -600,7 +600,7 @@ impl Chunk {
                                 open,
                                 material,
                             } => {
-                                let facing_data = facing4_swne(&facing);
+                                let facing_data = facing4_swne(facing);
                                 let open_data = if *open { 0x4 } else { 0x0 };
                                 let data = facing_data | open_data;
                                 match material {
@@ -625,7 +625,7 @@ impl Chunk {
                             Block::Cauldron { water_level } => (118, water_level.get() as u8),
                             Block::EndPortal => (119, 0),
                             Block::EndPortalFrame { facing, has_eye } => {
-                                let facing_data = facing4_swne(&facing);
+                                let facing_data = facing4_swne(facing);
                                 let has_eye_data = if *has_eye { 0x4 } else { 0x0 };
                                 (120, facing_data | has_eye_data)
                             }
@@ -639,13 +639,13 @@ impl Chunk {
                                 facing,
                             } => {
                                 let growth_data = (growth_stage.get() as u8) << 2;
-                                let facing_data = facing4_nesw(&facing);
+                                let facing_data = facing4_nesw(facing);
                                 (127, growth_data | facing_data)
                             }
                             // 128 sandstone stairs already handled
                             Block::EmeraldOre => (129, 0),
-                            Block::EnderChest { facing, .. } => (130, facing4_xxnswe(&facing)),
-                            Block::TripwireHook { facing } => (131, facing4_swne(&facing)),
+                            Block::EnderChest { facing, .. } => (130, facing4_xxnswe(facing)),
+                            Block::TripwireHook { facing } => (131, facing4_swne(facing)),
                             Block::Tripwire => (132, 0),
                             Block::BlockOfEmerald => (133, 0),
                             // 134-136 spruce / birch / jungle stairs already handled
@@ -671,7 +671,7 @@ impl Chunk {
                                 (144, data)
                             }
                             Block::Anvil { facing, damage } => {
-                                let facing_data = facing4_swne(&facing);
+                                let facing_data = facing4_swne(facing);
                                 let damage_data = match damage {
                                     AnvilDamage::Intact => 0b0000,
                                     AnvilDamage::SlightlyDamaged => 0b0100,
@@ -681,9 +681,9 @@ impl Chunk {
                             }
                             Block::TrappedChest(chest) => (146, facing4_xxnswe(&chest.facing)),
                             // 147 and 148 gold / iron pressure plate already handled
-                            Block::RedstoneComparator { facing } => (149, facing4_nesw(&facing)),
+                            Block::RedstoneComparator { facing } => (149, facing4_nesw(facing)),
                             Block::RedstoneSubtractor { facing } => {
-                                (149, 0x4 | facing4_nesw(&facing))
+                                (149, 0x4 | facing4_nesw(facing))
                             }
                             // NB 150 powered redstone comparator is not implemented
                             Block::DaylightDetector => (151, 0),
@@ -743,7 +743,7 @@ impl Chunk {
                             //     already handled
                             // 193-197 spruce / birch / jungle / acacia / dark oak doors
                             //     already handled
-                            Block::EndRod { facing } => (198, facing6_dunswe(&facing)),
+                            Block::EndRod { facing } => (198, facing6_dunswe(facing)),
                             Block::ChorusPlant => (199, 0),
                             Block::ChorusFlower { growth_stage } => (200, growth_stage.get() as u8),
                             Block::PurpurBlock => (201, 0),
@@ -770,7 +770,7 @@ impl Chunk {
                                 Axis3::Z => (216, 8),
                             },
                             Block::StructureVoid => (217, 0),
-                            Block::Observer { facing } => (218, facing6_dunswe(&facing)),
+                            Block::Observer { facing } => (218, facing6_dunswe(facing)),
                             Block::ShulkerBox(shulker_box) => {
                                 let colour = shulker_box.colour.unwrap_or(Colour::Purple);
                                 let block_id = (colour as u8) + 219;
@@ -988,13 +988,13 @@ impl Chunk {
         chunk_position: &ChunkCoord,
     ) -> HashMap<BlockCoord, BlockEntity> {
         let xz_offset: BlockCoord = chunk_position.into();
-        let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
-        let blocks = nbt_value_lookup_byte_array(&section, "Blocks").unwrap();
+        let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
+        let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(&section, "Add")
+            &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|| vec![0; blocks.len() / 2]),
         );
-        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(&section, "Data").unwrap());
+        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         return blocks
             .iter()
@@ -1083,13 +1083,13 @@ impl Chunk {
         block_cuboid: &mut BlockCuboid,
     ) {
         let xz_offset: BlockCoord = chunk_position.into();
-        let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
-        let blocks = nbt_value_lookup_byte_array(&section, "Blocks").unwrap();
+        let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
+        let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(&section, "Add")
+            &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|| vec![0; blocks.len() / 2]),
         );
-        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(&section, "Data").unwrap());
+        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         //let mut block_cuboid = BlockCuboid::new((16, 16, 16));
         blocks
@@ -2390,13 +2390,13 @@ impl Chunk {
         sky_light: &mut LightCuboid,
     ) {
         // Parse relevant NBT data
-        let section_y_index = nbt_value_lookup_byte(&section, "Y").unwrap() as i64;
+        let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
         let section_block_light = packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(&section, "BlockLight")
+            &nbt_value_lookup_byte_array(section, "BlockLight")
                 .unwrap_or_else(|| vec![0; 2048]),
         );
         let section_sky_light = packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(&section, "SkyLight")
+            &nbt_value_lookup_byte_array(section, "SkyLight")
                 .unwrap_or_else(|| vec![0; 2048]),
         );
         let local_xz_offset = BlockCoord(0, 0, 0);
