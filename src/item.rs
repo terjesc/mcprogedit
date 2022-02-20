@@ -50,8 +50,8 @@ impl Item {
     // * spectral_arrow
     // * dragon_breath
     pub fn from_nbt_value(value: &nbt::Value) -> Self {
-        let id = nbt_value_lookup_string(&value, "id").unwrap(); // mandatory
-        let damage = nbt_value_lookup_short(&value, "Damage").unwrap_or(0);
+        let id = nbt_value_lookup_string(value, "id").unwrap(); // mandatory
+        let damage = nbt_value_lookup_short(value, "Damage").unwrap_or(0);
         // TODO Some items must store data from a "tag" field as well.
         // let tag = nbt_value_lookup(&value, "tag"); // optional
 
@@ -670,6 +670,14 @@ impl Item {
             damage: None,             // TODO
             kind,
         }
+    }
+
+    pub(crate) fn to_nbt_value(&self) -> nbt::Value {
+        let mut item: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(4);
+        //TODO fill "id" and "tag" fields
+        // For now: everything is an apple!
+        item.insert("id".into(), nbt::Value::String("minecraft:apple".into()));
+        nbt::Value::Compound(item)
     }
 }
 

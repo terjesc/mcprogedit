@@ -27,13 +27,28 @@ impl Inventory {
         }
     }
 
-    pub fn from_nbt_value_vec(list: &[nbt::Value]) -> Self {
+    pub(crate) fn from_nbt_value_vec(list: &[nbt::Value]) -> Self {
         let mut slots = HashMap::new();
         for item in list {
-            let slot = nbt_value_lookup_byte(&item, "Slot").unwrap();
-            slots.insert(slot, ItemStack::from_nbt_value(&item));
+            let slot = nbt_value_lookup_byte(item, "Slot").unwrap();
+            slots.insert(slot, ItemStack::from_nbt_value(item));
         }
         Inventory { slots }
+    }
+
+    pub(crate) fn to_nbt_value(&self) -> nbt::Value {
+        let mut items = Vec::with_capacity(self.slots.len());
+
+        for (slot, stack) in &self.slots {
+            let mut item = stack.item.to_nbt_value();
+            if let nbt::Value::Compound(ref mut item) = item {
+                item.insert("Count".into(), nbt::Value::Byte(stack.count));
+                item.insert("Slot".into(), nbt::Value::Byte(*slot));
+            }
+            items.push(item);
+        }
+
+        nbt::Value::List(items)
     }
 
     // TODO / FUTURE WORK
@@ -60,8 +75,8 @@ struct ItemStack {
 
 impl ItemStack {
     pub fn from_nbt_value(value: &nbt::Value) -> Self {
-        let count = nbt_value_lookup_byte(&value, "Count").unwrap();
-        let item = Item::from_nbt_value(&value);
+        let count = nbt_value_lookup_byte(value, "Count").unwrap();
+        let item = Item::from_nbt_value(value);
 
         Self { item, count }
     }

@@ -1,10 +1,10 @@
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct BlockCoord(pub i64, pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct BlockColumnCoord(pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct ChunkCoord(pub i64, pub i64);
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, Ord, PartialEq, PartialOrd, Eq)]
 pub struct RegionCoord(pub i64, pub i64);
 
 impl From<(i64, i64, i64)> for BlockCoord {
@@ -26,6 +26,30 @@ impl std::ops::Sub for BlockCoord {
 
     fn sub(self, other: Self) -> Self {
         Self(self.0 - other.0, self.1 - other.1, self.2 - other.2)
+    }
+}
+
+impl std::ops::Mul<i64> for BlockCoord {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        BlockCoord(self.0 * rhs, self.1 * rhs, self.2 * rhs)
+    }
+}
+
+impl std::ops::Mul<BlockCoord> for i64 {
+    type Output = BlockCoord;
+
+    fn mul(self, rhs: BlockCoord) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl std::ops::Div<i64> for BlockCoord {
+    type Output = Self;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        BlockCoord(self.0 / rhs, self.1 / rhs, self.2 / rhs)
     }
 }
 
@@ -54,6 +78,30 @@ impl std::ops::Sub for BlockColumnCoord {
 
     fn sub(self, other: Self) -> Self {
         Self(self.0 - other.0, self.1 - other.1)
+    }
+}
+
+impl std::ops::Mul<i64> for BlockColumnCoord {
+    type Output = Self;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        BlockColumnCoord(self.0 * rhs, self.1 * rhs)
+    }
+}
+
+impl std::ops::Mul<BlockColumnCoord> for i64 {
+    type Output = BlockColumnCoord;
+
+    fn mul(self, rhs: BlockColumnCoord) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl std::ops::Div<i64> for BlockColumnCoord {
+    type Output = Self;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        BlockColumnCoord(self.0 / rhs, self.1 / rhs)
     }
 }
 

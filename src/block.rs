@@ -1,10 +1,10 @@
 use std::convert::TryFrom;
 
 mod banner;
+mod beacon;
 mod bed;
 mod brewing_stand;
 mod chest;
-mod chorus_plant;
 mod dispenser;
 mod door;
 mod dropper;
@@ -21,11 +21,14 @@ mod stair;
 mod trapdoor;
 mod vines;
 
+mod foilage;
+pub(crate) mod light;
+
 pub use self::banner::*;
+pub use self::beacon::*;
 pub use self::bed::*;
 pub use self::brewing_stand::*;
 pub use self::chest::*;
-pub use self::chorus_plant::*;
 pub use self::dispenser::*;
 pub use self::door::*;
 pub use self::dropper::*;
@@ -47,17 +50,8 @@ use crate::colour::*;
 use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
-use crate::status_effect::StatusEffect;
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Beacon {
-    pub lock: Option<String>,
-    pub levels: i32, // TODO change type to integer with valid range
-    pub primary: Option<StatusEffect>,
-    pub secondary: Option<StatusEffect>,
-}
-
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SlabVariant {
     Bottom,
     Double,
@@ -73,11 +67,11 @@ pub struct Slab {
 
 impl Slab {
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RailType {
     Activator,
     Detector,
@@ -85,7 +79,7 @@ pub enum RailType {
     Powered,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum RailShape {
     EastWest,
     NorthEast,
@@ -115,9 +109,24 @@ impl RailShape {
             n => panic!("Invalid rail shape value: {}", n),
         }
     }
+
+    pub fn to_value(self) -> u8 {
+        match self {
+            Self::NorthSouth => 0,
+            Self::EastWest => 1,
+            Self::AscendingEast => 2,
+            Self::AscendingWest => 3,
+            Self::AscendingNorth => 4,
+            Self::AscendingSouth => 5,
+            Self::SouthEast => 6,
+            Self::SouthWest => 7,
+            Self::NorthWest => 8,
+            Self::NorthEast => 9,
+        }
+    }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Flower {
     Allium,
     AzureBluet,
@@ -142,7 +151,7 @@ pub enum Flower {
     WitherRose,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Grass {
     Fern,
     Grass,
@@ -152,14 +161,14 @@ pub enum Grass {
     TallGrassTop,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Seagrass {
     Seagrass,
     TallSeagrassBottom,
     TallSeagrassTop,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum AnvilDamage {
     Intact,
     SlightlyDamaged,
@@ -186,7 +195,7 @@ pub enum StemState {
     Attached(Surface4),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum BambooLeaves {
     None,
     Small,
@@ -203,19 +212,14 @@ pub struct Log {
 
 impl Log {
     pub fn has_material_of(&self, material: Material) -> bool {
-        material == self.material.clone().into()
+        material == self.material.into()
     }
 }
 
-bounded_integer! {
-    #[repr(i8)]
-    pub struct HoneyLevel { 0..=5 }
-}
-
-pub type ChorusPlantConnections = DirectionFlags6;
+pub type HoneyLevel = Int0Through5;
 pub type FireFace = DirectionFlags6;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum CommandBlockVariant {
     ChainedCommandBlock,
     CommandBlock,
@@ -234,7 +238,7 @@ pub struct Jukebox {
     pub record: Option<Item>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum OnOffState {
     On,
     Off,
@@ -309,6 +313,9 @@ pub enum Block {
     BrownMushroomBlock {
         cap_directions: DirectionFlags6,
     },
+    BrownMushroomStem {
+        stem_directions: DirectionFlags6,
+    },
     BubbleColumn {
         drag_direction: Surface2,
     }, // Is this even needed?
@@ -348,7 +355,7 @@ pub enum Block {
     ChorusFlower {
         growth_stage: Int0Through5,
     },
-    ChorusPlant(ChorusPlant),
+    ChorusPlant,
     Clay,
     CoalOre,
     CoarseDirt,
@@ -531,9 +538,6 @@ pub enum Block {
     MossyCobblestone,
     MossyStoneBricks,
     // TODO consider adding the MovingPiston technical block and block entity
-    MushroomStem {
-        stem_directions: DirectionFlags6,
-    },
     Mycelium,
     NetherBricks,
     NetherGoldOre,
@@ -602,6 +606,9 @@ pub enum Block {
     RedMushroomBlock {
         cap_directions: DirectionFlags6,
     },
+    RedMushroomStem {
+        stem_directions: DirectionFlags6,
+    },
     RedNetherBricks,
     RedSand,
     RedSandstone,
@@ -643,10 +650,7 @@ pub enum Block {
     Sign(Box<Sign>),
     Slab(Slab),
     SmithingTable,
-    Smoker {
-        facing: Surface4,
-        lit: bool,
-    }, // TODO add block entity
+    Smoker(Box<Furnace>),
     SmoothQuartz,
     SmoothRedSandstone,
     SmoothSandstone,
@@ -758,7 +762,7 @@ assert_eq_size!(Block, i128);
 
 impl Block {
     /// Returns an acacia fence.
-    pub fn acacia_fence() -> Self {
+    pub const fn acacia_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Acacia,
             waterlogged: false,
@@ -802,14 +806,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Acacia variant.
-    pub fn acacia_planks() -> Self {
+    pub const fn acacia_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Acacia,
         }
     }
 
     /// Returns a Sapling block of the Acacia variant.
-    pub fn acacia_sapling() -> Self {
+    pub const fn acacia_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Acacia,
             growth_stage: Int0Through1::MIN,
@@ -825,7 +829,7 @@ impl Block {
     }
 
     /// Returns a birch fence.
-    pub fn birch_fence() -> Self {
+    pub const fn birch_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Birch,
             waterlogged: false,
@@ -869,14 +873,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Birch variant.
-    pub fn birch_planks() -> Self {
+    pub const fn birch_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Birch,
         }
     }
 
     /// Returns a Sapling block of the Birch variant.
-    pub fn birch_sapling() -> Self {
+    pub const fn birch_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Birch,
             growth_stage: Int0Through1::MIN,
@@ -893,7 +897,7 @@ impl Block {
     }
 
     /// Returns a (full) cake.
-    pub fn cake() -> Self {
+    pub const fn cake() -> Self {
         Self::Cake {
             pieces: Int1Through7::MAX,
         }
@@ -907,7 +911,7 @@ impl Block {
     }
 
     /// Returns a cactus block.
-    pub fn cactus() -> Self {
+    pub const fn cactus() -> Self {
         Self::Cactus {
             growth_stage: Int0Through15::MIN,
         }
@@ -929,7 +933,7 @@ impl Block {
     }
 
     /// Returns a dark oak fence.
-    pub fn dark_oak_fence() -> Self {
+    pub const fn dark_oak_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::DarkOak,
             waterlogged: false,
@@ -973,14 +977,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Dark Oak variant.
-    pub fn dark_oak_planks() -> Self {
+    pub const fn dark_oak_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::DarkOak,
         }
     }
 
     /// Returns a Sapling block of the Dark Oak variant.
-    pub fn dark_oak_sapling() -> Self {
+    pub const fn dark_oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::DarkOak,
             growth_stage: Int0Through1::MIN,
@@ -1005,19 +1009,19 @@ impl Block {
     }
 
     /// Returns a fire block of minimum age.
-    pub fn fire() -> Self {
+    pub const fn fire() -> Self {
         Self::Fire {
             age: Int0Through15::MIN,
         }
     }
 
     /// Returns an uncoloured glass block.
-    pub fn glass() -> Self {
+    pub const fn glass() -> Self {
         Self::Glass { colour: None }
     }
 
     /// Returns an uncoloured glass pane.
-    pub fn glass_pane() -> Self {
+    pub const fn glass_pane() -> Self {
         Self::GlassPane {
             colour: None,
             waterlogged: false,
@@ -1105,7 +1109,7 @@ impl Block {
             }
             Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
             Self::Sign(sign) => sign.has_facing_of(direction),
-            Self::Smoker { facing, .. } => Direction::from(*facing) == direction,
+            Self::Smoker(furnace) => furnace.has_facing_of(direction),
             Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
             Self::SoulLantern { mounted_at } => Direction::from(*mounted_at) == direction,
             Self::SoulTorch { attached, .. } => Direction::from(*attached).opposite() == direction,
@@ -1144,159 +1148,259 @@ impl Block {
     }
 
     /// Returns an iron bars block..
-    pub fn iron_bars() -> Self {
+    pub const fn iron_bars() -> Self {
         Self::IronBars { waterlogged: false }
     }
 
     /// Returns true if the block is a beacon.
     pub fn is_beacon(&self) -> bool {
-        match self {
-            Self::Beacon { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Beacon { .. })
     }
 
     /// Returns true if the block is a brewing stand.
     pub fn is_brewing_stand(&self) -> bool {
-        match self {
-            Self::BrewingStand(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::BrewingStand(_))
     }
 
     /// Returns true if the block is a chest.
     pub fn is_chest(&self) -> bool {
-        match self {
-            Self::Chest(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Chest(_))
     }
 
     /// Returns true if the block is a dispenser.
     pub fn is_dispenser(&self) -> bool {
-        match self {
-            Self::Dispenser(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Dispenser(_))
     }
 
     /// Returns true if the block is a dropper.
     pub fn is_dropper(&self) -> bool {
-        match self {
-            Self::Dropper(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Dropper(_))
     }
 
     /// Returns true if the block is an enchanting table.
     pub fn is_enchanting_table(&self) -> bool {
-        match self {
-            Self::EnchantingTable { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::EnchantingTable { .. })
     }
 
     /// Returns true if the block is an ender chest.
     pub fn is_ender_chest(&self) -> bool {
-        match self {
-            Self::EnderChest { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::EnderChest { .. })
     }
 
     /// Returns true if the block is a furnace.
     pub fn is_furnace(&self) -> bool {
-        match self {
-            Self::Furnace(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Furnace(_))
     }
 
     /// Returns true if the block is a hopper.
     pub fn is_hopper(&self) -> bool {
-        match self {
-            Self::Hopper(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Hopper(_))
     }
 
     /// Returns true if the block is an observer.
     pub fn is_observer(&self) -> bool {
-        match self {
-            Self::Observer { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Observer { .. })
     }
 
     /// Returns true if the block is a piston (base).
     pub fn is_piston(&self) -> bool {
-        match self {
-            Self::Piston { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Piston { .. })
     }
 
     /// Returns true if the block is a piston head.
     pub fn is_piston_head(&self) -> bool {
-        match self {
-            Self::PistonHead { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::PistonHead { .. })
     }
 
     /// Returns true if the block is a redstone torch.
     pub fn is_redstone_torch(&self) -> bool {
-        match self {
-            Self::RedstoneTorch { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::RedstoneTorch { .. })
     }
 
     /// Returns true if the block is a sign.
     pub fn is_sign(&self) -> bool {
-        match self {
-            Self::Sign(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Sign(_))
+    }
+
+    /// Returns true if the block cannot be moved through and fills the full block space.
+    pub fn is_solid(&self) -> bool {
+        matches!(
+            self,
+            Self::AncientDebris
+                | Self::Andesite
+                | Self::Barrel { .. }
+                | Self::Basalt { .. }
+                | Self::Bedrock
+                | Self::Beehive { .. }
+                | Self::BeeNest { .. }
+                | Self::Blackstone
+                | Self::BlastFurnace(_)
+                | Self::BlockOfCoal
+                | Self::BlockOfDiamond
+                | Self::BlockOfEmerald
+                | Self::BlockOfGold
+                | Self::BlockOfIron
+                | Self::BlockOfNetherite
+                | Self::BlockOfQuartz
+                | Self::BlockOfRedstone
+                | Self::BlockOfSlime
+                | Self::BlueIce
+                | Self::BoneBlock { .. }
+                | Self::Bookshelf
+                | Self::BrickBlock
+                | Self::BrownMushroomBlock { .. }
+                | Self::BrownMushroomStem { .. }
+                | Self::Cactus { .. }
+                | Self::CarvedPumpkin { .. }
+                | Self::ChiseledNetherBricks
+                | Self::ChiseledPolishedBlackstone
+                | Self::ChiseledQuartzBlock
+                | Self::ChiseledRedSandstone
+                | Self::ChiseledSandstone
+                | Self::ChiseledStoneBricks
+                | Self::Clay
+                | Self::CoalOre
+                | Self::CoarseDirt
+                | Self::Cobblestone
+                | Self::CommandBlock(_)
+                | Self::Concrete { .. }
+                | Self::ConcretePowder { .. }
+                | Self::CoralBlock { .. }
+                | Self::CrackedNetherBricks
+                | Self::CrackedPolishedBlackstoneBricks
+                | Self::CrackedStoneBricks
+                | Self::CraftingTable
+                | Self::CryingObsidian
+                | Self::CutRedSandstone
+                | Self::CutSandstone
+                | Self::DarkPrismarine
+                | Self::DiamondOre
+                | Self::Diorite
+                | Self::Dirt
+                | Self::Dispenser(_)
+                | Self::DriedKelpBlock
+                | Self::Dropper(_)
+                | Self::EmeraldOre
+                | Self::EndStone
+                | Self::EndStoneBricks
+                | Self::FletchingTable
+                | Self::FrostedIce
+                | Self::Furnace(_)
+                | Self::GildedBlackstone
+                | Self::Glass { .. }
+                | Self::GlazedTerracotta(_)
+                | Self::Glowstone
+                | Self::GoldOre
+                | Self::Granite
+                | Self::Grass(_)
+                | Self::GrassBlock
+                | Self::Gravel
+                | Self::HayBale { .. }
+                | Self::HoneyBlock
+                | Self::HoneycombBlock
+                | Self::Ice
+                | Self::InfestedChiseledStoneBricks
+                | Self::InfestedCobblestone
+                | Self::InfestedCrackedStoneBricks
+                | Self::InfestedMossyStoneBricks
+                | Self::InfestedStone
+                | Self::InfestedStoneBricks
+                | Self::IronOre
+                | Self::JackOLantern { .. }
+                | Self::Jukebox(_)
+                | Self::LapisLazuliBlock
+                | Self::LapisLazuliOre
+                | Self::Leaves { .. }
+                | Self::Log(_)
+                | Self::Loom { .. }
+                | Self::MagmaBlock
+                | Self::Melon
+                | Self::MossyCobblestone
+                | Self::MossyStoneBricks
+                | Self::Mycelium
+                | Self::NetherBricks
+                | Self::NetherGoldOre
+                | Self::NetherWartBlock
+                | Self::Netherrack
+                | Self::Noteblock(_)
+                | Self::Observer { .. }
+                | Self::Obsidian
+                | Self::PackedIce
+                | Self::Piston { .. }
+                | Self::Planks { .. }
+                | Self::Podzol
+                | Self::PolishedAndesite
+                | Self::PolishedBasalt { .. }
+                | Self::PolishedBlackstone
+                | Self::PolishedBlackstoneBricks
+                | Self::PolishedDiorite
+                | Self::PolishedGranite
+                | Self::Prismarine
+                | Self::PrismarineBricks
+                | Self::Pumpkin { .. }
+                | Self::PurpurBlock
+                | Self::PurpurPillar { .. }
+                | Self::QuartzBricks
+                | Self::QuartzOre
+                | Self::QuartzPillar { .. }
+                | Self::RedMushroomBlock { .. }
+                | Self::RedMushroomStem { .. }
+                | Self::RedNetherBricks
+                | Self::RedSand
+                | Self::RedSandstone
+                | Self::RedstoneLamp
+                | Self::RedstoneOre
+                | Self::RespawnAnchor { .. }
+                | Self::Sand
+                | Self::Sandstone
+                | Self::SeaLantern
+                | Self::Shroomlight
+                | Self::ShulkerBox(_)
+                | Self::Slab(Slab {
+                    position: SlabVariant::Double,
+                    ..
+                })
+                | Self::SmithingTable
+                | Self::Smoker { .. }
+                | Self::SmoothQuartz
+                | Self::SmoothRedSandstone
+                | Self::SmoothSandstone
+                | Self::SmoothStone
+                | Self::SnowBlock
+                | Self::SoulSand
+                | Self::SoulSoil
+                | Self::Spawner
+                | Self::Sponge
+                | Self::StickyPiston { .. }
+                | Self::Stone
+                | Self::StoneBricks
+                | Self::Target
+                | Self::Terracotta { .. }
+                | Self::TNT
+                | Self::WarpedWartBlock
+                | Self::WetSponge
+                | Self::Wool { .. }
+        )
     }
 
     /// Returns true if the block is a stair.
     pub fn is_stairs(&self) -> bool {
-        match self {
-            Self::Stairs(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Stairs(_))
     }
 
     /// Returns true if the block is a sticky piston (base).
     pub fn is_sticky_piston(&self) -> bool {
-        match self {
-            Self::StickyPiston { .. } => true,
-            _ => false,
-        }
-    }
-
-    /// Returns a sugar cane block.
-    pub fn sugar_cane() -> Self {
-        Self::SugarCane {
-            growth_stage: Int0Through15::MIN,
-        }
+        matches!(self, Self::StickyPiston { .. })
     }
 
     /// Returns true if the block is a torch.
     pub fn is_torch(&self) -> bool {
-        match self {
-            Self::Torch { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Torch { .. })
     }
 
     /// Returns true if the block is a trapped chest.
     pub fn is_trapped_chest(&self) -> bool {
-        match self {
-            Self::TrappedChest(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::TrappedChest(_))
     }
 
     /// Returns true if the block is a wall.
@@ -1305,10 +1409,7 @@ impl Block {
     /// that represents e.g. stone walls, often used for fencing. Their
     /// collision box is narrower than a block, but extends higher upwards.
     pub fn is_wall(&self) -> bool {
-        match self {
-            Self::Wall { .. } => true,
-            _ => false,
-        }
+        matches!(self, Self::Wall { .. })
     }
 
     /// Returns a jack o'lantern facing in the given direction.
@@ -1331,7 +1432,7 @@ impl Block {
     }
 
     /// Returns an jungle fence.
-    pub fn jungle_fence() -> Self {
+    pub const fn jungle_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Jungle,
             waterlogged: false,
@@ -1375,14 +1476,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Jungle variant.
-    pub fn jungle_planks() -> Self {
+    pub const fn jungle_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Jungle,
         }
     }
 
     /// Returns a Sapling block of the Jungle variant.
-    pub fn jungle_sapling() -> Self {
+    pub const fn jungle_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Jungle,
             growth_stage: Int0Through1::MIN,
@@ -1429,7 +1530,7 @@ impl Block {
     }
 
     /// Returns a nether brick fence.
-    pub fn nether_brick_fence() -> Self {
+    pub const fn nether_brick_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::NetherBrick,
             waterlogged: false,
@@ -1442,7 +1543,7 @@ impl Block {
     }
 
     /// Returns an oak fence.
-    pub fn oak_fence() -> Self {
+    pub const fn oak_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Oak,
             waterlogged: false,
@@ -1486,14 +1587,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Oak variant.
-    pub fn oak_planks() -> Self {
+    pub const fn oak_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Oak,
         }
     }
 
     /// Returns a Sapling block of the Oak variant.
-    pub fn oak_sapling() -> Self {
+    pub const fn oak_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Oak,
             growth_stage: Int0Through1::MIN,
@@ -1641,7 +1742,7 @@ impl Block {
     }
 
     /// Returns a one layer thick snow block.
-    pub fn snow_layer() -> Self {
+    pub const fn snow_layer() -> Self {
         Self::Snow {
             thickness: Int1Through8::MIN,
         }
@@ -1655,7 +1756,7 @@ impl Block {
     }
 
     /// Returns a spruce fence.
-    pub fn spruce_fence() -> Self {
+    pub const fn spruce_fence() -> Self {
         Self::Fence {
             material: FenceMaterial::Spruce,
             waterlogged: false,
@@ -1699,14 +1800,14 @@ impl Block {
     }
 
     /// Returns a Plank block of the Spruce variant.
-    pub fn spruce_planks() -> Self {
+    pub const fn spruce_planks() -> Self {
         Self::Planks {
             material: WoodMaterial::Spruce,
         }
     }
 
     /// Returns a Sapling block of the Spruce variant.
-    pub fn spruce_sapling() -> Self {
+    pub const fn spruce_sapling() -> Self {
         Self::Sapling {
             material: SaplingMaterial::Spruce,
             growth_stage: Int0Through1::MIN,
@@ -1721,8 +1822,15 @@ impl Block {
         )
     }
 
+    /// Returns a sugar cane block.
+    pub const fn sugar_cane() -> Self {
+        Self::SugarCane {
+            growth_stage: Int0Through15::MIN,
+        }
+    }
+
     /// Returns an uncoloured terracotta block.
-    pub fn terracotta() -> Self {
+    pub const fn terracotta() -> Self {
         Self::Terracotta { colour: None }
     }
 
@@ -1740,6 +1848,13 @@ impl Block {
             position: SlabVariant::Top,
             waterlogged: false,
         })
+    }
+
+    /// Returns a torch facing up.
+    pub const fn torch() -> Self {
+        Self::Torch {
+            attached: Surface5::Down,
+        }
     }
 
     /// Returns a Water or WaterSource block with the given water level.
@@ -1765,7 +1880,7 @@ impl Block {
     }
 
     /// Returns a wheat block of minimum age.
-    pub fn wheat() -> Self {
+    pub const fn wheat() -> Self {
         Self::Wheat {
             growth_stage: Int0Through7::MIN,
         }

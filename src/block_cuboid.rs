@@ -1,6 +1,7 @@
 use crate::block::Block;
+use crate::height_map::HeightMap;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BlockCuboid {
     blocks: Vec<Block>,
     x_dim: usize,
@@ -10,9 +11,13 @@ pub struct BlockCuboid {
 
 impl BlockCuboid {
     pub fn new((x_dim, y_dim, z_dim): (usize, usize, usize)) -> Self {
+        Self::new_filled((x_dim, y_dim, z_dim), Block::None)
+    }
+
+    pub fn new_filled((x_dim, y_dim, z_dim): (usize, usize, usize), block: Block) -> Self {
         let blocks_len = x_dim * y_dim * z_dim;
         let mut blocks = Vec::with_capacity(blocks_len);
-        blocks.resize(blocks_len, Block::None);
+        blocks.resize(blocks_len, block);
         Self {
             blocks,
             x_dim,
@@ -26,11 +31,18 @@ impl BlockCuboid {
     }
 
     pub fn insert(&mut self, coordinates: (usize, usize, usize), block: Block) {
-        let index = self.index(coordinates).unwrap();
-        self.blocks[index] = block;
+        if let Some(index) = self.index(coordinates) {
+            self.blocks[index] = block;
+        } else {
+            eprintln!(
+                "[warning] failed to set block {:?} at invalid coordinates {:?}",
+                block,
+                coordinates,
+            );
+        }
     }
 
-    pub fn get(&self, coordinates: (usize, usize, usize)) -> Option<&Block> {
+    pub fn block_at(&self, coordinates: (usize, usize, usize)) -> Option<&Block> {
         if let Some(index) = self.index(coordinates) {
             self.blocks.get(index)
         } else {
@@ -38,7 +50,7 @@ impl BlockCuboid {
         }
     }
 
-    pub fn get_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
+    pub fn _block_at_mut(&mut self, coordinates: (usize, usize, usize)) -> Option<&mut Block> {
         if let Some(index) = self.index(coordinates) {
             self.blocks.get_mut(index)
         } else {
@@ -48,8 +60,12 @@ impl BlockCuboid {
 
     /// Paste the contents of a different BlockCuboid into this BlockCuboid.
     ///
+    /// The corner of `other` with the lowest numbered coordinates, is aligned at block
+    /// coordinates `at` relative to the block cuboid. Only the parts of `other` that
+    /// then overlaps with the block cuboid are pasted.
+    ///
     /// Empty blocks ([`Block::None`](crate::block::Block::None)) are not copied over,
-    /// allowing for pasting non-rectangular cuboid selections.
+    /// allowing for pasting other selection shapes than rectangular cuboids.
     pub fn paste(&mut self, offset: (i64, i64, i64), other: &Self) {
         // Calculate the spans relative to self, for where blocks are to be pasted in.
         let min = (
@@ -69,12 +85,103 @@ impl BlockCuboid {
                 let from_y = (to_y as i64 - offset.1) as usize;
                 for to_z in min.2..=max.2 {
                     let from_z = (to_z as i64 - offset.2) as usize;
-                    if let Some(block) = other.get((from_x, from_y, from_z)) {
+                    if let Some(block) = other.block_at((from_x, from_y, from_z)) {
                         if *block != Block::None {
                             self.insert((to_x, to_y, to_z), block.clone());
                         }
                     } else {
-                        eprintln!("[warning] Tried to paste block from invalid source position");
+                        eprintln!("[warning] Tried to paste block from invalid source position ({}, {}, {})", from_x, from_y, from_z);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Creates a new `BlockCuboid` from part of an existing `BlockCuboid`.
+    pub fn from_block_cuboid(
+        p1: (usize, usize, usize),
+        p2: (usize, usize, usize),
+        other: &Self,
+    ) -> Self {
+        let min = (
+            usize::min(p1.0, p2.0),
+            usize::min(p1.1, p2.1),
+            usize::min(p1.2, p2.2),
+        );
+        let max = (
+            usize::max(p1.0, p2.0),
+            usize::max(p1.1, p2.1),
+            usize::max(p1.2, p2.2),
+        );
+
+        let dimensions = (max.0 - min.0, max.1 - min.1, max.2 - min.2);
+
+        let mut cuboid = Self::new(dimensions);
+
+        for from_x in min.0..=max.0 {
+            let to_x = from_x - min.0;
+            for from_y in min.1..=max.1 {
+                let to_y = from_y - min.1;
+                for from_z in min.2..=max.2 {
+                    let to_z = from_z - min.2;
+                    if let Some(block) = other.block_at((from_x, from_y, from_z)) {
+                        if *block != Block::None {
+                            cuboid.insert((to_x, to_y, to_z), block.clone());
+                        }
+                    } else {
+                        eprintln!("[warning] Tried to copy block from invalid source position ({}, {}, {})", from_x, from_y, from_z);
+                    }
+                }
+            }
+        }
+
+        cuboid
+    }
+
+    /// Generate and return a height map for the block cuboid, relative to the bottom
+    /// layer of blocks in the block cuboid.
+    pub fn height_map(&self) -> HeightMap {
+        let mut height_map = HeightMap::new((self.x_dim, self.z_dim));
+
+        for x in 0..self.x_dim {
+            for z in 0..self.z_dim {
+                let mut height = 0;
+
+                // Quckly drill down through the air
+                for y in (0..self.y_dim).rev() {
+                    if let Some(Block::Air) = self.block_at((x, y as usize, z)) {
+                    } else {
+                        height = y;
+                        break;
+                    }
+                }
+
+                // Accurately find the first opaque block
+                for y in (0..=height).rev() {
+                    if let Some(block) = self.block_at((x, y as usize, z)) {
+                        if block.is_affecting_sky_light_old() {
+                            height = y + 1;
+                            break;
+                        }
+                    }
+                }
+
+                height_map.set_height((x, z), height as u32);
+            }
+        }
+
+        height_map
+    }
+
+    /// Replace all occurrences of the given block with the given replacement.
+    pub fn replace(&mut self, search_for: &Block, replace_with: &Block) {
+        for x in 0..self.x_dim {
+            for y in 0..self.y_dim {
+                for z in 0..self.z_dim {
+                    if let Some(found_block) = self.block_at((x, y, z)) {
+                        if *search_for == *found_block {
+                            self.insert((x, y, z), replace_with.clone());
+                        }
                     }
                 }
             }

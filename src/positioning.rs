@@ -23,7 +23,7 @@ pub enum DirectionError {
 /// Bells can be rotated in four directions. On top of that they can hang
 /// form the block above, be mounted to one side, hang between two blocks
 /// (one on either side), or be mounted on the block below.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum BellPosition {
     UpEast,
     UpNorth,
@@ -46,7 +46,7 @@ pub enum BellPosition {
 /// All directions.
 ///
 /// Convertible to and from direction, edge and surface data types.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction {
     Down,
     DownEast,
@@ -264,7 +264,7 @@ impl From<SurfaceRotation12> for Direction {
 
 /// Describes the rotation of blocks or entities that can be positioned in
 /// 16 different directions, by what direction they are facing.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Direction16 {
     South = 0,
     SouthSouthWest = 1,
@@ -338,6 +338,29 @@ impl From<i8> for Direction16 {
     }
 }
 
+impl From<Direction16> for u8 {
+    fn from(direction: Direction16) -> u8 {
+        match direction {
+            Direction16::South => 0,
+            Direction16::SouthSouthWest => 1,
+            Direction16::SouthWest => 2,
+            Direction16::WestSouthWest => 3,
+            Direction16::West => 4,
+            Direction16::WestNorthWest => 5,
+            Direction16::NorthWest => 6,
+            Direction16::NorthNorthWest => 7,
+            Direction16::North => 8,
+            Direction16::NorthNorthEast => 9,
+            Direction16::NorthEast => 10,
+            Direction16::EastNorthEast => 11,
+            Direction16::East => 12,
+            Direction16::EastSouthEast => 13,
+            Direction16::SouthEast => 14,
+            Direction16::SouthSouthEast => 15,
+        }
+    }
+}
+
 impl TryFrom<Direction> for Direction16 {
     type Error = DirectionError;
 
@@ -364,7 +387,7 @@ impl TryFrom<Direction> for Direction16 {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DirectionFlags6 {
     pub east: bool,
     pub down: bool,
@@ -390,7 +413,7 @@ pub struct DirectionFlags6 {
 /// // A block attached to its neighbouring block to the south (i.e. facing north).
 /// let placement = WallOrRotatedOnFloor::Wall(Surface4::South);
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum WallOrRotatedOnFloor {
     /// Block rests on top of the block below it, and may face 16 different directions.
     Floor(Direction16),
@@ -400,10 +423,7 @@ pub enum WallOrRotatedOnFloor {
 
 impl WallOrRotatedOnFloor {
     pub fn is_on_floor(&self) -> bool {
-        match self {
-            Self::Floor(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Floor(_))
     }
 
     pub fn is_on_wall(&self) -> bool {
@@ -418,7 +438,7 @@ impl Default for WallOrRotatedOnFloor {
 }
 
 /// Alignment along one of the 2 horizontal axes.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Axis2 {
     /// East-West orientation
     X,
@@ -442,7 +462,7 @@ impl Default for Axis2 {
 }
 
 /// Alignment along an axis.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Axis3 {
     /// East-West orientation
     X,
@@ -470,7 +490,7 @@ impl Default for Axis3 {
 }
 
 /// The top and bottom surfaces of the voxel volume populated by the block.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Surface2 {
     Down,
     Up,
@@ -495,7 +515,7 @@ impl TryFrom<Direction> for Surface2 {
 }
 
 /// The four side surfaces of the voxel volume populated by the block.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Surface4 {
     East,
     North,
@@ -524,7 +544,7 @@ impl TryFrom<Direction> for Surface4 {
 }
 
 /// The bottom and four side surfaces of the voxel volume populated by the block..
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Surface5 {
     Down,
     East,
@@ -555,7 +575,7 @@ impl TryFrom<Direction> for Surface5 {
 }
 
 /// All six surfaces of the voxel volume populated by the block.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Surface6 {
     Down,
     East,
@@ -588,7 +608,7 @@ impl TryFrom<Direction> for Surface6 {
 }
 
 /// The four top-most and four bottom-most edges of the voxel volume populated by the block.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Edge8 {
     DownEast,
     DownNorth,
@@ -622,6 +642,21 @@ impl From<i8> for Edge8 {
     }
 }
 
+impl From<Edge8> for u8 {
+    fn from(edge: Edge8) -> u8 {
+        match edge {
+            Edge8::DownEast => 0,
+            Edge8::DownWest => 1,
+            Edge8::DownSouth => 2,
+            Edge8::DownNorth => 3,
+            Edge8::UpEast => 4,
+            Edge8::UpWest => 5,
+            Edge8::UpSouth => 6,
+            Edge8::UpNorth => 7,
+        }
+    }
+}
+
 impl TryFrom<Direction> for Edge8 {
     type Error = DirectionError;
 
@@ -642,7 +677,7 @@ impl TryFrom<Direction> for Edge8 {
 
 /// All six surfaces of the voxel volume populated by the block,
 /// with rotation towards a cardinal direction for the Up and Down surfaces.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SurfaceRotation12 {
     DownFacingEast,
     DownFacingNorth,
@@ -690,7 +725,7 @@ impl TryFrom<Direction> for SurfaceRotation12 {
 ///
 /// Please don't ask. The terminology is taken directly from the Minecraft save format.
 /// I have no idea what it means.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum JigsawBlockOrientation {
     DownEast,
     DownNorth,
