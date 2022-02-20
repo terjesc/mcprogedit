@@ -90,6 +90,7 @@ pub(crate) fn tightly_packed<T>(unpacked_array: &[T], bits_per_value: usize) -> 
         let low_unpacked_index = (packed_long_bit_index + bits_per_value - 1) / bits_per_value;
         let high_unpacked_index = std::cmp::min(unpacked_len, low_unpacked_index + values_overlapping_u64_max);
 
+        #[allow(clippy::needless_range_loop)]
         for unpacked_index in low_unpacked_index .. high_unpacked_index {
             // The values with these indexes are possibly overlapping with the given element of the
             // packed array
@@ -108,8 +109,33 @@ pub(crate) fn tightly_packed<T>(unpacked_array: &[T], bits_per_value: usize) -> 
     packed
 }
 
-pub(crate) fn tightly_unpacked<T>(packed_array: &[u64], bits_per_value: usize) -> Vec<T> {
-    unimplemented!()
+/// Unpacks a tightly packed array stored in a u64 array.
+///
+/// This is the value unpacking used between the flattening and Minecraft 1.16. Values of length
+/// bits_per_value are placed back to back in the memory space of the output array.
+pub(crate) fn tightly_unpacked<T>(packed_array: &[u64], bits_per_value: usize) -> Vec<T> where
+    T: std::convert::TryFrom<u64>,
+    <T as std::convert::TryFrom<u64>>::Error: std::fmt::Debug,
+{
+    let packed_len = packed_array.len();
+    let unpacked_len = packed_len * 64 / bits_per_value;
+    let mut unpacked = Vec::<T>::with_capacity(unpacked_len);
+
+    let value_mask = (1 << bits_per_value) - 1;
+
+    for unpacked_index in 0 .. unpacked_len {
+        let value_bit_index = unpacked_index * bits_per_value;
+        let long_index = value_bit_index / 64;
+        let internal_bit_index = value_bit_index % 64;
+
+        let mut value = (packed_array[long_index] >> internal_bit_index) & value_mask;
+        if (64 - internal_bit_index) < bits_per_value {
+            value |= (packed_array[long_index + 1] << (64 - internal_bit_index)) & value_mask;
+        }
+        unpacked.push(std::convert::TryInto::<T>::try_into(value).unwrap());
+    }
+
+    unpacked
 }
 
 /// Packs an array into an array of padded u64.
@@ -142,8 +168,30 @@ pub(crate) fn paddedly_packed<T>(unpacked_array: &[T], bits_per_value: usize) ->
     packed
 }
 
-pub(crate) fn paddedly_unpacked<T>(packed_array: &[u64], bits_per_value: usize) -> Vec<T> {
-    unimplemented!()
+/// Unpacks a padded array stored in a u64 array.
+///
+/// This is the value unpacking used for Minecraft 1.16 and later. Values of length bits_per_value
+/// are placed back to back in each u64, but padding is added in the most significant end of the
+/// u64 when there is not enough space left for storing a full value.
+pub(crate) fn paddedly_unpacked<T>(packed_array: &[u64], bits_per_value: usize) -> Vec<T> where
+    T: std::convert::TryFrom<u64>,
+    <T as std::convert::TryFrom<u64>>::Error: std::fmt::Debug,
+{
+    let full_values_per_u64 = 64 / bits_per_value;
+    let packed_len = packed_array.len();
+    let unpacked_len = packed_len * full_values_per_u64;
+    let mut unpacked = Vec::with_capacity(unpacked_len);
+
+    let value_mask = (1 << bits_per_value) - 1;
+
+    for long in packed_array {
+        for internal_index in 0 .. full_values_per_u64 {
+            let value = (long >> (internal_index * bits_per_value)) & value_mask;
+            unpacked.push(std::convert::TryInto::<T>::try_into(value).unwrap());
+        }
+    }
+
+    unpacked
 }
 
 #[cfg(test)]
@@ -161,7 +209,7 @@ mod tests {
 
     #[test]
     fn test_tight_unpacking() {
-        assert_eq!(UNPACKED_U8, tightly_unpacked(&TIGHTLY_PACKED_5, 5).as_slice());
+        assert_eq!(UNPACKED_U8, tightly_unpacked(&TIGHTLY_PACKED_5, 5).as_slice()[..26]);
     }
 
     #[test]
@@ -171,6 +219,6 @@ mod tests {
 
     #[test]
     fn test_padded_unpacking() {
-        assert_eq!(UNPACKED_U8, paddedly_unpacked(&PADDEDLY_PACKED_5, 5).as_slice());
+        assert_eq!(UNPACKED_U8, paddedly_unpacked(&PADDEDLY_PACKED_5, 5).as_slice()[..26]);
     }
 }
