@@ -149,14 +149,14 @@ impl Chunk {
         let _last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
 
         let tile_entities = nbt_blob_lookup(&nbt, "Level/TileEntities")
-            .unwrap_or_else(|| panic!("Level/TileEntities not found"));
+            .unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
 
         let biomes: Option<Vec<Biome>> = nbt_blob_lookup_byte_array(&nbt, "Level/Biomes")
-            .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect());
+            .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect::<Vec<Biome>>()).ok();
 
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
-            .unwrap_or_else(|| panic!("Level/Sections not found"));
+            .unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
 
         /*
         let height_map = nbt_blob_lookup(&nbt, "Level/HeightMap")

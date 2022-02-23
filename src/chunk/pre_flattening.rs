@@ -992,7 +992,7 @@ impl Chunk {
         let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "Add")
-                .unwrap_or_else(|| vec![0; blocks.len() / 2]),
+                .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
         let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
@@ -1087,7 +1087,7 @@ impl Chunk {
         let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
         let add = packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "Add")
-                .unwrap_or_else(|| vec![0; blocks.len() / 2]),
+                .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
         let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
@@ -2393,11 +2393,11 @@ impl Chunk {
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
         let section_block_light = packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "BlockLight")
-                .unwrap_or_else(|| vec![0; 2048]),
+                .unwrap_or_else(|_| vec![0; 2048]),
         );
         let section_sky_light = packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "SkyLight")
-                .unwrap_or_else(|| vec![0; 2048]),
+                .unwrap_or_else(|_| vec![0; 2048]),
         );
         let local_xz_offset = BlockCoord(0, 0, 0);
 

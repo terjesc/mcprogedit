@@ -55,7 +55,7 @@ impl WorldExcerpt {
             .expect("Unable to parse level.dat contents");
 
         let _data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
-            .unwrap_or_else(|| panic!("level.dat Data/DataVersion not found"));
+            .unwrap_or_else(|err| panic!("level.dat Data/DataVersion not found: {}", err));
 
         // Create an empty (None-filled) WorldExcerpt of the correct size.
         let mut world_excerpt = Self::new(
@@ -206,7 +206,7 @@ impl WorldExcerpt {
             .expect("Unable to parse level.dat contents");
 
         let _data_version = nbt_blob_lookup_int(&level_dat_blob, "Data/DataVersion")
-            .unwrap_or_else(|| panic!("level.dat Data/DataVersion not found"));
+            .unwrap_or_else(|err| panic!("level.dat Data/DataVersion not found: {}", err));
 
         let (dx, dy, dz) = self.dim();
         let (dx, dy, dz) = (dx as i64, dy as i64, dz as i64);

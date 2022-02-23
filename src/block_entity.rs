@@ -160,7 +160,7 @@ impl BlockEntity {
     }
 
     pub fn from_nbt_value(value: &nbt::Value) -> Self {
-        if let Some(id) = nbt_value_lookup_string(value, "id") {
+        if let Ok(id) = nbt_value_lookup_string(value, "id") {
             match id.as_str() {
                 "minecraft:banner" => Self::banner_from_nbt_value(value),
                 "minecraft:barrel" => Self::barrel_from_nbt_value(value),
@@ -253,7 +253,7 @@ impl BlockEntity {
     fn banner_from_nbt_value(value: &nbt::Value) -> Self {
         let mut patterns = Vec::new();
 
-        if let Some(pattern_entries) = nbt_value_lookup_list(value, "Patterns") {
+        if let Ok(pattern_entries) = nbt_value_lookup_list(value, "Patterns") {
             for pattern_entry in pattern_entries {
                 let pattern = ColouredPattern {
                     colour: Colour::from(nbt_value_lookup_int(&pattern_entry, "Color").unwrap()),
@@ -269,14 +269,14 @@ impl BlockEntity {
 
         BlockEntity::Banner {
             common: CommonTags::from_nbt_value(value),
-            colour: if let Some(colour) = nbt_value_lookup_string(value, "Color") {
+            colour: if let Ok(colour) = nbt_value_lookup_string(value, "Color") {
                 Colour::from(colour.as_str())
-            } else if let Some(colour) = nbt_value_lookup_int(value, "Base") {
+            } else if let Ok(colour) = nbt_value_lookup_int(value, "Base") {
                 Colour::from(15 - colour)
             } else {
                 Colour::White
             },
-            custom_name: nbt_value_lookup_string(value, "CustomName"),
+            custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
             patterns,
         }
     }
@@ -326,12 +326,14 @@ impl BlockEntity {
     fn beacon_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Beacon {
             common: CommonTags::from_nbt_value(value),
-            lock: nbt_value_lookup_string(value, "Lock"),
+            lock: nbt_value_lookup_string(value, "Lock").ok(),
             levels: nbt_value_lookup_int(value, "Levels").unwrap(),
             primary: nbt_value_lookup_int(value, "Primary")
+                .ok()
                 .filter(|i| *i != 0)
                 .map(StatusEffect::from),
             secondary: nbt_value_lookup_int(value, "Secondary")
+                .ok()
                 .filter(|i| *i != 0)
                 .map(StatusEffect::from),
         }
@@ -389,7 +391,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn beehive_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -401,7 +403,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn bell_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -422,7 +424,7 @@ impl BlockEntity {
     }
 
     fn brewing_stand_from_nbt_value(value: &nbt::Value) -> Self {
-        let items = if let Some(items) = nbt_value_lookup_list(value, "Items") {
+        let items = if let Ok(items) = nbt_value_lookup_list(value, "Items") {
             Inventory::from_nbt_value_vec(&items)
         } else {
             Inventory::new()
@@ -430,8 +432,8 @@ impl BlockEntity {
 
         BlockEntity::BrewingStand {
             common: CommonTags::from_nbt_value(value),
-            custom_name: nbt_value_lookup_string(value, "CustomName"),
-            lock: nbt_value_lookup_string(value, "Lock"),
+            custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
+            lock: nbt_value_lookup_string(value, "Lock").ok(),
             items,
             brew_time: nbt_value_lookup_short(value, "BrewTime").unwrap(),
             fuel: nbt_value_lookup_byte(value, "Fuel").unwrap(),
@@ -446,7 +448,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn campfire_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -499,7 +501,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn conduit_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -560,7 +562,7 @@ impl BlockEntity {
     fn enchanting_table_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::EnchantingTable {
             common: CommonTags::from_nbt_value(value),
-            custom_name: nbt_value_lookup_string(value, "CustomName"),
+            custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
         }
     }
 
@@ -585,10 +587,10 @@ impl BlockEntity {
             common: CommonTags::from_nbt_value(value),
             age: nbt_value_lookup_long(value, "Age").unwrap(),
             exact_teleport: match nbt_value_lookup_byte(value, "ExactTeleport") {
-                Some(0) => false,
-                Some(1) => true,
-                Some(n) => panic!("Unknown ExactTeleport value of {}", n),
-                None => panic!("ExactTeleport nbt value not found"),
+                Ok(0) => false,
+                Ok(1) => true,
+                Ok(n) => panic!("Unknown ExactTeleport value of {}", n),
+                Err(_) => panic!("ExactTeleport nbt value not found"),
             },
             exit_portal: (
                 nbt_value_lookup_int(value, "ExitPortal/X").unwrap() as i64,
@@ -700,7 +702,7 @@ impl BlockEntity {
     fn jigsaw_from_nbt_value(value: &nbt::Value) -> Self {
         // TODO (deferred as too complicated)
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -712,7 +714,7 @@ impl BlockEntity {
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Jukebox {
             common: CommonTags::from_nbt_value(value),
-            record: nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)),
+            record: nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)).ok(),
         }
     }
 
@@ -727,7 +729,7 @@ impl BlockEntity {
             book: nbt_value_lookup(value, "Book").map(|book_value| (
                     Item::from_nbt_value(&book_value),
                     nbt_value_lookup_int(value, "Page").unwrap(),
-                )),
+                )).ok(),
         }
     }
 
@@ -750,7 +752,7 @@ impl BlockEntity {
         BlockEntity::Noteblock {
             common: CommonTags::from_nbt_value(value),
             note: Pitch::from_value(nbt_value_lookup_byte(value, "note").unwrap() as u8),
-            powered: !matches!(nbt_value_lookup_byte(value, "powered"), Some(0)),
+            powered: !matches!(nbt_value_lookup_byte(value, "powered"), Ok(0)),
         }
     }
 
@@ -806,7 +808,7 @@ impl BlockEntity {
     fn sign_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Sign {
             common: CommonTags::from_nbt_value(value),
-            colour: if let Some(colour) = nbt_value_lookup_string(value, "Color") {
+            colour: if let Ok(colour) = nbt_value_lookup_string(value, "Color") {
                 Colour::from(colour.as_str())
             } else {
                 Colour::Black
@@ -861,7 +863,7 @@ impl BlockEntity {
     // TODO (deferred as not present in Minecraft 1.12.2)
     fn soul_campfire_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id"),
+            id: nbt_value_lookup_string(value, "id").ok(),
         }
     }
 
@@ -974,9 +976,9 @@ impl ChestTags {
         //chest_tags_from_nbt_value!(value)
         Self {
             common: CommonTags::from_nbt_value(value),
-            custom_name: nbt_value_lookup_string(value, "CustomName"),
-            lock: nbt_value_lookup_string(value, "Lock"),
-            items: if let Some(items) = nbt_value_lookup_list(value, "Items") {
+            custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
+            lock: nbt_value_lookup_string(value, "Lock").ok(),
+            items: if let Ok(items) = nbt_value_lookup_list(value, "Items") {
                 Inventory::from_nbt_value_vec(&items)
             } else {
                 Inventory::new()
@@ -1016,7 +1018,7 @@ pub struct FurnaceTags {
 
 impl FurnaceTags {
     fn from_nbt_value(value: &nbt::Value) -> Self {
-        let items = if let Some(items) = nbt_value_lookup_list(value, "Items") {
+        let items = if let Ok(items) = nbt_value_lookup_list(value, "Items") {
             Inventory::from_nbt_value_vec(&items)
         } else {
             Inventory::new()
@@ -1024,8 +1026,8 @@ impl FurnaceTags {
 
         Self {
             common: CommonTags::from_nbt_value(value),
-            custom_name: nbt_value_lookup_string(value, "CustomName"),
-            lock: nbt_value_lookup_string(value, "Lock"),
+            custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
+            lock: nbt_value_lookup_string(value, "Lock").ok(),
             items,
             burn_time: nbt_value_lookup_short(value, "BurnTime").unwrap(),
             cook_time: nbt_value_lookup_short(value, "CookTime").unwrap(),
