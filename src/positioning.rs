@@ -388,6 +388,15 @@ impl TryFrom<Direction> for Direction16 {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub struct DirectionFlags5 {
+    pub east: bool,
+    pub north: bool,
+    pub south: bool,
+    pub up: bool,
+    pub west: bool,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DirectionFlags6 {
     pub east: bool,
     pub down: bool,
@@ -704,6 +713,7 @@ impl TryFrom<Direction> for SurfaceRotation12 {
 
     fn try_from(item: Direction) -> Result<Self, Self::Error> {
         match item {
+            Direction::Down => Ok(Self::DownFacingNorth),
             Direction::DownEast => Ok(Self::DownFacingEast),
             Direction::DownWest => Ok(Self::DownFacingWest),
             Direction::DownSouth => Ok(Self::DownFacingSouth),
@@ -712,6 +722,7 @@ impl TryFrom<Direction> for SurfaceRotation12 {
             Direction::West => Ok(Self::West),
             Direction::South => Ok(Self::South),
             Direction::North => Ok(Self::North),
+            Direction::Up => Ok(Self::UpFacingNorth),
             Direction::UpEast => Ok(Self::UpFacingEast),
             Direction::UpWest => Ok(Self::UpFacingWest),
             Direction::UpSouth => Ok(Self::UpFacingSouth),

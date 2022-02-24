@@ -14,52 +14,6 @@ use crate::positioning::*;
 use crate::utils;
 
 impl Chunk {
-    /// Calculates the global block coordinates of the block at index `index`
-    /// of the "Blocks" and similar NBT tags, within section `section_y_index`
-    /// of the chunk whose local (0, 0, 0) coordinates are at global block
-    /// coordinates `chunk_offset`.
-    fn coordinates(section_y_index: i64, chunk_offset: BlockCoord, index: usize) -> BlockCoord {
-        // index = (y * X_LENGTH * Z_LENGTH) + (z * X_LENGTH) + x
-        const X_LENGTH: i64 = 16;
-        const Y_HEIGHT: i64 = 16;
-        const Z_LENGTH: i64 = 16;
-        let y_offset = section_y_index * Y_HEIGHT;
-        let y = y_offset + (index as i64) / (X_LENGTH * Z_LENGTH);
-        let z = ((index as i64) % (X_LENGTH * Z_LENGTH)) / X_LENGTH;
-        let x = (index as i64) % X_LENGTH;
-        //println!("Looking for block entity at ({}, {}, {})", x, y, z);
-        let local_coordinates: BlockCoord = (x, y, z).into();
-        local_coordinates + chunk_offset
-    }
-
-    /// Calculates the index into the "Blocks" and similar NBT tags, for a block
-    /// within section `section_y_index`, located at chunk local coordinates
-    /// `local_block_coords`.
-    fn local_index(section_y_index: i64, local_block_coords: BlockCoord) -> usize {
-        const X_LENGTH: i64 = 16;
-        const Y_HEIGHT: i64 = 16;
-        const Z_LENGTH: i64 = 16;
-        let y_offset = section_y_index * Y_HEIGHT;
-        let (x, y, z) = (
-            local_block_coords.0,
-            local_block_coords.1,
-            local_block_coords.2,
-        );
-        ((y - y_offset) * X_LENGTH * Z_LENGTH + z * X_LENGTH + x) as usize
-    }
-
-    /// Calculates the index into the "Blocks" and similar NBT tags, for a block
-    /// within section `section_y_index` of the chunk whose local (0, 0, 0)
-    /// coordinates are at global block coordinates `chunk_offset`.
-    fn _global_index(
-        section_y_index: i64,
-        chunk_offset: BlockCoord,
-        global_block_coordinates: BlockCoord,
-    ) -> usize {
-        let local_coords = global_block_coordinates - chunk_offset;
-        Self::local_index(section_y_index, local_coords)
-    }
-
     /// Generates tile entities for all blocks in the chunk, and returns them
     /// in an NBT list value ready for inclusion in the pre flattening chunk format.
     pub(crate) fn pre_flattening_tile_entities(&self) -> nbt::Value {
@@ -211,10 +165,9 @@ impl Chunk {
                                 ..
                             }) => {
                                 let data = match alignment {
-                                    Some(Axis3::Y) => 0,
-                                    Some(Axis3::X) => 1 << 2,
-                                    Some(Axis3::Z) => 2 << 2,
-                                    None => 3 << 2,
+                                    Axis3::Y => 0,
+                                    Axis3::X => 1 << 2,
+                                    Axis3::Z => 2 << 2,
                                 };
                                 match material {
                                     WoodMaterial::Oak => (17, data),
@@ -498,7 +451,7 @@ impl Chunk {
                             // NB 75 unlit redstone torch is not implemented
                             Block::RedstoneTorch { attached } => (76, facing5_xwensd(attached)),
                             Block::Button(material, facing) => {
-                                let data = facing6_dewsnu(facing);
+                                let data = button_facing(facing);
                                 match material {
                                     ButtonMaterial::Stone => (77, data),
                                     ButtonMaterial::Oak => (143, data),
@@ -527,7 +480,7 @@ impl Chunk {
                                     _ => (85, 0), // fallback to oak fence
                                 }
                             }
-                            Block::Pumpkin { facing } => (86, facing4_swne(facing)),
+                            Block::CarvedPumpkin { facing } => (86, facing4_swne(facing)),
                             Block::Netherrack => (87, 0),
                             Block::SoulSand => (88, 0),
                             Block::Glowstone => (89, 0),
@@ -562,14 +515,13 @@ impl Chunk {
                             Block::MossyStoneBricks => (98, 1),
                             Block::CrackedStoneBricks => (98, 2),
                             Block::ChiseledStoneBricks => (98, 3),
-                            Block::BrownMushroomStem { stem_directions } => {
+                            // MushroomStem is non-coloured in later versions,
+                            // and always considered to be brown for early version file export
+                            Block::MushroomStem { stem_directions } => {
                                 (99, mushroom_stems(stem_directions))
                             }
                             Block::BrownMushroomBlock { cap_directions } => {
                                 (99, mushroom_caps(cap_directions))
-                            }
-                            Block::RedMushroomStem { stem_directions } => {
-                                (100, mushroom_stems(stem_directions))
                             }
                             Block::RedMushroomBlock { cap_directions } => {
                                 (100, mushroom_caps(cap_directions))
@@ -634,7 +586,7 @@ impl Chunk {
                             Block::RedstoneLamp => (123, 0),
                             // NB 124 lit redstone lamp is not implemented
                             // 125 and 126 wooden slabs already handled
-                            Block::CocoaBeans {
+                            Block::Cocoa {
                                 growth_stage,
                                 facing,
                             } => {
@@ -878,17 +830,6 @@ impl Chunk {
             }
         }
 
-        fn facing6_dewsnu(facing: &Surface6) -> u8 {
-            match facing {
-                Surface6::Down => 0,
-                Surface6::East => 1,
-                Surface6::West => 2,
-                Surface6::South => 3,
-                Surface6::North => 4,
-                Surface6::Up => 5,
-            }
-        }
-
         fn facing6_dunswe(facing: &Surface6) -> u8 {
             match facing {
                 Surface6::Down => 0,
@@ -914,23 +855,41 @@ impl Chunk {
             }
         }
 
+        // NB This value mapping needs checking
+        fn button_facing(facing: &SurfaceRotation12) -> u8 {
+            match facing {
+                SurfaceRotation12::DownFacingNorth
+                | SurfaceRotation12::DownFacingSouth
+                | SurfaceRotation12::DownFacingEast
+                | SurfaceRotation12::DownFacingWest => 0,
+                SurfaceRotation12::East => 1,
+                SurfaceRotation12::West => 2,
+                SurfaceRotation12::South => 3,
+                SurfaceRotation12::North => 4,
+                SurfaceRotation12::UpFacingNorth
+                | SurfaceRotation12::UpFacingSouth
+                | SurfaceRotation12::UpFacingEast
+                | SurfaceRotation12::UpFacingWest => 5,
+            }
+        }
+
         fn mushroom_caps(caps: &DirectionFlags6) -> u8 {
             match (
                 caps.north, caps.south, caps.east, caps.west, caps.up, caps.down,
             ) {
                 //north south  east   west   top    bottom
-                (false, false, false, false, false, false) => 0,
-                (true, false, false, true, true, false) => 1,
-                (true, false, false, false, true, false) => 2,
-                (true, false, true, false, true, false) => 3,
-                (false, false, false, true, true, false) => 4,
-                (false, false, false, false, true, false) => 5,
-                (false, false, true, false, true, false) => 6,
-                (false, true, false, true, true, false) => 7,
-                (false, true, false, false, true, false) => 8,
-                (false, true, true, false, true, false) => 9,
-                (true, true, true, true, true, true) => 14,
-                _ => 0, // fallback to all pores; could perhaps be improved
+                (false, false, false, false, false, false) => 0, // co caps (all pores)
+                (true, false, false, true, _, false) => 1, // north west top
+                (true, false, false, false, _, false) => 2, // north top
+                (true, false, true, false, _, false) => 3, // north east top
+                (false, false, false, true, _, false) => 4, // west top
+                (false, false, false, false, true, false) => 5, // top
+                (false, false, true, false, _, false) => 6, // east top
+                (false, true, false, true, _, false) => 7, // south west top
+                (false, true, false, false, _, false) => 8, // south top
+                (false, true, true, false, _, false) => 9, // south east top
+                (_, _, _, _, _, true) => 14, // all sides (only way to get bottom)
+                _ => 14, // final fallback to all caps; could perhaps be improved
             }
         }
 
@@ -944,10 +903,14 @@ impl Chunk {
                 stems.down,
             ) {
                 //north south  east   west   top    bottom
-                (false, false, false, false, false, false) => 0,
-                (true, true, true, true, false, false) => 10,
-                (true, true, true, true, true, true) => 15,
-                _ => 0, // fallback to all pores; could perhaps be improved
+                (false, false, false, false, false, false) => 0, // no stem (all pores)
+                (true, true, true, true, false, false) => 10, // north south east west
+                (true, true, true, true, true, true) => 15, // all sides
+                // fallbacks
+                (_, _, _, _, _, true) => 15, // bottom only available through pattern 15
+                (_, _, _, _, true, _) => 15, // top only available through pattern 15
+                (_, _, _, _, false, false) => 10, // best pattern for any side combo
+                //_ => 0, // fallback to all pores; could perhaps be improved
             }
         }
 
@@ -990,11 +953,11 @@ impl Chunk {
         let xz_offset: BlockCoord = chunk_position.into();
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
         let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
-        let add = packed_nibbles_to_bytes(
+        let add = utils::packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
-        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
+        let data = utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         return blocks
             .iter()
@@ -1076,7 +1039,7 @@ impl Chunk {
     // large flowers. Those structures have some metadata in the top block, and
     // some metadata in the bottom block, while the internal mcprogedit format
     // keeps all data in both blocks.
-    pub(crate) fn pre_flattening_section_into_block_cuboid(
+    pub(crate) fn pre_flattening_fill_block_cuboid_from_section(
         section: &nbt::Value,
         block_entities: &HashMap<BlockCoord, BlockEntity>,
         chunk_position: &ChunkCoord,
@@ -1085,11 +1048,11 @@ impl Chunk {
         let xz_offset: BlockCoord = chunk_position.into();
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
         let blocks = nbt_value_lookup_byte_array(section, "Blocks").unwrap();
-        let add = packed_nibbles_to_bytes(
+        let add = utils::packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
-        let data = packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
+        let data = utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         //let mut block_cuboid = BlockCuboid::new((16, 16, 16));
         blocks
@@ -1184,6 +1147,7 @@ impl Chunk {
                             },
                             alignment: wood_alignment(data[index]),
                             stripped: false,
+                            bark_on_all_sides: false,
                         }),
                         18 => Block::Leaves {
                             material: match data[index] & 0x3 {
@@ -1512,7 +1476,7 @@ impl Chunk {
                         75 | 76 => Block::RedstoneTorch {
                             attached: facing5_xwensd(data[index]),
                         },
-                        77 => Block::Button(ButtonMaterial::Stone, facing6_dewsnu(data[index])),
+                        77 => Block::Button(ButtonMaterial::Stone, button_facing(data[index])),
                         78 => Block::Snow {
                             thickness: Int1Through8::new((data[index] & 0x7) + 1).unwrap(),
                         },
@@ -1552,7 +1516,7 @@ impl Chunk {
                                 _ => unreachable!(),
                             },
                         },
-                        86 => Block::Pumpkin {
+                        86 => Block::CarvedPumpkin {
                             facing: facing4_swne(data[index]),
                         },
                         87 => Block::Netherrack,
@@ -1600,7 +1564,9 @@ impl Chunk {
                             n => panic!("Unknown stone brick data variant: {}", n),
                         },
                         99 => match data[index] {
-                            stem @ 10 | stem @ 15 => Block::BrownMushroomStem {
+                            // Stems are separate blocks in the internal representation,
+                            // as well as in later versions of the save format
+                            stem @ 10 | stem @ 15 => Block::MushroomStem {
                                 stem_directions: mushroom_caps(stem),
                             },
                             cap => Block::BrownMushroomBlock {
@@ -1608,7 +1574,9 @@ impl Chunk {
                             },
                         },
                         100 => match data[index] {
-                            stem @ 10 | stem @ 15 => Block::RedMushroomStem {
+                            // Stems are separate blocks in the internal representation,
+                            // as well as in later versions of the save format
+                            stem @ 10 | stem @ 15 => Block::MushroomStem {
                                 stem_directions: mushroom_caps(stem),
                             },
                             cap => Block::RedMushroomBlock {
@@ -1632,9 +1600,8 @@ impl Chunk {
                             ),
                         },
                         106 => Block::Vines(Vines {
-                            anchored_at: DirectionFlags6 {
+                            anchored_at: DirectionFlags5 {
                                 east: data[index] & 0x8 == 0x8,
-                                down: false,
                                 north: data[index] & 0x4 == 0x4,
                                 south: data[index] & 0x1 == 0x1,
                                 up: false,
@@ -1756,7 +1723,7 @@ impl Chunk {
                             },
                             waterlogged: false,
                         }),
-                        127 => Block::CocoaBeans {
+                        127 => Block::Cocoa {
                             growth_stage: Int0Through2::new((data[index] & 0xC) >> 2).unwrap(),
                             facing: facing4_nesw(data[index]),
                         },
@@ -1838,7 +1805,7 @@ impl Chunk {
                         142 => Block::Potatoes {
                             growth_stage: Int0Through7::new(data[index] & 0x7).unwrap(),
                         },
-                        143 => Block::Button(ButtonMaterial::Oak, facing6_dewsnu(data[index])),
+                        143 => Block::Button(ButtonMaterial::Oak, button_facing(data[index])),
                         144 => {
                             let coordinates = Self::coordinates(section_y_index, xz_offset, index);
                             let block_entity = block_entities.get(&coordinates).unwrap();
@@ -1983,6 +1950,7 @@ impl Chunk {
                             },
                             alignment: wood_alignment(data[index]),
                             stripped: false,
+                            bark_on_all_sides: false,
                         }),
                         163 => Block::Stairs(Stair {
                             material: StairMaterial::Acacia,
@@ -2291,19 +2259,6 @@ impl Chunk {
             }
         }
 
-        fn facing6_dewsnu(data: i8) -> Surface6 {
-            match data & 0x7 {
-                0 => Surface6::Down,
-                1 => Surface6::East,
-                2 => Surface6::West,
-                3 => Surface6::South,
-                4 => Surface6::North,
-                5 => Surface6::Up,
-                n @ 6..=7 => panic!("Unknown facing6 dunswe value: {}", n),
-                _ => unreachable!(),
-            }
-        }
-
         fn facing6_dunswe(data: i8) -> Surface6 {
             match data & 0x7 {
                 0 => Surface6::Down,
@@ -2331,12 +2286,11 @@ impl Chunk {
             }
         }
 
-        fn wood_alignment(data: i8) -> Option<Axis3> {
+        fn wood_alignment(data: i8) -> Axis3 {
             match (data & 0xC) >> 2 {
-                0 => Some(Axis3::Y),
-                1 => Some(Axis3::X),
-                2 => Some(Axis3::Z),
-                3 => None,
+                0 => Axis3::Y,
+                1 => Axis3::X,
+                2 => Axis3::Z,
                 _ => unreachable!(),
             }
         }
@@ -2351,6 +2305,20 @@ impl Chunk {
                 5 => SurfaceRotation12::UpFacingSouth,
                 6 => SurfaceRotation12::UpFacingEast,
                 7 => SurfaceRotation12::DownFacingSouth,
+                _ => unreachable!(),
+            }
+        }
+
+        // NB This value mapping needs checking
+        fn button_facing(data: i8) -> SurfaceRotation12 {
+            match data & 0x7 {
+                0 => SurfaceRotation12::DownFacingNorth,
+                1 => SurfaceRotation12::East,
+                2 => SurfaceRotation12::West,
+                3 => SurfaceRotation12::South,
+                4 => SurfaceRotation12::North,
+                5 => SurfaceRotation12::UpFacingNorth,
+                n @ 6..=7 => panic!("Unknown button facing value: {}", n),
                 _ => unreachable!(),
             }
         }
@@ -2391,11 +2359,11 @@ impl Chunk {
     ) {
         // Parse relevant NBT data
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
-        let section_block_light = packed_nibbles_to_bytes(
+        let section_block_light = utils::packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "BlockLight")
                 .unwrap_or_else(|_| vec![0; 2048]),
         );
-        let section_sky_light = packed_nibbles_to_bytes(
+        let section_sky_light = utils::packed_nibbles_to_bytes(
             &nbt_value_lookup_byte_array(section, "SkyLight")
                 .unwrap_or_else(|_| vec![0; 2048]),
         );
@@ -2413,47 +2381,3 @@ impl Chunk {
     }
 }
 
-// FIXME there may be something going on with i8 overflow,
-// which makes the behaviour different from with u8.
-/// Convert byte vector of packed nibbles into byte vector
-/// The packing is little endian
-fn packed_nibbles_to_bytes(nibbles: &[i8]) -> Vec<i8> {
-    nibbles
-        .iter()
-        .flat_map(|byte| vec![byte & 0x0F, (byte >> 4) & 0x0F])
-        .collect()
-}
-
-// FIXME there may be something going on with i8 overflow,
-// which makes the behaviour different from with u8.
-/// Convert byte vector into byte vector of packed nibbles
-/// The packing is little endian
-fn _bytes_to_packed_nibbles(bytes: &[i8]) -> Vec<i8> {
-    bytes
-        .chunks(2)
-        .map(|c| c.iter().fold(0i8, |acc, x| (acc >> 4) + ((x & 0x0F) << 4)))
-        .collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    // FIXME test the full range 0-F for the nibbles.
-    #[test]
-    fn test_packed_nibbles_to_bytes() {
-        assert_eq!(
-            packed_nibbles_to_bytes(&[0x10, 0x32, 0x54, 0x76]),
-            vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7]
-        );
-    }
-
-    // FIXME test the full range 0-F for the nibbles.
-    #[test]
-    fn test_bytes_to_packed_nibbles() {
-        assert_eq!(
-            _bytes_to_packed_nibbles(&[0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7]),
-            vec![0x10, 0x32, 0x54, 0x76]
-        );
-    }
-}

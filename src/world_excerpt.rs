@@ -405,6 +405,7 @@ mod tests {
     use super::*;
     use crate::block::Log;
     use crate::material::WoodMaterial;
+    use crate::positioning::Axis3;
 
     #[test]
     fn test_basic_functionality() {
@@ -425,8 +426,9 @@ mod tests {
             (0, 2, 0).into(),
             Block::Log(Log {
                 material: WoodMaterial::Oak,
-                alignment: None,
+                alignment: Axis3::Y,
                 stripped: false,
+                bark_on_all_sides: false,
             }),
         );
         run_test_at(&mut excerpt, (0, 0, 2).into(), Block::WaterSource);

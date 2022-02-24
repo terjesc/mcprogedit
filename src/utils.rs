@@ -194,6 +194,28 @@ pub(crate) fn paddedly_unpacked<T>(packed_array: &[u64], bits_per_value: usize) 
     unpacked
 }
 
+// FIXME there may be something going on with i8 overflow,
+// which makes the behaviour different from with u8.
+/// Convert byte vector of packed nibbles into byte vector
+/// The packing is little endian
+pub(crate) fn packed_nibbles_to_bytes(nibbles: &[i8]) -> Vec<i8> {
+    nibbles
+        .iter()
+        .flat_map(|byte| vec![byte & 0x0F, (byte >> 4) & 0x0F])
+        .collect()
+}
+
+// FIXME there may be something going on with i8 overflow,
+// which makes the behaviour different from with u8.
+/// Convert byte vector into byte vector of packed nibbles
+/// The packing is little endian
+pub(crate) fn _bytes_to_packed_nibbles(bytes: &[i8]) -> Vec<i8> {
+    bytes
+        .chunks(2)
+        .map(|c| c.iter().fold(0i8, |acc, x| (acc >> 4) + ((x & 0x0F) << 4)))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,5 +242,23 @@ mod tests {
     #[test]
     fn test_padded_unpacking() {
         assert_eq!(UNPACKED_U8, paddedly_unpacked(&PADDEDLY_PACKED_5, 5).as_slice()[..26]);
+    }
+
+    // FIXME test the full range 0-F for the nibbles.
+    #[test]
+    fn test_packed_nibbles_to_bytes() {
+        assert_eq!(
+            packed_nibbles_to_bytes(&[0x10, 0x32, 0x54, 0x76]),
+            vec![0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7]
+        );
+    }
+
+    // FIXME test the full range 0-F for the nibbles.
+    #[test]
+    fn test_bytes_to_packed_nibbles() {
+        assert_eq!(
+            _bytes_to_packed_nibbles(&[0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7]),
+            vec![0x10, 0x32, 0x54, 0x76]
+        );
     }
 }

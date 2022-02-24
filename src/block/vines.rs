@@ -1,12 +1,13 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
-use crate::positioning::{Direction, DirectionFlags6};
+use crate::positioning::{Direction, DirectionFlags5};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vines {
-    // NB should attach to all neighbouring blocks by default
-    pub(crate) anchored_at: DirectionFlags6,
+    // NB Older versions attaches to all neighbouring blocks by default.
+    // NB Newer versions allow arbitrary placement up and on any side surface, in any combination.
+    pub(crate) anchored_at: DirectionFlags5,
 }
 
 impl Vines {
@@ -17,7 +18,6 @@ impl Vines {
     {
         match Into::<Direction>::into(direction) {
             Direction::East => self.anchored_at.east,
-            Direction::Down => self.anchored_at.down,
             Direction::North => self.anchored_at.north,
             Direction::South => self.anchored_at.south,
             Direction::Up => self.anchored_at.up,

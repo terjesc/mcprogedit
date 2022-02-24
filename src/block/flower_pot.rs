@@ -77,6 +77,6 @@ pub enum PottedPlant {
     TulipRed,
     TulipWhite,
     WarpedFungus,
-    Warpedroots,
+    WarpedRoots,
     WitherRose,
 }

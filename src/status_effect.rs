@@ -1,5 +1,6 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum StatusEffect {
+    None = -1,
     Speed = 1,
     Slowness = 2,
     Haste = 3,
@@ -37,6 +38,7 @@ pub enum StatusEffect {
 impl From<i32> for StatusEffect {
     fn from(effect_number: i32) -> Self {
         match effect_number {
+            -1 => StatusEffect::None,
             1 => StatusEffect::Speed,
             2 => StatusEffect::Slowness,
             3 => StatusEffect::Haste,
@@ -77,6 +79,7 @@ impl From<i32> for StatusEffect {
 impl From<StatusEffect> for i32 {
     fn from(effect: StatusEffect) -> i32 {
         match effect {
+            StatusEffect::None => -1,
             StatusEffect::Speed => 1,
             StatusEffect::Slowness => 2,
             StatusEffect::Haste => 3,

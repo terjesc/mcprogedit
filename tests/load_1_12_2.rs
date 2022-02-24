@@ -627,10 +627,10 @@ fn v_1_12_2_block_group_6() {
 
     assert_block_eq(&excerpt, (5, 0, 0), &Block::oak_fence());
 
-    assert_block_eq(&excerpt, (6, 0, 0), &Block::pumpkin(Direction::West));
-    assert_block_eq(&excerpt, (6, 0, 2), &Block::pumpkin(Direction::South));
-    assert_block_eq(&excerpt, (6, 0, 4), &Block::pumpkin(Direction::East));
-    assert_block_eq(&excerpt, (6, 0, 6), &Block::pumpkin(Direction::North));
+    assert_block_eq(&excerpt, (6, 0, 0), &Block::carved_pumpkin(Direction::West));
+    assert_block_eq(&excerpt, (6, 0, 2), &Block::carved_pumpkin(Direction::South));
+    assert_block_eq(&excerpt, (6, 0, 4), &Block::carved_pumpkin(Direction::East));
+    assert_block_eq(&excerpt, (6, 0, 6), &Block::carved_pumpkin(Direction::North));
 
     assert_block_eq(&excerpt, (7, 0, 0), &Block::Netherrack);
 
@@ -881,7 +881,7 @@ fn v_1_12_2_block_group_8() {
     assert_block_eq(&excerpt, (14, 1, 5), &Block::top_slab(Material::DarkOak));
 
     assert_block_eq(&excerpt, (15, 0, 0),
-        &Block::CocoaBeans {
+        &Block::Cocoa {
             growth_stage: Int0Through2::new_saturating(2),
             facing: Surface4::South,
         },

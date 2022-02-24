@@ -850,6 +850,8 @@ pub struct McVersion {
     id: i32,
 }
 
+pub const THE_FLATTENING: McVersion = McVersion{ id: 1451 };
+
 impl McVersion {
     /// Creates a new McVersion from a "data version" / "version id" value.
     ///

@@ -205,9 +205,9 @@ pub enum BambooLeaves {
 #[derive(Clone, Debug, PartialEq)]
 pub struct Log {
     pub material: WoodMaterial,
-    /// Logs with no alignment have bark (or stripped pattern) on all sides.
-    pub alignment: Option<Axis3>,
+    pub alignment: Axis3,
     pub stripped: bool,
+    pub bark_on_all_sides: bool,
 }
 
 impl Log {
@@ -313,13 +313,10 @@ pub enum Block {
     BrownMushroomBlock {
         cap_directions: DirectionFlags6,
     },
-    BrownMushroomStem {
-        stem_directions: DirectionFlags6,
-    },
     BubbleColumn {
         drag_direction: Surface2,
     }, // Is this even needed?
-    Button(ButtonMaterial, Surface6),
+    Button(ButtonMaterial, SurfaceRotation12),
     Cactus {
         growth_stage: Int0Through15,
     },
@@ -361,7 +358,7 @@ pub enum Block {
     CoarseDirt,
     Cobblestone,
     Cobweb,
-    CocoaBeans {
+    Cocoa {
         growth_stage: Int0Through2,
         facing: Surface4,
     },
@@ -537,6 +534,9 @@ pub enum Block {
     },
     MossyCobblestone,
     MossyStoneBricks,
+    MushroomStem {
+        stem_directions: DirectionFlags6,
+    },
     // TODO consider adding the MovingPiston technical block and block entity
     Mycelium,
     NetherBricks,
@@ -583,9 +583,7 @@ pub enum Block {
     },
     Prismarine,
     PrismarineBricks,
-    Pumpkin {
-        facing: Surface4,
-    },
+    Pumpkin,
     PumpkinStem {
         state: StemState,
     },
@@ -605,9 +603,6 @@ pub enum Block {
     RedMushroom,
     RedMushroomBlock {
         cap_directions: DirectionFlags6,
-    },
-    RedMushroomStem {
-        stem_directions: DirectionFlags6,
     },
     RedNetherBricks,
     RedSand,
@@ -800,8 +795,9 @@ impl Block {
     pub fn acacia_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::Acacia,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -867,8 +863,9 @@ impl Block {
     pub fn birch_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::Birch,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -971,8 +968,9 @@ impl Block {
     pub fn dark_oak_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::DarkOak,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -1078,7 +1076,7 @@ impl Block {
             Self::Campfire { facing, .. } => Direction::from(*facing) == direction,
             Self::CarvedPumpkin { facing, .. } => Direction::from(*facing) == direction,
             Self::Chest(chest) => chest.has_facing_of(direction),
-            Self::CocoaBeans { facing, .. } => Direction::from(*facing) == direction,
+            Self::Cocoa { facing, .. } => Direction::from(*facing) == direction,
             Self::CoralFan { facing, .. } => Direction::from(*facing) == direction,
             Self::Dispenser(dispenser) => dispenser.has_facing_of(direction),
             Self::Door(door) => door.has_facing_of(direction),
@@ -1100,7 +1098,6 @@ impl Block {
             Self::Observer { facing, .. } => Direction::from(*facing) == direction,
             Self::Piston { facing, .. } => Direction::from(*facing) == direction,
             Self::PistonHead { facing, .. } => Direction::from(*facing) == direction,
-            Self::Pumpkin { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneComparator { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneRepeater(repeater) => repeater.has_facing_of(direction),
             Self::RedstoneSubtractor { facing, .. } => Direction::from(*facing) == direction,
@@ -1249,7 +1246,6 @@ impl Block {
                 | Self::Bookshelf
                 | Self::BrickBlock
                 | Self::BrownMushroomBlock { .. }
-                | Self::BrownMushroomStem { .. }
                 | Self::Cactus { .. }
                 | Self::CarvedPumpkin { .. }
                 | Self::ChiseledNetherBricks
@@ -1317,6 +1313,7 @@ impl Block {
                 | Self::Melon
                 | Self::MossyCobblestone
                 | Self::MossyStoneBricks
+                | Self::MushroomStem { .. }
                 | Self::Mycelium
                 | Self::NetherBricks
                 | Self::NetherGoldOre
@@ -1344,7 +1341,6 @@ impl Block {
                 | Self::QuartzOre
                 | Self::QuartzPillar { .. }
                 | Self::RedMushroomBlock { .. }
-                | Self::RedMushroomStem { .. }
                 | Self::RedNetherBricks
                 | Self::RedSand
                 | Self::RedSandstone
@@ -1470,8 +1466,9 @@ impl Block {
     pub fn jungle_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::Jungle,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -1539,7 +1536,7 @@ impl Block {
 
     /// Returns a oak button of the given placemnet.
     pub fn oak_button(direction: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, Surface6::try_from(direction).unwrap())
+        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(direction).unwrap())
     }
 
     /// Returns an oak fence.
@@ -1581,8 +1578,9 @@ impl Block {
     pub fn oak_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::Oak,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -1616,9 +1614,9 @@ impl Block {
         }
     }
 
-    /// Returns a pumpkin facing in the given direction.
-    pub fn pumpkin(facing: Direction) -> Self {
-        Self::Pumpkin {
+    /// Returns a carved pumpkin facing in the given direction.
+    pub fn carved_pumpkin(facing: Direction) -> Self {
+        Self::CarvedPumpkin {
             facing: Surface4::try_from(facing).unwrap(),
         }
     }
@@ -1665,7 +1663,7 @@ impl Block {
             } => {
                 *growth_stage = Int0Through5::new_saturating(new_age);
             }
-            Self::CocoaBeans {
+            Self::Cocoa {
                 ref mut growth_stage,
                 ..
             } => {
@@ -1794,8 +1792,9 @@ impl Block {
     pub fn spruce_log(axis: Axis3) -> Self {
         Self::Log(Log {
             material: WoodMaterial::Spruce,
-            alignment: Some(axis),
+            alignment: axis,
             stripped: false,
+            bark_on_all_sides: false,
         })
     }
 
@@ -1818,7 +1817,7 @@ impl Block {
     pub fn stone_button(direction: Direction) -> Self {
         Self::Button(
             ButtonMaterial::Stone,
-            Surface6::try_from(direction).unwrap(),
+            SurfaceRotation12::try_from(direction).unwrap(),
         )
     }
 
@@ -1871,7 +1870,7 @@ impl Block {
 
     /// Returns a wooden button of the given placemnet.
     pub fn wooden_button(direction: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, Surface6::try_from(direction).unwrap())
+        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(direction).unwrap())
     }
 
     /// Returns a wool block of the given colour.

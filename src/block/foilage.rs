@@ -13,7 +13,6 @@ impl Block {
             | Block::Beehive { .. }
             | Block::BeeNest { .. }
             | Block::BrownMushroomBlock { .. }
-            | Block::BrownMushroomStem { .. }
             | Block::Cactus { .. }
             | Block::CarvedPumpkin { .. }
             | Block::CoralBlock { .. }
@@ -23,7 +22,6 @@ impl Block {
             | Block::Melon
             | Block::Pumpkin { .. }
             | Block::RedMushroomBlock { .. }
-            | Block::RedMushroomStem { .. }
             | Block::WarpedRoots
             | Block::None
             | Block::Air
@@ -34,7 +32,7 @@ impl Block {
             | Block::Campfire { .. }
             | Block::Carrots { .. }
             | Block::CaveAir
-            | Block::CocoaBeans { .. }
+            | Block::Cocoa { .. }
             | Block::Coral { .. }
             | Block::CoralFan { .. }
             | Block::CrimsonFungus
@@ -46,6 +44,7 @@ impl Block {
             | Block::Kelp { .. }
             | Block::LilyPad
             | Block::MelonStem { .. }
+            | Block::MushroomStem { .. }
             | Block::NetherSprouts
             | Block::NetherWart { .. }
             | Block::Potatoes { .. }

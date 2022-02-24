@@ -1,3 +1,5 @@
+mod common;
+mod post_flattening;
 mod pre_flattening;
 
 use std::str::FromStr;
@@ -132,7 +134,7 @@ impl Chunk {
 
     /// Creates a chunk from raw chunk (NBT) data.
     // NB only pre-flattening chunk loading as of yet
-    // TODO Move pre-flattening import implementation to the pre-flattening file.
+    // TODO Move pre-flattening and post-flattening import implementations to the respective files?
     pub fn from_raw_chunk_data(data: &RawChunkData) -> Self {
         let nbt = data.to_nbt();
 
@@ -140,7 +142,8 @@ impl Chunk {
         let data_version = nbt_blob_lookup_int(&nbt, "DataVersion")
             .map(McVersion::from_id)
             .unwrap();
-        assert!(data_version < McVersion::from_str(THE_FLATTENING).unwrap());
+        //NB Temporarily disabled save version check; should be used for import details
+        //assert!(data_version < McVersion::from_str(THE_FLATTENING).unwrap());
 
         let x_pos = nbt_blob_lookup_int(&nbt, "Level/xPos").unwrap();
         let z_pos = nbt_blob_lookup_int(&nbt, "Level/zPos").unwrap();
@@ -150,7 +153,7 @@ impl Chunk {
 
         let tile_entities = nbt_blob_lookup(&nbt, "Level/TileEntities")
             .unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
-        let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities);
+        let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities, data_version);
 
         let biomes: Option<Vec<Biome>> = nbt_blob_lookup_byte_array(&nbt, "Level/Biomes")
             .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect::<Vec<Biome>>()).ok();
@@ -166,22 +169,46 @@ impl Chunk {
 
         // Fist pass: Prepare pseudo bock entities for block data that is stored
         // in one block but used for another. This may cross section boundaries.
-        for section in &sections {
-            block_entities.extend(
-                Chunk::pre_flattening_pseudo_block_entities(section, &global_pos).into_iter(),
-            );
+        if data_version < McVersion::from_str(THE_FLATTENING).unwrap() {
+            for section in &sections {
+                block_entities.extend(
+                    Chunk::pre_flattening_pseudo_block_entities(section, &global_pos).into_iter(),
+                );
+            }
         }
+/*
+        // TODO implement pseudo block entity stuff for post flattening parsing (if needed)
+        else {
+            for section in &sections {
+                block_entities.extend(
+                    Chunk::post_flattening_pseudo_block_entities(section, &global_pos).into_iter(),
+                );
+            }
+        }*/
 
         // Second pass: Collect the full set of (finished) blocks
+        // TODO chunk height increased at some point and must be handled correctly here
         let mut block_cuboid = BlockCuboid::new_filled((16, 256, 16), Block::Air);
-        for section in &sections {
-            // TODO rename to pre_flattening_fill_block_cuboid_from_section
-            Chunk::pre_flattening_section_into_block_cuboid(
-                section,
-                &block_entities,
-                &global_pos,
-                &mut block_cuboid,
-            );
+        
+        if data_version < McVersion::from_str(THE_FLATTENING).unwrap() {
+            for section in &sections {
+                // TODO rename to pre_flattening_fill_block_cuboid_from_section
+                Chunk::pre_flattening_fill_block_cuboid_from_section(
+                    section,
+                    &block_entities,
+                    &global_pos,
+                    &mut block_cuboid,
+                );
+            }
+        } else {
+            for section in &sections {
+                Chunk::post_flattening_fill_block_cuboid_from_section(
+                    section,
+                    &block_entities,
+                    &global_pos,
+                    &mut block_cuboid,
+                );
+            }
         }
 
         // Get block light and sky light data out from the sections

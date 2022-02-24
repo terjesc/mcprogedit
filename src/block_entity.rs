@@ -7,6 +7,7 @@ use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
 use crate::item::Item;
+use crate::mc_version::{McVersion, THE_FLATTENING};
 use crate::nbt_lookup::*;
 use crate::positioning::{Direction16, Surface4};
 use crate::status_effect::StatusEffect;
@@ -36,7 +37,7 @@ pub enum BlockEntity {
     },
     Bed {
         common: CommonTags,
-        colour: Colour,
+        colour: Option<Colour>,
     },
     BlastFurnace {
         tags: FurnaceTags,
@@ -139,8 +140,8 @@ pub enum BlockEntity {
 }
 
 impl BlockEntity {
-    pub fn map_from_nbt_list(list: &nbt::Value) -> HashMap<BlockCoord, Self> {
-        Self::vec_from_nbt_list(list)
+    pub fn map_from_nbt_list(list: &nbt::Value, data_version: McVersion) -> HashMap<BlockCoord, Self> {
+        Self::vec_from_nbt_list(list, data_version)
             .iter()
             .map(|entity| (entity.coordinates(), entity))
             .filter(|(coord, _entity)| coord.is_some())
@@ -148,18 +149,18 @@ impl BlockEntity {
             .collect()
     }
 
-    pub fn vec_from_nbt_list(list: &nbt::Value) -> Vec<Self> {
+    pub fn vec_from_nbt_list(list: &nbt::Value, data_version: McVersion) -> Vec<Self> {
         if let nbt::Value::List(block_entities) = list {
             block_entities
                 .iter()
-                .map(BlockEntity::from_nbt_value)
+                .map(|nbt_value| BlockEntity::from_nbt_value(nbt_value, data_version))
                 .collect()
         } else {
             Vec::new()
         }
     }
 
-    pub fn from_nbt_value(value: &nbt::Value) -> Self {
+    pub fn from_nbt_value(value: &nbt::Value, data_version: McVersion) -> Self {
         if let Ok(id) = nbt_value_lookup_string(value, "id") {
             match id.as_str() {
                 "minecraft:banner" => Self::banner_from_nbt_value(value),
@@ -182,7 +183,7 @@ impl BlockEntity {
                 "minecraft:ender_chest" => Self::ender_chest_from_nbt_value(value),
                 "minecraft:end_gateway" => Self::end_gateway_from_nbt_value(value),
                 "minecraft:end_portal" => Self::end_portal_from_nbt_value(value),
-                "minecraft:flower_pot" => Self::flower_pot_from_nbt_value(value),
+                "minecraft:flower_pot" if data_version < THE_FLATTENING => Self::flower_pot_from_nbt_value(value),
                 "minecraft:furnace" => Self::furnace_from_nbt_value(value),
                 "minecraft:hopper" => Self::hopper_from_nbt_value(value),
                 "minecraft:jigsaw" => Self::jigsaw_from_nbt_value(value),
@@ -193,7 +194,7 @@ impl BlockEntity {
                 "minecraft:piston" => Self::piston_from_nbt_value(value),
                 "minecraft:shulker_box" => Self::shulker_box_from_nbt_value(value),
                 "minecraft:sign" => Self::sign_from_nbt_value(value),
-                "minecraft:skull" => Self::skull_from_nbt_value(value),
+                "minecraft:skull" if data_version < THE_FLATTENING => Self::skull_from_nbt_value(value),
                 "minecraft:smoker" => Self::smoker_from_nbt_value(value),
                 "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(value),
                 "minecraft:structure_block" => Self::structure_block_from_nbt_value(value),
@@ -377,9 +378,13 @@ impl BlockEntity {
     }
 
     fn bed_from_nbt_value(value: &nbt::Value) -> Self {
+        let colour = match nbt_value_lookup_int(value, "color") {
+            Ok(colour) => Some(Colour::from(colour)),
+            Err(_) => None,
+        };
         BlockEntity::Bed {
             common: CommonTags::from_nbt_value(value),
-            colour: Colour::from(nbt_value_lookup_int(value, "color").unwrap()),
+            colour,
         }
     }
 

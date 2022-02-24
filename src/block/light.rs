@@ -170,7 +170,6 @@ impl Block {
             | Block::Bookshelf
             | Block::BrickBlock
             | Block::BrownMushroomBlock { .. }
-            | Block::BrownMushroomStem { .. }
             | Block::Cactus { .. }
             | Block::CartographyTable
             | Block::CarvedPumpkin { .. }
@@ -234,6 +233,7 @@ impl Block {
             | Block::Melon
             | Block::MossyCobblestone
             | Block::MossyStoneBricks
+            | Block::MushroomStem { .. }
             | Block::Mycelium
             | Block::NetherBricks
             | Block::NetherGoldOre
@@ -260,7 +260,6 @@ impl Block {
             | Block::QuartzOre
             | Block::QuartzPillar { .. }
             | Block::RedMushroomBlock { .. }
-            | Block::RedMushroomStem { .. }
             | Block::RedNetherBricks
             | Block::RedSand
             | Block::RedSandstone
@@ -311,7 +310,7 @@ impl Block {
             | Block::Cauldron { .. }
             | Block::CaveAir
             | Block::Chest(_)
-            | Block::CocoaBeans { .. }
+            | Block::Cocoa { .. }
             | Block::Composter { .. }
             | Block::Conduit { .. }
             | Block::Coral { .. }
@@ -430,7 +429,6 @@ impl Block {
             | Block::Bookshelf
             | Block::BrickBlock
             | Block::BrownMushroomBlock { .. }
-            | Block::BrownMushroomStem { .. }
             | Block::Cactus { .. }
             | Block::CartographyTable
             | Block::CarvedPumpkin { .. }
@@ -494,6 +492,7 @@ impl Block {
             | Block::Melon
             | Block::MossyCobblestone
             | Block::MossyStoneBricks
+            | Block::MushroomStem { .. }
             | Block::Mycelium
             | Block::NetherBricks
             | Block::NetherGoldOre
@@ -520,7 +519,6 @@ impl Block {
             | Block::QuartzOre
             | Block::QuartzPillar { .. }
             | Block::RedMushroomBlock { .. }
-            | Block::RedMushroomStem { .. }
             | Block::RedNetherBricks
             | Block::RedSand
             | Block::RedSandstone
@@ -574,7 +572,7 @@ impl Block {
             | Block::Cauldron { .. }
             | Block::CaveAir
             | Block::Chest(_)
-            | Block::CocoaBeans { .. }
+            | Block::Cocoa { .. }
             | Block::Composter { .. }
             | Block::Conduit { .. }
             | Block::Coral { .. }
