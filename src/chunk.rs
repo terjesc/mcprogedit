@@ -13,7 +13,7 @@ use crate::block_entity::BlockEntity;
 use crate::coordinates::ChunkCoord;
 use crate::height_map::HeightMap;
 use crate::light_cuboid::LightCuboid;
-use crate::mc_version::McVersion;
+use crate::mc_version::{McVersion, THE_FLATTENING};
 use crate::nbt_lookup::*;
 use crate::utils;
 
@@ -100,7 +100,11 @@ impl Chunk {
         let biomes = utils::vec_u8_into_vec_i8(biomes);
 
         // Various calculations
-        let sections = self.pre_flattening_sections();
+        let sections = if self.data_version < THE_FLATTENING {
+            self.pre_flattening_sections()
+        } else {
+            self.post_flattening_sections()
+        };
         let tile_entities = self.pre_flattening_tile_entities();
 
         // Create the Level compund tag
@@ -134,8 +138,6 @@ impl Chunk {
     }
 
     /// Creates a chunk from raw chunk (NBT) data.
-    // NB only pre-flattening chunk loading as of yet
-    // TODO Move pre-flattening and post-flattening import implementations to the respective files?
     pub fn from_raw_chunk_data(data: &RawChunkData) -> Self {
         let nbt = data.to_nbt();
 
@@ -162,6 +164,7 @@ impl Chunk {
         let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
             .unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
 
+        // TODO import height maps
         /*
         let height_map = nbt_blob_lookup(&nbt, "Level/HeightMap")
             .unwrap_or_else(|| panic!("Level/HeightMap not found"));
@@ -177,15 +180,6 @@ impl Chunk {
                 );
             }
         }
-/*
-        // TODO implement pseudo block entity stuff for post flattening parsing (if needed)
-        else {
-            for section in &sections {
-                block_entities.extend(
-                    Chunk::post_flattening_pseudo_block_entities(section, &global_pos).into_iter(),
-                );
-            }
-        }*/
 
         // Second pass: Collect the full set of (finished) blocks
         // TODO chunk height increased at some point and must be handled correctly here
@@ -193,7 +187,6 @@ impl Chunk {
         
         if data_version < McVersion::from_str(THE_FLATTENING).unwrap() {
             for section in &sections {
-                // TODO rename to pre_flattening_fill_block_cuboid_from_section
                 Chunk::pre_flattening_fill_block_cuboid_from_section(
                     section,
                     &block_entities,

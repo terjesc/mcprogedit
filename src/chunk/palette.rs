@@ -39,6 +39,16 @@ pub(super) enum PaletteItem {
     ProtoBlock(ProtoBlock),
 }
 
+impl PaletteItem {
+    pub(super) fn from_block(block_instance: &Block) -> Self {
+        match block_instance {
+            Block::Air => block(Block::Air),
+            _ => block(Block::Sponge),
+        }
+    }
+}
+
+/// From a section NBT value, generate a palette in the form of a vector of PaletteItems.
 pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
     // Import Palette. It contains a list of compounds, each with a Name:String (Namespaced block ID)
     // and optionally a Properties:Compound which contains pairs of Name:String, value (for
