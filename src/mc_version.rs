@@ -850,7 +850,10 @@ pub struct McVersion {
     id: i32,
 }
 
-pub const THE_FLATTENING: McVersion = McVersion{ id: 1451 };
+/// 17w47a. Known as "the flattening", the world save format was heavily changed.
+pub const THE_FLATTENING: McVersion = McVersion { id: 1451 };
+/// 20w17a. Save format changed to pad BlockStates Long values.
+pub const BLOCK_STATES_PADDED: McVersion = McVersion { id: 2529 };
 
 impl McVersion {
     /// Creates a new McVersion from a "data version" / "version id" value.

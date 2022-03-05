@@ -1,6 +1,7 @@
 mod common;
 mod post_flattening;
 mod pre_flattening;
+mod palette;
 
 use std::str::FromStr;
 use std::time::SystemTime;
@@ -203,6 +204,7 @@ impl Chunk {
         } else {
             for section in &sections {
                 Chunk::post_flattening_fill_block_cuboid_from_section(
+                    data_version,
                     section,
                     &block_entities,
                     &global_pos,
