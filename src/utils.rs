@@ -64,6 +64,14 @@ pub(crate) fn vec_i64_into_vec_u64(mut vec: Vec<i64>) -> Vec<u64> {
     unsafe { Vec::from_raw_parts(p as *mut u64, len, cap) }
 }
 
+pub(crate) fn vec_u64_into_vec_i64(mut vec: Vec<u64>) -> Vec<i64> {
+    let p = vec.as_mut_ptr();
+    let len = vec.len();
+    let cap = vec.capacity();
+    std::mem::forget(vec);
+    unsafe { Vec::from_raw_parts(p as *mut i64, len, cap) }
+}
+
 /// Convert Vec<u32> into Vec<i32>. Useful for making and manipulating int arrays,
 /// that are later to be added to an NBT tag, as the former format is best suited
 /// for bit manipulation, while the latter format is the format required by the

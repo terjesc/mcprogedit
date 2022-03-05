@@ -53,7 +53,7 @@ impl TryFrom<Block> for Chest {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum ChestVariant {
     Left,
     Right,

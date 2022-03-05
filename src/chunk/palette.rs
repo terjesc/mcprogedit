@@ -40,10 +40,50 @@ pub(super) enum PaletteItem {
 }
 
 impl PaletteItem {
-    pub(super) fn from_block(block_instance: &Block) -> Self {
-        match block_instance {
-            Block::Air => block(Block::Air),
-            _ => block(Block::Sponge),
+    /// Convert from Block to PaletteItem.
+    pub(super) fn from_block(block: &Block) -> Self {
+        match block {
+            Block::Banner(banner) => proto(ProtoBlock::Banner {
+                colour: banner.colour,
+                placement: banner.placement,
+            }),
+            Block::Beacon(_) => proto(ProtoBlock::Beacon),
+            Block::BrewingStand(_) => proto(ProtoBlock::BrewingStand),
+            Block::Chest(chest) => proto(ProtoBlock::Chest {
+                facing: chest.facing,
+                variant: chest.variant,
+                waterlogged: chest.waterlogged,
+            }),
+            Block::Dispenser(dispenser) => proto(ProtoBlock::Dispenser {
+                facing: dispenser.facing
+            }),
+            Block::Dropper(dropper) => proto(ProtoBlock::Dropper {
+                facing: dropper.facing
+            }),
+            Block::EnchantingTable { .. } => proto(ProtoBlock::EnchantingTable),
+            Block::Furnace(furnace) => proto(ProtoBlock::Furnace {
+                facing: furnace.facing,
+                lit: furnace.lit,
+            }),
+            Block::Hopper(hopper) => proto(ProtoBlock::Hopper {
+                facing: hopper.facing,
+            }),
+            Block::Jukebox(_) => proto(ProtoBlock::Jukebox),
+            Block::ShulkerBox(shulker_box) => proto(ProtoBlock::ShulkerBox {
+                colour: shulker_box.colour,
+                facing: shulker_box.facing,
+            }),
+            Block::Sign(sign) => proto(ProtoBlock::Sign {
+                material: sign.material,
+                placement: sign.placement,
+                waterlogged: sign.waterlogged,
+            }),
+            Block::TrappedChest(trapped_chest) => proto(ProtoBlock::TrappedChest {
+                facing: trapped_chest.facing,
+                variant: trapped_chest.variant,
+                waterlogged: trapped_chest.waterlogged,
+            }),
+            _ => PaletteItem::Block(block.clone()),
         }
     }
 }
