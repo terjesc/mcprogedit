@@ -6,7 +6,7 @@ use crate::colour::*;
 use crate::positioning::*;
 
 /// Banner "block".
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Banner {
     /// Base colour of the banner.
     pub colour: Colour,
@@ -63,13 +63,13 @@ impl TryFrom<Block> for Banner {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct ColouredPattern {
     pub colour: Colour,
     pub pattern: BannerPattern,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BannerPattern {
     BaseColor,               // b (base)
     Base,                    // bs (bottom stripe)

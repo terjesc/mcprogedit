@@ -5,7 +5,7 @@ use crate::block_entity::{BlockEntity, ChestTags, CommonTags};
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface5};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Hopper {
     pub facing: Surface5,
     pub custom_name: Option<String>,

@@ -5,7 +5,7 @@ use crate::colour::Colour;
 use crate::material::{Material, WoodMaterial};
 use crate::positioning::{Direction, WallOrRotatedOnFloor};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Sign {
     pub material: WoodMaterial,
     pub placement: WallOrRotatedOnFloor,

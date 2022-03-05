@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface4};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Furnace {
     pub facing: Surface4,
     pub lit: bool,

@@ -118,9 +118,8 @@ impl Chunk {
         for x in 0..16 {
             for z in 0..16 {
                 for y in (section_y as i64 * 16)..(16 + section_y as i64 * 16) {
-                    let index = Self::local_index(section_y as i64, (x, y, z).into());
+                    //let index = Self::local_index(section_y as i64, (x, y, z).into());
 
-                    /*
                     if let Some(block) = self.blocks.block_at((x as usize, y as usize, z as usize))
                     {
                         let palette_item = PaletteItem::from_block(block);
@@ -129,12 +128,14 @@ impl Chunk {
                             palette_index_next += 1;
                             index
                         });
-                        block_states.push(palette_index);
+                        block_states.push(*palette_index);
                     }
-                    */
                 }
             }
         }
+
+        // TODO restructure block_states according to the number of bits needed for the palette
+        // TODO convert the palette to its final form
 
         // Generate the section
         let mut section = nbt::Map::new();

@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::inventory::Inventory;
 
 /// Represents the state of a brewing stand block.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BrewingStand {
     pub custom_name: Option<String>,
     pub lock: Option<String>,

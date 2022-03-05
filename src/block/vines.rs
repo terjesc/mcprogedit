@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use crate::block::Block;
 use crate::positioning::{Direction, DirectionFlags5};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Vines {
     // NB Older versions attaches to all neighbouring blocks by default.
     // NB Newer versions allow arbitrary placement up and on any side surface, in any combination.

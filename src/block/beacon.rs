@@ -5,7 +5,7 @@ use crate::block_entity::{BlockEntity, CommonTags};
 use crate::status_effect::StatusEffect;
 
 /// Beacon "block".
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Beacon {
     pub lock: Option<String>,
     pub levels: i32, // TODO change type to integer with valid range

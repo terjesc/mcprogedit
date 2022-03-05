@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::colour::Colour;
 use crate::positioning::{Direction, Surface4};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct GlazedTerracotta {
     pub(crate) colour: Colour,
     pub(crate) facing: Surface4,

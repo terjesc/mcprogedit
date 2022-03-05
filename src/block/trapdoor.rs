@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::material::{DoorMaterial, Material};
 use crate::positioning::{Direction, Edge8};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Trapdoor {
     pub(crate) material: DoorMaterial,
     pub(crate) hinge_at: Edge8,

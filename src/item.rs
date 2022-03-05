@@ -6,7 +6,7 @@ use crate::enchantment::Enchantment;
 use crate::material::*;
 use crate::nbt_lookup::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Item {
     custom_name: Option<String>,
     enchantments: Vec<Enchantment>,
@@ -681,7 +681,7 @@ impl Item {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BowlContents {
     BeetrootSoup,
     MushroomStew,
@@ -689,7 +689,7 @@ pub enum BowlContents {
     SuspiciousStew,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BucketContents {
     Empty,
     Lava,
@@ -697,7 +697,7 @@ pub enum BucketContents {
     Water,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Recording {
     Blocks,
     Cat,
@@ -713,7 +713,7 @@ pub enum Recording {
     Wait,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum MinecartContents {
     Chest,
     CommandBlock,
@@ -722,7 +722,7 @@ pub enum MinecartContents {
     TNT,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ItemKind {
     // mcprogedit "items"
     Unknown,

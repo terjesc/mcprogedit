@@ -5,7 +5,7 @@ use crate::block_entity::{BlockEntity, ChestTags, CommonTags};
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface4};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Chest {
     pub facing: Surface4,
     pub variant: Option<ChestVariant>,
@@ -53,7 +53,7 @@ impl TryFrom<Block> for Chest {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum ChestVariant {
     Left,
     Right,

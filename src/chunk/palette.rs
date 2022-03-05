@@ -12,7 +12,7 @@ use crate::positioning::*;
 /// in the palette. When parsing the Palette the shared data is stored in this "proto block".
 /// Later, when parsing BlockStates, the proto block gets combined with the block entities to
 /// form the actual blocks.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum ProtoBlock {
     Banner { colour: Colour, placement: WallOrRotatedOnFloor },
     Beacon,
@@ -33,7 +33,7 @@ pub(super) enum ProtoBlock {
 /// entity has not been matched yet. The latter contain only information from the Palette
 /// NBT value, and are named "proto blocks". They will later be combined with block entities
 /// to form full blocks.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum PaletteItem {
     Block(Block),
     ProtoBlock(ProtoBlock),

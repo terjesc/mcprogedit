@@ -7,7 +7,7 @@ use crate::positioning::{Direction, Edge8};
 /// Stair shape is not configurable, as it depend on neighbouring stairs.
 /// Stair shape is either automatically calculated on save, or the block is
 /// flagged for update so that it will be automatically corrected in-game.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Stair {
     pub material: StairMaterial,
     pub position: Edge8,

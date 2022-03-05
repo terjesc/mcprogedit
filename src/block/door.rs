@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::material::{DoorMaterial, Material};
 use crate::positioning::{Direction, Surface4};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Door {
     pub material: DoorMaterial,
     pub facing: Surface4,
@@ -66,7 +66,7 @@ impl TryFrom<Block> for Door {
 }
 
 /// Doors are two blocks high. Which block is this?
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DoorHalf {
     /// Bottom block of the door
     Lower,
@@ -77,7 +77,7 @@ pub enum DoorHalf {
 /// For doors, what way they are hinged. Left/Right relative to the direction
 /// the door is Facing. (E.g. if Facing North, Left means on the West side,
 /// and Right means on the East side.)
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Hinge {
     Left,
     Right,

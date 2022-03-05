@@ -4,7 +4,7 @@ use crate::block::Block;
 use crate::colour::Colour;
 use crate::positioning::{Direction, Surface4};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Bed {
     pub colour: Colour,
     pub facing: Surface4,
@@ -32,7 +32,7 @@ impl TryFrom<Block> for Bed {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum BedEnd {
     Foot,
     Head,

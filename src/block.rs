@@ -58,7 +58,7 @@ pub enum SlabVariant {
     Top,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Slab {
     pub material: SlabMaterial,
     pub position: SlabVariant,
@@ -187,7 +187,7 @@ impl From<i16> for AnvilDamage {
 }
 
 /// Growth and attachment state for Melon and Pumpkin stems.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum StemState {
     /// Stem has not yet produced any fruit, or the fruit has been removed.
     Growing(Int0Through7),
@@ -202,7 +202,7 @@ pub enum BambooLeaves {
     Large,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Log {
     pub material: WoodMaterial,
     pub alignment: Axis3,
@@ -226,14 +226,14 @@ pub enum CommandBlockVariant {
     RepeatingCommandBlock,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct CommandBlock {
     pub variant: CommandBlockVariant,
     pub conditional: bool,
     pub facing: Surface6,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Jukebox {
     pub record: Option<Item>,
 }
@@ -250,7 +250,7 @@ pub enum OnOffState {
 /// Blocks with attributes can be created directly, or through the use of helper functions.
 /// Some of the more complex blocks have their own data structures, that are put inside
 /// the corresponding enum variant (often boxed.)
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Block {
     None,
     Unknown(Option<u16>),

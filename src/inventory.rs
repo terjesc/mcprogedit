@@ -3,7 +3,7 @@
 use crate::item::Item;
 use crate::nbt_lookup::*;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 // TODO / FUTURE WORK
 // Maybe this is best as a trait?
@@ -15,20 +15,20 @@ use std::collections::HashMap;
 // e.g. furnace has "fuel" slot, "cooking" slot and "cooked" slot,
 // and animals have "saddle" slot, "armor" slot, "chest" slots, etc.
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Inventory {
-    slots: HashMap<i8, ItemStack>,
+    slots: BTreeMap<i8, ItemStack>,
 }
 
 impl Inventory {
     pub fn new() -> Self {
         Self {
-            slots: HashMap::new(),
+            slots: BTreeMap::new(),
         }
     }
 
     pub(crate) fn from_nbt_value_vec(list: &[nbt::Value]) -> Self {
-        let mut slots = HashMap::new();
+        let mut slots = BTreeMap::new();
         for item in list {
             let slot = nbt_value_lookup_byte(item, "Slot").unwrap();
             slots.insert(slot, ItemStack::from_nbt_value(item));
@@ -67,7 +67,7 @@ impl Default for Inventory {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct ItemStack {
     item: Item,
     count: i8,

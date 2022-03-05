@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use crate::block::Block;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct FlowerPot {
     pub(crate) plant: Option<PottedPlant>,
 }
@@ -48,7 +48,7 @@ impl From<FlowerPot> for Block {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum PottedPlant {
     AcaciaSapling,
     Allium,

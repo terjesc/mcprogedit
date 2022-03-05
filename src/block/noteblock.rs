@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use crate::block::Block;
 use crate::block_entity::{BlockEntity, CommonTags};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Noteblock {
     pub pitch: Pitch,
 }
@@ -40,7 +40,7 @@ impl TryFrom<Block> for Noteblock {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Pitch {
     Fs0 = 0,
     G0,
@@ -134,7 +134,7 @@ impl Pitch {
 
 // TODO put somewhere suitable
 // TODO utility functions
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Instrument {
     Banjo,
     Basedrum,

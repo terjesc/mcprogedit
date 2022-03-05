@@ -34,7 +34,7 @@ use crate::positioning::{Direction, DirectionError, Surface4};
 /// // Turn the repeater into a proper block:
 /// let repeater_block: Block = repeater.into();
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct RedstoneRepeater {
     pub(crate) facing: Surface4,
     pub(crate) delay: Int1Through4,

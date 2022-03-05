@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use crate::block::Block;
 use crate::positioning::{Direction, WallOrRotatedOnFloor};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct Head {
     pub(crate) variant: HeadVariant,
     pub(crate) placement: WallOrRotatedOnFloor,
@@ -28,7 +28,7 @@ impl Head {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum HeadVariant {
     CreeperHead,
     DragonHead,

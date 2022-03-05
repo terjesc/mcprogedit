@@ -5,7 +5,7 @@ use crate::block_entity::{BlockEntity, ChestTags, CommonTags};
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface6};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Dispenser {
     pub facing: Surface6,
     pub custom_name: Option<String>,
