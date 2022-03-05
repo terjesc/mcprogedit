@@ -1879,7 +1879,6 @@ impl Chunk {
                             match block_entity {
                                 BlockEntity::Hopper { tags } => Block::Hopper(Box::new(Hopper {
                                     facing: facing5_dxnswe(data[index]),
-                                    waterlogged: false,
                                     custom_name: tags.custom_name.clone(),
                                     lock: tags.lock.clone(),
                                     items: tags.items.clone(),

@@ -8,7 +8,6 @@ use crate::positioning::{Direction, Surface5};
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hopper {
     pub facing: Surface5,
-    pub waterlogged: bool,
     pub custom_name: Option<String>,
     pub lock: Option<String>,
     pub items: Inventory,

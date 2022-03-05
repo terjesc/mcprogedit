@@ -125,6 +125,9 @@ pub enum BlockEntity {
         tags: FurnaceTags,
     },
     StructureBlock,
+    TrappedChest {
+        tags: ChestTags,
+    },
     /// "Pseudo" variants are not found in game save files.
     /// They are internal to mcprogedit, and used for storing parameters from
     /// multiblock structures during world loading.
@@ -198,6 +201,7 @@ impl BlockEntity {
                 "minecraft:smoker" => Self::smoker_from_nbt_value(value),
                 "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(value),
                 "minecraft:structure_block" => Self::structure_block_from_nbt_value(value),
+                "minecraft:trapped_chest" => Self::trapped_chest_from_nbt_value(value),
                 _ => {
                     eprintln!("Unknown tile entity ID: {}", id);
                     BlockEntity::Unknown { id: Some(id) }
@@ -245,6 +249,7 @@ impl BlockEntity {
             Self::Smoker { .. } => self.smoker_to_nbt_value(),
             //Self::SoulCampfire { .. } => self.soul_campfire_to_nbt_value(),
             Self::StructureBlock { .. } => self.structure_block_to_nbt_value(),
+            Self::TrappedChest { .. } => self.trapped_chest_to_nbt_value(),
 
             // TODO add more block entity types
             _ => None,
@@ -887,6 +892,25 @@ impl BlockEntity {
         unimplemented!()
     }
 
+    fn trapped_chest_from_nbt_value(value: &nbt::Value) -> Self {
+        BlockEntity::TrappedChest {
+            tags: ChestTags::from_nbt_value(value),
+        }
+    }
+
+    fn trapped_chest_to_nbt_value(&self) -> Option<nbt::Value> {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::TrappedChest { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
+    }
+
     fn coordinates(&self) -> Option<BlockCoord> {
         match self {
             BlockEntity::Unknown { .. } => None,
@@ -919,6 +943,7 @@ impl BlockEntity {
             Self::Skull { common, .. } => Some(common.coordinates()),
             Self::Smoker { tags } => Some(tags.common.coordinates()),
             Self::StructureBlock => None,
+            Self::TrappedChest { tags } => Some(tags.common.coordinates()),
             // Internal mcprogedit block entities do not contain x, y, z tags
             Self::PseudoDoorBottom { .. }
             | Self::PseudoDoorTop { .. }

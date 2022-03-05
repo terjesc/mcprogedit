@@ -1,22 +1,17 @@
-use nbt::Value;
-
 use std::collections::HashMap;
 
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
-use crate::block_entity::BlockEntity;
-use crate::bounded_ints::*;
+use crate::block_entity::{BlockEntity, ChestTags, FurnaceTags};
 use crate::chunk::Chunk;
 use crate::chunk::palette;
+use crate::chunk::palette::{PaletteItem, ProtoBlock};
 use crate::colour::Colour;
-use crate::coordinates::{BlockColumnCoord, BlockCoord, ChunkCoord};
-use crate::light_cuboid::LightCuboid;
-use crate::material::*;
+use crate::coordinates::{BlockCoord, ChunkCoord};
+use crate::inventory::Inventory;
 use crate::mc_version::McVersion;
 use crate::mc_version;
 use crate::nbt_lookup::*;
-use crate::chunk::palette::PaletteItem;
-use crate::positioning::*;
 use crate::utils;
 
 impl Chunk {
@@ -54,7 +49,7 @@ impl Chunk {
             // Fill the section area of the block_cuboid with the palette block
             let block = match &palette[0] {
                 PaletteItem::Block(block) => block,
-                PaletteItem::ProtoBlock(block) => &Block::Sponge, // TODO handle block entity blocks
+                PaletteItem::ProtoBlock(_proto_block) => unimplemented!(), // TODO handle block entity blocks
             };
 
             for coordinate_index in 0 .. 16 * 16 * 16 {
@@ -72,8 +67,6 @@ impl Chunk {
 
         // Exctract the block state array
         let bits_per_value = bits_per_value(palette.len());
-        println!("Palette lenght: {}, Bits per value: {}", palette.len(), bits_per_value);
-
         let block_states = nbt_value_lookup_long_array(&section, "BlockStates").unwrap();
         let block_states = if data_version >= mc_version::BLOCK_STATES_PADDED {
             utils::paddedly_unpacked::<u64>(&utils::vec_i64_into_vec_u64(block_states), bits_per_value)
@@ -85,7 +78,13 @@ impl Chunk {
         for (coordinate_index, palette_index) in block_states.iter().enumerate() {
             let block = match &palette[*palette_index as usize] {
                 PaletteItem::Block(block) => block.clone(),
-                PaletteItem::ProtoBlock(block) => Block::Sponge, // TODO handle block entity blocks
+                PaletteItem::ProtoBlock(proto_block) => {
+                    let coordinates = Self::coordinates(section_y_index, xz_offset, coordinate_index);
+                    block_from_proto_and_entity(
+                        proto_block,
+                        block_entities.get(&coordinates).unwrap(),
+                    )
+                }
             };
 
             let coordinates = Self::coordinates(section_y_index, (0, 0, 0).into(), coordinate_index);
@@ -94,9 +93,226 @@ impl Chunk {
                 coordinates.1 as usize,
                 coordinates.2 as usize,
             );
+
             block_cuboid.insert(coordinates, block);
         }
 
+        fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEntity) -> Block {
+            match proto_block {
+                ProtoBlock::Banner { colour, placement } => {
+                    let (custom_name, patterns) =
+                        if let BlockEntity::Banner { custom_name, patterns, .. } = block_entity {
+                            (custom_name.clone(), patterns.clone())
+                        } else {
+                            (None, Vec::new())
+                        };
+
+                    Block::Banner(Box::new(Banner {
+                            colour: *colour,
+                            custom_name,
+                            placement: *placement,
+                            patterns,
+                    }))
+                }
+
+                ProtoBlock::Beacon => {
+                    let (lock, levels, primary, secondary) =
+                        if let BlockEntity::Beacon { lock, levels, primary, secondary, .. } = block_entity {
+                            (lock.clone(), *levels, primary.clone(), secondary.clone())
+                        } else {
+                            (None, 0, None, None)
+                        };
+
+                    Block::Beacon(Box::new(Beacon {
+                        lock,
+                        levels,
+                        primary,
+                        secondary,
+                    }))
+                }
+
+                ProtoBlock::BrewingStand => {
+                    let (custom_name, lock, items, brew_time, fuel) =
+                        if let BlockEntity::BrewingStand { custom_name, lock, items, brew_time, fuel, .. } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone(), *brew_time, *fuel)
+                        } else {
+                            (None, None, Inventory::new(), 0, 0)
+                        };
+
+                    Block::BrewingStand(Box::new(BrewingStand {
+                        custom_name,
+                        lock,
+                        items,
+                        brew_time,
+                        fuel,
+                    }))
+                }
+
+                ProtoBlock::Chest { facing, variant, waterlogged } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::Chest { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::Chest(Box::new(Chest {
+                        facing: *facing,
+                        variant: variant.clone(),
+                        waterlogged: *waterlogged,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+
+                ProtoBlock::Dispenser { facing } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::Dispenser { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::Dispenser(Box::new(Dispenser {
+                        facing: *facing,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+
+                ProtoBlock::Dropper { facing } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::Dropper { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::Dropper(Box::new(Dropper {
+                        facing: *facing,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+
+                ProtoBlock::EnchantingTable => {
+                    let custom_name =
+                        if let BlockEntity::EnchantingTable { custom_name, .. } = block_entity {
+                            custom_name.clone()
+                        } else {
+                            None
+                        };
+
+                    Block::EnchantingTable { custom_name: Box::new(custom_name) }
+                }
+
+                ProtoBlock::Furnace { facing, lit } => {
+                    let (custom_name, lock, items, burn_time, cook_time, cook_time_total) =
+                        if let BlockEntity::Furnace {
+                            tags: FurnaceTags { custom_name, lock, items, burn_time, cook_time, cook_time_total, .. }
+                        } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone(), *burn_time, *cook_time, *cook_time_total)
+                        } else {
+                            (None, None, Inventory::new(), 0, 0, 0)
+                        };
+
+                    Block::Furnace(Box::new(Furnace {
+                        facing: *facing,
+                        lit: *lit,
+                        custom_name,
+                        lock,
+                        items,
+                        burn_time,
+                        cook_time,
+                        cook_time_total,
+                    }))
+                }
+
+                ProtoBlock::Hopper { facing } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::Hopper { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::Hopper(Box::new(Hopper {
+                        facing: *facing,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+
+                ProtoBlock::Jukebox => {
+                    let record = if let BlockEntity::Jukebox { record, .. } = block_entity {
+                        record.clone()
+                    } else {
+                        None
+                    };
+
+                    Block::Jukebox(Box::new(Jukebox { record }))
+                }
+
+                ProtoBlock::ShulkerBox { colour, facing } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::ShulkerBox { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::ShulkerBox(Box::new(ShulkerBox {
+                        colour: colour.clone(),
+                        facing: *facing,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+
+                ProtoBlock::Sign { material, placement, waterlogged } => {
+                    let (colour, text) =
+                        if let BlockEntity::Sign { colour, text, .. } = block_entity {
+                            (*colour, text.clone())
+                        } else {
+                            (Colour::Black, vec![String::new(); 4])
+                        };
+
+                    Block::Sign(Box::new(Sign {
+                        material: *material,
+                        placement: *placement,
+                        waterlogged: *waterlogged,
+                        colour,
+                        text1: text[0].clone(),
+                        text2: text[1].clone(),
+                        text3: text[2].clone(),
+                        text4: text[3].clone(),
+                    }))
+                }
+
+                ProtoBlock::TrappedChest { facing, variant, waterlogged } => {
+                    let (custom_name, lock, items) =
+                        if let BlockEntity::TrappedChest { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                            (custom_name.clone(), lock.clone(), items.clone())
+                        } else {
+                            (None, None, Inventory::new())
+                        };
+
+                    Block::TrappedChest(Box::new(Chest {
+                        facing: *facing,
+                        variant: variant.clone(),
+                        waterlogged: *waterlogged,
+                        custom_name,
+                        lock,
+                        items,
+                    }))
+                }
+            }
+        }
         /*
         //let mut block_cuboid = BlockCuboid::new((16, 16, 16));
         blocks

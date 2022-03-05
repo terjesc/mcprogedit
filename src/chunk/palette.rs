@@ -45,8 +45,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
     // e.g. facing.) Essentially holding all info previously encoded in blocks + add + data.
     let mut palette: Vec<PaletteItem> = Vec::new();
     let raw_palette = if let Ok(p) = nbt_value_lookup_list(section, "Palette") { p } else { return None };
-    //println!("Section {}: {}", section_y_index, section);
-    println!("Raw palette: {:#?}", raw_palette);
+
+//    println!("Raw palette: {:#?}", raw_palette);
     for raw_block in raw_palette {
         let name = nbt_value_lookup_string(&raw_block, "Name").unwrap();
         let properties = nbt_value_lookup(&raw_block, "Properties").ok();
@@ -680,7 +680,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
         };
         palette.push(palette_item);
     }
-    println!("Palette: {:#?}", palette);
+//    println!("Palette: {:#?}", palette);
 
     Some(palette)
 }
