@@ -490,6 +490,14 @@ impl Axis3 {
     pub const Down: Axis3 = Axis3::Y;
     pub const South: Axis3 = Axis3::Z;
     pub const North: Axis3 = Axis3::Z;
+
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::X => "x".into(),
+            Self::Y => "y".into(),
+            Self::Z => "z".into(),
+        }
+    }
 }
 
 impl Default for Axis3 {

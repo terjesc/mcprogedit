@@ -1,3 +1,4 @@
+use log::warn;
 use std::collections::HashMap;
 
 use crate::block::*;
@@ -108,12 +109,11 @@ impl Chunk {
         nbt::Value::List(sections)
     }
 
-    // TODO
     fn post_flattening_section(&self, section_y: i8) -> nbt::Value {
-
-        println!("post_flattening_section()");
+//        println!("post_flattening_section({})", section_y);
         let mut block_states: Vec<u64> = Vec::new();
-        let mut palette: HashMap<PaletteItem, u64> = HashMap::new();
+        let mut palette_map: HashMap<PaletteItem, u64> = HashMap::new();
+        let mut palette_vec: Vec<PaletteItem> = Vec::new();
         let mut palette_index_next = 0;
 
         for x in 0..16 {
@@ -124,23 +124,24 @@ impl Chunk {
                     if let Some(block) = self.blocks.block_at((x as usize, y as usize, z as usize))
                     {
                         let palette_item = PaletteItem::from_block(block);
-                        let palette_index = palette.entry(palette_item).or_insert_with(|| {
+                        let palette_index = palette_map.entry(palette_item.clone()).or_insert_with(|| {
                             let index = palette_index_next;
+                            palette_vec.push(palette_item);
                             palette_index_next += 1;
-                            println!("Pushing palette item: {:?}", PaletteItem::from_block(block));
+//                            println!("Pushing palette item: {:?}", PaletteItem::from_block(block));
                             index
                         });
                         block_states.push(*palette_index);
                     } else {
-                        println!("Could not find block at ({}, {}, {})", x, y, z);
+                        warn!("Could not find block at ({}, {}, {})", x, y, z);
                     }
                 }
             }
         }
 
         // Restructure block_states according to the number of bits needed for the palette
-        let bits_per_value = bits_per_value(palette.len());
-        println!("Palette with {} elements --> {} bits per index.", palette.len(), bits_per_value);
+        let bits_per_value = bits_per_value(palette_vec.len());
+//        println!("Palette with {} elements --> {} bits per index.", palette_vec.len(), bits_per_value);
         let block_states = if self.data_version >= mc_version::BLOCK_STATES_PADDED {
             utils::paddedly_packed(&block_states, bits_per_value)
         } else {
@@ -149,13 +150,17 @@ impl Chunk {
         let block_states = utils::vec_u64_into_vec_i64(block_states);
 
         // TODO convert the palette to its final form
+        let mut palette_nbt = Vec::new();
+        for palette_item in palette_vec {
+            palette_nbt.push(palette_item.to_nbt_value());
+        }
 
         // Generate the section
         let mut section = nbt::Map::new();
 
         section.insert("Y".into(), nbt::Value::Byte(section_y));
         section.insert("BlockStates".into(), nbt::Value::LongArray(block_states));
-//        section.insert("Palette".into(), nbt::Value::List(palette));
+        section.insert("Palette".into(), nbt::Value::List(palette_nbt));
 //        section.insert("BlockLight".into(), nbt::Value::ByteArray(block_light));
 //        section.insert("SkyLight".into(), nbt::Value::ByteArray(sky_light));
 

@@ -3,12 +3,17 @@ extern crate mcprogedit;
 
 use std::path::Path;
 
+use simple_logger::SimpleLogger;
+
 use mcprogedit::block::*;
 use mcprogedit::colour::Colour;
 use mcprogedit::coordinates::BlockCoord;
 use mcprogedit::world_excerpt::WorldExcerpt;
 
 fn main() {
+    // Initialize logging
+    SimpleLogger::new().init().unwrap();
+
     // Read arguments
     let matches = matches();
     let input_directory = matches.value_of("input_save").unwrap_or(".");

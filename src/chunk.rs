@@ -92,7 +92,8 @@ impl Chunk {
             .unwrap()
             .as_secs();
 
-        // Biomes needs some extra handling...
+        // TODO: Biomes currently hard coded to plains.
+        // TODO: Add biomes for post flattening saves.
         let biomes: Vec<u8> = match &self.biomes {
             Some(biomes) => biomes.iter().map(|biome| u8::from(*biome)).collect(),
             None => vec![Biome::Plains.into(); 256],
@@ -112,15 +113,23 @@ impl Chunk {
         level.insert("xPos".into(), nbt::Value::Int(self.global_pos.0 as i32));
         level.insert("zPos".into(), nbt::Value::Int(self.global_pos.1 as i32));
         level.insert("LastUpdate".into(), nbt::Value::Long(last_update as i64));
-        level.insert("LightPopulated".into(), nbt::Value::Byte(1));
-        level.insert("TerrainPopulated".into(), nbt::Value::Byte(1));
-        level.insert("V".into(), nbt::Value::Byte(1));
         level.insert("InhabitedTime".into(), nbt::Value::Long(0));
-        level.insert("Biomes".into(), nbt::Value::ByteArray(biomes));
-        level.insert(
-            "HeightMap".into(),
-            nbt::Value::IntArray(self.height_map().into()),
-        );
+        
+        // Different tags after and before the flattening
+        if self.data_version >= THE_FLATTENING {
+            level.insert("Status".into(), nbt::Value::String("full".into()));
+            level.insert("isLightOn".into(), nbt::Value::Byte(0));
+        } else {
+            level.insert("TerrainPopulated".into(), nbt::Value::Byte(1));
+            level.insert("LightPopulated".into(), nbt::Value::Byte(1));
+            level.insert("V".into(), nbt::Value::Byte(1));
+            level.insert("Biomes".into(), nbt::Value::ByteArray(biomes));
+            level.insert(
+                "HeightMap".into(),
+                nbt::Value::IntArray(self.height_map().into()),
+            );
+        }
+
         level.insert("Sections".into(), sections);
         // TODO Add proper handling of entities, instead of forgetting them:
         level.insert(
