@@ -1,6 +1,8 @@
 //! For describing positioning of blocks within their voxel (placement, rotation, etc.)
 
 use std::convert::TryFrom;
+use std::fmt;
+
 use thiserror::Error;
 
 // TODO Consider adding door placement data structure to this file...
@@ -600,6 +602,19 @@ pub enum Surface6 {
     South,
     Up,
     West,
+}
+
+impl fmt::Display for Surface6 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Surface6::Down => "down",
+            Surface6::East => "east",
+            Surface6::North => "north",
+            Surface6::South => "south",
+            Surface6::Up => "up",
+            Surface6::West => "west",
+        })
+    }
 }
 
 impl Default for Surface6 {

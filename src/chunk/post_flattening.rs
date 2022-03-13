@@ -149,7 +149,7 @@ impl Chunk {
         };
         let block_states = utils::vec_u64_into_vec_i64(block_states);
 
-        // TODO convert the palette to its final form
+        // Convert the palette to its final form
         let mut palette_nbt = Vec::new();
         for palette_item in palette_vec {
             palette_nbt.push(palette_item.to_nbt_value());

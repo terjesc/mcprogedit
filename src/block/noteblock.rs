@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 
 use crate::block::Block;
 use crate::block_entity::{BlockEntity, CommonTags};
@@ -67,6 +68,12 @@ pub enum Pitch {
     E2,
     F2,
     Fs2,
+}
+
+impl fmt::Display for Pitch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_i8())
+    }
 }
 
 impl Pitch {

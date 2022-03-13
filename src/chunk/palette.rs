@@ -113,6 +113,20 @@ impl PaletteItem {
                 properties.insert("axis".into(), nbt::Value::String(alignment.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::WaterSource)
+            | PaletteItem::Block(Block::LavaSource) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("level".into(), nbt::Value::String("0".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Water { falling, level })
+            | PaletteItem::Block(Block::Lava { falling, level }) => {
+                let mut properties = nbt::Map::new();
+                let level = 8 - i8::from(*level);
+                let level = if *falling { level | 0x8 } else { level };
+                properties.insert("level".into(), nbt::Value::String(level.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
             PaletteItem::Block(Block::Leaves { distance_to_trunk, persistent, .. }) => {
                 let mut properties = nbt::Map::new();
                 if let Some(distance) = distance_to_trunk {
@@ -122,13 +136,63 @@ impl PaletteItem {
                 properties.insert("persistent".into(), nbt::Value::String(persistent));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::ProtoBlock(ProtoBlock::Dispenser { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Noteblock(Noteblock { pitch })) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("note".into(), nbt::Value::String(pitch.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Rail { shape, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("shape".into(), nbt::Value::String(shape.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::StickyPiston { facing, extended }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("extended".into(), nbt::Value::String(extended.to_string()));
+                properties.insert("type".into(), nbt::Value::String("sticky".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Piston { facing, extended }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("extended".into(), nbt::Value::String(extended.to_string()));
+                properties.insert("type".into(), nbt::Value::String("normal".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::StickyPistonHead { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("short".into(), nbt::Value::String("false".into()));
+                properties.insert("type".into(), nbt::Value::String("sticky".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::PistonHead { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("short".into(), nbt::Value::String("false".into()));
+                properties.insert("type".into(), nbt::Value::String("normal".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Grass(Grass::TallGrassTop))
+            | PaletteItem::Block(Block::Grass(Grass::LargeFernTop)) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("half".into(), nbt::Value::String("upper".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Grass(Grass::TallGrassBottom))
+            | PaletteItem::Block(Block::Grass(Grass::LargeFernBottom)) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("half".into(), nbt::Value::String("lower".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+
             /*
-            "minecraft:oak_leaves" => block(leaves(LeavesMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_leaves" => block(leaves(LeavesMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_leaves" => block(leaves(LeavesMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_leaves" => block(leaves(LeavesMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_leaves" => block(leaves(LeavesMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_leaves" => block(leaves(LeavesMaterial::DarkOak, &properties.unwrap())),
             */
 
             _ => None, // TODO should have some way to signal unhandled block types. Perhaps list all?
@@ -230,27 +294,54 @@ impl PaletteItem {
             }
             PaletteItem::Block(Block::Sponge) => "minecraft:sponge",
             PaletteItem::Block(Block::WetSponge) => "minecraft:wet_sponge",
-            /*
+            PaletteItem::Block(Block::Glass { colour }) => match colour {
+                None => "minecraft:glass",
+                Some(Colour::White) => "minecraft:white_stained_glass",
+                Some(Colour::Orange) => "minecraft:orange_stained_glass",
+                Some(Colour::Magenta) => "minecraft:magenta_stained_glass",
+                Some(Colour::LightBlue) => "minecraft:light_blue_stained_glass",
+                Some(Colour::Yellow) => "minecraft:yellow_stained_glass",
+                Some(Colour::Lime) => "minecraft:lime_stained_glass",
+                Some(Colour::Pink) => "minecraft:pink_stained_glass",
+                Some(Colour::Gray) => "minecraft:gray_stained_glass",
+                Some(Colour::LightGray) => "minecraft:light_gray_stained_glass",
+                Some(Colour::Cyan) => "minecraft:cyan_stained_glass",
+                Some(Colour::Purple) => "minecraft:purple_stained_glass",
+                Some(Colour::Blue) => "minecraft:blue_stained_glass",
+                Some(Colour::Brown) => "minecraft:brown_stained_glass",
+                Some(Colour::Green) => "minecraft:green_stained_glass",
+                Some(Colour::Red) => "minecraft:red_stained_glass",
+                Some(Colour::Black) => "minecraft:black_stained_glass",
+            }
+            PaletteItem::Block(Block::LapisLazuliOre) => "minecraft:lapis_ore",
+            PaletteItem::Block(Block::LapisLazuliBlock) => "minecraft:lapis_block",
+            PaletteItem::ProtoBlock(ProtoBlock::Dispenser { .. }) => "minecraft:dispenser",
+            PaletteItem::Block(Block::Sandstone) => "minecraft:sandstone",
+            PaletteItem::Block(Block::ChiseledSandstone) => "minecraft:chiseled_sandstone",
+            PaletteItem::Block(Block::SmoothSandstone) => "minecraft:smooth_sandstone",
+            PaletteItem::Block(Block::CutSandstone) => "minecraft:cut_sandstone",
+            PaletteItem::Block(Block::Noteblock(Noteblock { .. })) => "minecraft:note_block",
+            PaletteItem::Block(Block::Rail { variant, .. }) => match variant {
+                RailType::Activator => "minecraft:activator_rail",
+                RailType::Detector => "minecraft:detector_rail",
+                RailType::Normal => "minecraft:rail",
+                RailType::Powered => "minecraft:powered_rail",
+            }
+            PaletteItem::Block(Block::PistonHead { .. })
+            | PaletteItem::Block(Block::StickyPistonHead { .. }) => "minecraft:piston_head",
+            PaletteItem::Block(Block::Piston { .. }) => "minecraft:piston",
+            PaletteItem::Block(Block::StickyPiston { .. }) => "minecraft:sticky_piston",
+            PaletteItem::Block(Block::Cobweb) => "minecraft:cobweb",
+            PaletteItem::Block(Block::Grass(grass_variant)) => match grass_variant {
+                Grass::Grass => "minecraft:grass",
+                Grass::Fern => "minecraft:fern",
+                Grass::TallGrassTop
+                | Grass::TallGrassBottom => "minecraft:tall_grass",
+                Grass::LargeFernTop
+                | Grass::LargeFernBottom => "minecraft:large_fern",
+            }
 
-            "minecraft:glass" => block(Block::Glass { colour: None }),
-            "minecraft:lapis_ore" => block(Block::LapisLazuliOre),
-            "minecraft:lapis_block" => block(Block::LapisLazuliBlock),
-            "minecraft:dispenser" => proto(proto_dispenser(&properties.unwrap())),
-            "minecraft:sandstone" => block(Block::Sandstone),
-            "minecraft:chiseled_sandstone" => block(Block::ChiseledSandstone),
-            "minecraft:smooth_sandstone" => block(Block::SmoothSandstone),
-            "minecraft:cut_sandstone" => block(Block::CutSandstone),
-            "minecraft:note_block" => block(noteblock(&properties.unwrap())),
-            "minecraft:powered_rail" => block(rail(RailType::Powered, &properties.unwrap())),
-            "minecraft:detector_rail" => block(rail(RailType::Detector, &properties.unwrap())),
-            "minecraft:rail" => block(rail(RailType::Normal, &properties.unwrap())),
-            "minecraft:activator_rail" => block(rail(RailType::Activator, &properties.unwrap())),
-            "minecraft:sticky_piston" => block(piston(true, &properties.unwrap())),
-            "minecraft:piston_head" => block(piston_head(&properties.unwrap())),
-            "minecraft:piston" => block(piston(false, &properties.unwrap())),
-            "minecraft:cobweb" => block(Block::Cobweb),
-            "minecraft:grass" => block(Block::Grass(Grass::Grass)),
-            "minecraft:fern" => block(Block::Grass(Grass::Fern)),
+            /*
             "minecraft:dead_bush" => block(Block::DeadBush),
             "minecraft:white_wool" => block(Block::Wool { colour: Colour::White }),
             "minecraft:orange_wool" => block(Block::Wool { colour: Colour::Orange }),
@@ -442,22 +533,6 @@ impl PaletteItem {
             "minecraft:jack_o_lantern" => block(jack_o_lantern(&properties.unwrap())),
             "minecraft:cake" => block(cake(&properties.unwrap())),
             "minecraft:repeater" => block(repeater(&properties.unwrap())),
-            "minecraft:white_stained_glass" => block(Block::Glass { colour: Some(Colour::White )}),
-            "minecraft:orange_stained_glass" => block(Block::Glass { colour: Some(Colour::Orange )}),
-            "minecraft:magenta_stained_glass" => block(Block::Glass { colour: Some(Colour::Magenta )}),
-            "minecraft:light_blue_stained_glass" => block(Block::Glass { colour: Some(Colour::LightBlue )}),
-            "minecraft:yellow_stained_glass" => block(Block::Glass { colour: Some(Colour::Yellow )}),
-            "minecraft:lime_stained_glass" => block(Block::Glass { colour: Some(Colour::Lime )}),
-            "minecraft:pink_stained_glass" => block(Block::Glass { colour: Some(Colour::Pink )}),
-            "minecraft:gray_stained_glass" => block(Block::Glass { colour: Some(Colour::Gray )}),
-            "minecraft:light_gray_stained_glass" => block(Block::Glass { colour: Some(Colour::LightGray )}),
-            "minecraft:cyan_stained_glass" => block(Block::Glass { colour: Some(Colour::Cyan )}),
-            "minecraft:purple_stained_glass" => block(Block::Glass { colour: Some(Colour::Purple )}),
-            "minecraft:blue_stained_glass" => block(Block::Glass { colour: Some(Colour::Blue )}),
-            "minecraft:brown_stained_glass" => block(Block::Glass { colour: Some(Colour::Brown )}),
-            "minecraft:green_stained_glass" => block(Block::Glass { colour: Some(Colour::Green )}),
-            "minecraft:red_stained_glass" => block(Block::Glass { colour: Some(Colour::Red )}),
-            "minecraft:black_stained_glass" => block(Block::Glass { colour: Some(Colour::Black )}),
             "minecraft:oak_trapdoor" => block(trapdoor(DoorMaterial::Oak, &properties.unwrap())),
             "minecraft:spruce_trapdoor" => block(trapdoor(DoorMaterial::Spruce, &properties.unwrap())),
             "minecraft:birch_trapdoor" => block(trapdoor(DoorMaterial::Birch, &properties.unwrap())),
@@ -651,8 +726,6 @@ impl PaletteItem {
             "minecraft:lilac" => block(tall("lilac", &properties.unwrap())),
             "minecraft:rose_bush" => block(tall("rose_bush", &properties.unwrap())),
             "minecraft:peony" => block(tall("peony", &properties.unwrap())),
-            "minecraft:tall_grass" => block(tall("tall_grass", &properties.unwrap())),
-            "minecraft:large_fern" => block(tall("large_fern", &properties.unwrap())),
             "minecraft:white_bed" => block(bed(Colour::White, &properties.unwrap())),
             "minecraft:orange_bed" => block(bed(Colour::Orange, &properties.unwrap())),
             "minecraft:magenta_bed" => block(bed(Colour::Magenta, &properties.unwrap())),
@@ -1618,7 +1691,7 @@ fn noteblock(properties: &Option<Value>) -> Block {
         .and_then(|note_integer| Some(Pitch::from_value(note_integer)))
         .unwrap_or_else(|| {
             let pitch = Pitch::from_value(0);
-            warn!("Using fallback value \"{:?}\" for \"note\" property of leaves.", pitch);
+            warn!("Using fallback value \"{:?}\" for \"note\" property of note block.", pitch);
             pitch
         });
 

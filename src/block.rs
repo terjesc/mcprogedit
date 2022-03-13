@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 
 mod banner;
 mod beacon;
@@ -91,6 +92,23 @@ pub enum RailShape {
     AscendingNorth,
     AscendingSouth,
     AscendingWest,
+}
+
+impl fmt::Display for RailShape {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            RailShape::NorthSouth => "north_south",
+            RailShape::EastWest => "east_west",
+            RailShape::NorthEast => "north_east",
+            RailShape::NorthWest => "north_west",
+            RailShape::SouthEast => "south_east",
+            RailShape::SouthWest => "south_west",
+            RailShape::AscendingNorth => "ascending_north",
+            RailShape::AscendingSouth => "ascending_south",
+            RailShape::AscendingEast => "ascending_east",
+            RailShape::AscendingWest => "ascending_west",
+        })
+    }
 }
 
 impl RailShape {
