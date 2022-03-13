@@ -116,9 +116,9 @@ impl Chunk {
         let mut palette_vec: Vec<PaletteItem> = Vec::new();
         let mut palette_index_next = 0;
 
-        for x in 0..16 {
+        for y in (section_y as i64 * 16)..(16 + section_y as i64 * 16) {
             for z in 0..16 {
-                for y in (section_y as i64 * 16)..(16 + section_y as i64 * 16) {
+                for x in 0..16 {
                     //let index = Self::local_index(section_y as i64, (x, y, z).into());
 
                     if let Some(block) = self.blocks.block_at((x as usize, y as usize, z as usize))
