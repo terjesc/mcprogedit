@@ -81,7 +81,7 @@ impl Chunk {
                     let coordinates = Self::coordinates(section_y_index, xz_offset, coordinate_index);
                     block_from_proto_and_entity(
                         proto_block,
-                        block_entities.get(&coordinates).unwrap(),
+                        block_entities.get(&coordinates),
                     )
                 }
             };
@@ -168,13 +168,14 @@ impl Chunk {
     }
 }
         
-fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEntity) -> Block {
+fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&BlockEntity>) -> Block {
     match proto_block {
         ProtoBlock::Banner { colour, placement } => {
             let (custom_name, patterns) =
-                if let BlockEntity::Banner { custom_name, patterns, .. } = block_entity {
+                if let Some(BlockEntity::Banner { custom_name, patterns, .. }) = block_entity {
                     (custom_name.clone(), patterns.clone())
                 } else {
+                    warn!("Wrong or missing block entity for banner: {:?}", block_entity);
                     (None, Vec::new())
                 };
 
@@ -188,9 +189,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Beacon => {
             let (lock, levels, primary, secondary) =
-                if let BlockEntity::Beacon { lock, levels, primary, secondary, .. } = block_entity {
+                if let Some(BlockEntity::Beacon { lock, levels, primary, secondary, .. }) = block_entity {
                     (lock.clone(), *levels, primary.clone(), secondary.clone())
                 } else {
+                    warn!("Wrong or missing block entity for beacon: {:?}", block_entity);
                     (None, 0, None, None)
                 };
 
@@ -204,9 +206,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::BrewingStand => {
             let (custom_name, lock, items, brew_time, fuel) =
-                if let BlockEntity::BrewingStand { custom_name, lock, items, brew_time, fuel, .. } = block_entity {
+                if let Some(BlockEntity::BrewingStand { custom_name, lock, items, brew_time, fuel, .. }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone(), *brew_time, *fuel)
                 } else {
+                    warn!("Wrong or missing block entity for brewing stand: {:?}", block_entity);
                     (None, None, Inventory::new(), 0, 0)
                 };
 
@@ -221,9 +224,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Chest { facing, variant, waterlogged } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::Chest { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::Chest { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for chest: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
@@ -239,9 +243,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Dispenser { facing } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::Dispenser { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::Dispenser { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for dispenser: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
@@ -255,9 +260,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Dropper { facing } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::Dropper { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::Dropper { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for dropper: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
@@ -271,9 +277,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::EnchantingTable => {
             let custom_name =
-                if let BlockEntity::EnchantingTable { custom_name, .. } = block_entity {
+                if let Some(BlockEntity::EnchantingTable { custom_name, .. }) = block_entity {
                     custom_name.clone()
                 } else {
+                    warn!("Wrong or missing block entity for enchanting table: {:?}", block_entity);
                     None
                 };
 
@@ -282,11 +289,12 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Furnace { facing, lit } => {
             let (custom_name, lock, items, burn_time, cook_time, cook_time_total) =
-                if let BlockEntity::Furnace {
+                if let Some(BlockEntity::Furnace {
                     tags: FurnaceTags { custom_name, lock, items, burn_time, cook_time, cook_time_total, .. }
-                } = block_entity {
+                }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone(), *burn_time, *cook_time, *cook_time_total)
                 } else {
+                    warn!("Wrong or missing block entity for furnace: {:?}", block_entity);
                     (None, None, Inventory::new(), 0, 0, 0)
                 };
 
@@ -304,9 +312,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Hopper { facing } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::Hopper { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::Hopper { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for hopper: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
@@ -319,9 +328,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
         }
 
         ProtoBlock::Jukebox => {
-            let record = if let BlockEntity::Jukebox { record, .. } = block_entity {
+            let record = if let Some(BlockEntity::Jukebox { record, .. }) = block_entity {
                 record.clone()
             } else {
+                    warn!("Wrong or missing block entity for jukebox: {:?}", block_entity);
                 None
             };
 
@@ -330,9 +340,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::ShulkerBox { colour, facing } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::ShulkerBox { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::ShulkerBox { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for shulker box: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
@@ -347,9 +358,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::Sign { material, placement, waterlogged } => {
             let (colour, text) =
-                if let BlockEntity::Sign { colour, text, .. } = block_entity {
+                if let Some(BlockEntity::Sign { colour, text, .. }) = block_entity {
                     (*colour, text.clone())
                 } else {
+                    warn!("Wrong or missing block entity for sign: {:?}", block_entity);
                     (Colour::Black, vec![String::new(); 4])
                 };
 
@@ -367,9 +379,10 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: &BlockEnt
 
         ProtoBlock::TrappedChest { facing, variant, waterlogged } => {
             let (custom_name, lock, items) =
-                if let BlockEntity::TrappedChest { tags: ChestTags { custom_name, lock, items, .. } } = block_entity {
+                if let Some(BlockEntity::TrappedChest { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
                     (custom_name.clone(), lock.clone(), items.clone())
                 } else {
+                    warn!("Wrong or missing block entity for trapped chest: {:?}", block_entity);
                     (None, None, Inventory::new())
                 };
 
