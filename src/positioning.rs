@@ -542,6 +542,17 @@ pub enum Surface4 {
     West,
 }
 
+impl fmt::Display for Surface4 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Surface4::East => "east",
+            Surface4::North => "north",
+            Surface4::South => "south",
+            Surface4::West => "west",
+        })
+    }
+}
+
 impl Default for Surface4 {
     fn default() -> Self {
         Self::North
@@ -570,6 +581,18 @@ pub enum Surface5 {
     North,
     South,
     West,
+}
+
+impl fmt::Display for Surface5 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Surface5::Down => "down",
+            Surface5::East => "east",
+            Surface5::North => "north",
+            Surface5::South => "south",
+            Surface5::West => "west",
+        })
+    }
 }
 
 impl Default for Surface5 {

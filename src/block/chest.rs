@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 
 use crate::block::Block;
 use crate::block_entity::{BlockEntity, ChestTags, CommonTags};
@@ -59,3 +60,14 @@ pub enum ChestVariant {
     Right,
     Single,
 }
+
+impl fmt::Display for ChestVariant {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Self::Left => "left",
+            Self::Right => "right",
+            Self::Single => "single",
+        })
+    }
+}
+
