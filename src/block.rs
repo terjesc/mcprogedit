@@ -59,6 +59,16 @@ pub enum SlabVariant {
     Top,
 }
 
+impl fmt::Display for SlabVariant {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            SlabVariant::Bottom => "bottom",
+            SlabVariant::Double => "double",
+            SlabVariant::Top => "top",
+        })
+    }
+}
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Slab {
     pub material: SlabMaterial,

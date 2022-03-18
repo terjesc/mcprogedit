@@ -180,15 +180,62 @@ impl PaletteItem {
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Grass(Grass::TallGrassTop))
-            | PaletteItem::Block(Block::Grass(Grass::LargeFernTop)) => {
+            | PaletteItem::Block(Block::Grass(Grass::LargeFernTop))
+            | PaletteItem::Block(Block::Flower(Flower::SunflowerTop))
+            | PaletteItem::Block(Block::Flower(Flower::LilacTop))
+            | PaletteItem::Block(Block::Flower(Flower::PeonyTop))
+            | PaletteItem::Block(Block::Flower(Flower::RoseBushTop)) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("half".into(), nbt::Value::String("upper".into()));
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Grass(Grass::TallGrassBottom))
-            | PaletteItem::Block(Block::Grass(Grass::LargeFernBottom)) => {
+            | PaletteItem::Block(Block::Grass(Grass::LargeFernBottom))
+            | PaletteItem::Block(Block::Flower(Flower::SunflowerBottom))
+            | PaletteItem::Block(Block::Flower(Flower::LilacBottom))
+            | PaletteItem::Block(Block::Flower(Flower::PeonyBottom))
+            | PaletteItem::Block(Block::Flower(Flower::RoseBushBottom)) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("half".into(), nbt::Value::String("lower".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Slab(Slab { position, waterlogged, .. })) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert("type".into(), nbt::Value::String(position.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Torch { attached: Surface5::North })
+            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::North })
+            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::North }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String("south".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Torch { attached: Surface5::South })
+            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::South })
+            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::South }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String("north".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Torch { attached: Surface5::East })
+            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::East })
+            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::East }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String("west".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Torch { attached: Surface5::West })
+            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::West })
+            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::West }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String("east".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Fire { age }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("age".into(), nbt::Value::String(age.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
 
@@ -340,78 +387,119 @@ impl PaletteItem {
                 Grass::LargeFernTop
                 | Grass::LargeFernBottom => "minecraft:large_fern",
             }
+            PaletteItem::Block(Block::DeadBush) => "minecraft:dead_bush",
+            PaletteItem::Block(Block::Wool { colour }) => match colour {
+                Colour::White => "minecraft:white_wool",
+                Colour::Orange => "minecraft:orange_wool",
+                Colour::Magenta => "minecraft:magenta_wool",
+                Colour::LightBlue => "minecraft:light_blue_wool",
+                Colour::Yellow => "minecraft:yellow_wool",
+                Colour::Lime => "minecraft:lime_wool",
+                Colour::Pink => "minecraft:pink_wool",
+                Colour::Gray => "minecraft:gray_wool",
+                Colour::LightGray => "minecraft:light_gray_wool",
+                Colour::Cyan => "minecraft:cyan_wool",
+                Colour::Purple => "minecraft:purple_wool",
+                Colour::Blue => "minecraft:blue_wool",
+                Colour::Brown => "minecraft:brown_wool",
+                Colour::Green => "minecraft:green_wool",
+                Colour::Red => "minecraft:red_wool",
+                Colour::Black => "minecraft:black_wool",
+            }
+            // TODO block 36 piston_extension ("Block moved by Piston")
+            PaletteItem::Block(Block::Flower(flower_variant)) => match flower_variant {
+                Flower::Dandelion => "minecraft:dandelion",
+                Flower::Poppy => "minecraft:poppy",
+                Flower::BlueOrchid => "minecraft:blue_orchid",
+                Flower::Allium => "minecraft:allium",
+                Flower::AzureBluet => "minecraft:azure_bluet",
+                Flower::TulipRed => "minecraft:red_tulip",
+                Flower::TulipOrange => "minecraft:orange_tulip",
+                Flower::TulipWhite => "minecraft:white_tulip",
+                Flower::TulipPink => "minecraft:pink_tulip",
+                Flower::OxeyeDaisy => "minecraft:oxeye_daisy",
+                Flower::Cornflower => "minecraft:cornflower",
+                Flower::LilyOfTheValley => "minecraft:lily_of_the_valley",
+                Flower::WitherRose => "minecraft:wither_rose",
+                Flower::SunflowerTop
+                | Flower::SunflowerBottom => "minecraft:sunflower",
+                Flower::LilacTop
+                | Flower::LilacBottom => "minecraft:lilac",
+                Flower::PeonyTop
+                | Flower::PeonyBottom => "minecraft:peony",
+                Flower::RoseBushTop
+                | Flower::RoseBushBottom => "minecraft:rose_bush",
+            }
+            PaletteItem::Block(Block::BrownMushroom) => "minecraft:brown_mushroom",
+            PaletteItem::Block(Block::RedMushroom) => "minecraft:red_mushroom",
+            PaletteItem::Block(Block::BlockOfGold) => "minecraft:gold_block",
+            PaletteItem::Block(Block::BlockOfIron) => "minecraft:iron_block",
+            PaletteItem::Block(Block::Slab(Slab { material, .. })) => match material {
+                SlabMaterial::Oak => "minecraft:oak_slab",
+                SlabMaterial::Spruce => "minecraft:spruce_slab",
+                SlabMaterial::Birch => "minecraft:birch_slab",
+                SlabMaterial::Jungle => "minecraft:jungle_slab",
+                SlabMaterial::Acacia => "minecraft:acacia_slab",
+                SlabMaterial::DarkOak => "minecraft:dark_oak_slab",
+                SlabMaterial::Crimson => "minecraft:crimson_slab",
+                SlabMaterial::Warped => "minecraft:warped_slab",
+                SlabMaterial::Stone => "minecraft:stone_slab",
+                SlabMaterial::Sandstone => "minecraft:sandstone_slab",
+                SlabMaterial::PetrifiedOak => "minecraft:petrified_oak_slab",
+                SlabMaterial::Cobblestone => "minecraft:cobblestone_slab",
+                SlabMaterial::Brick => "minecraft:brick_slab",
+                SlabMaterial::StoneBrick => "minecraft:stone_brick_slab",
+                SlabMaterial::NetherBrick => "minecraft:nether_brick_slab",
+                SlabMaterial::Quartz => "minecraft:quartz_slab",
+                SlabMaterial::RedSandstone => "minecraft:red_sandstone_slab",
+                SlabMaterial::Purpur => "minecraft:purpur_slab",
+                SlabMaterial::Prismarine => "minecraft:prismarine_slab",
+                SlabMaterial::PrismarineBrick => "minecraft:prismarine_brick_slab",
+                SlabMaterial::DarkPrismarine => "minecraft:dark_prismarine_slab",
+                SlabMaterial::Andesite => "minecraft:andesite_slab",
+                SlabMaterial::Granite => "minecraft:granite_slab",
+                SlabMaterial::Diorite => "minecraft:diorite_slab",
+                SlabMaterial::PolishedAndesite => "minecraft:polished_andesite_slab",
+                SlabMaterial::PolishedGranite => "minecraft:polished_granite_slab",
+                SlabMaterial::PolishedDiorite => "minecraft:polished_diorite_slab",
+                SlabMaterial::CutSandstone => "minecraft:cut_sandstone_slab",
+                SlabMaterial::CutRedSandstone => "minecraft:cut_red_sandstone_slab",
+                SlabMaterial::SmoothSandstone => "minecraft:smooth_sandstone_slab",
+                SlabMaterial::SmoothRedSandstone => "minecraft:smooth_red_sandstone_slab",
+                SlabMaterial::SmoothQuartz => "minecraft:smooth_quartz_slab",
+                SlabMaterial::SmoothStone => "minecraft:smooth_stone_slab",
+                SlabMaterial::RedNetherBrick => "minecraft:red_nether_brick_slab",
+                SlabMaterial::EndStoneBrick => "minecraft:end_stone_brick_slab",
+                SlabMaterial::Blackstone => "minecraft:blackstone_slab",
+                SlabMaterial::PolishedBlackstone => "minecraft:polished_blackstone_slab",
+                SlabMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_slab",
+                SlabMaterial::MossyCobblestone => "minecraft:mossy_cobblestone_slab",
+                SlabMaterial::MossyStoneBrick => "minecraft:mossy_stone_brick_slab",
+            }
+            PaletteItem::Block(Block::SmoothQuartz) => "minecraft:smooth_quartz",
+            PaletteItem::Block(Block::SmoothStone) => "minecraft:smooth_stone",
+            PaletteItem::Block(Block::BrickBlock) => "minecraft:bricks",
+            PaletteItem::Block(Block::TNT) => "minecraft:tnt",
+            PaletteItem::Block(Block::Bookshelf) => "minecraft:bookshelf",
+            PaletteItem::Block(Block::MossyCobblestone) => "minecraft:mossy_cobblestone",
+            PaletteItem::Block(Block::Obsidian) => "minecraft:obsidian",
+            PaletteItem::Block(Block::CryingObsidian) => "minecraft:crying_obsidian",
+            PaletteItem::Block(Block::Torch { attached }) => match attached {
+                Surface5::Down => "minecraft:torch",
+                _ => "minecraft:wall_torch",
+            }
+            PaletteItem::Block(Block::RedstoneTorch { attached }) => match attached {
+                Surface5::Down => "minecraft:redstone_torch",
+                _ => "minecraft:redstone_wall_torch",
+            }
+            PaletteItem::Block(Block::SoulTorch { attached }) => match attached {
+                Surface5::Down => "minecraft:soul_torch",
+                _ => "minecraft:soul_wall_torch",
+            }
+            PaletteItem::Block(Block::Fire { .. }) => "minecraft:fire",
+            // TODO block 52 / minecraft:spawner / mob spawner
 
             /*
-            "minecraft:dead_bush" => block(Block::DeadBush),
-            "minecraft:white_wool" => block(Block::Wool { colour: Colour::White }),
-            "minecraft:orange_wool" => block(Block::Wool { colour: Colour::Orange }),
-            "minecraft:magenta_wool" => block(Block::Wool { colour: Colour::Magenta }),
-            "minecraft:light_blue_wool" => block(Block::Wool { colour: Colour::LightBlue }),
-            "minecraft:yellow_wool" => block(Block::Wool { colour: Colour::Yellow }),
-            "minecraft:lime_wool" => block(Block::Wool { colour: Colour::Lime }),
-            "minecraft:pink_wool" => block(Block::Wool { colour: Colour::Pink }),
-            "minecraft:gray_wool" => block(Block::Wool { colour: Colour::Gray }),
-            "minecraft:light_gray_wool" => block(Block::Wool { colour: Colour::LightGray }),
-            "minecraft:cyan_wool" => block(Block::Wool { colour: Colour::Cyan }),
-            "minecraft:purple_wool" => block(Block::Wool { colour: Colour::Purple }),
-            "minecraft:blue_wool" => block(Block::Wool { colour: Colour::Blue }),
-            "minecraft:brown_wool" => block(Block::Wool { colour: Colour::Brown }),
-            "minecraft:green_wool" => block(Block::Wool { colour: Colour::Green }),
-            "minecraft:red_wool" => block(Block::Wool { colour: Colour::Red }),
-            "minecraft:black_wool" => block(Block::Wool { colour: Colour::Black }),
-            // TODO block 36 piston_extension ("Block moved by Piston")
-            "minecraft:dandelion" => block(Block::Flower(Flower::Dandelion)),
-            "minecraft:poppy" => block(Block::Flower(Flower::Poppy)),
-            "minecraft:blue_orchid" => block(Block::Flower(Flower::BlueOrchid)),
-            "minecraft:allium" => block(Block::Flower(Flower::Allium)),
-            "minecraft:azure_bluet" => block(Block::Flower(Flower::AzureBluet)),
-            "minecraft:red_tulip" => block(Block::Flower(Flower::TulipRed)),
-            "minecraft:orange_tulip" => block(Block::Flower(Flower::TulipOrange)),
-            "minecraft:white_tulip" => block(Block::Flower(Flower::TulipWhite)),
-            "minecraft:pink_tulip" => block(Block::Flower(Flower::TulipPink)),
-            "minecraft:oxeye_daisy" => block(Block::Flower(Flower::OxeyeDaisy)),
-            "minecraft:cornflower" => block(Block::Flower(Flower::Cornflower)),
-            "minecraft:lily_of_the_valley" => block(Block::Flower(Flower::LilyOfTheValley)),
-            "minecraft:wither_rose" => block(Block::Flower(Flower::WitherRose)),
-            "minecraft:brown_mushroom" => block(Block::BrownMushroom),
-            "minecraft:red_mushroom" => block(Block::RedMushroom),
-            "minecraft:gold_block" => block(Block::BlockOfGold),
-            "minecraft:iron_block" => block(Block::BlockOfIron),
-            "minecraft:oak_slab" => block(slab(SlabMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_slab" => block(slab(SlabMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_slab" => block(slab(SlabMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_slab" => block(slab(SlabMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_slab" => block(slab(SlabMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_slab" => block(slab(SlabMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:stone_slab" => block(slab(SlabMaterial::Stone, &properties.unwrap())),
-            "minecraft:smooth_stone_slab" => block(slab(SlabMaterial::SmoothStone, &properties.unwrap())),
-            "minecraft:sandstone_slab" => block(slab(SlabMaterial::Sandstone, &properties.unwrap())),
-            "minecraft:petrified_oak_slab" => block(slab(SlabMaterial::PetrifiedOak, &properties.unwrap())),
-            "minecraft:cobblestone_slab" => block(slab(SlabMaterial::Cobblestone, &properties.unwrap())),
-            "minecraft:brick_slab" => block(slab(SlabMaterial::Brick, &properties.unwrap())),
-            "minecraft:stone_brick_slab" => block(slab(SlabMaterial::StoneBrick, &properties.unwrap())),
-            "minecraft:nether_brick_slab" => block(slab(SlabMaterial::NetherBrick, &properties.unwrap())),
-            "minecraft:quartz_slab" => block(slab(SlabMaterial::Quartz, &properties.unwrap())),
-            "minecraft:red_sandstone_slab" => block(slab(SlabMaterial::RedSandstone, &properties.unwrap())),
-            "minecraft:purpur_slab" => block(slab(SlabMaterial::Purpur, &properties.unwrap())),
-            "minecraft:prismarine_slab" => block(slab(SlabMaterial::Prismarine, &properties.unwrap())),
-            "minecraft:prismarine_brick_slab" => block(slab(SlabMaterial::PrismarineBrick, &properties.unwrap())),
-            "minecraft:dark_prismarine_slab" => block(slab(SlabMaterial::DarkPrismarine, &properties.unwrap())),
-            "minecraft:smooth_quartz" => block(Block::SmoothQuartz),
-            "minecraft:smooth_stone" => block(Block::SmoothStone),
-            "minecraft:bricks" => block(Block::BrickBlock),
-            "minecraft:tnt" => block(Block::TNT),
-            "minecraft:bookshelf" => block(Block::Bookshelf),
-            "minecraft:mossy_cobblestone" => block(Block::MossyCobblestone),
-            "minecraft:obsidian" => block(Block::Obsidian),
-            "minecraft:torch" => block(Block::Torch { attached: Surface5::Down }),
-            "minecraft:wall_torch" => block(wall_torch(&properties.unwrap())),
-            "minecraft:redstone_torch" => block(Block::RedstoneTorch { attached: Surface5::Down }),
-            "minecraft:redstone_wall_torch" => block(redstone_wall_torch(&properties.unwrap())),
-            "minecraft:soul_torch" => block(Block::SoulTorch { attached: Surface5::Down }),
-            "minecraft:soul_wall_torch" => block(soul_wall_torch(&properties.unwrap())),
-            "minecraft:fire" => block(fire(&properties.unwrap())),
-            // TODO block 52 / minecraft:spawner / mob spawner
             "minecraft:oak_stairs" => block(stairs(StairMaterial::Oak, &properties.unwrap())),
             "minecraft:spruce_stairs" => block(stairs(StairMaterial::Spruce, &properties.unwrap())),
             "minecraft:birch_stairs" => block(stairs(StairMaterial::Birch, &properties.unwrap())),
@@ -448,6 +536,7 @@ impl PaletteItem {
             "minecraft:polished_granite_stairs" => block(stairs(StairMaterial::PolishedGranite, &properties.unwrap())),
             "minecraft:granite_stairs" => block(stairs(StairMaterial::Granite, &properties.unwrap())),
             "minecraft:smooth_quartz_stairs" => block(stairs(StairMaterial::SmoothQuartz, &properties.unwrap())),
+
             "minecraft:chest" => proto(proto_chest(&properties.unwrap())),
             "minecraft:redstone_wire" => block(Block::RedstoneWire),
             "minecraft:diamond_ore" => block(Block::DiamondOre),
@@ -722,10 +811,6 @@ impl PaletteItem {
             "minecraft:red_carpet" => block(Block::Carpet { colour: Colour::Red }),
             "minecraft:black_carpet" => block(Block::Carpet { colour: Colour::Black }),
             "minecraft:coal_block" => block(Block::BlockOfCoal),
-            "minecraft:sunflower" => block(tall("sunflower", &properties.unwrap())),
-            "minecraft:lilac" => block(tall("lilac", &properties.unwrap())),
-            "minecraft:rose_bush" => block(tall("rose_bush", &properties.unwrap())),
-            "minecraft:peony" => block(tall("peony", &properties.unwrap())),
             "minecraft:white_bed" => block(bed(Colour::White, &properties.unwrap())),
             "minecraft:orange_bed" => block(bed(Colour::Orange, &properties.unwrap())),
             "minecraft:magenta_bed" => block(bed(Colour::Magenta, &properties.unwrap())),
@@ -1020,6 +1105,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:jungle_slab" => block(slab(SlabMaterial::Jungle, &properties)),
             "minecraft:acacia_slab" => block(slab(SlabMaterial::Acacia, &properties)),
             "minecraft:dark_oak_slab" => block(slab(SlabMaterial::DarkOak, &properties)),
+            "minecraft:crimson_slab" => block(slab(SlabMaterial::Crimson, &properties)),
+            "minecraft:warped_slab" => block(slab(SlabMaterial::Warped, &properties)),
             "minecraft:stone_slab" => block(slab(SlabMaterial::Stone, &properties)),
             "minecraft:smooth_stone_slab" => block(slab(SlabMaterial::SmoothStone, &properties)),
             "minecraft:sandstone_slab" => block(slab(SlabMaterial::Sandstone, &properties)),
@@ -1034,6 +1121,24 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:prismarine_slab" => block(slab(SlabMaterial::Prismarine, &properties)),
             "minecraft:prismarine_brick_slab" => block(slab(SlabMaterial::PrismarineBrick, &properties)),
             "minecraft:dark_prismarine_slab" => block(slab(SlabMaterial::DarkPrismarine, &properties)),
+            "minecraft:andesite_slab" => block(slab(SlabMaterial::Andesite, &properties)),
+            "minecraft:diorite_slab" => block(slab(SlabMaterial::Diorite, &properties)),
+            "minecraft:granite_slab" => block(slab(SlabMaterial::Granite, &properties)),
+            "minecraft:polished_andesite_slab" => block(slab(SlabMaterial::PolishedAndesite, &properties)),
+            "minecraft:polished_diorite_slab" => block(slab(SlabMaterial::PolishedDiorite, &properties)),
+            "minecraft:polished_granite_slab" => block(slab(SlabMaterial::PolishedGranite, &properties)),
+            "minecraft:cut_sandstone_slab" => block(slab(SlabMaterial::CutSandstone, &properties)),
+            "minecraft:cut_red_sandstone_slab" => block(slab(SlabMaterial::CutRedSandstone, &properties)),
+            "minecraft:smooth_sandstone_slab" => block(slab(SlabMaterial::SmoothSandstone, &properties)),
+            "minecraft:smooth_red_sandstone_slab" => block(slab(SlabMaterial::SmoothRedSandstone, &properties)),
+            "minecraft:smooth_quartz_slab" => block(slab(SlabMaterial::SmoothQuartz, &properties)),
+            "minecraft:red_nether_brick_slab" => block(slab(SlabMaterial::RedNetherBrick, &properties)),
+            "minecraft:end_stone_brick_slab" => block(slab(SlabMaterial::EndStoneBrick, &properties)),
+            "minecraft:mossy_cobblestone_slab" => block(slab(SlabMaterial::MossyCobblestone, &properties)),
+            "minecraft:mossy_stone_brick_slab" => block(slab(SlabMaterial::MossyStoneBrick, &properties)),
+            "minecraft:blackstone_slab" => block(slab(SlabMaterial::Blackstone, &properties)),
+            "minecraft:polished_blackstone_slab" => block(slab(SlabMaterial::PolishedBlackstone, &properties)),
+            "minecraft:polished_blackstone_brick_slab" => block(slab(SlabMaterial::PolishedBlackstoneBrick, &properties)),
             "minecraft:smooth_quartz" => block(Block::SmoothQuartz),
             "minecraft:smooth_stone" => block(Block::SmoothStone),
             "minecraft:bricks" => block(Block::BrickBlock),
@@ -1041,6 +1146,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:bookshelf" => block(Block::Bookshelf),
             "minecraft:mossy_cobblestone" => block(Block::MossyCobblestone),
             "minecraft:obsidian" => block(Block::Obsidian),
+            "minecraft:crying_obsidian" => block(Block::CryingObsidian),
             "minecraft:torch" => block(Block::Torch { attached: Surface5::Down }),
             "minecraft:wall_torch" => block(wall_torch(&properties)),
             "minecraft:redstone_torch" => block(Block::RedstoneTorch { attached: Surface5::Down }),
