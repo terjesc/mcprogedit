@@ -334,6 +334,69 @@ impl PaletteItem {
                 }
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Door(Door { facing, half, hinged_at, open, .. })) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("half".into(), nbt::Value::String(half.to_string()));
+                properties.insert("hinge".into(), nbt::Value::String(hinged_at.to_string()));
+                properties.insert("open".into(), nbt::Value::String(open.to_string()));
+                properties.insert("powered".into(), nbt::Value::String("false".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Ladder { facing, waterlogged }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Lever(position, state)) => {
+                let (face, facing) = match position {
+                    SurfaceRotation12::DownFacingEast => ("floor", Surface4::East),
+                    SurfaceRotation12::DownFacingNorth => ("floor", Surface4::North),
+                    SurfaceRotation12::DownFacingSouth => ("floor", Surface4::South),
+                    SurfaceRotation12::DownFacingWest => ("floor", Surface4::West),
+                    SurfaceRotation12::East => ("wall", Surface4::East),
+                    SurfaceRotation12::North => ("wall", Surface4::North),
+                    SurfaceRotation12::South => ("wall", Surface4::South),
+                    SurfaceRotation12::West => ("wall", Surface4::West),
+                    SurfaceRotation12::UpFacingEast => ("ceiling", Surface4::East),
+                    SurfaceRotation12::UpFacingNorth => ("ceiling", Surface4::North),
+                    SurfaceRotation12::UpFacingSouth => ("ceiling", Surface4::South),
+                    SurfaceRotation12::UpFacingWest => ("ceiling", Surface4::West),
+                };
+                let powered = match state {
+                    OnOffState::On => true,
+                    OnOffState::Off => false,
+                };
+
+                let mut properties = nbt::Map::new();
+                properties.insert("face".into(), nbt::Value::String(face.to_string()));
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("powered".into(), nbt::Value::String(powered.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Button(_, position)) => {
+                let (face, facing) = match position {
+                    SurfaceRotation12::DownFacingEast => ("floor", Surface4::East),
+                    SurfaceRotation12::DownFacingNorth => ("floor", Surface4::North),
+                    SurfaceRotation12::DownFacingSouth => ("floor", Surface4::South),
+                    SurfaceRotation12::DownFacingWest => ("floor", Surface4::West),
+                    SurfaceRotation12::East => ("wall", Surface4::East),
+                    SurfaceRotation12::North => ("wall", Surface4::North),
+                    SurfaceRotation12::South => ("wall", Surface4::South),
+                    SurfaceRotation12::West => ("wall", Surface4::West),
+                    SurfaceRotation12::UpFacingEast => ("ceiling", Surface4::East),
+                    SurfaceRotation12::UpFacingNorth => ("ceiling", Surface4::North),
+                    SurfaceRotation12::UpFacingSouth => ("ceiling", Surface4::South),
+                    SurfaceRotation12::UpFacingWest => ("ceiling", Surface4::West),
+                };
+
+                let mut properties = nbt::Map::new();
+                properties.insert("face".into(), nbt::Value::String(face.to_string()));
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("powered".into(), nbt::Value::String("false".into()));
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -675,47 +738,48 @@ impl PaletteItem {
                     WoodMaterial::Warped => "minecraft:warped_wall_sign",
                 }
             }
+            PaletteItem::Block(Block::Door(Door { material, .. })) => match material {
+                DoorMaterial::Acacia => "minecraft:acacia_door",
+                DoorMaterial::Birch => "minecraft:birch_door",
+                DoorMaterial::Crimson => "minecraft:crimson_door",
+                DoorMaterial::DarkOak => "minecraft:dark_oak_door",
+                DoorMaterial::Iron => "minecraft:iron_door",
+                DoorMaterial::Jungle => "minecraft:jungle_door",
+                DoorMaterial::Oak => "minecraft:oak_door",
+                DoorMaterial::Spruce => "minecraft:spruce_door",
+                DoorMaterial::Warped => "minecraft:warped_door",
+            }
+            PaletteItem::Block(Block::Ladder { .. }) => "minecraft:ladder",
+            PaletteItem::Block(Block::Lever(..)) => "minecraft:lever",
+            PaletteItem::Block(Block::PressurePlate { material }) => match material {
+                PressurePlateMaterial::Acacia => "minecraft:acacia_pressure_plate",
+                PressurePlateMaterial::Birch => "minecraft:birch_pressure_plate",
+                PressurePlateMaterial::Crimson => "minecraft:crimson_pressure_plate",
+                PressurePlateMaterial::DarkOak => "minecraft:dark_oak_pressure_plate",
+                PressurePlateMaterial::Gold => "minecraft:light_weighted_pressure_plate",
+                PressurePlateMaterial::Iron => "minecraft:heavy_weighted_pressure_plate",
+                PressurePlateMaterial::Jungle => "minecraft:jungle_pressure_plate",
+                PressurePlateMaterial::Oak => "minecraft:oak_pressure_plate",
+                PressurePlateMaterial::PolishedBlackstone => "minecraft:polished_blackstone_pressure_plate",
+                PressurePlateMaterial::Spruce => "minecraft:spruce_pressure_plate",
+                PressurePlateMaterial::Stone => "minecraft:stone_pressure_plate",
+                PressurePlateMaterial::Warped => "minecraft:warped_pressure_plate",
+            }
+            PaletteItem::Block(Block::RedstoneOre) => "minecraft:redstone_ore",
+            PaletteItem::Block(Block::Button(material, _)) => match material {
+                ButtonMaterial::Acacia => "minecraft:acacia_button",
+                ButtonMaterial::Birch => "minecraft:birch_button",
+                ButtonMaterial::Crimson => "minecraft:crimson_button",
+                ButtonMaterial::DarkOak => "minecraft:dark_oak_button",
+                ButtonMaterial::Jungle => "minecraft:jungle_button",
+                ButtonMaterial::Oak => "minecraft:oak_button",
+                ButtonMaterial::PolishedBlackstone => "minecraft:polished_blackstone_button",
+                ButtonMaterial::Spruce => "minecraft:spruce_button",
+                ButtonMaterial::Stone => "minecraft:stone_button",
+                ButtonMaterial::Warped => "minecraft:warped_button",
+            }
 
             /*
-            "minecraft:oak_door" => block(door(DoorMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_door" => block(door(DoorMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_door" => block(door(DoorMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_door" => block(door(DoorMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_door" => block(door(DoorMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_door" => block(door(DoorMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:crimson_door" => block(door(DoorMaterial::Crimson, &properties.unwrap())),
-            "minecraft:warped_door" => block(door(DoorMaterial::Warped, &properties.unwrap())),
-            "minecraft:iron_door" => block(door(DoorMaterial::Iron, &properties.unwrap())),
-
-            "minecraft:ladder" => block(ladder(&properties.unwrap())),
-            "minecraft:lever" => block(lever(&properties.unwrap())),
-
-            "minecraft:oak_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Oak)),
-            "minecraft:spruce_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Spruce)),
-            "minecraft:birch_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Birch)),
-            "minecraft:jungle_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Jungle)),
-            "minecraft:acacia_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Acacia)),
-            "minecraft:dark_oak_pressure_plate" => block(pressure_plate(PressurePlateMaterial::DarkOak)),
-            "minecraft:crimson_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Crimson)),
-            "minecraft:warped_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Warped)),
-            "minecraft:stone_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Stone)),
-            "minecraft:polished_blackstone_pressure_plate" => block(pressure_plate(PressurePlateMaterial::PolishedBlackstone)),
-            "minecraft:heavy_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Iron)),
-            "minecraft:light_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Gold)),
-
-            "minecraft:redstone_ore" => block(Block::RedstoneOre),
-
-            "minecraft:oak_button" => block(button(ButtonMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_button" => block(button(ButtonMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_button" => block(button(ButtonMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_button" => block(button(ButtonMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_button" => block(button(ButtonMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_button" => block(button(ButtonMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:crimson_button" => block(button(ButtonMaterial::Crimson, &properties.unwrap())),
-            "minecraft:warped_button" => block(button(ButtonMaterial::Warped, &properties.unwrap())),
-            "minecraft:stone_button" => block(button(ButtonMaterial::Stone, &properties.unwrap())),
-            "minecraft:polished_blackstone_button" => block(button(ButtonMaterial::PolishedBlackstone, &properties.unwrap())),
-
             "minecraft:snow" => block(snow(&properties.unwrap())),
             "minecraft:ice" => block(Block::Ice),
             "minecraft:packed_ice" => block(Block::PackedIce),

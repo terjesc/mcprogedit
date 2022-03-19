@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 
 use crate::block::Block;
 use crate::material::{DoorMaterial, Material};
@@ -74,6 +75,15 @@ pub enum DoorHalf {
     Upper,
 }
 
+impl fmt::Display for DoorHalf {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            DoorHalf::Lower => "lower",
+            DoorHalf::Upper => "upper",
+        })
+    }
+}
+
 /// For doors, what way they are hinged. Left/Right relative to the direction
 /// the door is Facing. (E.g. if Facing North, Left means on the West side,
 /// and Right means on the East side.)
@@ -81,4 +91,13 @@ pub enum DoorHalf {
 pub enum Hinge {
     Left,
     Right,
+}
+
+impl fmt::Display for Hinge {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Hinge::Left => "left",
+            Hinge::Right => "right",
+        })
+    }
 }
