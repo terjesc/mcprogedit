@@ -542,6 +542,18 @@ pub enum Surface4 {
     West,
 }
 
+impl Surface4 {
+    /// Returns an instance of the opposite direction.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Surface4::East => Surface4::West,
+            Surface4::West => Surface4::East,
+            Surface4::North => Surface4::South,
+            Surface4::South => Surface4::North,
+        }
+    }
+}
+
 impl fmt::Display for Surface4 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", match self {

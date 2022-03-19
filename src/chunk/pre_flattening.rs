@@ -46,6 +46,9 @@ impl Chunk {
                         Some(Block::Dropper(dropper)) => {
                             dropper.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::Furnace(furnace)) => {
+                            furnace.to_block_entity(block_coordinates).to_nbt_value()
+                        }
                         Some(Block::Hopper(hopper)) => {
                             hopper.to_block_entity(block_coordinates).to_nbt_value()
                         }
@@ -54,6 +57,9 @@ impl Chunk {
                         }
                         Some(Block::ShulkerBox(shulker_box)) => {
                             shulker_box.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Sign(sign)) => {
+                            sign.to_block_entity(block_coordinates).to_nbt_value()
                         }
                         // TODO add handling of other blocks with entities
                         //Some(block) => { println!("Block found: {:?}", block); None },

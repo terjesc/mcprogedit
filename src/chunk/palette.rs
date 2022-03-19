@@ -320,6 +320,20 @@ impl PaletteItem {
                 properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::ProtoBlock(ProtoBlock::Sign { placement, waterlogged, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                match placement {
+                    WallOrRotatedOnFloor::Floor(rotation) => {
+                        let rotation = u8::from(*rotation);
+                        properties.insert("rotation".into(), nbt::Value::String(rotation.to_string()));
+                    }
+                    WallOrRotatedOnFloor::Wall(facing) => {
+                        properties.insert("facing".into(), nbt::Value::String(facing.opposite().to_string()));
+                    }
+                }
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -639,27 +653,30 @@ impl PaletteItem {
             PaletteItem::Block(Block::Pumpkin) => "minecraft:pumpkin",
             PaletteItem::Block(Block::Melon) => "minecraft:melon",
             PaletteItem::ProtoBlock(ProtoBlock::Furnace { .. }) => "minecraft:furnace",
+            PaletteItem::ProtoBlock(ProtoBlock::Sign { placement, material, .. }) => match placement {
+                WallOrRotatedOnFloor::Floor(_) => match material {
+                    WoodMaterial::Acacia => "minecraft:acacia_sign",
+                    WoodMaterial::Birch => "minecraft:birch_sign",
+                    WoodMaterial::Crimson => "minecraft:crimson_sign",
+                    WoodMaterial::DarkOak => "minecraft:dark_oak_sign",
+                    WoodMaterial::Jungle => "minecraft:jungle_sign",
+                    WoodMaterial::Oak => "minecraft:oak_sign",
+                    WoodMaterial::Spruce => "minecraft:spruce_sign",
+                    WoodMaterial::Warped => "minecraft:warped_sign",
+                }
+                WallOrRotatedOnFloor::Wall(_) => match material {
+                    WoodMaterial::Acacia => "minecraft:acacia_wall_sign",
+                    WoodMaterial::Birch => "minecraft:birch_wall_sign",
+                    WoodMaterial::Crimson => "minecraft:crimson_wall_sign",
+                    WoodMaterial::DarkOak => "minecraft:dark_oak_wall_sign",
+                    WoodMaterial::Jungle => "minecraft:jungle_wall_sign",
+                    WoodMaterial::Oak => "minecraft:oak_wall_sign",
+                    WoodMaterial::Spruce => "minecraft:spruce_wall_sign",
+                    WoodMaterial::Warped => "minecraft:warped_wall_sign",
+                }
+            }
 
             /*
-            "minecraft:furnace" => proto(proto_furnace(&properties.unwrap())),
-
-            "minecraft:oak_sign" => proto(proto_sign(WoodMaterial::Oak, &properties.unwrap())),
-            "minecraft:oak_wall_sign" => proto(proto_wall_sign(WoodMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_sign" => proto(proto_sign(WoodMaterial::Spruce, &properties.unwrap())),
-            "minecraft:spruce_wall_sign" => proto(proto_wall_sign(WoodMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_sign" => proto(proto_sign(WoodMaterial::Birch, &properties.unwrap())),
-            "minecraft:birch_wall_sign" => proto(proto_wall_sign(WoodMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_sign" => proto(proto_sign(WoodMaterial::Jungle, &properties.unwrap())),
-            "minecraft:jungle_wall_sign" => proto(proto_wall_sign(WoodMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_sign" => proto(proto_sign(WoodMaterial::Acacia, &properties.unwrap())),
-            "minecraft:acacia_wall_sign" => proto(proto_wall_sign(WoodMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_sign" => proto(proto_sign(WoodMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:dark_oak_wall_sign" => proto(proto_wall_sign(WoodMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:crimson_sign" => proto(proto_sign(WoodMaterial::Crimson, &properties.unwrap())),
-            "minecraft:crimson_wall_sign" => proto(proto_wall_sign(WoodMaterial::Crimson, &properties.unwrap())),
-            "minecraft:warped_sign" => proto(proto_sign(WoodMaterial::Warped, &properties.unwrap())),
-            "minecraft:warped_wall_sign" => proto(proto_wall_sign(WoodMaterial::Warped, &properties.unwrap())),
-
             "minecraft:oak_door" => block(door(DoorMaterial::Oak, &properties.unwrap())),
             "minecraft:spruce_door" => block(door(DoorMaterial::Spruce, &properties.unwrap())),
             "minecraft:birch_door" => block(door(DoorMaterial::Birch, &properties.unwrap())),
@@ -2516,8 +2533,6 @@ fn floor_sign_facing_direction16(properties: &Option<Value>) -> Direction16 {
             warn!("Using fallback value for \"rotation\" property of a free standing block.");
             Direction16::North
         })
-// TODO remove commented
-//    nbt_value_lookup_string(properties, "rotation").unwrap().as_str().parse::<i8>().unwrap().into()
 }
 
 /// Convert a string to an Int0Through1 value

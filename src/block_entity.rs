@@ -686,8 +686,16 @@ impl BlockEntity {
     }
 
     fn furnace_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Furnace { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn hopper_from_nbt_value(value: &nbt::Value) -> Self {
@@ -825,17 +833,30 @@ impl BlockEntity {
             },
             // TODO handle text in a better manner than to expose "compound object" JSON
             text: vec![
-                nbt_value_lookup_string(value, "Text1").unwrap_or_default(),
-                nbt_value_lookup_string(value, "Text2").unwrap_or_default(),
-                nbt_value_lookup_string(value, "Text3").unwrap_or_default(),
-                nbt_value_lookup_string(value, "Text4").unwrap_or_default(),
+                nbt_value_lookup_string(value, "Text1").unwrap_or(r#"{"text":""}"#.into()),
+                nbt_value_lookup_string(value, "Text2").unwrap_or(r#"{"text":""}"#.into()),
+                nbt_value_lookup_string(value, "Text3").unwrap_or(r#"{"text":""}"#.into()),
+                nbt_value_lookup_string(value, "Text4").unwrap_or(r#"{"text":""}"#.into()),
             ],
         }
     }
 
     fn sign_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Sign { common, colour, text } = self {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            entity.insert("Color".into(), nbt::Value::String(colour.to_string()));
+            entity.insert("Text1".into(), nbt::Value::String(text[0].clone()));
+            entity.insert("Text2".into(), nbt::Value::String(text[1].clone()));
+            entity.insert("Text3".into(), nbt::Value::String(text[2].clone()));
+            entity.insert("Text4".into(), nbt::Value::String(text[3].clone()));
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn skull_from_nbt_value(value: &nbt::Value) -> Self {
@@ -1036,13 +1057,13 @@ impl ChestTags {
 // Tags present for all "furnace similar" block entities, e.g. Furnace, Smoker, etc.
 #[derive(Clone, Debug)]
 pub struct FurnaceTags {
-    common: CommonTags,
-    pub custom_name: Option<String>,
-    pub lock: Option<String>,
-    pub items: Inventory,
-    pub burn_time: i16,
-    pub cook_time: i16,
-    pub cook_time_total: i16,
+    pub(crate) common: CommonTags,
+    pub(crate) custom_name: Option<String>,
+    pub(crate) lock: Option<String>,
+    pub(crate) items: Inventory,
+    pub(crate) burn_time: i16,
+    pub(crate) cook_time: i16,
+    pub(crate) cook_time_total: i16,
     // TODO Add structure for recipes for which XP is not collected yet..
 }
 
@@ -1063,6 +1084,22 @@ impl FurnaceTags {
             cook_time: nbt_value_lookup_short(value, "CookTime").unwrap(),
             cook_time_total: nbt_value_lookup_short(value, "CookTimeTotal").unwrap(),
         }
+    }
+
+    fn to_nbt_values(&self) -> Vec<(String, nbt::Value)> {
+        let mut nbt_values = self.common.to_nbt_values();
+        if let Some(name) = &self.custom_name {
+            nbt_values.push(("CustomName".into(), nbt::Value::String(name.clone())));
+        }
+        if let Some(lock) = &self.lock {
+            nbt_values.push(("Lock".into(), nbt::Value::String(lock.clone())));
+        }
+        nbt_values.push(("Items".into(), self.items.to_nbt_value()));
+        nbt_values.push(("BurnTime".into(), nbt::Value::Short(self.burn_time)));
+        nbt_values.push(("CookTime".into(), nbt::Value::Short(self.cook_time)));
+        nbt_values.push(("CookTimeTotal".into(), nbt::Value::Short(self.cook_time_total)));
+        // TODO Add compound RecipesUsed
+        nbt_values
     }
 }
 

@@ -1,6 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
+use crate::block_entity::{BlockEntity, CommonTags};
 use crate::colour::Colour;
 use crate::material::{Material, WoodMaterial};
 use crate::positioning::{Direction, WallOrRotatedOnFloor};
@@ -28,6 +29,21 @@ impl Sign {
 
     pub fn has_facing_of(&self, facing: Direction) -> bool {
         facing == self.placement.into()
+    }
+
+    pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+        let (x, y, z) = at;
+        BlockEntity::Sign {
+            common: CommonTags {
+                id: "minecraft:sign".into(),
+                x,
+                y,
+                z,
+                keep_packed: false,
+            },
+            colour: self.colour,
+            text: vec![self.text1.clone(), self.text2.clone(), self.text3.clone(), self.text4.clone()],
+        }
     }
 }
 
