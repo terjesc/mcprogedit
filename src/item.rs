@@ -1,5 +1,7 @@
 //! Items.
 
+use log::warn;
+
 use crate::block::{AnvilDamage, Flower};
 use crate::colour::Colour;
 use crate::enchantment::Enchantment;
@@ -11,7 +13,7 @@ pub struct Item {
     custom_name: Option<String>,
     enchantments: Vec<Enchantment>,
     damage: Option<i16>,
-    kind: ItemKind,
+    pub(crate) kind: ItemKind,
 }
 
 impl Default for Item {
@@ -465,18 +467,18 @@ impl Item {
             "minecraft:rabbit_hide" => ItemKind::RabbitHide,
             "minecraft:rabbit_stew" => ItemKind::Bowl(Some(BowlContents::RabbitStew)),
             "minecraft:rail" => ItemKind::Rail,
-            "minecraft:record_11" => ItemKind::Record(Recording::Eleven),
-            "minecraft:record_13" => ItemKind::Record(Recording::Thirteen),
-            "minecraft:record_blocks" => ItemKind::Record(Recording::Blocks),
-            "minecraft:record_cat" => ItemKind::Record(Recording::Cat),
-            "minecraft:record_chirp" => ItemKind::Record(Recording::Chirp),
-            "minecraft:record_far" => ItemKind::Record(Recording::Far),
-            "minecraft:record_mall" => ItemKind::Record(Recording::Mall),
-            "minecraft:record_mellohi" => ItemKind::Record(Recording::Mellohi),
-            "minecraft:record_stal" => ItemKind::Record(Recording::Stal),
-            "minecraft:record_strad" => ItemKind::Record(Recording::Strad),
-            "minecraft:record_ward" => ItemKind::Record(Recording::Ward),
-            "minecraft:record_wait" => ItemKind::Record(Recording::Wait),
+            "minecraft:music_disc_11" => ItemKind::Record(Recording::Eleven),
+            "minecraft:music_disc_13" => ItemKind::Record(Recording::Thirteen),
+            "minecraft:music_disc_blocks" => ItemKind::Record(Recording::Blocks),
+            "minecraft:music_disc_cat" => ItemKind::Record(Recording::Cat),
+            "minecraft:music_disc_chirp" => ItemKind::Record(Recording::Chirp),
+            "minecraft:music_disc_far" => ItemKind::Record(Recording::Far),
+            "minecraft:music_disc_mall" => ItemKind::Record(Recording::Mall),
+            "minecraft:music_disc_mellohi" => ItemKind::Record(Recording::Mellohi),
+            "minecraft:music_disc_stal" => ItemKind::Record(Recording::Stal),
+            "minecraft:music_disc_strad" => ItemKind::Record(Recording::Strad),
+            "minecraft:music_disc_ward" => ItemKind::Record(Recording::Ward),
+            "minecraft:music_disc_wait" => ItemKind::Record(Recording::Wait),
             "minecraft:red_flower" => match damage {
                 0 => ItemKind::Flower(Flower::Poppy),
                 1 => ItemKind::Flower(Flower::BlueOrchid),
@@ -661,7 +663,10 @@ impl Item {
                 ItemKind::GlazedTerracotta(Some(Colour::Yellow))
             }
             "minecraft:yellow_shulker_box" => ItemKind::ShulkerBox(Some(Colour::Yellow)),
-            _ => ItemKind::Unknown,
+            _ => {
+                warn!("Unknown item id: \"{}\"", id);
+                ItemKind::Unknown
+            }
         };
 
         Self {

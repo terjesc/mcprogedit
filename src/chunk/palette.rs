@@ -69,7 +69,7 @@ impl PaletteItem {
             Block::Hopper(hopper) => proto(ProtoBlock::Hopper {
                 facing: hopper.facing,
             }),
-            Block::Jukebox(_) => proto(ProtoBlock::Jukebox),
+            // NB Jukebox has a ProtoBlock, but it is only used for import
             Block::ShulkerBox(shulker_box) => proto(ProtoBlock::ShulkerBox {
                 colour: shulker_box.colour,
                 facing: shulker_box.facing,
@@ -395,6 +395,38 @@ impl PaletteItem {
                 properties.insert("face".into(), nbt::Value::String(face.to_string()));
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 properties.insert("powered".into(), nbt::Value::String("false".into()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Snow { thickness }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("layers".into(), nbt::Value::String(thickness.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Cactus { growth_stage })
+            | PaletteItem::Block(Block::SugarCane { growth_stage }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Jukebox(jukebox)) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("has_record".into(), nbt::Value::String(jukebox.record.is_some().to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Fence { waterlogged, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::CarvedPumpkin { facing })
+            | PaletteItem::Block(Block::JackOLantern { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Cake { pieces }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("bites".into(), nbt::Value::String((7 - pieces).to_string()));
                 Some(nbt::Value::Compound(properties))
             }
 
@@ -778,35 +810,38 @@ impl PaletteItem {
                 ButtonMaterial::Stone => "minecraft:stone_button",
                 ButtonMaterial::Warped => "minecraft:warped_button",
             }
+            PaletteItem::Block(Block::Snow { .. }) => "minecraft:snow",
+            PaletteItem::Block(Block::SnowBlock) => "minecraft:snow_block",
+            PaletteItem::Block(Block::Ice) => "minecraft:ice",
+            PaletteItem::Block(Block::PackedIce) => "minecraft:packed_ice",
+            PaletteItem::Block(Block::BlueIce) => "minecraft:blue_ice",
+            PaletteItem::Block(Block::Clay) => "minecraft:clay",
+            PaletteItem::Block(Block::Cactus { .. }) => "minecraft:cactus",
+            PaletteItem::Block(Block::SugarCane { .. }) => "minecraft:sugar_cane",
+            PaletteItem::Block(Block::Jukebox(..))
+            | PaletteItem::ProtoBlock(ProtoBlock::Jukebox) => "minecraft:jukebox",
+            PaletteItem::Block(Block::Fence { material, .. }) => match material {
+                FenceMaterial::Acacia => "minecraft:acacia_fence",
+                FenceMaterial::Birch => "minecraft:birch_fence",
+                FenceMaterial::Crimson => "minecraft:crimson_fence",
+                FenceMaterial::DarkOak => "minecraft:dark_oak_fence",
+                FenceMaterial::Jungle => "minecraft:jungle_fence",
+                FenceMaterial::NetherBrick => "minecraft:nether_brick_fence",
+                FenceMaterial::Oak => "minecraft:oak_fence",
+                FenceMaterial::Spruce => "minecraft:spruce_fence",
+                FenceMaterial::Warped => "minecraft:warped_fence",
+            }
+            PaletteItem::Block(Block::CarvedPumpkin { .. }) => "minecraft:carved_pumpkin",
+            PaletteItem::Block(Block::Netherrack) => "minecraft:netherrack",
+            PaletteItem::Block(Block::SoulSand) => "minecraft:soul_sand",
+            PaletteItem::Block(Block::SoulSoil) => "minecraft:soul_soil",
+            PaletteItem::Block(Block::Glowstone) => "minecraft:glowstone",
+            PaletteItem::Block(Block::NetherPortal { .. }) => "minecraft:nether_portal",
+            PaletteItem::Block(Block::JackOLantern { .. }) => "minecraft:jack_o_lantern",
+            PaletteItem::Block(Block::Cake { .. }) => "minecraft:cake",
 
             /*
-            "minecraft:snow" => block(snow(&properties.unwrap())),
-            "minecraft:ice" => block(Block::Ice),
-            "minecraft:packed_ice" => block(Block::PackedIce),
-            "minecraft:blue_ice" => block(Block::BlueIce),
-            "minecraft:snow_block" => block(Block::SnowBlock),
-            "minecraft:cactus" => block(cactus(&properties.unwrap())),
-            "minecraft:clay" => block(Block::Clay),
-            "minecraft:sugar_cane" => block(sugar_cane(&properties.unwrap())),
-            "minecraft:jukebox" => jukebox(&properties.unwrap()),
-
-            "minecraft:oak_fence" => block(fence(FenceMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_fence" => block(fence(FenceMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_fence" => block(fence(FenceMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_fence" => block(fence(FenceMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_fence" => block(fence(FenceMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_fence" => block(fence(FenceMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:crimson_fence" => block(fence(FenceMaterial::Crimson, &properties.unwrap())),
-            "minecraft:warped_fence" => block(fence(FenceMaterial::Warped, &properties.unwrap())),
-            "minecraft:nether_brick_fence" => block(fence(FenceMaterial::NetherBrick, &properties.unwrap())),
-
-            "minecraft:carved_pumpkin" => block(carved_pumpkin(&properties.unwrap())),
-            "minecraft:netherrack" => block(Block::Netherrack),
-            "minecraft:soul_sand" => block(Block::SoulSand),
-            "minecraft:glowstone" => block(Block::Glowstone),
             "minecraft:nether_portal" => block(nether_portal(&properties.unwrap())),
-            "minecraft:jack_o_lantern" => block(jack_o_lantern(&properties.unwrap())),
-            "minecraft:cake" => block(cake(&properties.unwrap())),
             "minecraft:repeater" => block(repeater(&properties.unwrap())),
 
             "minecraft:oak_trapdoor" => block(trapdoor(DoorMaterial::Oak, &properties.unwrap())),
@@ -1479,6 +1514,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:carved_pumpkin" => block(carved_pumpkin(&properties)),
             "minecraft:netherrack" => block(Block::Netherrack),
             "minecraft:soul_sand" => block(Block::SoulSand),
+            "minecraft:soul_soil" => block(Block::SoulSoil),
             "minecraft:glowstone" => block(Block::Glowstone),
             "minecraft:nether_portal" => block(nether_portal(&properties)),
             "minecraft:jack_o_lantern" => block(jack_o_lantern(&properties)),

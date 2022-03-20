@@ -1,12 +1,14 @@
+use log::{trace, warn};
+
 use std::collections::HashMap;
 
 use crate::block::{
-    BannerPattern, ColouredPattern, Flower, Grass, HeadVariant, Hinge, Pitch, PottedPlant,
+    BannerPattern, ColouredPattern, Flower, Grass, HeadVariant, Hinge, Jukebox, Pitch, PottedPlant,
 };
 use crate::colour::Colour;
 use crate::coordinates::BlockCoord;
 use crate::inventory::Inventory;
-use crate::item::Item;
+use crate::item::{Item, ItemKind, Recording};
 use crate::mc_version::{McVersion, THE_FLATTENING};
 use crate::nbt_lookup::*;
 use crate::positioning::{Direction16, Surface4};
@@ -203,7 +205,7 @@ impl BlockEntity {
                 "minecraft:structure_block" => Self::structure_block_from_nbt_value(value),
                 "minecraft:trapped_chest" => Self::trapped_chest_from_nbt_value(value),
                 _ => {
-                    eprintln!("Unknown tile entity ID: {}", id);
+                    warn!("Unknown tile entity ID: \"{}\"", id);
                     BlockEntity::Unknown { id: Some(id) }
                 }
             }
@@ -730,15 +732,46 @@ impl BlockEntity {
     }
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Jukebox {
-            common: CommonTags::from_nbt_value(value),
-            record: nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)).ok(),
-        }
+        let record = nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)).ok();
+        trace!("Imported record: {:?}", record);
+        BlockEntity::Jukebox { common: CommonTags::from_nbt_value(value), record }
     }
 
     fn jukebox_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 2);
+        if let Self::Jukebox { common, record } = self {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            if let Some(item) = record {
+                let recording = &item.kind;
+                let record_id = match recording {
+                    ItemKind::Record(Recording::Eleven) => "minecraft:music_disc_11",
+                    ItemKind::Record(Recording::Thirteen) => "minecraft:music_disc_13",
+                    ItemKind::Record(Recording::Blocks) => "minecraft:music_disc_blocks",
+                    ItemKind::Record(Recording::Cat) => "minecraft:music_disc_cat",
+                    ItemKind::Record(Recording::Chirp) => "minecraft:music_disc_chirp",
+                    ItemKind::Record(Recording::Far) => "minecraft:music_disc_far",
+                    ItemKind::Record(Recording::Mall) => "minecraft:music_disc_mall",
+                    ItemKind::Record(Recording::Mellohi) => "minecraft:music_disc_mellohi",
+                    ItemKind::Record(Recording::Stal) => "minecraft:music_disc_stal",
+                    ItemKind::Record(Recording::Strad) => "minecraft:music_disc_strad",
+                    ItemKind::Record(Recording::Ward) => "minecraft:music_disc_ward",
+                    ItemKind::Record(Recording::Wait) => "minecraft:music_disc_wait",
+                    _ => {
+                        warn!("Unknown record item {:?} in jukebox, defaulting to \"Chirp\"", recording);
+                        "minecraft:music_disc_chirp"
+                    }
+                };
+                let mut record_item: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(2);
+                record_item.insert("id".into(), nbt::Value::String(record_id.into()));
+                record_item.insert("Count".into(), nbt::Value::Byte(1));
+                entity.insert("RecordItem".into(), nbt::Value::Compound(record_item));
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn lectern_from_nbt_value(value: &nbt::Value) -> Self {
@@ -970,6 +1003,22 @@ impl BlockEntity {
             | Self::PseudoDoorTop { .. }
             | Self::PseudoFlowerBottom(_)
             | Self::PseudoGrassBottom(_) => None,
+        }
+    }
+}
+
+impl Jukebox {
+    pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+        let (x, y, z) = at;
+        BlockEntity::Jukebox {
+            common: CommonTags {
+                id: "minecraft:jukebox".into(),
+                x,
+                y,
+                z,
+                keep_packed: false,
+            },
+            record: self.record.clone(),
         }
     }
 }

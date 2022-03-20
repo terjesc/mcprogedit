@@ -52,6 +52,9 @@ impl Chunk {
                         Some(Block::Hopper(hopper)) => {
                             hopper.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::Jukebox(jukebox)) => {
+                            jukebox.to_block_entity(block_coordinates).to_nbt_value()
+                        }
                         Some(Block::Noteblock(noteblock)) => {
                             noteblock.to_block_entity(block_coordinates).to_nbt_value()
                         }
