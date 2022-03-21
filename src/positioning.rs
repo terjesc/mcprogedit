@@ -466,6 +466,15 @@ impl Axis2 {
     pub const North: Axis2 = Axis2::Z;
 }
 
+impl fmt::Display for Axis2 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Axis2::X => "x",
+            Axis2::Z => "z",
+        })
+    }
+}
+
 impl Default for Axis2 {
     fn default() -> Self {
         Self::Z

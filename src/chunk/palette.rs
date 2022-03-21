@@ -429,6 +429,64 @@ impl PaletteItem {
                 properties.insert("bites".into(), nbt::Value::String((7 - pieces).to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::NetherPortal { alignment }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("axis".into(), nbt::Value::String(alignment.unwrap_or(Axis2::X).to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::RedstoneRepeater(RedstoneRepeater { facing, delay })) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("delay".into(), nbt::Value::String(delay.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Trapdoor(Trapdoor { hinge_at, open, waterlogged, .. })) => {
+                let facing = match hinge_at {
+                    Edge8::DownEast
+                    | Edge8::UpEast => "east".to_string(),
+                    Edge8::DownNorth
+                    | Edge8::UpNorth => "north".to_string(),
+                    Edge8::DownSouth
+                    | Edge8::UpSouth => "south".to_string(),
+                    Edge8::DownWest
+                    | Edge8::UpWest => "west".to_string(),
+                };
+                let half = match hinge_at {
+                    Edge8::DownEast
+                    | Edge8::DownNorth
+                    | Edge8::DownSouth
+                    | Edge8::DownWest => "bottom".to_string(),
+                    Edge8::UpEast
+                    | Edge8::UpNorth
+                    | Edge8::UpSouth
+                    | Edge8::UpWest => "top".to_string(),
+                };
+
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert("facing".into(), nbt::Value::String(facing));
+                properties.insert("half".into(), nbt::Value::String(half));
+                properties.insert("open".into(), nbt::Value::String(open.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::BrownMushroomBlock { cap_directions: directions })
+            | PaletteItem::Block(Block::RedMushroomBlock { cap_directions: directions })
+            | PaletteItem::Block(Block::MushroomStem { stem_directions: directions }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("east".into(), nbt::Value::String(directions.east.to_string()));
+                properties.insert("down".into(), nbt::Value::String(directions.down.to_string()));
+                properties.insert("north".into(), nbt::Value::String(directions.north.to_string()));
+                properties.insert("south".into(), nbt::Value::String(directions.south.to_string()));
+                properties.insert("up".into(), nbt::Value::String(directions.up.to_string()));
+                properties.insert("west".into(), nbt::Value::String(directions.west.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::IronBars { waterlogged })
+            | PaletteItem::Block(Block::GlassPane { waterlogged, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -836,60 +894,57 @@ impl PaletteItem {
             PaletteItem::Block(Block::SoulSand) => "minecraft:soul_sand",
             PaletteItem::Block(Block::SoulSoil) => "minecraft:soul_soil",
             PaletteItem::Block(Block::Glowstone) => "minecraft:glowstone",
-            PaletteItem::Block(Block::NetherPortal { .. }) => "minecraft:nether_portal",
             PaletteItem::Block(Block::JackOLantern { .. }) => "minecraft:jack_o_lantern",
             PaletteItem::Block(Block::Cake { .. }) => "minecraft:cake",
+            PaletteItem::Block(Block::NetherPortal { .. }) => "minecraft:nether_portal",
+            PaletteItem::Block(Block::RedstoneRepeater { .. }) => "minecraft:repeater",
+            PaletteItem::Block(Block::Trapdoor(Trapdoor { material, .. })) => match material {
+                DoorMaterial::Acacia => "minecraft:acacia_trapdoor",
+                DoorMaterial::Birch => "minecraft:birch_trapdoor",
+                DoorMaterial::Crimson => "minecraft:crimson_trapdoor",
+                DoorMaterial::DarkOak => "minecraft:dark_oak_trapdoor",
+                DoorMaterial::Iron => "minecraft:iron_trapdoor",
+                DoorMaterial::Jungle => "minecraft:jungle_trapdoor",
+                DoorMaterial::Oak => "minecraft:oak_trapdoor",
+                DoorMaterial::Spruce => "minecraft:spruce_trapdoor",
+                DoorMaterial::Warped => "minecraft:warped_trapdoor",
+            }
+            PaletteItem::Block(Block::InfestedStone) => "minecraft:infested_stone",
+            PaletteItem::Block(Block::InfestedCobblestone) => "minecraft:infested_cobblestone",
+            PaletteItem::Block(Block::InfestedStoneBricks) => "minecraft:infested_stone_bricks",
+            PaletteItem::Block(Block::InfestedMossyStoneBricks) => "minecraft:infested_mossy_stone_bricks",
+            PaletteItem::Block(Block::InfestedCrackedStoneBricks) => "minecraft:infested_cracked_stone_bricks",
+            PaletteItem::Block(Block::InfestedChiseledStoneBricks) => "minecraft:infested_chiseled_stone_bricks",
+            PaletteItem::Block(Block::StoneBricks) => "minecraft:stone_bricks",
+            PaletteItem::Block(Block::MossyStoneBricks) => "minecraft:mossy_stone_bricks",
+            PaletteItem::Block(Block::CrackedStoneBricks) => "minecraft:cracked_stone_bricks",
+            PaletteItem::Block(Block::ChiseledStoneBricks) => "minecraft:chiseled_stone_bricks",
+            PaletteItem::Block(Block::BrownMushroomBlock { .. }) => "minecraft:brown_mushroom_block",
+            PaletteItem::Block(Block::RedMushroomBlock { .. }) => "minecraft:red_mushroom_block",
+            PaletteItem::Block(Block::MushroomStem { .. }) => "minecraft:mushroom_stem",
+            PaletteItem::Block(Block::IronBars { .. }) => "minecraft:iron_bars",
+            PaletteItem::Block(Block::GlassPane { colour, .. }) => match colour {
+                None => "minecraft:glass_pane",
+                Some(Colour::White) => "minecraft:white_stained_glass_pane",
+                Some(Colour::Orange) => "minecraft:orange_stained_glass_pane",
+                Some(Colour::Magenta) => "minecraft:magenta_stained_glass_pane",
+                Some(Colour::LightBlue) => "minecraft:light_blue_stained_glass_pane",
+                Some(Colour::Yellow) => "minecraft:yellow_stained_glass_pane",
+                Some(Colour::Lime) => "minecraft:lime_stained_glass_pane",
+                Some(Colour::Pink) => "minecraft:pink_stained_glass_pane",
+                Some(Colour::Gray) => "minecraft:gray_stained_glass_pane",
+                Some(Colour::LightGray) => "minecraft:light_gray_stained_glass_pane",
+                Some(Colour::Cyan) => "minecraft:cyan_stained_glass_pane",
+                Some(Colour::Purple) => "minecraft:purple_stained_glass_pane",
+                Some(Colour::Blue) => "minecraft:blue_stained_glass_pane",
+                Some(Colour::Brown) => "minecraft:brown_stained_glass_pane",
+                Some(Colour::Green) => "minecraft:green_stained_glass_pane",
+                Some(Colour::Red) => "minecraft:red_stained_glass_pane",
+                Some(Colour::Black) => "minecraft:black_stained_glass_pane",
+            }
+            //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
-            "minecraft:nether_portal" => block(nether_portal(&properties.unwrap())),
-            "minecraft:repeater" => block(repeater(&properties.unwrap())),
-
-            "minecraft:oak_trapdoor" => block(trapdoor(DoorMaterial::Oak, &properties.unwrap())),
-            "minecraft:spruce_trapdoor" => block(trapdoor(DoorMaterial::Spruce, &properties.unwrap())),
-            "minecraft:birch_trapdoor" => block(trapdoor(DoorMaterial::Birch, &properties.unwrap())),
-            "minecraft:jungle_trapdoor" => block(trapdoor(DoorMaterial::Jungle, &properties.unwrap())),
-            "minecraft:acacia_trapdoor" => block(trapdoor(DoorMaterial::Acacia, &properties.unwrap())),
-            "minecraft:dark_oak_trapdoor" => block(trapdoor(DoorMaterial::DarkOak, &properties.unwrap())),
-            "minecraft:crimson_trapdoor" => block(trapdoor(DoorMaterial::Crimson, &properties.unwrap())),
-            "minecraft:warped_trapdoor" => block(trapdoor(DoorMaterial::Warped, &properties.unwrap())),
-            "minecraft:iron_trapdoor" => block(trapdoor(DoorMaterial::Iron, &properties.unwrap())),
-
-            "minecraft:infested_stone" => block(Block::InfestedStone),
-            "minecraft:infested_cobblestone" => block(Block::InfestedCobblestone),
-            "minecraft:infested_stone_bricks" => block(Block::InfestedStoneBricks),
-            "minecraft:infested_mossy_stone_bricks" => block(Block::InfestedMossyStoneBricks),
-            "minecraft:infested_cracked_stone_bricks" => block(Block::InfestedCrackedStoneBricks),
-            "minecraft:infested_chiseled_stone_bricks" => block(Block::InfestedChiseledStoneBricks),
-
-            "minecraft:stone_bricks" => block(Block::StoneBricks),
-            "minecraft:mossy_stone_bricks" => block(Block::MossyStoneBricks),
-            "minecraft:cracked_stone_bricks" => block(Block::CrackedStoneBricks),
-            "minecraft:chiseled_stone_bricks" => block(Block::ChiseledStoneBricks),
-
-            "minecraft:brown_mushroom_block" => block(brown_mushroom_block(&properties.unwrap())),
-            "minecraft:red_mushroom_block" => block(red_mushroom_block(&properties.unwrap())),
-            "minecraft:mushroom_stem" => block(mushroom_stem(&properties.unwrap())),
-
-            "minecraft:iron_bars" => block(Block::IronBars { waterlogged: waterlogged(&properties.unwrap()) }),
-
-            "minecraft:glass_pane" => block(glass_pane(&properties.unwrap())),
-            "minecraft:white_stained_glass_pane" => block(stained_glass_pane(Colour::White, &properties.unwrap())),
-            "minecraft:orange_stained_glass_pane" => block(stained_glass_pane(Colour::Orange, &properties.unwrap())),
-            "minecraft:magenta_stained_glass_pane" => block(stained_glass_pane(Colour::Magenta, &properties.unwrap())),
-            "minecraft:light_blue_stained_glass_pane" => block(stained_glass_pane(Colour::LightBlue, &properties.unwrap())),
-            "minecraft:yellow_stained_glass_pane" => block(stained_glass_pane(Colour::Yellow, &properties.unwrap())),
-            "minecraft:lime_stained_glass_pane" => block(stained_glass_pane(Colour::Lime, &properties.unwrap())),
-            "minecraft:pink_stained_glass_pane" => block(stained_glass_pane(Colour::Pink, &properties.unwrap())),
-            "minecraft:gray_stained_glass_pane" => block(stained_glass_pane(Colour::Gray, &properties.unwrap())),
-            "minecraft:light_gray_stained_glass_pane" => block(stained_glass_pane(Colour::LightGray, &properties.unwrap())),
-            "minecraft:cyan_stained_glass_pane" => block(stained_glass_pane(Colour::Cyan, &properties.unwrap())),
-            "minecraft:purple_stained_glass_pane" => block(stained_glass_pane(Colour::Purple, &properties.unwrap())),
-            "minecraft:blue_stained_glass_pane" => block(stained_glass_pane(Colour::Blue, &properties.unwrap())),
-            "minecraft:brown_stained_glass_pane" => block(stained_glass_pane(Colour::Brown, &properties.unwrap())),
-            "minecraft:green_stained_glass_pane" => block(stained_glass_pane(Colour::Green, &properties.unwrap())),
-            "minecraft:red_stained_glass_pane" => block(stained_glass_pane(Colour::Red, &properties.unwrap())),
-            "minecraft:black_stained_glass_pane" => block(stained_glass_pane(Colour::Black, &properties.unwrap())),
-
             "minecraft:vine" => block(vine(&properties.unwrap())),
 
             "minecraft:oak_fence_gate" => block(fence_gate(WoodMaterial::Oak, &properties.unwrap())),
@@ -2900,14 +2955,14 @@ fn trapdoor_hinge(properties: &Option<Value>) -> Edge8 {
     let facing = facing_surface4(properties);
 
     match (half, facing) {
-        (Surface2::Up, Surface4::North) => Edge8::UpSouth,
-        (Surface2::Up, Surface4::South) => Edge8::UpNorth,
-        (Surface2::Up, Surface4::East) => Edge8::UpWest,
-        (Surface2::Up, Surface4::West) => Edge8::UpEast,
-        (Surface2::Down, Surface4::North) => Edge8::DownSouth,
-        (Surface2::Down, Surface4::South) => Edge8::DownNorth,
-        (Surface2::Down, Surface4::East) => Edge8::DownWest,
-        (Surface2::Down, Surface4::West) => Edge8::DownEast,
+        (Surface2::Up, Surface4::North) => Edge8::UpNorth,
+        (Surface2::Up, Surface4::South) => Edge8::UpSouth,
+        (Surface2::Up, Surface4::East) => Edge8::UpEast,
+        (Surface2::Up, Surface4::West) => Edge8::UpWest,
+        (Surface2::Down, Surface4::North) => Edge8::DownNorth,
+        (Surface2::Down, Surface4::South) => Edge8::DownSouth,
+        (Surface2::Down, Surface4::East) => Edge8::DownEast,
+        (Surface2::Down, Surface4::West) => Edge8::DownWest,
     }
 }
 
