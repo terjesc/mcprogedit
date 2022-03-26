@@ -370,6 +370,9 @@ pub enum Block {
         water_level: Int0Through3,
     },
     CaveAir,
+    Chain {
+        alignment: Axis3,
+    },
     Chest(Box<Chest>),
     ChiseledNetherBricks,
     ChiseledPolishedBlackstone,
@@ -526,6 +529,7 @@ pub enum Block {
     Kelp {
         growth_stage: Int0Through25,
     },
+    KelpPlant,
     Ladder {
         facing: Surface4,
         waterlogged: bool,
@@ -750,7 +754,7 @@ pub enum Block {
         waterlogged: bool,
     },
     WarpedFungus,
-    WarpedNyliym,
+    WarpedNylium,
     WarpedRoots,
     WarpedWartBlock,
     Water {

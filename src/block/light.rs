@@ -284,7 +284,7 @@ impl Block {
             | Block::Target
             | Block::Terracotta { .. }
             | Block::TNT
-            | Block::WarpedNyliym
+            | Block::WarpedNylium
             | Block::WarpedRoots
             | Block::WarpedWartBlock
             | Block::WetSponge
@@ -309,6 +309,7 @@ impl Block {
             | Block::Carrots { .. }
             | Block::Cauldron { .. }
             | Block::CaveAir
+            | Block::Chain { .. }
             | Block::Chest(_)
             | Block::Cocoa { .. }
             | Block::Composter { .. }
@@ -337,6 +338,7 @@ impl Block {
             | Block::Hopper(_)
             | Block::IronBars { .. }
             | Block::Kelp { .. }
+            | Block::KelpPlant
             | Block::Ladder { .. }
             | Block::Lantern { .. }
             | Block::Lever(_, _)
@@ -545,7 +547,7 @@ impl Block {
             | Block::Target
             | Block::Terracotta { .. }
             | Block::TNT
-            | Block::WarpedNyliym
+            | Block::WarpedNylium
             | Block::WarpedRoots
             | Block::WarpedWartBlock
             | Block::WetSponge
@@ -571,6 +573,7 @@ impl Block {
             | Block::Carrots { .. }
             | Block::Cauldron { .. }
             | Block::CaveAir
+            | Block::Chain { .. }
             | Block::Chest(_)
             | Block::Cocoa { .. }
             | Block::Composter { .. }
@@ -599,6 +602,7 @@ impl Block {
             | Block::Hopper(_)
             | Block::IronBars { .. }
             | Block::Kelp { .. }
+            | Block::KelpPlant
             | Block::Ladder { .. }
             | Block::Lantern { .. }
             | Block::Lever(_, _)

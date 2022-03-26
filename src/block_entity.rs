@@ -1,4 +1,4 @@
-use log::{trace, warn};
+use log::warn;
 
 use std::collections::HashMap;
 
@@ -733,7 +733,7 @@ impl BlockEntity {
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
         let record = nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)).ok();
-        trace!("Imported record: {:?}", record);
+        //trace!("Imported record: {:?}", record);
         BlockEntity::Jukebox { common: CommonTags::from_nbt_value(value), record }
     }
 

@@ -103,14 +103,21 @@ impl PaletteItem {
 
     fn properties(&self) -> Option<nbt::Value> {
         match self {
-            PaletteItem::Block(Block::Sapling { growth_stage, .. }) => {
-                let mut properties = nbt::Map::new();
-                properties.insert("stage".into(), nbt::Value::String(growth_stage.to_string()));
-                Some(nbt::Value::Compound(properties))
+            PaletteItem::Block(Block::Sapling { growth_stage, material }) => {
+                if *material == SaplingMaterial::Bamboo {
+                    None
+                } else {
+                    let mut properties = nbt::Map::new();
+                    properties.insert("stage".into(), nbt::Value::String(growth_stage.to_string()));
+                    Some(nbt::Value::Compound(properties))
+                }
             }
-            PaletteItem::Block(Block::BoneBlock { alignment })
+            PaletteItem::Block(Block::Basalt { alignment })
+            | PaletteItem::Block(Block::BoneBlock { alignment })
+            | PaletteItem::Block(Block::Chain { alignment })
             | PaletteItem::Block(Block::Log(Log { alignment, .. }))
             | PaletteItem::Block(Block::HayBale { alignment })
+            | PaletteItem::Block(Block::PolishedBasalt { alignment })
             | PaletteItem::Block(Block::PurpurPillar { alignment })
             | PaletteItem::Block(Block::QuartzPillar { alignment }) => {
                 let mut properties = nbt::Map::new();
@@ -625,6 +632,57 @@ impl PaletteItem {
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Seagrass { variant }) => match variant {
+                Seagrass::Seagrass => None,
+                Seagrass::TallSeagrassTop => {
+                    let mut properties = nbt::Map::new();
+                    properties.insert("half".into(), nbt::Value::String("upper".into()));
+                    Some(nbt::Value::Compound(properties))
+                }
+                Seagrass::TallSeagrassBottom => {
+                    let mut properties = nbt::Map::new();
+                    properties.insert("half".into(), nbt::Value::String("lower".into()));
+                    Some(nbt::Value::Compound(properties))
+                }
+            }
+            PaletteItem::Block(Block::SeaPickle { count, waterlogged }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("pickles".into(), nbt::Value::String(count.to_string()));
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Kelp { growth_stage }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::TurtleEgg { count, age }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("hatch".into(), nbt::Value::String(age.to_string()));
+                properties.insert("eggs".into(), nbt::Value::String(count.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Scaffolding { waterlogged }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Coral { waterlogged, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::CoralFan { waterlogged, facing, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                match facing {
+                    Surface5::Down => (),
+                    facing => {
+                        properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                    }
+                }
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -671,7 +729,7 @@ impl PaletteItem {
                 SaplingMaterial::Jungle => "minecraft:jungle_sapling",
                 SaplingMaterial::Acacia => "minecraft:acacia_sapling",
                 SaplingMaterial::DarkOak => "minecraft:dark_oak_sapling",
-                SaplingMaterial::Bamboo => unreachable!(),
+                SaplingMaterial::Bamboo => "minecraft:bamboo_sapling",
             },
             PaletteItem::Block(Block::Bedrock) => "minecraft:bedrock",
             PaletteItem::Block(Block::Water { .. }) => "minecraft:water",
@@ -1403,6 +1461,92 @@ impl PaletteItem {
                 Colour::Black => "minecraft:black_concrete_powder",
             }
             // TODO 255 structure block
+            PaletteItem::Block(Block::CrimsonNylium) => "minecraft:crimson_nylium",
+            PaletteItem::Block(Block::WarpedNylium) => "minecraft:warped_nylium",
+            PaletteItem::Block(Block::NetherGoldOre) => "minecraft:nether_gold_ore",
+            PaletteItem::Block(Block::Seagrass { variant }) => match variant {
+                Seagrass::Seagrass => "minecraft:seagrass",
+                Seagrass::TallSeagrassBottom
+                | Seagrass::TallSeagrassTop => "minecraft:tall_seagrass",
+            }
+            PaletteItem::Block(Block::SeaPickle { .. }) => "minecraft:sea_pickle",
+            PaletteItem::Block(Block::Kelp { .. }) => "minecraft:kelp",
+            PaletteItem::Block(Block::KelpPlant) => "minecraft:kelp_plant",
+            PaletteItem::Block(Block::Basalt { .. }) => "minecraft:basalt",
+            PaletteItem::Block(Block::PolishedBasalt { .. }) => "minecraft:polished_basalt",
+            PaletteItem::Block(Block::QuartzBricks) => "minecraft:quartz_bricks",
+            PaletteItem::Block(Block::Chain { .. }) => "minecraft:chain",
+            PaletteItem::Block(Block::TurtleEgg { .. }) => "minecraft:turtle_egg",
+            PaletteItem::Block(Block::DriedKelpBlock) => "minecraft:dried_kelp_block",
+            PaletteItem::Block(Block::Scaffolding { .. }) => "minecraft:scaffolding",
+
+            PaletteItem::Block(Block::Coral { material, dead: false, .. }) => match material {
+                CoralMaterial::Bubble => "minecraft:bubble_coral",
+                CoralMaterial::Brain => "minecraft:brain_coral",
+                CoralMaterial::Fire => "minecraft:fire_coral",
+                CoralMaterial::Horn => "minecraft:horn_coral",
+                CoralMaterial::Tube => "minecraft:tube_coral",
+            }
+            PaletteItem::Block(Block::Coral { material, dead: true, .. }) => match material {
+                CoralMaterial::Bubble => "minecraft:dead_bubble_coral",
+                CoralMaterial::Brain => "minecraft:dead_brain_coral",
+                CoralMaterial::Fire => "minecraft:dead_fire_coral",
+                CoralMaterial::Horn => "minecraft:dead_horn_coral",
+                CoralMaterial::Tube => "minecraft:dead_tube_coral",
+            }
+            PaletteItem::Block(Block::CoralBlock { material, dead: false }) => match material {
+                CoralMaterial::Bubble => "minecraft:bubble_coral_block",
+                CoralMaterial::Brain => "minecraft:brain_coral_block",
+                CoralMaterial::Fire => "minecraft:fire_coral_block",
+                CoralMaterial::Horn => "minecraft:horn_coral_block",
+                CoralMaterial::Tube => "minecraft:tube_coral_block",
+            }
+            PaletteItem::Block(Block::CoralBlock { material, dead: true }) => match material {
+                CoralMaterial::Bubble => "minecraft:dead_bubble_coral_block",
+                CoralMaterial::Brain => "minecraft:dead_brain_coral_block",
+                CoralMaterial::Fire => "minecraft:dead_fire_coral_block",
+                CoralMaterial::Horn => "minecraft:dead_horn_coral_block",
+                CoralMaterial::Tube => "minecraft:dead_tube_coral_block",
+            }
+            PaletteItem::Block(Block::CoralFan { material, dead: false, facing, .. }) => match facing {
+                Surface5::Down => match material {
+                    CoralMaterial::Bubble => "minecraft:bubble_coral_fan",
+                    CoralMaterial::Brain => "minecraft:brain_coral_fan",
+                    CoralMaterial::Fire => "minecraft:fire_coral_fan",
+                    CoralMaterial::Horn => "minecraft:horn_coral_fan",
+                    CoralMaterial::Tube => "minecraft:tube_coral_fan",
+                }
+                _facing => match material {
+                    CoralMaterial::Bubble => "minecraft:bubble_coral_wall_fan",
+                    CoralMaterial::Brain => "minecraft:brain_coral_wall_fan",
+                    CoralMaterial::Fire => "minecraft:fire_coral_wall_fan",
+                    CoralMaterial::Horn => "minecraft:horn_coral_wall_fan",
+                    CoralMaterial::Tube => "minecraft:tube_coral_wall_fan",
+                }
+            }
+            PaletteItem::Block(Block::CoralFan { material, dead: true, facing, .. }) => match facing {
+                Surface5::Down => match material {
+                    CoralMaterial::Bubble => "minecraft:dead_bubble_coral_fan",
+                    CoralMaterial::Brain => "minecraft:dead_brain_coral_fan",
+                    CoralMaterial::Fire => "minecraft:dead_fire_coral_fan",
+                    CoralMaterial::Horn => "minecraft:dead_horn_coral_fan",
+                    CoralMaterial::Tube => "minecraft:dead_tube_coral_fan",
+                }
+                _facing => match material {
+                    CoralMaterial::Bubble => "minecraft:dead_bubble_coral_wall_fan",
+                    CoralMaterial::Brain => "minecraft:dead_brain_coral_wall_fan",
+                    CoralMaterial::Fire => "minecraft:dead_fire_coral_wall_fan",
+                    CoralMaterial::Horn => "minecraft:dead_horn_coral_wall_fan",
+                    CoralMaterial::Tube => "minecraft:dead_tube_coral_wall_fan",
+                }
+            }
+            //PaletteItem::Block(Block::) => "minecraft:",
+
+            /*
+            */
+            //
+            PaletteItem::Block(Block::AncientDebris) => "minecraft:ancient_debris",
+            //PaletteItem::Block(Block::) => "minecraft:",
 
             // Blocks that should only appear as proto blocks
             PaletteItem::Block(Block::Banner(_))
@@ -1414,13 +1558,20 @@ impl PaletteItem {
             | PaletteItem::Block(Block::EnchantingTable { .. })
             | PaletteItem::Block(Block::Furnace(_))
             | PaletteItem::Block(Block::Hopper(_))
-            | PaletteItem::Block(Block::Jukebox(_))
             | PaletteItem::Block(Block::ShulkerBox(_))
             | PaletteItem::Block(Block::Sign(_))
             | PaletteItem::Block(Block::TrappedChest(_)) => {
                 warn!("Unexpected PaletteItem::Block variant: {:?}", self);
                 "minecraft:sponge"
             }
+
+            // Blocks that should not appear as proto blocks
+            PaletteItem::ProtoBlock(ProtoBlock::Jukebox) => {
+                warn!("Unexpected PaletteItem::ProtoBlock variant: {:?}", self);
+                "minecraft:sponge"
+            }
+
+            // Catch-all // TODO remove when all variants are handled!
             _ => "minecraft:sponge", // TODO handle all variants!
 
             /*
@@ -1472,6 +1623,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:jungle_sapling" => block(sapling(SaplingMaterial::Jungle, &properties)),
             "minecraft:acacia_sapling" => block(sapling(SaplingMaterial::Acacia, &properties)),
             "minecraft:dark_oak_sapling" => block(sapling(SaplingMaterial::DarkOak, &properties)),
+            "minecraft:bamboo_sapling" => block(sapling(SaplingMaterial::Bamboo, &properties)),
             "minecraft:bedrock" => block(Block::Bedrock),
             "minecraft:water" => block(water(&properties)),
             "minecraft:lava" => block(lava(&properties)),
@@ -2100,7 +2252,70 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:red_concrete_powder" => block(concrete_powder(Colour::Red)),
             "minecraft:black_concrete_powder" => block(concrete_powder(Colour::Black)),
             // TODO 255 structure block
-            _ => block(Block::Unknown(None)),
+            "minecraft:crimson_nylium" => block(Block::CrimsonNylium),
+            "minecraft:warped_nylium" => block(Block::WarpedNylium),
+            "minecraft:nether_gold_ore" => block(Block::NetherGoldOre),
+            "minecraft:seagrass" => block(seagrass(Seagrass::Seagrass)),
+            "minecraft:tall_seagrass" => block(tall("tall_seagrass", &properties)),
+            "minecraft:sea_pickle" => block(sea_pickle(&properties)),
+            "minecraft:kelp" => block(kelp(&properties)),
+            "minecraft:kelp_plant" => block(Block::KelpPlant),
+            "minecraft:basalt" => block(basalt(&properties)),
+            "minecraft:polished_basalt" => block(polished_basalt(&properties)),
+            "minecraft:quartz_bricks" => block(Block::QuartzBricks),
+            "minecraft:chain" => block(chain(&properties)),
+            "minecraft:turtle_egg" => block(turtle_egg(&properties)),
+            "minecraft:dried_kelp_block" => block(Block::DriedKelpBlock),
+            "minecraft:scaffolding" => block(scaffolding(&properties)),
+
+            "minecraft:tube_coral" => block(coral(CoralMaterial::Tube , &properties)),
+            "minecraft:brain_coral" => block(coral(CoralMaterial::Brain , &properties)),
+            "minecraft:bubble_coral" => block(coral(CoralMaterial::Bubble , &properties)),
+            "minecraft:fire_coral" => block(coral(CoralMaterial::Fire , &properties)),
+            "minecraft:horn_coral" => block(coral(CoralMaterial::Horn , &properties)),
+            "minecraft:dead_tube_coral" => block(dead_coral(CoralMaterial::Tube , &properties)),
+            "minecraft:dead_brain_coral" => block(dead_coral(CoralMaterial::Brain , &properties)),
+            "minecraft:dead_bubble_coral" => block(dead_coral(CoralMaterial::Bubble , &properties)),
+            "minecraft:dead_fire_coral" => block(dead_coral(CoralMaterial::Fire , &properties)),
+            "minecraft:dead_horn_coral" => block(dead_coral(CoralMaterial::Horn , &properties)),
+            "minecraft:tube_coral_block" => block(coral_block(CoralMaterial::Tube)),
+            "minecraft:brain_coral_block" => block(coral_block(CoralMaterial::Brain)),
+            "minecraft:bubble_coral_block" => block(coral_block(CoralMaterial::Bubble)),
+            "minecraft:fire_coral_block" => block(coral_block(CoralMaterial::Fire)),
+            "minecraft:horn_coral_block" => block(coral_block(CoralMaterial::Horn)),
+            "minecraft:dead_tube_coral_block" => block(dead_coral_block(CoralMaterial::Tube)),
+            "minecraft:dead_brain_coral_block" => block(dead_coral_block(CoralMaterial::Brain)),
+            "minecraft:dead_bubble_coral_block" => block(dead_coral_block(CoralMaterial::Bubble)),
+            "minecraft:dead_fire_coral_block" => block(dead_coral_block(CoralMaterial::Fire)),
+            "minecraft:dead_horn_coral_block" => block(dead_coral_block(CoralMaterial::Horn)),
+            "minecraft:tube_coral_fan" => block(coral_fan(CoralMaterial::Tube , &properties)),
+            "minecraft:brain_coral_fan" => block(coral_fan(CoralMaterial::Brain , &properties)),
+            "minecraft:bubble_coral_fan" => block(coral_fan(CoralMaterial::Bubble , &properties)),
+            "minecraft:fire_coral_fan" => block(coral_fan(CoralMaterial::Fire , &properties)),
+            "minecraft:horn_coral_fan" => block(coral_fan(CoralMaterial::Horn , &properties)),
+            "minecraft:dead_tube_coral_fan" => block(dead_coral_fan(CoralMaterial::Tube , &properties)),
+            "minecraft:dead_brain_coral_fan" => block(dead_coral_fan(CoralMaterial::Brain , &properties)),
+            "minecraft:dead_bubble_coral_fan" => block(dead_coral_fan(CoralMaterial::Bubble , &properties)),
+            "minecraft:dead_fire_coral_fan" => block(dead_coral_fan(CoralMaterial::Fire , &properties)),
+            "minecraft:dead_horn_coral_fan" => block(dead_coral_fan(CoralMaterial::Horn , &properties)),
+            "minecraft:tube_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Tube , &properties)),
+            "minecraft:brain_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Brain , &properties)),
+            "minecraft:bubble_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Bubble , &properties)),
+            "minecraft:fire_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Fire , &properties)),
+            "minecraft:horn_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Horn , &properties)),
+            "minecraft:dead_tube_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Tube , &properties)),
+            "minecraft:dead_brain_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Brain , &properties)),
+            "minecraft:dead_bubble_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Bubble , &properties)),
+            "minecraft:dead_fire_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Fire , &properties)),
+            "minecraft:dead_horn_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Horn , &properties)),
+
+            /*
+            */
+            // Catch-all
+            _ => {
+                warn!("Unknown block id: {}", name.as_str());
+                block(Block::Unknown(None))
+            }
         };
         palette.push(palette_item);
     }
@@ -2175,7 +2390,9 @@ fn sapling(material: SaplingMaterial, properties: &Option<Value>) -> Block {
     let growth_stage = properties_lookup_string(properties, "stage")
         .and_then(i_0_through_1)
         .unwrap_or_else(|| {
-            warn!("Using fallback value for \"stage\" property of sapling.");
+            if material != SaplingMaterial::Bamboo {
+                warn!("Using fallback value for \"stage\" property of sapling.");
+            }
             Int0Through1::new(0).unwrap()
         });
 
@@ -2674,6 +2891,11 @@ fn tall(name: &'static str, properties: &Option<Value>) -> Block {
                 Block::Grass(Grass::LargeFernBottom),
                 properties,
             ),
+        "tall_seagrass" => tall_helper(
+                Block::Seagrass { variant: Seagrass::TallSeagrassTop },
+                Block::Seagrass { variant: Seagrass::TallSeagrassBottom },
+                properties,
+            ),
         _ => unreachable!(),
     }
 }
@@ -2723,6 +2945,96 @@ fn concrete(colour: Colour) -> Block {
 fn concrete_powder(colour: Colour) -> Block {
     Block::ConcretePowder { colour }
 }
+
+fn seagrass(variant: Seagrass) -> Block {
+    Block::Seagrass{ variant }
+}
+
+fn sea_pickle(properties: &Option<Value>) -> Block {
+    Block::SeaPickle{
+        count: pickles1_4(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn kelp(properties: &Option<Value>) -> Block {
+    Block::Kelp{ growth_stage: age0_25(properties) }
+}
+
+fn basalt(properties: &Option<Value>) -> Block {
+    Block::Basalt { alignment: wood_alignment(&properties) }
+}
+
+fn polished_basalt(properties: &Option<Value>) -> Block {
+    Block::PolishedBasalt { alignment: wood_alignment(&properties) }
+}
+
+fn chain(properties: &Option<Value>) -> Block {
+    Block::Chain { alignment: wood_alignment(&properties) }
+}
+
+fn turtle_egg(properties: &Option<Value>) -> Block {
+    Block::TurtleEgg { count: eggs1_4(properties), age: age0_2(properties) }
+}
+
+fn scaffolding(properties: &Option<Value>) -> Block {
+    Block::Scaffolding { waterlogged: waterlogged(properties) }
+}
+
+fn coral(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::Coral { material, dead: false, waterlogged: waterlogged(properties) }
+}
+
+fn dead_coral(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::Coral { material, dead: true, waterlogged: waterlogged(properties) }
+}
+
+fn coral_block(material: CoralMaterial) -> Block {
+    Block::CoralBlock { material, dead: false }
+}
+
+fn dead_coral_block(material: CoralMaterial) -> Block {
+    Block::CoralBlock { material, dead: true }
+}
+
+fn coral_fan(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::CoralFan {
+        material,
+        facing: Surface5::Down,
+        dead: false,
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn dead_coral_fan(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::CoralFan {
+        material,
+        facing: Surface5::Down,
+        dead: true,
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn coral_wall_fan(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::CoralFan {
+        material,
+        facing: facing_surface5(properties),
+        dead: false,
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn dead_coral_wall_fan(material: CoralMaterial, properties: &Option<Value>) -> Block {
+    Block::CoralFan {
+        material,
+        facing: facing_surface5(properties),
+        dead: true,
+        waterlogged: waterlogged(properties),
+    }
+}
+
+/*
+*/
 
 //
 // Convenience functions for proto blocks
@@ -2910,6 +3222,12 @@ fn i_0_through_15(string: String) -> Option<Int0Through15> {
         .and_then(|i| Int0Through15::new(i))
 }
 
+/// Convert a string to an Int0Through25 value
+fn i_0_through_25(string: String) -> Option<Int0Through25> {
+    string.parse::<i8>().ok()
+        .and_then(|i| Int0Through25::new(i))
+}
+
 /// Convert a string to an Int1Through4 value
 fn i_1_through_4(string: String) -> Option<Int1Through4> {
     string.parse::<i8>().ok()
@@ -2979,6 +3297,33 @@ fn age0_15(properties: &Option<Value>) -> Int0Through15 {
         .unwrap_or_else(|| {
             warn!("Using fallback value for \"age\" property of a block.");
             Int0Through15::new(0).unwrap()
+        })
+}
+
+fn age0_25(properties: &Option<Value>) -> Int0Through25 {
+    properties_lookup_string(properties, "age")
+        .and_then(i_0_through_25)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value for \"age\" property of a block.");
+            Int0Through25::new(25).unwrap()
+        })
+}
+
+fn pickles1_4(properties: &Option<Value>) -> Int1Through4 {
+    properties_lookup_string(properties, "pickles")
+        .and_then(i_1_through_4)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value for \"pickles\" property of a block.");
+            Int1Through4::new(1).unwrap()
+        })
+}
+
+fn eggs1_4(properties: &Option<Value>) -> Int1Through4 {
+    properties_lookup_string(properties, "eggs")
+        .and_then(i_1_through_4)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value for \"eggs\" property of a block.");
+            Int1Through4::new(1).unwrap()
         })
 }
 
