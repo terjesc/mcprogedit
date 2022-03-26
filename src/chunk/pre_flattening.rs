@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use log::warn;
 
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
@@ -48,6 +49,9 @@ impl Chunk {
                         }
                         Some(Block::Furnace(furnace)) => {
                             furnace.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Head(head)) => {
+                            head.to_block_entity(block_coordinates).to_nbt_value()
                         }
                         Some(Block::Hopper(hopper)) => {
                             hopper.to_block_entity(block_coordinates).to_nbt_value()
@@ -1820,20 +1824,25 @@ impl Chunk {
                             let block_entity = block_entities.get(&coordinates).unwrap();
 
                             match block_entity {
-                                BlockEntity::Skull {
-                                    skull_type, facing, ..
-                                } => Block::Head(Head {
-                                    variant: *skull_type,
-                                    placement: match data[index] {
-                                        1 => WallOrRotatedOnFloor::Floor(*facing),
-                                        2 => WallOrRotatedOnFloor::Wall(Surface4::North),
-                                        3 => WallOrRotatedOnFloor::Wall(Surface4::South),
-                                        4 => WallOrRotatedOnFloor::Wall(Surface4::West),
-                                        5 => WallOrRotatedOnFloor::Wall(Surface4::East),
-                                        n => panic!("Unknown data value for skull: {}", n),
-                                    },
-                                    waterlogged: false,
-                                }),
+                                BlockEntity::Skull { skull_type, facing, .. } => {
+                                    let facing = facing.unwrap_or(Direction16::default());
+                                    let skull_type = skull_type.unwrap_or(HeadVariant::default());
+                                    Block::Head(Head {
+                                        variant: skull_type,
+                                        placement: match data[index] {
+                                            1 => WallOrRotatedOnFloor::Floor(facing),
+                                            2 => WallOrRotatedOnFloor::Wall(Surface4::North),
+                                            3 => WallOrRotatedOnFloor::Wall(Surface4::South),
+                                            4 => WallOrRotatedOnFloor::Wall(Surface4::West),
+                                            5 => WallOrRotatedOnFloor::Wall(Surface4::East),
+                                            n => {
+                                                warn!("Unknown data value for skull: {}", n);
+                                                WallOrRotatedOnFloor::Floor(Direction16::default())
+                                            }
+                                        },
+                                        waterlogged: false,
+                                    })
+                                }
                                 _ => panic!("Wrong block entity variant for skull / head"),
                             }
                         }

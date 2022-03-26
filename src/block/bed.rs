@@ -1,4 +1,5 @@
 use std::convert::TryFrom;
+use std::fmt;
 
 use crate::block::Block;
 use crate::colour::Colour;
@@ -36,4 +37,13 @@ impl TryFrom<Block> for Bed {
 pub enum BedEnd {
     Foot,
     Head,
+}
+
+impl fmt::Display for BedEnd {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            BedEnd::Foot => "foot",
+            BedEnd::Head => "head",
+        })
+    }
 }

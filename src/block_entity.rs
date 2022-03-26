@@ -120,8 +120,8 @@ pub enum BlockEntity {
     },
     Skull {
         common: CommonTags,
-        skull_type: HeadVariant,
-        facing: Direction16,
+        skull_type: Option<HeadVariant>,
+        facing: Option<Direction16>,
     },
     Smoker {
         tags: FurnaceTags,
@@ -199,7 +199,7 @@ impl BlockEntity {
                 "minecraft:piston" => Self::piston_from_nbt_value(value),
                 "minecraft:shulker_box" => Self::shulker_box_from_nbt_value(value),
                 "minecraft:sign" => Self::sign_from_nbt_value(value),
-                "minecraft:skull" if data_version < THE_FLATTENING => Self::skull_from_nbt_value(value),
+                "minecraft:skull" => Self::skull_from_nbt_value(value),
                 "minecraft:smoker" => Self::smoker_from_nbt_value(value),
                 "minecraft:soul_campfire" => Self::soul_campfire_from_nbt_value(value),
                 "minecraft:structure_block" => Self::structure_block_from_nbt_value(value),
@@ -895,22 +895,53 @@ impl BlockEntity {
     fn skull_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Skull {
             common: CommonTags::from_nbt_value(value),
-            skull_type: match nbt_value_lookup_byte(value, "SkullType").unwrap() {
-                0 => HeadVariant::SkeletonSkull,
-                1 => HeadVariant::WitherSkeletonSkull,
-                2 => HeadVariant::ZombieHead,
-                3 => HeadVariant::PlayerHead,
-                4 => HeadVariant::CreeperHead,
-                5 => HeadVariant::DragonHead,
-                n => panic!("Unknown SkullType value of {}", n),
+            skull_type: nbt_value_lookup_byte(value, "SkullType")
+                .ok()
+                .and_then(|variant| match variant {
+                    0 => Some(HeadVariant::SkeletonSkull),
+                    1 => Some(HeadVariant::WitherSkeletonSkull),
+                    2 => Some(HeadVariant::ZombieHead),
+                    3 => Some(HeadVariant::PlayerHead),
+                    4 => Some(HeadVariant::CreeperHead),
+                    5 => Some(HeadVariant::DragonHead),
+                    n => {
+                        warn!("Unknown SkullType value of {}", n);
+                        None
+                    }
+                }),
+            facing: match nbt_value_lookup_byte(value, "Rot") {
+                Ok(facing) => Some(Direction16::from(facing).opposite()),
+                Err(_) => None,
             },
-            facing: Direction16::from(nbt_value_lookup_byte(value, "Rot").unwrap()).opposite(),
+            //facing: Direction16::from(nbt_value_lookup_byte(value, "Rot").unwrap()).opposite(),
         }
     }
 
     fn skull_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Skull { common, facing, skull_type } = self {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            if let Some(facing) = facing {
+                entity.insert("Rot".into(), nbt::Value::Byte(facing.opposite().into()));
+            }
+            if let Some(skull_type) = skull_type {
+                let skull_type = nbt::Value::Byte(match skull_type {
+                    HeadVariant::SkeletonSkull => 0,
+                    HeadVariant::WitherSkeletonSkull => 1,
+                    HeadVariant::ZombieHead => 2,
+                    HeadVariant::PlayerHead => 3,
+                    HeadVariant::CreeperHead => 4,
+                    HeadVariant::DragonHead => 5,
+                });
+                entity.insert("SKullType".into(), skull_type);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn smoker_from_nbt_value(value: &nbt::Value) -> Self {
