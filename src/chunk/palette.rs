@@ -655,7 +655,9 @@ impl PaletteItem {
                 properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Kelp { growth_stage }) => {
+            PaletteItem::Block(Block::Kelp { growth_stage })
+            | PaletteItem::Block(Block::TwistingVines { growth_stage })
+            | PaletteItem::Block(Block::WeepingVines { growth_stage }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
                 Some(nbt::Value::Compound(properties))
@@ -1548,6 +1550,10 @@ impl PaletteItem {
             PaletteItem::Block(Block::SeaPickle { .. }) => "minecraft:sea_pickle",
             PaletteItem::Block(Block::Kelp { .. }) => "minecraft:kelp",
             PaletteItem::Block(Block::KelpPlant) => "minecraft:kelp_plant",
+            PaletteItem::Block(Block::TwistingVines { .. }) => "minecraft:twisting_vines",
+            PaletteItem::Block(Block::TwistingVinesPlant) => "minecraft:twisting_vines_plant",
+            PaletteItem::Block(Block::WeepingVines { .. }) => "minecraft:weeping_vines",
+            PaletteItem::Block(Block::WeepingVinesPlant) => "minecraft:weeping_vines_plant",
             PaletteItem::Block(Block::Basalt { .. }) => "minecraft:basalt",
             PaletteItem::Block(Block::PolishedBasalt { .. }) => "minecraft:polished_basalt",
             PaletteItem::Block(Block::QuartzBricks) => "minecraft:quartz_bricks",
@@ -1644,6 +1650,7 @@ impl PaletteItem {
             PaletteItem::Block(Block::CrimsonFungus) => "minecraft:crimson_fungus",
             PaletteItem::Block(Block::WarpedRoots) => "minecraft:warped_roots",
             PaletteItem::Block(Block::CrimsonRoots) => "minecraft:crimson_roots",
+            PaletteItem::Block(Block::NetherSprouts) => "minecraft:nether_sprouts",
             PaletteItem::Block(Block::Campfire { .. }) => "minecraft:campfire",
             PaletteItem::Block(Block::SoulCampfire { .. }) => "minecraft:soul_campfire",
             PaletteItem::ProtoBlock(ProtoBlock::Barrel { .. }) => "minecraft:barrel",
@@ -1660,12 +1667,8 @@ impl PaletteItem {
                 beehive
                 bee_nest (beehive)
 
-                // Missing plant classes:
-                // TwistingVines & TwistingVinesPlant
-                // WeepingVines & WeepingVinesPlant
-                // Bamboo & BambooPlant
-                // -- They are probably just like Kelp and KelpPlant,
-                //    in that the "plant" variant is the full-grown variant.
+                // TODO Figure out how bamboo / bamboo_sapling works.
+                //      Is it similar to Kelp, TwistingVines and WeepingVines?
             */
 
             // Blocks that should only appear as proto blocks
@@ -2381,6 +2384,10 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:sea_pickle" => block(sea_pickle(&properties)),
             "minecraft:kelp" => block(kelp(&properties)),
             "minecraft:kelp_plant" => block(Block::KelpPlant),
+            "minecraft:twisting_vines" => block(twisting_vines(&properties)),
+            "minecraft:twisting_vines_plant" => block(Block::TwistingVinesPlant),
+            "minecraft:weeping_vines" => block(weeping_vines(&properties)),
+            "minecraft:weeping_vines_plant" => block(Block::WeepingVinesPlant),
             "minecraft:basalt" => block(basalt(&properties)),
             "minecraft:polished_basalt" => block(polished_basalt(&properties)),
             "minecraft:quartz_bricks" => block(Block::QuartzBricks),
@@ -2457,6 +2464,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:crimson_fungus" => block(Block::CrimsonFungus),
             "minecraft:warped_roots" => block(Block::WarpedRoots),
             "minecraft:crimson_roots" => block(Block::CrimsonRoots),
+            "minecraft:nether_sprouts" => block(Block::NetherSprouts),
             "minecraft:campfire" => block(campfire(&properties)),
             "minecraft:soul_campfire" => block(soul_campfire(&properties)),
             "minecraft:barrel" => proto(proto_barrel(&properties)),
@@ -3121,6 +3129,14 @@ fn sea_pickle(properties: &Option<Value>) -> Block {
 
 fn kelp(properties: &Option<Value>) -> Block {
     Block::Kelp{ growth_stage: age0_25(properties) }
+}
+
+fn twisting_vines(properties: &Option<Value>) -> Block {
+    Block::TwistingVines { growth_stage: age0_25(properties) }
+}
+
+fn weeping_vines(properties: &Option<Value>) -> Block {
+    Block::WeepingVines { growth_stage: age0_25(properties) }
 }
 
 fn basalt(properties: &Option<Value>) -> Block {
