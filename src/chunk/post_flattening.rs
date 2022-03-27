@@ -187,6 +187,22 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&B
             }))
         }
 
+        ProtoBlock::Barrel { facing } => {
+            let (custom_name, lock, items) =
+                if let Some(BlockEntity::Barrel { tags: ChestTags { custom_name, lock, items, .. } }) = block_entity {
+                    (custom_name.clone(), lock.clone(), items.clone())
+                } else {
+                    warn!("Wrong or missing block entity for barrel: {:?}", block_entity);
+                    (None, None, Inventory::new())
+                };
+            Block::Barrel(Box::new(Barrel {
+                facing: *facing,
+                custom_name,
+                lock,
+                items,
+            }))
+        }
+
         ProtoBlock::Beacon => {
             let (lock, levels, primary, secondary) =
                 if let Some(BlockEntity::Beacon { lock, levels, primary, secondary, .. }) = block_entity {

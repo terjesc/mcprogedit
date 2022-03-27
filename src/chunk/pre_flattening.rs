@@ -35,11 +35,19 @@ impl Chunk {
                         Some(Block::Banner(banner)) => {
                             banner.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::Barrel(barrel)) => {
+                            barrel.to_block_entity(block_coordinates).to_nbt_value()
+                        }
                         Some(Block::Beacon(beacon)) => {
                             beacon.to_block_entity(block_coordinates).to_nbt_value()
                         }
                         Some(Block::Bed(_)) => {
                             Some(CommonTags::new_nbt("minecraft:bed", block_coordinates))
+                        }
+                        Some(Block::Campfire { .. })
+                        | Some(Block::SoulCampfire { .. }) => {
+                            // TODO Items, CookingTimes and CookingTotalTimes
+                            Some(CommonTags::new_nbt("minecraft:campfire", block_coordinates))
                         }
                         Some(Block::Chest(chest)) => {
                             chest.to_block_entity(block_coordinates).to_nbt_value()

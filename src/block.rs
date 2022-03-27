@@ -2,6 +2,7 @@ use std::convert::TryFrom;
 use std::fmt;
 
 mod banner;
+mod barrel;
 mod beacon;
 mod bed;
 mod brewing_stand;
@@ -26,6 +27,7 @@ mod foilage;
 pub(crate) mod light;
 
 pub use self::banner::*;
+pub use self::barrel::*;
 pub use self::beacon::*;
 pub use self::bed::*;
 pub use self::brewing_stand::*;
@@ -295,9 +297,7 @@ pub enum Block {
         stage: Int0Through1,
     },
     Banner(Box<Banner>),
-    Barrel {
-        facing: Surface6,
-    }, // TODO add block entity
+    Barrel(Box<Barrel>),
     Barrier,
     Basalt {
         alignment: Axis3,
@@ -1101,7 +1101,7 @@ impl Block {
         match self {
             Self::Anvil { facing, .. } => Direction::from(*facing) == direction,
             Self::Banner(banner) => banner.has_facing_of(direction),
-            Self::Barrel { facing, .. } => Direction::from(*facing) == direction,
+            Self::Barrel(barrel) => barrel.has_facing_of(direction),
             Self::Beehive { facing, .. } => Direction::from(*facing) == direction,
             Self::BeeNest { facing, .. } => Direction::from(*facing) == direction,
             Self::Bed(bed) => bed.has_facing_of(direction),

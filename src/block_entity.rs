@@ -327,8 +327,16 @@ impl BlockEntity {
     }
 
     fn barrel_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Barrel { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn beacon_from_nbt_value(value: &nbt::Value) -> Self {

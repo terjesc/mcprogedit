@@ -16,6 +16,7 @@ use crate::positioning::*;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum ProtoBlock {
     Banner { colour: Colour, placement: WallOrRotatedOnFloor },
+    Barrel { facing: Surface6 },
     Beacon,
     BrewingStand,
     Chest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
@@ -49,6 +50,9 @@ impl PaletteItem {
                 placement: banner.placement,
             }),
             Block::Beacon(_) => proto(ProtoBlock::Beacon),
+            Block::Barrel(barrel) => proto(ProtoBlock::Barrel {
+                facing: barrel.facing,
+            }),
             Block::BrewingStand(_) => proto(ProtoBlock::BrewingStand),
             Block::Chest(chest) => proto(ProtoBlock::Chest {
                 facing: chest.facing,
@@ -736,6 +740,19 @@ impl PaletteItem {
                 properties.insert("charges".into(), nbt::Value::String(charges.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Campfire { facing, lit, waterlogged })
+            | PaletteItem::Block(Block::SoulCampfire { facing, lit, waterlogged }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::ProtoBlock(ProtoBlock::Barrel { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -743,6 +760,8 @@ impl PaletteItem {
             // TODO Figure out what to do with:
             //      ChorusPlant, Fence, FenceGate, GlassPane, IronBars, RedstoneWire, Tripwire, Wall.
             //      They all have connection info in the Properties tag.
+            //      Also:
+            //      Campfire, SoulCampfire: "signal_fire" = "true" if on top of HayBale
 
             _ => None, // TODO should have compile time warning for unhandled block types. Perhaps list all?
         }
@@ -1625,18 +1644,19 @@ impl PaletteItem {
             PaletteItem::Block(Block::CrimsonFungus) => "minecraft:crimson_fungus",
             PaletteItem::Block(Block::WarpedRoots) => "minecraft:warped_roots",
             PaletteItem::Block(Block::CrimsonRoots) => "minecraft:crimson_roots",
+            PaletteItem::Block(Block::Campfire { .. }) => "minecraft:campfire",
+            PaletteItem::Block(Block::SoulCampfire { .. }) => "minecraft:soul_campfire",
+            PaletteItem::ProtoBlock(ProtoBlock::Barrel { .. }) => "minecraft:barrel",
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
                 smoker
                 blast_furnace
+
                 lectern
                 conduit
-                barrel
                 bell
-                campfire
-                soul_campfire (campfire)
                 beehive
                 bee_nest (beehive)
 
@@ -1650,6 +1670,7 @@ impl PaletteItem {
 
             // Blocks that should only appear as proto blocks
             PaletteItem::Block(Block::Banner(_))
+            | PaletteItem::Block(Block::Barrel(_))
             | PaletteItem::Block(Block::Beacon(_))
             | PaletteItem::Block(Block::BrewingStand(_))
             | PaletteItem::Block(Block::Chest(_))
@@ -2436,18 +2457,19 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:crimson_fungus" => block(Block::CrimsonFungus),
             "minecraft:warped_roots" => block(Block::WarpedRoots),
             "minecraft:crimson_roots" => block(Block::CrimsonRoots),
+            "minecraft:campfire" => block(campfire(&properties)),
+            "minecraft:soul_campfire" => block(soul_campfire(&properties)),
+            "minecraft:barrel" => proto(proto_barrel(&properties)),
             //"minecraft:" => block(Block::),
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
                 smoker
                 blast_furnace
+
                 lectern
                 conduit
-                barrel
                 bell
-                campfire
-                soul_campfire (campfire)
                 beehive
                 bee_nest (beehive)
             */
@@ -3187,9 +3209,23 @@ fn soul_lantern(properties: &Option<Value>) -> Block {
     }
 }
 
+fn campfire(properties: &Option<Value>) -> Block {
+    Block::Campfire {
+        facing: facing_surface4(properties),
+        lit: lit(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn soul_campfire(properties: &Option<Value>) -> Block {
+    Block::SoulCampfire {
+        facing: facing_surface4(properties),
+        lit: lit(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
 /*
-                lantern             waterlogged + hanging
-                soul_lantern        waterlogged + hanging
 */
 
 //
@@ -3201,6 +3237,10 @@ fn proto_banner(colour: Colour, properties: &Option<Value>) -> ProtoBlock {
         colour,
         placement: WallOrRotatedOnFloor::Floor(floor_sign_facing_direction16(properties)),
     }
+}
+
+fn proto_barrel(properties: &Option<Value>) -> ProtoBlock {
+    ProtoBlock::Barrel { facing: facing_surface6(properties) }
 }
 
 fn proto_wall_banner(colour: Colour, properties: &Option<Value>) -> ProtoBlock {
