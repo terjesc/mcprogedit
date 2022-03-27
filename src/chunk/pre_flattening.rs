@@ -3,7 +3,7 @@ use log::warn;
 
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
-use crate::block_entity::BlockEntity;
+use crate::block_entity::{BlockEntity, CommonTags};
 use crate::bounded_ints::*;
 use crate::chunk::Chunk;
 use crate::colour::Colour;
@@ -38,6 +38,9 @@ impl Chunk {
                         Some(Block::Beacon(beacon)) => {
                             beacon.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::Bed(_)) => {
+                            Some(CommonTags::new_nbt("minecraft:bed", block_coordinates))
+                        }
                         Some(Block::Chest(chest)) => {
                             chest.to_block_entity(block_coordinates).to_nbt_value()
                         }
@@ -46,6 +49,12 @@ impl Chunk {
                         }
                         Some(Block::Dropper(dropper)) => {
                             dropper.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::EnderChest { .. }) => {
+                            Some(CommonTags::new_nbt("minecraft:ender_chest", block_coordinates))
+                        }
+                        Some(Block::EndPortal) => {
+                            Some(CommonTags::new_nbt("minecraft:end_portal", block_coordinates))
                         }
                         Some(Block::Furnace(furnace)) => {
                             furnace.to_block_entity(block_coordinates).to_nbt_value()
@@ -67,6 +76,9 @@ impl Chunk {
                         }
                         Some(Block::Sign(sign)) => {
                             sign.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::TrappedChest(trapped_chest)) => {
+                            trapped_chest.to_trapped_block_entity(block_coordinates).to_nbt_value()
                         }
                         // TODO add handling of other blocks with entities
                         //Some(block) => { println!("Block found: {:?}", block); None },

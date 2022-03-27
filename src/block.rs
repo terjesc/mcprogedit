@@ -499,7 +499,7 @@ pub enum Block {
     GrassBlock,
     GrassPath,
     Gravel,
-    GrindStone(SurfaceRotation12),
+    Grindstone(SurfaceRotation12),
     HayBale {
         alignment: Axis3,
     },
@@ -536,6 +536,7 @@ pub enum Block {
     },
     Lantern {
         mounted_at: Surface2,
+        waterlogged: bool,
     },
     LapisLazuliBlock,
     LapisLazuliOre,
@@ -554,7 +555,7 @@ pub enum Block {
     }, // TODO add block entity (and possibly "has book" bool)
     Lever(SurfaceRotation12, OnOffState),
     LilyPad,
-    LodeStone,
+    Lodestone,
     Log(Log),
     Loom {
         facing: Surface4,
@@ -653,7 +654,7 @@ pub enum Block {
     },
     RedstoneWire, // TODO upcoming change: * or + shape, of non-connected wire
     RespawnAnchor {
-        charges: Int0Through4,
+        charges: Int0Through15,
     },
     Sand,
     Sandstone,
@@ -697,6 +698,7 @@ pub enum Block {
     },
     SoulLantern {
         mounted_at: Surface2,
+        waterlogged: bool,
     },
     SoulTorch {
         attached: Surface5,
@@ -715,7 +717,7 @@ pub enum Block {
     },
     Stone,
     StoneBricks,
-    StoneCutter {
+    Stonecutter {
         facing: Surface4,
     },
     StructureBlock, // TODO Add Corner, Data, Load, and Save variants. TODO add block entity
@@ -1119,12 +1121,12 @@ impl Block {
             Self::FenceGate { facing, .. } => Direction::from(*facing) == direction,
             Self::Furnace(furnace) => furnace.has_facing_of(direction),
             Self::GlazedTerracotta(gt) => gt.has_facing_of(direction),
-            Self::GrindStone(rotation) => Direction::from(*rotation) == direction,
+            Self::Grindstone(rotation) => Direction::from(*rotation) == direction,
             Self::Head(head) => head.has_facing_of(direction),
             Self::Hopper(hopper) => hopper.has_facing_of(direction),
             Self::JackOLantern { facing, .. } => Direction::from(*facing) == direction,
             Self::Ladder { facing, .. } => Direction::from(*facing) == direction,
-            Self::Lantern { mounted_at } => Direction::from(*mounted_at) == direction,
+            Self::Lantern { mounted_at, .. } => Direction::from(*mounted_at) == direction,
             Self::Lever(rotation, _) => Direction::from(*rotation) == direction,
             Self::Loom { facing, .. } => Direction::from(*facing) == direction,
             Self::Observer { facing, .. } => Direction::from(*facing) == direction,
@@ -1140,11 +1142,11 @@ impl Block {
             Self::Sign(sign) => sign.has_facing_of(direction),
             Self::Smoker(furnace) => furnace.has_facing_of(direction),
             Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
-            Self::SoulLantern { mounted_at } => Direction::from(*mounted_at) == direction,
+            Self::SoulLantern { mounted_at, .. } => Direction::from(*mounted_at) == direction,
             Self::SoulTorch { attached, .. } => Direction::from(*attached).opposite() == direction,
             Self::Stairs(stair) => stair.has_facing_of(direction),
             Self::StickyPiston { facing, .. } => Direction::from(*facing) == direction,
-            Self::StoneCutter { facing, .. } => Direction::from(*facing) == direction,
+            Self::Stonecutter { facing, .. } => Direction::from(*facing) == direction,
             Self::Torch { attached, .. } => Direction::from(*attached).opposite() == direction,
             Self::TrappedChest(chest) => chest.has_facing_of(direction),
             Self::TripwireHook { facing, .. } => Direction::from(*facing) == direction,

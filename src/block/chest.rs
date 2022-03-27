@@ -40,6 +40,26 @@ impl Chest {
             }
         }
     }
+
+    pub(crate) fn to_trapped_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+        let (x, y, z) = at;
+        BlockEntity::Chest {
+            tags: ChestTags {
+                common: CommonTags {
+                    id: "minecraft:trapped_chest".into(),
+                    x,
+                    y,
+                    z,
+                    keep_packed: false,
+                },
+                custom_name: self.custom_name.clone(),
+                lock: self.custom_name.clone(),
+                items: self.items.clone(),
+                loot_table: None,      // TODO
+                loot_table_seed: None, // TODO
+            }
+        }
+    }
 }
 
 impl TryFrom<Block> for Chest {

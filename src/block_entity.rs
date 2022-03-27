@@ -1065,6 +1065,19 @@ pub struct CommonTags {
 }
 
 impl CommonTags {
+    pub(crate) fn new(id: &'static str, at: (i32, i32, i32)) -> Self {
+        let (x, y, z) = at;
+        Self { id: id.to_string(), x, y, z, keep_packed: false }
+    }
+
+    pub(crate) fn new_nbt(id: &'static str, at: (i32, i32, i32)) -> nbt::Value {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5);
+        for (key, value) in Self::new(id, at).to_nbt_values() {
+            entity.insert(key, value);
+        }
+        nbt::Value::Compound(entity)
+    }
+
     fn from_nbt_value(value: &nbt::Value) -> Self {
         Self {
             id: nbt_value_lookup_string(value, "id").unwrap(),

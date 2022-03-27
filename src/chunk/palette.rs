@@ -683,6 +683,59 @@ impl PaletteItem {
                 }
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Loom { facing })
+            | PaletteItem::Block(Block::Stonecutter { facing}) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Lantern { mounted_at, waterlogged })
+            | PaletteItem::Block(Block::SoulLantern { mounted_at, waterlogged }) => {
+                let hanging = match mounted_at {
+                    Surface2::Up => true,
+                    Surface2::Down => false,
+                };
+                let mut properties = nbt::Map::new();
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert("hanging".into(), nbt::Value::String(hanging.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Composter { fullness }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("level".into(), nbt::Value::String(fullness.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Grindstone(position)) => {
+                let (face, facing) = match position {
+                    SurfaceRotation12::DownFacingEast => ("floor", Surface4::East),
+                    SurfaceRotation12::DownFacingNorth => ("floor", Surface4::North),
+                    SurfaceRotation12::DownFacingSouth => ("floor", Surface4::South),
+                    SurfaceRotation12::DownFacingWest => ("floor", Surface4::West),
+                    SurfaceRotation12::East => ("wall", Surface4::East),
+                    SurfaceRotation12::North => ("wall", Surface4::North),
+                    SurfaceRotation12::South => ("wall", Surface4::South),
+                    SurfaceRotation12::West => ("wall", Surface4::West),
+                    SurfaceRotation12::UpFacingEast => ("ceiling", Surface4::East),
+                    SurfaceRotation12::UpFacingNorth => ("ceiling", Surface4::North),
+                    SurfaceRotation12::UpFacingSouth => ("ceiling", Surface4::South),
+                    SurfaceRotation12::UpFacingWest => ("ceiling", Surface4::West),
+                };
+
+                let mut properties = nbt::Map::new();
+                properties.insert("face".into(), nbt::Value::String(face.to_string()));
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::SweetBerryBush{ growth_stage }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::RespawnAnchor { charges }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("charges".into(), nbt::Value::String(charges.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -700,6 +753,7 @@ impl PaletteItem {
             PaletteItem::Block(Block::None)
             | PaletteItem::Block(Block::Unknown(_))
             | PaletteItem::Block(Block::Air) => "minecraft:air",
+            PaletteItem::Block(Block::CaveAir) => "minecraft:cave_air",
             PaletteItem::Block(Block::Stone) => "minecraft:stone",
             PaletteItem::Block(Block::Granite) => "minecraft:granite",
             PaletteItem::Block(Block::PolishedGranite) => "minecraft:polished_granite",
@@ -1158,6 +1212,8 @@ impl PaletteItem {
             PaletteItem::Block(Block::Mycelium) => "minecraft:mycelium",
             PaletteItem::Block(Block::LilyPad) => "minecraft:lily_pad",
             PaletteItem::Block(Block::NetherBricks) => "minecraft:nether_bricks",
+            PaletteItem::Block(Block::CrackedNetherBricks) => "minecraft:cracked_nether_bricks",
+            PaletteItem::Block(Block::ChiseledNetherBricks) => "minecraft:chiseled_nether_bricks",
             PaletteItem::Block(Block::NetherWart { .. }) => "minecraft:nether_wart",
             PaletteItem::ProtoBlock(ProtoBlock::EnchantingTable) => "minecraft:enchanting_table",
             PaletteItem::ProtoBlock(ProtoBlock::BrewingStand) => "minecraft:brewing_stand",
@@ -1381,6 +1437,7 @@ impl PaletteItem {
             // TODO 212 FrostedIce
             PaletteItem::Block(Block::MagmaBlock) => "minecraft:magma_block",
             PaletteItem::Block(Block::NetherWartBlock) => "minecraft:nether_wart_block",
+            PaletteItem::Block(Block::WarpedWartBlock) => "minecraft:warped_wart_block",
             PaletteItem::Block(Block::RedNetherBricks) => "minecraft:red_nether_bricks",
             PaletteItem::Block(Block::BoneBlock { .. }) => "minecraft:bone_block",
             // TODO 217 StructureVoid
@@ -1540,13 +1597,56 @@ impl PaletteItem {
                     CoralMaterial::Tube => "minecraft:dead_tube_coral_wall_fan",
                 }
             }
+            PaletteItem::Block(Block::CartographyTable) => "minecraft:cartography_table",
+            PaletteItem::Block(Block::SmithingTable) => "minecraft:smithing_table",
+            PaletteItem::Block(Block::FletchingTable) => "minecraft:fletching_table",
+            PaletteItem::Block(Block::Shroomlight) => "minecraft:shroomlight",
+            PaletteItem::Block(Block::HoneyBlock) => "minecraft:honey_block",
+            PaletteItem::Block(Block::HoneycombBlock) => "minecraft:honeycomb_block",
+            PaletteItem::Block(Block::Lodestone) => "minecraft:lodestone",
+            PaletteItem::Block(Block::BlockOfNetherite) => "minecraft:netherite_block",
+            PaletteItem::Block(Block::AncientDebris) => "minecraft:ancient_debris",
+            PaletteItem::Block(Block::Blackstone) => "minecraft:blackstone",
+            PaletteItem::Block(Block::GildedBlackstone) => "minecraft:gilded_blackstone",
+            PaletteItem::Block(Block::PolishedBlackstone) => "minecraft:polished_blackstone",
+            PaletteItem::Block(Block::ChiseledPolishedBlackstone) => "minecraft:chiseled_polished_blackstone",
+            PaletteItem::Block(Block::PolishedBlackstoneBricks) => "minecraft:polished_blackstone_bricks",
+            PaletteItem::Block(Block::CrackedPolishedBlackstoneBricks) => "minecraft:cracked_polished_blackstone_bricks",
+            PaletteItem::Block(Block::Loom { .. }) => "minecraft:loom",
+            PaletteItem::Block(Block::Stonecutter { .. }) => "minecraft:stonecutter",
+            PaletteItem::Block(Block::Lantern { .. }) => "minecraft:lantern",
+            PaletteItem::Block(Block::SoulLantern { .. }) => "minecraft:soul_lantern",
+            PaletteItem::Block(Block::Composter { .. }) => "minecraft:composter",
+            PaletteItem::Block(Block::Grindstone(_)) => "minecraft:grindstone",
+            PaletteItem::Block(Block::SweetBerryBush { .. }) => "minecraft:sweet_berry_bush",
+            PaletteItem::Block(Block::RespawnAnchor { .. }) => "minecraft:respawn_anchor",
+            PaletteItem::Block(Block::Target) => "minecraft:target",
+            PaletteItem::Block(Block::WarpedFungus) => "minecraft:warped_fungus",
+            PaletteItem::Block(Block::CrimsonFungus) => "minecraft:crimson_fungus",
+            PaletteItem::Block(Block::WarpedRoots) => "minecraft:warped_roots",
+            PaletteItem::Block(Block::CrimsonRoots) => "minecraft:crimson_roots",
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
+                // Missing blocks with tile entity (and possibly also properties)
+                smoker
+                blast_furnace
+                lectern
+                conduit
+                barrel
+                bell
+                campfire
+                soul_campfire (campfire)
+                beehive
+                bee_nest (beehive)
+
+                // Missing plant classes:
+                // TwistingVines & TwistingVinesPlant
+                // WeepingVines & WeepingVinesPlant
+                // Bamboo & BambooPlant
+                // -- They are probably just like Kelp and KelpPlant,
+                //    in that the "plant" variant is the full-grown variant.
             */
-            //
-            PaletteItem::Block(Block::AncientDebris) => "minecraft:ancient_debris",
-            //PaletteItem::Block(Block::) => "minecraft:",
 
             // Blocks that should only appear as proto blocks
             PaletteItem::Block(Block::Banner(_))
@@ -1573,10 +1673,6 @@ impl PaletteItem {
 
             // Catch-all // TODO remove when all variants are handled!
             _ => "minecraft:sponge", // TODO handle all variants!
-
-            /*
-            NB TODO FIXME Missing (empty) tile entities: Bed, EnderChest, EndPortal, TrappedChest.
-            */
         }
     }
 }
@@ -1597,6 +1693,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
         // Source for (hopefully exhaustive) list of IDs: https://minecraftitemids.com
         let palette_item = match name.as_str() {
             "minecraft:air" => block(Block::Air),
+            "minecraft:cave_air" => block(Block::CaveAir),
             "minecraft:stone" => block(Block::Stone),
             "minecraft:granite" => block(Block::Granite),
             "minecraft:polished_granite" => block(Block::PolishedGranite),
@@ -1962,6 +2059,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:mycelium" => block(Block::Mycelium),
             "minecraft:lily_pad" => block(Block::LilyPad),
             "minecraft:nether_bricks" => block(Block::NetherBricks),
+            "minecraft:cracked_nether_bricks" => block(Block::CrackedNetherBricks),
+            "minecraft:chiseled_nether_bricks" => block(Block::ChiseledNetherBricks),
             "minecraft:nether_wart" => block(nether_wart(&properties)),
             "minecraft:enchanting_table" => proto(ProtoBlock::EnchantingTable),
             "minecraft:brewing_stand" => proto(ProtoBlock::BrewingStand),
@@ -2182,6 +2281,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             // TODO 212 FrostedIce
             "minecraft:magma_block" => block(Block::MagmaBlock),
             "minecraft:nether_wart_block" => block(Block::NetherWartBlock),
+            "minecraft:warped_wart_block" => block(Block::WarpedWartBlock),
             "minecraft:red_nether_bricks" => block(Block::RedNetherBricks),
             "minecraft:bone_block" => block(bone_block(&properties)),
             // TODO 217 StructureVoid
@@ -2308,8 +2408,48 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:dead_bubble_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Bubble , &properties)),
             "minecraft:dead_fire_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Fire , &properties)),
             "minecraft:dead_horn_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Horn , &properties)),
+            "minecraft:cartography_table" => block(Block::CartographyTable),
+            "minecraft:smithing_table" => block(Block::SmithingTable),
+            "minecraft:fletching_table" => block(Block::FletchingTable),
+            "minecraft:shroomlight" => block(Block::Shroomlight),
+            "minecraft:honey_block" => block(Block::HoneyBlock),
+            "minecraft:honeycomb_block" => block(Block::HoneycombBlock),
+            "minecraft:lodestone" => block(Block::Lodestone),
+            "minecraft:netherite_block" => block(Block::BlockOfNetherite),
+            "minecraft:ancient_debris" => block(Block::AncientDebris),
+            "minecraft:blackstone" => block(Block::Blackstone),
+            "minecraft:gilded_blackstone" => block(Block::GildedBlackstone),
+            "minecraft:polished_blackstone" => block(Block::PolishedBlackstone),
+            "minecraft:chiseled_polished_blackstone" => block(Block::ChiseledPolishedBlackstone),
+            "minecraft:polished_blackstone_bricks" => block(Block::PolishedBlackstoneBricks),
+            "minecraft:cracked_polished_blackstone_bricks" => block(Block::CrackedPolishedBlackstoneBricks),
+            "minecraft:loom" => block(Block::Loom { facing: facing_surface4(&properties) }),
+            "minecraft:stonecutter" => block(Block::Stonecutter { facing: facing_surface4(&properties) }),
+            "minecraft:lantern" => block(lantern(&properties)),
+            "minecraft:soul_lantern" => block(soul_lantern(&properties)),
+            "minecraft:composter" => block(Block::Composter { fullness: level0_8(&properties)}),
+            "minecraft:grindstone" => block(Block::Grindstone(surface_rotation12(&properties))),
+            "minecraft:sweet_berry_bush" => block(Block::SweetBerryBush { growth_stage: age0_3(&properties) }),
+            "minecraft:respawn_anchor" => block(Block::RespawnAnchor { charges: charges0_15(&properties) }),
+            "minecraft:target" => block(Block::Target),
+            "minecraft:warped_fungus" => block(Block::WarpedFungus),
+            "minecraft:crimson_fungus" => block(Block::CrimsonFungus),
+            "minecraft:warped_roots" => block(Block::WarpedRoots),
+            "minecraft:crimson_roots" => block(Block::CrimsonRoots),
+            //"minecraft:" => block(Block::),
 
             /*
+                // Missing blocks with tile entity (and possibly also properties)
+                smoker
+                blast_furnace
+                lectern
+                conduit
+                barrel
+                bell
+                campfire
+                soul_campfire (campfire)
+                beehive
+                bee_nest (beehive)
             */
             // Catch-all
             _ => {
@@ -3033,7 +3173,23 @@ fn dead_coral_wall_fan(material: CoralMaterial, properties: &Option<Value>) -> B
     }
 }
 
+fn lantern(properties: &Option<Value>) -> Block {
+    Block::Lantern {
+        mounted_at: lantern_mounting(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
+fn soul_lantern(properties: &Option<Value>) -> Block {
+    Block::SoulLantern {
+        mounted_at: lantern_mounting(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
 /*
+                lantern             waterlogged + hanging
+                soul_lantern        waterlogged + hanging
 */
 
 //
@@ -3216,6 +3372,12 @@ fn i_0_through_7(string: String) -> Option<Int0Through7> {
         .and_then(|i| Int0Through7::new(i))
 }
 
+/// Convert a string to an Int0Through8 value
+fn i_0_through_8(string: String) -> Option<Int0Through8> {
+    string.parse::<i8>().ok()
+        .and_then(|i| Int0Through8::new(i))
+}
+
 /// Convert a string to an Int0Through15 value
 fn i_0_through_15(string: String) -> Option<Int0Through15> {
     string.parse::<i8>().ok()
@@ -3291,11 +3453,28 @@ fn i0_7(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
         })
 }
 
+fn level0_8(properties: &Option<Value>) -> Int0Through8 {
+    properties_lookup_string(properties, "level")
+        .and_then(i_0_through_8)
+        .unwrap_or_else(|| {
+            Int0Through8::new(0).unwrap()
+        })
+}
+
 fn age0_15(properties: &Option<Value>) -> Int0Through15 {
     properties_lookup_string(properties, "age")
         .and_then(i_0_through_15)
         .unwrap_or_else(|| {
             warn!("Using fallback value for \"age\" property of a block.");
+            Int0Through15::new(0).unwrap()
+        })
+}
+
+fn charges0_15(properties: &Option<Value>) -> Int0Through15 {
+    properties_lookup_string(properties, "charges")
+        .and_then(i_0_through_15)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value for \"charges\" property of a block.");
             Int0Through15::new(0).unwrap()
         })
 }
@@ -3533,6 +3712,14 @@ fn powered(properties: &Option<Value>) -> bool {
 
 fn boolean(string: String) -> Option<bool> {
     string.as_str().parse().ok()
+}
+
+fn lantern_mounting(properties: &Option<Value>) -> Surface2 {
+    let hanging = properties_lookup_bool(properties, "hanging", false);
+    match hanging {
+        true => Surface2::Up,
+        false => Surface2::Down,
+    }
 }
 
 fn portal_alignment(properties: &Option<Value>) -> Axis2 {

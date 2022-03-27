@@ -226,7 +226,7 @@ impl Block {
             | Block::Jukebox(_)
             | Block::LapisLazuliBlock
             | Block::LapisLazuliOre
-            | Block::LodeStone
+            | Block::Lodestone
             | Block::Log(_)
             | Block::Loom { .. }
             | Block::MagmaBlock
@@ -333,7 +333,7 @@ impl Block {
             | Block::GlassPane { .. }
             | Block::Glowstone
             | Block::Grass(_)
-            | Block::GrindStone(_)
+            | Block::Grindstone(_)
             | Block::Head(_)
             | Block::Hopper(_)
             | Block::IronBars { .. }
@@ -369,7 +369,7 @@ impl Block {
             | Block::SoulSand
             | Block::StickyPiston { .. }
             | Block::StickyPistonHead { .. }
-            | Block::StoneCutter { .. }
+            | Block::Stonecutter { .. }
             | Block::StructureVoid
             | Block::SugarCane { .. }
             | Block::SweetBerryBush { .. }
@@ -487,7 +487,7 @@ impl Block {
             | Block::Jukebox(_)
             | Block::LapisLazuliBlock
             | Block::LapisLazuliOre
-            | Block::LodeStone
+            | Block::Lodestone
             | Block::Log(_)
             | Block::Loom { .. }
             | Block::MagmaBlock
@@ -597,7 +597,7 @@ impl Block {
             | Block::GlassPane { .. }
             | Block::Glowstone
             | Block::Grass(_)
-            | Block::GrindStone(_)
+            | Block::Grindstone(_)
             | Block::Head(_)
             | Block::Hopper(_)
             | Block::IronBars { .. }
@@ -635,7 +635,7 @@ impl Block {
             | Block::SoulSand
             | Block::StickyPiston { .. }
             | Block::StickyPistonHead { .. }
-            | Block::StoneCutter { .. }
+            | Block::Stonecutter { .. }
             | Block::StructureVoid
             | Block::SugarCane { .. }
             | Block::SweetBerryBush { .. }
