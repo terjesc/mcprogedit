@@ -5,6 +5,7 @@ mod banner;
 mod barrel;
 mod beacon;
 mod bed;
+mod beehive;
 mod brewing_stand;
 mod chest;
 mod dispenser;
@@ -30,6 +31,7 @@ pub use self::banner::*;
 pub use self::barrel::*;
 pub use self::beacon::*;
 pub use self::bed::*;
+pub use self::beehive::*;
 pub use self::brewing_stand::*;
 pub use self::chest::*;
 pub use self::dispenser::*;
@@ -246,7 +248,6 @@ impl Log {
     }
 }
 
-pub type HoneyLevel = Int0Through5;
 pub type FireFace = DirectionFlags6;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -307,14 +308,8 @@ pub enum Block {
     Beetroots {
         growth_stage: Int0Through3,
     },
-    Beehive {
-        facing: Surface4,
-        honey_level: HoneyLevel,
-    }, // TODO add block entity
-    BeeNest {
-        facing: Surface4,
-        honey_level: HoneyLevel,
-    }, // TODO add block entity
+    Beehive(Box<Beehive>),
+    BeeNest(Box<Beehive>),
     Bell {
         position: BellPosition,
     }, // TODO add block entity
@@ -1102,8 +1097,8 @@ impl Block {
             Self::Anvil { facing, .. } => Direction::from(*facing) == direction,
             Self::Banner(banner) => banner.has_facing_of(direction),
             Self::Barrel(barrel) => barrel.has_facing_of(direction),
-            Self::Beehive { facing, .. } => Direction::from(*facing) == direction,
-            Self::BeeNest { facing, .. } => Direction::from(*facing) == direction,
+            Self::Beehive(beehive) => beehive.has_facing_of(direction),
+            Self::BeeNest(beehive) => beehive.has_facing_of(direction),
             Self::Bed(bed) => bed.has_facing_of(direction),
             Self::BlastFurnace(furnace) => furnace.has_facing_of(direction),
             Self::Button(_, rotation) => Direction::from(*rotation) == direction,

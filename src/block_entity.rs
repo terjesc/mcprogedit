@@ -41,6 +41,10 @@ pub enum BlockEntity {
         common: CommonTags,
         colour: Option<Colour>,
     },
+    Beehive {
+        common: CommonTags,
+        // bees: Vec<Bee> // TODO implement bees
+    },
     BlastFurnace {
         tags: FurnaceTags,
     },
@@ -220,7 +224,7 @@ impl BlockEntity {
             Self::Barrel { .. } => self.barrel_to_nbt_value(),
             Self::Beacon { .. } => self.beacon_to_nbt_value(),
             Self::Bed { .. } => self.bed_to_nbt_value(),
-            //Self::Beehive { .. } => self.beehive_to_nbt_value(),
+            Self::Beehive { .. } => self.beehive_to_nbt_value(),
             //Self::Bell { .. } => self.bell_to_nbt_value(),
             Self::BlastFurnace { .. } => self.blast_furnace_to_nbt_value(),
             Self::BrewingStand { .. } => self.brewing_stand_to_nbt_value(),
@@ -408,16 +412,24 @@ impl BlockEntity {
         unimplemented!()
     }
 
-    // TODO (deferred as not present in Minecraft 1.12.2)
     fn beehive_from_nbt_value(value: &nbt::Value) -> Self {
-        BlockEntity::Unknown {
-            id: nbt_value_lookup_string(value, "id").ok(),
+        BlockEntity::Beehive {
+            common: CommonTags::from_nbt_value(value),
         }
     }
 
-    fn _beehive_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+    fn beehive_to_nbt_value(&self) -> Option<nbt::Value> {
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5);
+
+        if let Self::Beehive { common } = self {
+            for (key, value) in common.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            // TODO add bees
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)
@@ -1011,6 +1023,7 @@ impl BlockEntity {
             Self::Barrel { tags } => Some(tags.common.coordinates()),
             Self::Beacon { common, .. } => Some(common.coordinates()),
             Self::Bed { common, .. } => Some(common.coordinates()),
+            Self::Beehive { common, .. } => Some(common.coordinates()),
             Self::BlastFurnace { tags } => Some(tags.common.coordinates()),
             Self::BrewingStand { common, .. } => Some(common.coordinates()),
             Self::Chest { tags } => Some(tags.common.coordinates()),

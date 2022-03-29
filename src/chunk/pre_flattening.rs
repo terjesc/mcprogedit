@@ -44,6 +44,10 @@ impl Chunk {
                         Some(Block::Bed(_)) => {
                             Some(CommonTags::new_nbt("minecraft:bed", block_coordinates))
                         }
+                        Some(Block::Beehive(beehive))
+                        | Some(Block::BeeNest(beehive)) => {
+                            beehive.to_block_entity(block_coordinates).to_nbt_value()
+                        }
                         Some(Block::Campfire { .. })
                         | Some(Block::SoulCampfire { .. }) => {
                             // TODO Items, CookingTimes and CookingTotalTimes

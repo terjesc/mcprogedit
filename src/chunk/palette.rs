@@ -18,6 +18,8 @@ pub(super) enum ProtoBlock {
     Banner { colour: Colour, placement: WallOrRotatedOnFloor },
     Barrel { facing: Surface6 },
     Beacon,
+    Beehive { facing: Surface4, honey_level: Int0Through6 },
+    BeeNest { facing: Surface4, honey_level: Int0Through6 },
     BrewingStand,
     Chest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
     Dispenser { facing: Surface6 },
@@ -52,6 +54,14 @@ impl PaletteItem {
             Block::Beacon(_) => proto(ProtoBlock::Beacon),
             Block::Barrel(barrel) => proto(ProtoBlock::Barrel {
                 facing: barrel.facing,
+            }),
+            Block::Beehive(beehive) => proto(ProtoBlock::Beehive {
+                facing: beehive.facing,
+                honey_level: beehive.honey_level,
+            }),
+            Block::BeeNest(beehive) => proto(ProtoBlock::BeeNest {
+                facing: beehive.facing,
+                honey_level: beehive.honey_level,
             }),
             Block::BrewingStand(_) => proto(ProtoBlock::BrewingStand),
             Block::Chest(chest) => proto(ProtoBlock::Chest {
@@ -753,6 +763,18 @@ impl PaletteItem {
             PaletteItem::ProtoBlock(ProtoBlock::Barrel { facing }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::ProtoBlock(ProtoBlock::Beehive { facing, honey_level }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("honey_level".into(), nbt::Value::String(honey_level.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::ProtoBlock(ProtoBlock::BeeNest { facing, honey_level }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("honey_level".into(), nbt::Value::String(honey_level.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
 
@@ -1654,6 +1676,8 @@ impl PaletteItem {
             PaletteItem::Block(Block::Campfire { .. }) => "minecraft:campfire",
             PaletteItem::Block(Block::SoulCampfire { .. }) => "minecraft:soul_campfire",
             PaletteItem::ProtoBlock(ProtoBlock::Barrel { .. }) => "minecraft:barrel",
+            PaletteItem::ProtoBlock(ProtoBlock::Beehive { .. }) => "minecraft:beehive",
+            PaletteItem::ProtoBlock(ProtoBlock::BeeNest { .. }) => "minecraft:bee_nest",
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
@@ -1664,8 +1688,6 @@ impl PaletteItem {
                 lectern
                 conduit
                 bell
-                beehive
-                bee_nest (beehive)
 
                 // TODO Figure out how bamboo / bamboo_sapling works.
                 //      Is it similar to Kelp, TwistingVines and WeepingVines?
@@ -2468,6 +2490,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:campfire" => block(campfire(&properties)),
             "minecraft:soul_campfire" => block(soul_campfire(&properties)),
             "minecraft:barrel" => proto(proto_barrel(&properties)),
+            "minecraft:beehive" => proto(proto_beehive(&properties)),
+            "minecraft:bee_nest" => proto(proto_bee_nest(&properties)),
             //"minecraft:" => block(Block::),
 
             /*
@@ -2478,8 +2502,6 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
                 lectern
                 conduit
                 bell
-                beehive
-                bee_nest (beehive)
             */
             // Catch-all
             _ => {
@@ -3259,6 +3281,20 @@ fn proto_barrel(properties: &Option<Value>) -> ProtoBlock {
     ProtoBlock::Barrel { facing: facing_surface6(properties) }
 }
 
+fn proto_beehive(properties: &Option<Value>) -> ProtoBlock {
+    ProtoBlock::Beehive {
+        facing: facing_surface4(properties),
+        honey_level: i0_6(properties, "honey_level", 0),
+    }
+}
+
+fn proto_bee_nest(properties: &Option<Value>) -> ProtoBlock {
+    ProtoBlock::BeeNest {
+        facing: facing_surface4(properties),
+        honey_level: i0_6(properties, "honey_level", 0),
+    }
+}
+
 fn proto_wall_banner(colour: Colour, properties: &Option<Value>) -> ProtoBlock {
     ProtoBlock::Banner {
         colour,
@@ -3489,6 +3525,15 @@ fn age0_5(properties: &Option<Value>) -> Int0Through5 {
         .unwrap_or_else(|| {
             warn!("Using fallback value for \"age\" property of a block.");
             Int0Through5::new(0).unwrap()
+        })
+}
+
+fn i0_6(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Through6 {
+    properties_lookup_string(properties, name)
+        .and_then(i_0_through_6)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value \"{}\" for \"{}\" property of a block.", fallback, name);
+            Int0Through6::new(fallback).unwrap()
         })
 }
 

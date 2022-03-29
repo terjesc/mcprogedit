@@ -220,6 +220,24 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&B
             }))
         }
 
+        ProtoBlock::Beehive { facing, honey_level } => {
+            // TODO implement Bees
+
+            Block::Beehive(Box::new(Beehive {
+                facing: *facing,
+                honey_level: *honey_level,
+            }))
+        }
+
+        ProtoBlock::BeeNest { facing, honey_level } => {
+            // TODO implement Bees
+
+            Block::BeeNest(Box::new(Beehive {
+                facing: *facing,
+                honey_level: *honey_level,
+            }))
+        }
+
         ProtoBlock::BrewingStand => {
             let (custom_name, lock, items, brew_time, fuel) =
                 if let Some(BlockEntity::BrewingStand { custom_name, lock, items, brew_time, fuel, .. }) = block_entity {
