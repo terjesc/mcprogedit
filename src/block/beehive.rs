@@ -9,7 +9,8 @@ use crate::positioning::{Direction, Surface4};
 pub struct Beehive {
     pub facing: Surface4,
     pub honey_level: Int0Through6,
-    //pub Bees: Vec<Bee>,
+    //pub bees: Vec<Bee>,
+    //pub flower_position
 }
 
 impl Beehive {
@@ -28,6 +29,7 @@ impl Beehive {
                 keep_packed: false,
             },
             //bees: None, // TODO implement bees
+            //flower_position: None, // TODO implement flower position
         }
     }
 }

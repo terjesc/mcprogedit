@@ -221,7 +221,7 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&B
         }
 
         ProtoBlock::Beehive { facing, honey_level } => {
-            // TODO implement Bees
+            // TODO implement Bees and flower positions
 
             Block::Beehive(Box::new(Beehive {
                 facing: *facing,
@@ -230,11 +230,34 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&B
         }
 
         ProtoBlock::BeeNest { facing, honey_level } => {
-            // TODO implement Bees
+            // TODO implement Bees and flower positions
 
             Block::BeeNest(Box::new(Beehive {
                 facing: *facing,
                 honey_level: *honey_level,
+            }))
+        }
+
+        ProtoBlock::BlastFurnace { facing, lit } => {
+            let (custom_name, lock, items, burn_time, cook_time, cook_time_total) =
+                if let Some(BlockEntity::BlastFurnace {
+                    tags: FurnaceTags { custom_name, lock, items, burn_time, cook_time, cook_time_total, .. }
+                }) = block_entity {
+                    (custom_name.clone(), lock.clone(), items.clone(), *burn_time, *cook_time, *cook_time_total)
+                } else {
+                    warn!("Wrong or missing block entity for blast furnace: {:?}", block_entity);
+                    (None, None, Inventory::new(), 0, 0, 0)
+                };
+
+            Block::BlastFurnace(Box::new(Furnace {
+                facing: *facing,
+                lit: *lit,
+                custom_name,
+                lock,
+                items,
+                burn_time,
+                cook_time,
+                cook_time_total,
             }))
         }
 
@@ -408,6 +431,29 @@ fn block_from_proto_and_entity(proto_block: &ProtoBlock, block_entity: Option<&B
                 text2: text[1].clone(),
                 text3: text[2].clone(),
                 text4: text[3].clone(),
+            }))
+        }
+
+        ProtoBlock::Smoker { facing, lit } => {
+            let (custom_name, lock, items, burn_time, cook_time, cook_time_total) =
+                if let Some(BlockEntity::Smoker {
+                    tags: FurnaceTags { custom_name, lock, items, burn_time, cook_time, cook_time_total, .. }
+                }) = block_entity {
+                    (custom_name.clone(), lock.clone(), items.clone(), *burn_time, *cook_time, *cook_time_total)
+                } else {
+                    warn!("Wrong or missing block entity for smoker: {:?}", block_entity);
+                    (None, None, Inventory::new(), 0, 0, 0)
+                };
+
+            Block::Smoker(Box::new(Furnace {
+                facing: *facing,
+                lit: *lit,
+                custom_name,
+                lock,
+                items,
+                burn_time,
+                cook_time,
+                cook_time_total,
             }))
         }
 

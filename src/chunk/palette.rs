@@ -20,6 +20,7 @@ pub(super) enum ProtoBlock {
     Beacon,
     Beehive { facing: Surface4, honey_level: Int0Through6 },
     BeeNest { facing: Surface4, honey_level: Int0Through6 },
+    BlastFurnace { facing: Surface4, lit: bool },
     BrewingStand,
     Chest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
     Dispenser { facing: Surface6 },
@@ -30,6 +31,7 @@ pub(super) enum ProtoBlock {
     Jukebox,
     ShulkerBox { colour: Option<Colour>, facing: Surface6 },
     Sign { material: WoodMaterial, placement: WallOrRotatedOnFloor, waterlogged: bool },
+    Smoker { facing: Surface4, lit: bool },
     TrappedChest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
 }
 
@@ -63,6 +65,10 @@ impl PaletteItem {
                 facing: beehive.facing,
                 honey_level: beehive.honey_level,
             }),
+            Block::BlastFurnace(furnace) => proto(ProtoBlock::BlastFurnace {
+                facing: furnace.facing,
+                lit: furnace.lit,
+            }),
             Block::BrewingStand(_) => proto(ProtoBlock::BrewingStand),
             Block::Chest(chest) => proto(ProtoBlock::Chest {
                 facing: chest.facing,
@@ -92,6 +98,10 @@ impl PaletteItem {
                 material: sign.material,
                 placement: sign.placement,
                 waterlogged: sign.waterlogged,
+            }),
+            Block::Smoker(furnace) => proto(ProtoBlock::Smoker {
+                facing: furnace.facing,
+                lit: furnace.lit,
             }),
             Block::TrappedChest(trapped_chest) => proto(ProtoBlock::TrappedChest {
                 facing: trapped_chest.facing,
@@ -341,7 +351,9 @@ impl PaletteItem {
                 }
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::Furnace { facing, lit }) => {
+            PaletteItem::ProtoBlock(ProtoBlock::Furnace { facing, lit })
+            | PaletteItem::ProtoBlock(ProtoBlock::BlastFurnace { facing, lit })
+            | PaletteItem::ProtoBlock(ProtoBlock::Smoker { facing, lit }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
@@ -1678,13 +1690,12 @@ impl PaletteItem {
             PaletteItem::ProtoBlock(ProtoBlock::Barrel { .. }) => "minecraft:barrel",
             PaletteItem::ProtoBlock(ProtoBlock::Beehive { .. }) => "minecraft:beehive",
             PaletteItem::ProtoBlock(ProtoBlock::BeeNest { .. }) => "minecraft:bee_nest",
+            PaletteItem::ProtoBlock(ProtoBlock::BlastFurnace { .. }) => "minecraft:blast_furnace",
+            PaletteItem::ProtoBlock(ProtoBlock::Smoker { .. }) => "minecraft:smoker",
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
-                smoker
-                blast_furnace
-
                 lectern
                 conduit
                 bell
@@ -1697,6 +1708,9 @@ impl PaletteItem {
             PaletteItem::Block(Block::Banner(_))
             | PaletteItem::Block(Block::Barrel(_))
             | PaletteItem::Block(Block::Beacon(_))
+            | PaletteItem::Block(Block::Beehive(_))
+            | PaletteItem::Block(Block::BeeNest(_))
+            | PaletteItem::Block(Block::BlastFurnace(_))
             | PaletteItem::Block(Block::BrewingStand(_))
             | PaletteItem::Block(Block::Chest(_))
             | PaletteItem::Block(Block::Dispenser(_))
@@ -1706,6 +1720,7 @@ impl PaletteItem {
             | PaletteItem::Block(Block::Hopper(_))
             | PaletteItem::Block(Block::ShulkerBox(_))
             | PaletteItem::Block(Block::Sign(_))
+            | PaletteItem::Block(Block::Smoker(_))
             | PaletteItem::Block(Block::TrappedChest(_)) => {
                 warn!("Unexpected PaletteItem::Block variant: {:?}", self);
                 "minecraft:sponge"
@@ -2492,13 +2507,12 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:barrel" => proto(proto_barrel(&properties)),
             "minecraft:beehive" => proto(proto_beehive(&properties)),
             "minecraft:bee_nest" => proto(proto_bee_nest(&properties)),
+            "minecraft:blast_furnace" => proto(proto_blast_furnace(&properties)),
+            "minecraft:smoker" => proto(proto_smoker(&properties)),
             //"minecraft:" => block(Block::),
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
-                smoker
-                blast_furnace
-
                 lectern
                 conduit
                 bell
@@ -3328,6 +3342,20 @@ fn proto_trapped_chest(properties: &Option<Value>) -> ProtoBlock {
 
 fn proto_furnace(properties: &Option<Value>) -> ProtoBlock {
     ProtoBlock::Furnace {
+        facing: facing_surface4(properties),
+        lit: lit(properties),
+    }
+}
+
+fn proto_blast_furnace(properties: &Option<Value>) -> ProtoBlock {
+    ProtoBlock::BlastFurnace {
+        facing: facing_surface4(properties),
+        lit: lit(properties),
+    }
+}
+
+fn proto_smoker(properties: &Option<Value>) -> ProtoBlock {
+    ProtoBlock::Smoker {
         facing: facing_surface4(properties),
         lit: lit(properties),
     }

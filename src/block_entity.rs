@@ -451,8 +451,16 @@ impl BlockEntity {
     }
 
     fn blast_furnace_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::BlastFurnace { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     fn brewing_stand_from_nbt_value(value: &nbt::Value) -> Self {
@@ -971,8 +979,16 @@ impl BlockEntity {
     }
 
     fn smoker_to_nbt_value(&self) -> Option<nbt::Value> {
-        // TODO
-        unimplemented!()
+        let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
+
+        if let Self::Smoker { tags } = self {
+            for (key, value) in tags.to_nbt_values() {
+                entity.insert(key, value);
+            }
+            Some(nbt::Value::Compound(entity))
+        } else {
+            None
+        }
     }
 
     // TODO (deferred as not present in Minecraft 1.12.2)

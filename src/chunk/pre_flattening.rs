@@ -48,6 +48,9 @@ impl Chunk {
                         | Some(Block::BeeNest(beehive)) => {
                             beehive.to_block_entity(block_coordinates).to_nbt_value()
                         }
+                        Some(Block::BlastFurnace(furnace)) => {
+                            furnace.to_block_entity("minecraft:blast_furnace", block_coordinates).to_nbt_value()
+                        }
                         Some(Block::Campfire { .. })
                         | Some(Block::SoulCampfire { .. }) => {
                             // TODO Items, CookingTimes and CookingTotalTimes
@@ -69,7 +72,7 @@ impl Chunk {
                             Some(CommonTags::new_nbt("minecraft:end_portal", block_coordinates))
                         }
                         Some(Block::Furnace(furnace)) => {
-                            furnace.to_block_entity(block_coordinates).to_nbt_value()
+                            furnace.to_block_entity("minecraft:furnace", block_coordinates).to_nbt_value()
                         }
                         Some(Block::Head(head)) => {
                             head.to_block_entity(block_coordinates).to_nbt_value()
@@ -88,6 +91,9 @@ impl Chunk {
                         }
                         Some(Block::Sign(sign)) => {
                             sign.to_block_entity(block_coordinates).to_nbt_value()
+                        }
+                        Some(Block::Smoker(furnace)) => {
+                            furnace.to_block_entity("minecraft:smoker", block_coordinates).to_nbt_value()
                         }
                         Some(Block::TrappedChest(trapped_chest)) => {
                             trapped_chest.to_trapped_block_entity(block_coordinates).to_nbt_value()

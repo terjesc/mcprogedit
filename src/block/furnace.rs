@@ -22,12 +22,12 @@ impl Furnace {
         facing == self.facing.into()
     }
 
-    pub(crate) fn to_block_entity(&self, at: (i32, i32, i32)) -> BlockEntity {
+    pub(crate) fn to_block_entity(&self, id: &'static str, at: (i32, i32, i32)) -> BlockEntity {
         let (x, y, z) = at;
         BlockEntity::Furnace {
             tags: FurnaceTags {
                 common: CommonTags {
-                    id: "minecraft:furnace".into(),
+                    id: id.into(),
                     x,
                     y,
                     z,
@@ -49,7 +49,9 @@ impl TryFrom<Block> for Furnace {
 
     fn try_from(block: Block) -> Result<Self, Self::Error> {
         match block {
-            Block::Furnace(furnace) => Ok(*furnace),
+            Block::Furnace(furnace)
+            | Block::BlastFurnace(furnace)
+            | Block::Smoker(furnace) => Ok(*furnace),
             _ => Err(()),
         }
     }
