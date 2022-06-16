@@ -421,6 +421,18 @@ pub struct DirectionFlags5 {
     pub west: bool,
 }
 
+impl DirectionFlags5 {
+    pub fn direction_count(&self) -> usize {
+        let mut count = 0;
+        count += if self.east { 1 } else { 0 };
+        count += if self.north { 1 } else { 0 };
+        count += if self.south { 1 } else { 0 };
+        count += if self.up { 1 } else { 0 };
+        count += if self.west { 1 } else { 0 };
+        count
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub struct DirectionFlags6 {
     pub east: bool,
@@ -429,6 +441,19 @@ pub struct DirectionFlags6 {
     pub south: bool,
     pub up: bool,
     pub west: bool,
+}
+
+impl DirectionFlags6 {
+    pub fn direction_count(&self) -> usize {
+        let mut count = 0;
+        count += if self.down { 1 } else { 0 };
+        count += if self.east { 1 } else { 0 };
+        count += if self.north { 1 } else { 0 };
+        count += if self.south { 1 } else { 0 };
+        count += if self.up { 1 } else { 0 };
+        count += if self.west { 1 } else { 0 };
+        count
+    }
 }
 
 /// Position and rotation for blocks that can either be put on top of the block below,
@@ -584,6 +609,26 @@ impl Surface4 {
             Surface4::South => Surface4::North,
         }
     }
+
+    /// Returns an instance of the direction 90 degrees clockwise
+    pub fn rotated_90_cw(&self) -> Self {
+        match self {
+            Surface4::East => Surface4::South,
+            Surface4::South => Surface4::West,
+            Surface4::West => Surface4::North,
+            Surface4::North => Surface4::East,
+        }
+    }
+
+    /// Returns an instance of the direction 90 degrees counter-clockwise
+    pub fn rotated_90_ccw(&self) -> Self {
+        match self {
+            Surface4::East => Surface4::North,
+            Surface4::North => Surface4::West,
+            Surface4::West => Surface4::South,
+            Surface4::South => Surface4::East,
+        }
+    }
 }
 
 impl fmt::Display for Surface4 {
@@ -717,6 +762,44 @@ pub enum Edge8 {
     UpNorth,
     UpSouth,
     UpWest,
+}
+
+impl Edge8 {
+    pub fn try_closest_down_from(item: Direction) -> Result<Self, DirectionError> {
+        match item {
+            Direction::DownEast
+            | Direction::East
+            | Direction::UpEast => Ok(Self::DownEast),
+            Direction::DownWest
+            | Direction::West
+            | Direction::UpWest => Ok(Self::DownWest),
+            Direction::DownSouth
+            | Direction::South
+            | Direction::UpSouth => Ok(Self::DownSouth),
+            Direction::DownNorth
+            | Direction::North
+            | Direction::UpNorth => Ok(Self::DownNorth),
+            _ => Err(DirectionError::TryFrom(item)),
+        }
+    }
+
+    pub fn try_closest_up_from(item: Direction) -> Result<Self, DirectionError> {
+        match item {
+            Direction::DownEast
+            | Direction::East
+            | Direction::UpEast => Ok(Self::UpEast),
+            Direction::DownWest
+            | Direction::West
+            | Direction::UpWest => Ok(Self::UpWest),
+            Direction::DownSouth
+            | Direction::South
+            | Direction::UpSouth => Ok(Self::UpSouth),
+            Direction::DownNorth
+            | Direction::North
+            | Direction::UpNorth => Ok(Self::UpNorth),
+            _ => Err(DirectionError::TryFrom(item)),
+        }
+    }
 }
 
 impl Default for Edge8 {

@@ -33,13 +33,16 @@ impl LightCuboid {
     pub fn set_light_level_at(&mut self, coordinates: BlockCoord, light_level: u8) {
         if let Some(index) = self.index(coordinates) {
             self.light_levels[index] = light_level;
-        } else {
+        }
+        // TODO reintroduce this warning (and investigate why it appears 100s of times in the
+        // output.)
+        /*else {
             eprintln!(
                 "[warning] failed to set light level {:?} at invalid coordinates {:?}",
                 light_level,
                 coordinates,
             );
-        }
+        }*/
     }
 
     pub fn light_level_at(&self, coordinates: BlockCoord) -> Option<u8> {

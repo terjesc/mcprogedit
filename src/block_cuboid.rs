@@ -34,11 +34,14 @@ impl BlockCuboid {
         if let Some(index) = self.index(coordinates) {
             self.blocks[index] = block;
         } else {
+            /* TODO it would probably be a good idea to re-introduce this warning, and figure out
+             * where we try to erroneously insert blocks...
             eprintln!(
                 "[warning] failed to set block {:?} at invalid coordinates {:?}",
                 block,
                 coordinates,
             );
+            */
         }
     }
 
@@ -103,6 +106,7 @@ impl BlockCuboid {
         p2: (usize, usize, usize),
         other: &Self,
     ) -> Self {
+        //log::warn!("Input points: {:?}, {:?}", p1, p2);
         let min = (
             usize::min(p1.0, p2.0),
             usize::min(p1.1, p2.1),
@@ -138,9 +142,7 @@ impl BlockCuboid {
         cuboid
     }
 
-    /// Generate and return a height map for the block cuboid, relative to the bottom
-    /// layer of blocks in the block cuboid.
-    pub fn height_map(&self) -> HeightMap {
+    fn generic_height_map(&self, block_filter: &Fn(&Block) -> bool) -> HeightMap {
         let mut height_map = HeightMap::new((self.x_dim, self.z_dim));
 
         for x in 0..self.x_dim {
@@ -156,10 +158,10 @@ impl BlockCuboid {
                     }
                 }
 
-                // Accurately find the first opaque block
+                // Accurately find the first block using the filter
                 for y in (0..=height).rev() {
                     if let Some(block) = self.block_at((x, y as usize, z)) {
-                        if block.is_affecting_sky_light_old() {
+                        if block_filter(&block) {
                             height = y + 1;
                             break;
                         }
@@ -171,6 +173,22 @@ impl BlockCuboid {
         }
 
         height_map
+    }
+
+    /// Generate and return a height map for the block cuboid, relative to the bottom
+    /// layer of blocks in the block cuboid.
+    pub fn height_map(&self) -> HeightMap {
+        self.generic_height_map(&|block: &Block| block.is_affecting_sky_light_old())
+    }
+
+    /// Generate and return a height map for the block cuboid, relative to the bottom
+    /// layer of blocks in the block cuboid, excluding air, foilage and snow blocks.
+    pub fn ground_height_map(&self) -> HeightMap {
+        self.generic_height_map(&|block: &Block| {
+            block.is_affecting_sky_light_old()
+            && !block.is_foilage()
+            // Todo: handle snow (and possibly other non-ground blocks)
+        })
     }
 
     /// Replace all occurrences of the given block with the given replacement.

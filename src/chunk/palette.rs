@@ -805,9 +805,10 @@ impl PaletteItem {
 
     fn name(&self) -> &str {
         match self {
-            PaletteItem::Block(Block::None)
-            | PaletteItem::Block(Block::Unknown(_))
-            | PaletteItem::Block(Block::Air) => "minecraft:air",
+            PaletteItem::Block(Block::Air)
+            | PaletteItem::Block(Block::None)
+            | PaletteItem::Block(Block::StructureVoid)
+            | PaletteItem::Block(Block::Unknown(_)) => "minecraft:air",
             PaletteItem::Block(Block::CaveAir) => "minecraft:cave_air",
             PaletteItem::Block(Block::Stone) => "minecraft:stone",
             PaletteItem::Block(Block::Granite) => "minecraft:granite",
@@ -1057,6 +1058,7 @@ impl PaletteItem {
                 _ => "minecraft:soul_wall_torch",
             }
             PaletteItem::Block(Block::Fire { .. }) => "minecraft:fire",
+            PaletteItem::Block(Block::SoulFire) => "minecraft:soul_fire",
             // TODO block 52 / minecraft:spawner / mob spawner
             PaletteItem::Block(Block::DiamondOre) => "minecraft:diamond_ore",
             PaletteItem::Block(Block::BlockOfDiamond) => "minecraft:diamond_block",
@@ -1732,8 +1734,22 @@ impl PaletteItem {
                 "minecraft:sponge"
             }
 
-            // Catch-all // TODO remove when all variants are handled!
-            _ => "minecraft:sponge", // TODO handle all variants!
+            // TODO Remove this match section when all variants are handled.
+            // This is a temporary listing for missing (unimplemented) patterns.
+            PaletteItem::Block(Block::Bamboo { .. })
+            | PaletteItem::Block(Block::Bell { .. })
+            | PaletteItem::Block(Block::BubbleColumn { .. })
+            | PaletteItem::Block(Block::CommandBlock(_))
+            | PaletteItem::Block(Block::Conduit { .. })
+            | PaletteItem::Block(Block::EndGateway)
+            | PaletteItem::Block(Block::FrostedIce)
+            | PaletteItem::Block(Block::JigsawBlock { .. })
+            | PaletteItem::Block(Block::Lectern { .. })
+            | PaletteItem::Block(Block::Spawner)
+            | PaletteItem::Block(Block::StructureBlock) => {
+                warn!("Block to name conversion not implemented for block: {:?}", self);
+                "minecraft:sponge"
+            }
         }
     }
 }
@@ -1940,6 +1956,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:soul_torch" => block(Block::SoulTorch { attached: Surface5::Down }),
             "minecraft:soul_wall_torch" => block(soul_wall_torch(&properties)),
             "minecraft:fire" => block(fire(&properties)),
+            "minecraft:soul_fire" => block(Block::SoulFire),
             // TODO block 52 / minecraft:spawner / mob spawner
             "minecraft:oak_stairs" => block(stairs(StairMaterial::Oak, &properties)),
             "minecraft:spruce_stairs" => block(stairs(StairMaterial::Spruce, &properties)),

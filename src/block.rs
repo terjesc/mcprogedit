@@ -52,6 +52,7 @@ pub use self::vines::*;
 
 use crate::bounded_ints::*;
 use crate::colour::*;
+use crate::inventory::Inventory;
 use crate::item::Item;
 use crate::material::*;
 use crate::positioning::*;
@@ -687,10 +688,7 @@ pub enum Block {
         lit: bool,
         waterlogged: bool,
     },
-    SoulFire {
-        age: Int0Through15,
-        burning_faces: FireFace,
-    },
+    SoulFire,
     SoulLantern {
         mounted_at: Surface2,
         waterlogged: bool,
@@ -853,6 +851,16 @@ impl Block {
         }
     }
 
+    /// Returns a barrel facing the given direction.
+    pub fn barrel(facing: Surface6) -> Self {
+        Self::Barrel(Box::new(Barrel {
+            facing,
+            custom_name: None,
+            lock: None,
+            items: Inventory::new(),
+        }))
+    }
+
     /// Returns a birch fence.
     pub const fn birch_fence() -> Self {
         Self::Fence {
@@ -922,6 +930,16 @@ impl Block {
         })
     }
 
+    /// Returns a bottom trapdoor of the specified material.
+    pub fn bottom_trapdoor(facing: Direction, material: Material) -> Self {
+        Self::Trapdoor(Trapdoor {
+            material: DoorMaterial::try_from(material).unwrap(),
+            hinge_at: Edge8::try_closest_down_from(facing).unwrap(),
+            open: false,
+            waterlogged: false,
+        })
+    }
+
     /// Returns a (full) cake.
     pub const fn cake() -> Self {
         Self::Cake {
@@ -946,6 +964,18 @@ impl Block {
     /// Returns a carpet of the given colour.
     pub fn carpet_with_colour(colour: Colour) -> Self {
         Self::Carpet { colour }
+    }
+
+    /// Returns a chest facing the given direction.
+    pub fn chest(facing: Surface4) -> Self {
+        Self::Chest(Box::new(Chest {
+            facing,
+            variant: Some(ChestVariant::Single),
+            waterlogged: false,
+            custom_name: None,
+            lock: None,
+            items: Inventory::new(),
+        }))
     }
 
     /// Returns a concrete block of the given colour.
@@ -1040,6 +1070,20 @@ impl Block {
         Self::Fire {
             age: Int0Through15::MIN,
         }
+    }
+
+    /// Returns a furnace facing the given direction.
+    pub fn furnace(facing: Surface4) -> Self {
+        Self::Furnace(Box::new(Furnace {
+            facing,
+            lit: false,
+            custom_name: None,
+            lock: None,
+            items: Inventory::new(),
+            burn_time: 0,
+            cook_time: 0,
+            cook_time_total: 0,
+        }))
     }
 
     /// Returns an uncoloured glass block.
@@ -1564,8 +1608,8 @@ impl Block {
     }
 
     /// Returns a oak button of the given placemnet.
-    pub fn oak_button(direction: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(direction).unwrap())
+    pub fn oak_button(facing: Direction) -> Self {
+        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(facing).unwrap())
     }
 
     /// Returns an oak fence.
@@ -1728,9 +1772,6 @@ impl Block {
             } => {
                 *growth_stage = Int0Through1::new_saturating(new_age);
             }
-            Self::SoulFire { ref mut age, .. } => {
-                *age = Int0Through15::new_saturating(new_age);
-            }
             Self::SugarCane {
                 ref mut growth_stage,
                 ..
@@ -1842,11 +1883,33 @@ impl Block {
         }
     }
 
+    /// Returns a stairs of the given direction and material.
+    pub fn stairs(facing: Direction, material: Material) -> Self {
+        Self::Stairs(
+            Stair {
+                material: StairMaterial::try_from(material).unwrap(),
+                position: Edge8::try_closest_down_from(facing).unwrap(),
+                waterlogged: false,
+            }
+        )
+    }
+
+    /// Returns an upside down stairs of the given direction and material.
+    pub fn stairs_inverted(facing: Direction, material: Material) -> Self {
+        Self::Stairs(
+            Stair {
+                material: StairMaterial::try_from(material).unwrap(),
+                position: Edge8::try_closest_up_from(facing).unwrap(),
+                waterlogged: false,
+            }
+        )
+    }
+
     /// Returns a stone button of the given placemnet.
-    pub fn stone_button(direction: Direction) -> Self {
+    pub fn stone_button(facing: Direction) -> Self {
         Self::Button(
             ButtonMaterial::Stone,
-            SurfaceRotation12::try_from(direction).unwrap(),
+            SurfaceRotation12::try_from(facing).unwrap(),
         )
     }
 
@@ -1878,6 +1941,16 @@ impl Block {
         })
     }
 
+    /// Returns a top trapdoor of the specified material.
+    pub fn top_trapdoor(facing: Direction, material: Material) -> Self {
+        Self::Trapdoor(Trapdoor {
+            material: DoorMaterial::try_from(material).unwrap(),
+            hinge_at: Edge8::try_closest_up_from(facing).unwrap(),
+            open: false,
+            waterlogged: false,
+        })
+    }
+
     /// Returns a torch facing up.
     pub const fn torch() -> Self {
         Self::Torch {
@@ -1898,8 +1971,8 @@ impl Block {
     }
 
     /// Returns a wooden button of the given placemnet.
-    pub fn wooden_button(direction: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(direction).unwrap())
+    pub fn wooden_button(facing: Direction) -> Self {
+        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(facing).unwrap())
     }
 
     /// Returns a wool block of the given colour.

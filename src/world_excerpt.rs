@@ -378,6 +378,11 @@ impl WorldExcerpt {
         self.blocks.height_map()
     }
 
+    /// Generate and return a height map of the ground level of the world excerpt.
+    pub fn ground_height_map(&self) -> HeightMap {
+        self.blocks.ground_height_map()
+    }
+
     /// Paste the contents of a different WorldExcerpt into this WorldExcerpt.
     ///
     /// The corner of `other` with the lowest numbered coordinates, is aligned at block

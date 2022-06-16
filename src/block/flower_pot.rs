@@ -80,3 +80,31 @@ pub enum PottedPlant {
     WarpedRoots,
     WitherRose,
 }
+
+impl From<super::Flower> for FlowerPot {
+    fn from(flower: super::Flower) -> Self {
+        match flower {
+            super::Flower::Allium => FlowerPot{ plant: Some(PottedPlant::Allium) },
+            super::Flower::AzureBluet => FlowerPot{ plant: Some(PottedPlant::AzureBluet) },
+            super::Flower::BlueOrchid => FlowerPot{ plant: Some(PottedPlant::BlueOrchid) },
+            super::Flower::Cornflower => FlowerPot{ plant: Some(PottedPlant::Cornflower) },
+            super::Flower::Dandelion => FlowerPot{ plant: Some(PottedPlant::Dandelion) },
+            super::Flower::LilacBottom => FlowerPot{ plant: None },
+            super::Flower::LilacTop => FlowerPot{ plant: None },
+            super::Flower::LilyOfTheValley => FlowerPot{ plant: Some(PottedPlant::LilyOfTheValley) },
+            super::Flower::OxeyeDaisy => FlowerPot{ plant: Some(PottedPlant::OxeyeDaisy) },
+            super::Flower::PeonyBottom => FlowerPot{ plant: None },
+            super::Flower::PeonyTop => FlowerPot{ plant: None },
+            super::Flower::Poppy => FlowerPot{ plant: Some(PottedPlant::Poppy) },
+            super::Flower::RoseBushBottom => FlowerPot{ plant: None },
+            super::Flower::RoseBushTop => FlowerPot{ plant: None },
+            super::Flower::SunflowerBottom => FlowerPot{ plant: None },
+            super::Flower::SunflowerTop => FlowerPot{ plant: None },
+            super::Flower::TulipWhite => FlowerPot{ plant: Some(PottedPlant::TulipWhite) },
+            super::Flower::TulipOrange => FlowerPot{ plant: Some(PottedPlant::TulipOrange) },
+            super::Flower::TulipPink => FlowerPot{ plant: Some(PottedPlant::TulipPink) },
+            super::Flower::TulipRed => FlowerPot{ plant: Some(PottedPlant::TulipRed) },
+            super::Flower::WitherRose => FlowerPot{ plant: Some(PottedPlant::WitherRose) },
+        }
+    }
+}
