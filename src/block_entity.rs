@@ -1210,9 +1210,9 @@ impl FurnaceTags {
             custom_name: nbt_value_lookup_string(value, "CustomName").ok(),
             lock: nbt_value_lookup_string(value, "Lock").ok(),
             items,
-            burn_time: nbt_value_lookup_short(value, "BurnTime").unwrap(),
-            cook_time: nbt_value_lookup_short(value, "CookTime").unwrap(),
-            cook_time_total: nbt_value_lookup_short(value, "CookTimeTotal").unwrap(),
+            burn_time: nbt_value_lookup_short(value, "BurnTime").unwrap_or(0),
+            cook_time: nbt_value_lookup_short(value, "CookTime").unwrap_or(0),
+            cook_time_total: nbt_value_lookup_short(value, "CookTimeTotal").unwrap_or(0),
         }
     }
 
