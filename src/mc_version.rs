@@ -9,8 +9,7 @@ use phf::phf_map;
 // add the mapping in ID2STR.
 // For ease of editing, add mappings in numeric order on id.
 //
-// ID2STR is populated compile-time to eliminate initialization at runtime. For now, STR2ID is
-// initialized on the first access and cached for subsequent accesses.
+// ID2STR is populated compile-time to eliminate initialization at runtime.
 static ID2STR: phf::Map<i32, &'static str> = phf_map! {
     // Released in 2015
     100i32 => "15w32a",
@@ -428,6 +427,7 @@ static ID2STR: phf::Map<i32, &'static str> = phf_map! {
     3066i32 => "Deep Dark Experimental Snapshot 1",
 };
 
+// For now, STR2ID is initialized on the first access and cached for subsequent accesses.
 static STR2ID: Lazy<HashMap<&'static str, i32>> = Lazy::new(|| {
     ID2STR
         .entries()
