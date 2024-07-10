@@ -564,9 +564,9 @@ static ID2STR: phf::Map<i32, &'static str> = phf_map! {
     3946i32 => "24w21a",
     3947i32 => "24w21b",
     3948i32 => "1.21 Pre-release 1",
-    3949i32 => "1.21 Pre-release 1",
-    3950i32 => "1.21 Pre-release 1",
-    3951i32 => "1.21 Pre-release 1",
+    3949i32 => "1.21 Pre-release 2",
+    3950i32 => "1.21 Pre-release 3",
+    3951i32 => "1.21 Pre-release 4",
     3952i32 => "1.21 Release Candidate 1",
     3953i32 => "1.21",
 };
