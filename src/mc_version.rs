@@ -916,4 +916,30 @@ mod tests {
             )
         }
     }
+
+    fn ids_in_id_list_can_convert_to_str_and_back_again(ids: &[i32]) {
+        for id in ids {
+            let version = McVersion::from_id(*id);
+            let name = version.name();
+            let version_from_str = McVersion::from_str(name).unwrap();
+            assert_eq!(version, version_from_str);
+        }
+    }
+
+    #[test]
+    fn ids_in_id2str_list_has_reverse_mappings() {
+        let ids = ID2STR.keys().map(|k| *k).collect::<Vec<i32>>();
+        assert!(!ids.is_empty());
+        ids_in_id_list_can_convert_to_str_and_back_again(&ids);
+    }
+
+    #[test]
+    fn ids_in_str2id_list_has_reverse_mappings() {
+        let ids = STR2ID
+            .entries()
+            .map(|(_, value)| *value)
+            .collect::<Vec<i32>>();
+        assert!(!ids.is_empty());
+        ids_in_id_list_can_convert_to_str_and_back_again(&ids);
+    }
 }
