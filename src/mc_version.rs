@@ -1,6 +1,6 @@
 use phf::phf_map;
 
-// Source: https://minecraft.fandom.com/wiki/Data_version
+// Source: https://minecraft.wiki/w/Data_version
 //
 // To add a new mapping between id (aka "data version") and version string (aka "name"),
 // add the same mapping both ways, that is both to STR2ID and to ID2STR.
