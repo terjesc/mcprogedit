@@ -670,10 +670,7 @@ mod tests {
 
     #[test]
     fn ids_in_str2id_list_has_reverse_mappings() {
-        let ids = STR2ID
-            .entries()
-            .map(|(_, value)| *value)
-            .collect::<Vec<i32>>();
+        let ids = STR2ID.iter().map(|(_, value)| *value).collect::<Vec<i32>>();
         assert!(!ids.is_empty());
         ids_in_id_list_can_convert_to_str_and_back_again(&ids);
     }
