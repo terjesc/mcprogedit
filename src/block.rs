@@ -276,6 +276,45 @@ pub enum OnOffState {
     Off,
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum AmethystBudSize {
+    Small,
+    Medium,
+    Large,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum DripleafVariant {
+    BigLeaf(DripleafTilt),
+    BigStem,
+    SmallTop,
+    SmallBottom,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum DripleafTilt {
+    None,
+    Unstable,
+    Partial,
+    Full,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum PointedDripstoneThickness {
+    Tip,
+    TipMerge,
+    Frustum,
+    Middle,
+    Base,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum SculkSensorPhase {
+    Active,
+    Cooldown,
+    Inactive,
+}
+
 /// Blocks, with the attributes required for full representation in the world.
 ///
 /// Plain blocks can be created directly.
@@ -283,16 +322,26 @@ pub enum OnOffState {
 /// Some of the more complex blocks have their own data structures, that are put inside
 /// the corresponding enum variant (often boxed.)
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum Block {
+pub enum Block { // TODO Next addition is `Dripleaf` from https://minecraft.wiki/w/Java_Edition_1.17
     None,
     Unknown(Option<u16>),
     Air,
+    AmethystBud {
+        size: AmethystBudSize,
+        facing: Surface6,
+        waterlogged: bool,
+    }, // TODO 1.17 (added in 1.17)
+    AmethystCluster {
+        facing: Surface6,
+        waterlogged: bool,
+    }, // TODO 1.17
     AncientDebris,
     Anvil {
         facing: Surface4,
         damage: AnvilDamage,
     },
     Andesite,
+    Azalea, // TODO 1.17 (blossoms / no blossoms variants)
     Bamboo {
         growth_stage: Int0Through1,
         leaves: BambooLeaves,
@@ -317,13 +366,21 @@ pub enum Block {
     Bed(Bed),
     Blackstone,
     BlastFurnace(Box<Furnace>),
+    BlockOfAmethyst, // TODO 1.17
     BlockOfCoal,
+    BlockOfCopper {
+        oxidation: Oxidation,
+        waxed: bool,
+    }, // TODO 1.17
     BlockOfDiamond,
     BlockOfEmerald,
     BlockOfGold,
     BlockOfIron,
     BlockOfNetherite,
     BlockOfQuartz,
+    BlockOfRawCopper, // TODO 1.17
+    BlockOfRawGold, // TODO 1.17
+    BlockOfRawIron, // TODO 1.17
     BlockOfRedstone,
     BlockOfSlime,
     BlueIce,
@@ -340,6 +397,7 @@ pub enum Block {
     BubbleColumn {
         drag_direction: Surface2,
     }, // Is this even needed?
+    BuddingAmethyst, // TODO 1.17
     Button(ButtonMaterial, SurfaceRotation12),
     Cactus {
         growth_stage: Int0Through15,
@@ -347,8 +405,14 @@ pub enum Block {
     Cake {
         pieces: Int1Through7,
     },
+    Calcite, // TODO 1.17
     Campfire {
         facing: Surface4,
+        lit: bool,
+        waterlogged: bool,
+    },
+    Candle { // TODO 1.17
+        count: Int1Through4,
         lit: bool,
         waterlogged: bool,
     },
@@ -366,10 +430,15 @@ pub enum Block {
         water_level: Int0Through3,
     },
     CaveAir,
+    CaveVines {
+        berries: bool,
+        growth_stage: Option<Int0Through25>,
+    }, // TODO 1.17 (both CaveVines and CaveVinesPlant)
     Chain {
         alignment: Axis3,
     },
     Chest(Box<Chest>),
+    ChiseledDeepslate,
     ChiseledNetherBricks,
     ChiseledPolishedBlackstone,
     ChiseledQuartzBlock,
@@ -383,6 +452,7 @@ pub enum Block {
     Clay,
     CoalOre,
     CoarseDirt,
+    CobbledDeepslate, // TODO 1.17
     Cobblestone,
     Cobweb,
     Cocoa {
@@ -402,6 +472,7 @@ pub enum Block {
     Conduit {
         waterlogged: bool,
     }, // TODO optionally add optional block entity
+    CopperOre, // TODO 1.17
     Coral {
         material: CoralMaterial,
         dead: bool,
@@ -417,6 +488,8 @@ pub enum Block {
         dead: bool,
         waterlogged: bool,
     },
+    CrackedDeepslateBricks,
+    CrackedDeepslateTiles,
     CrackedNetherBricks,
     CrackedPolishedBlackstoneBricks,
     CrackedStoneBricks,
@@ -425,11 +498,30 @@ pub enum Block {
     CrimsonNylium,
     CrimsonRoots,
     CryingObsidian,
+    CutCopper {
+        oxidation: Oxidation,
+        waxed: bool,
+    }, // TODO: 1.17
     CutRedSandstone,
     CutSandstone,
     DarkPrismarine,
     DaylightDetector,
     DeadBush,
+    Deepslate {
+        alignment: Axis3,
+    }, // TODO: 1.17
+    DeepslateBricks,
+    DeepslateCoalOre,
+    DeepslateCopperOre,
+    DeepslateIronOre,
+    DeepslateGoldOre,
+    DeepslateDiamondOre,
+    DeepslateRedstoneOre {
+        lit: bool,
+    },
+    DeepslateLapisLazuliOre,
+    DeepslateEmeraldOre,
+    DeepslateTiles,
     DiamondOre,
     Diorite,
     Dirt,
@@ -437,6 +529,12 @@ pub enum Block {
     Door(Door),
     DragonEgg,
     DriedKelpBlock,
+    Dripleaf {
+        facing: Surface4,
+        variant: DripleafVariant,
+        waterlogged: bool,
+    }, // TODO 1.17
+    Dripstone, // TODO 1.17
     Dropper(Box<Dropper>),
     EmeraldOre,
     EnchantingTable {
@@ -487,6 +585,10 @@ pub enum Block {
         waterlogged: bool,
     },
     GlazedTerracotta(GlazedTerracotta),
+    GlowLichen {
+        mounted_at: DirectionFlags6,
+        waterlogged: bool,
+    }, // TODO 1.17
     Glowstone,
     GoldOre,
     Granite,
@@ -496,6 +598,9 @@ pub enum Block {
     GrassPath,
     Gravel,
     Grindstone(SurfaceRotation12),
+    HangingRoots {
+        waterlogged: bool,
+    }, // TODO 1.17
     HayBale {
         alignment: Axis3,
     },
@@ -507,6 +612,7 @@ pub enum Block {
     InfestedChiseledStoneBricks,
     InfestedCobblestone,
     InfestedCrackedStoneBricks,
+    InfestedDeepslate, // TODO 1.17
     InfestedMossyStoneBricks,
     InfestedStone,
     InfestedStoneBricks,
@@ -551,6 +657,15 @@ pub enum Block {
     }, // TODO add block entity (and possibly "has book" bool)
     Lever(SurfaceRotation12, OnOffState),
     LilyPad,
+    Light {
+        level: Int0Through15,
+        waterlogged: bool,
+    }, // TODO 1.17
+    LightningRod {
+        mounted_at: Surface6,
+        powered: bool,
+        waterlogged: bool,
+    }, // TODO 1.17
     Lodestone,
     Log(Log),
     Loom {
@@ -561,6 +676,8 @@ pub enum Block {
     MelonStem {
         state: StemState,
     },
+    Moss, // TODO 1.17
+    MossCarpet, // TODO 1.17
     MossyCobblestone,
     MossyStoneBricks,
     MushroomStem {
@@ -596,17 +713,24 @@ pub enum Block {
         material: WoodMaterial,
     },
     Podzol,
+    PointedDripstone {
+        thickness: PointedDripstoneThickness,
+        mounted_at: Surface2,
+        waterlogged: bool,
+    }, // TODO 1.17
     PolishedAndesite,
     PolishedBasalt {
         alignment: Axis3,
     },
     PolishedBlackstone,
     PolishedBlackstoneBricks,
+    PolishedDeepslate,
     PolishedDiorite,
     PolishedGranite,
     Potatoes {
         growth_stage: Int0Through7,
     },
+    PowderedSnow, // TODO 1.17
     PressurePlate {
         material: PressurePlateMaterial,
     },
@@ -640,18 +764,21 @@ pub enum Block {
         facing: Surface4,
     }, // TODO add block entity (?)
     RedstoneLamp,
-    RedstoneOre,
+    RedstoneOre {
+        lit: bool,
+    },
     RedstoneRepeater(RedstoneRepeater),
     RedstoneSubtractor {
         facing: Surface4,
     }, // TODO add block entity (?)
     RedstoneTorch {
-        attached: Surface5,
+        mounted_at: Surface5,
     },
     RedstoneWire, // TODO upcoming change: * or + shape, of non-connected wire
     RespawnAnchor {
         charges: Int0Through15,
     },
+    RootedDirt, // TODO 1.17
     Sand,
     Sandstone,
     Sapling {
@@ -661,6 +788,11 @@ pub enum Block {
     Scaffolding {
         waterlogged: bool,
     },
+    SculkSensor {
+        power: Int0Through15,
+        phase: SculkSensorPhase,
+        waterlogged: bool,
+    }, // TODO 1.17
     SeaLantern,
     SeaPickle {
         count: Int1Through4,
@@ -675,6 +807,7 @@ pub enum Block {
     Slab(Slab),
     SmithingTable,
     Smoker(Box<Furnace>),
+    SmoothBasalt, // TODO 1.17
     SmoothQuartz,
     SmoothRedSandstone,
     SmoothSandstone,
@@ -694,12 +827,13 @@ pub enum Block {
         waterlogged: bool,
     },
     SoulTorch {
-        attached: Surface5,
+        mounted_at: Surface5,
     },
     SoulSand,
     SoulSoil,
     Spawner, // TODO add block entity
     Sponge,
+    SporeBlossom, // TODO 1.17
     Stairs(Stair),
     StickyPiston {
         facing: Surface6,
@@ -725,9 +859,10 @@ pub enum Block {
     Terracotta {
         colour: Option<Colour>,
     },
+    TintedGlass, // TODO 1.17
     TNT,
     Torch {
-        attached: Surface5,
+        mounted_at: Surface5,
     },
     Trapdoor(Trapdoor),
     TrappedChest(Box<Chest>),
@@ -735,6 +870,7 @@ pub enum Block {
     TripwireHook {
         facing: Surface4,
     },
+    Tuff, // TODO 1.17
     TurtleEgg {
         count: Int1Through4,
         age: Int0Through2,
@@ -1174,19 +1310,19 @@ impl Block {
             Self::RedstoneComparator { facing, .. } => Direction::from(*facing) == direction,
             Self::RedstoneRepeater(repeater) => repeater.has_facing_of(direction),
             Self::RedstoneSubtractor { facing, .. } => Direction::from(*facing) == direction,
-            Self::RedstoneTorch { attached, .. } => {
-                Direction::from(*attached).opposite() == direction
+            Self::RedstoneTorch { mounted_at, .. } => {
+                Direction::from(*mounted_at).opposite() == direction
             }
             Self::ShulkerBox(shulker_box) => shulker_box.has_facing_of(direction),
             Self::Sign(sign) => sign.has_facing_of(direction),
             Self::Smoker(furnace) => furnace.has_facing_of(direction),
             Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
             Self::SoulLantern { mounted_at, .. } => Direction::from(*mounted_at) == direction,
-            Self::SoulTorch { attached, .. } => Direction::from(*attached).opposite() == direction,
+            Self::SoulTorch { mounted_at, .. } => Direction::from(*mounted_at).opposite() == direction,
             Self::Stairs(stair) => stair.has_facing_of(direction),
             Self::StickyPiston { facing, .. } => Direction::from(*facing) == direction,
             Self::Stonecutter { facing, .. } => Direction::from(*facing) == direction,
-            Self::Torch { attached, .. } => Direction::from(*attached).opposite() == direction,
+            Self::Torch { mounted_at, .. } => Direction::from(*mounted_at).opposite() == direction,
             Self::TrappedChest(chest) => chest.has_facing_of(direction),
             Self::TripwireHook { facing, .. } => Direction::from(*facing) == direction,
             _ => false,
@@ -1418,7 +1554,7 @@ impl Block {
                 | Self::RedSand
                 | Self::RedSandstone
                 | Self::RedstoneLamp
-                | Self::RedstoneOre
+                | Self::RedstoneOre { .. }
                 | Self::RespawnAnchor { .. }
                 | Self::Sand
                 | Self::Sandstone
@@ -1954,7 +2090,7 @@ impl Block {
     /// Returns a torch facing up.
     pub const fn torch() -> Self {
         Self::Torch {
-            attached: Surface5::Down,
+            mounted_at: Surface5::Down,
         }
     }
 

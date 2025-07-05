@@ -346,11 +346,19 @@ impl TryFrom<Material> for IngotMaterial {
 /// mcprogedit::material::LeavesMaterial::Acacia;
 /// mcprogedit::material::LeavesMaterial::DarkOak;
 /// ```
+/// ## Introduced in Minecraft 1.17
+/// ```
+/// // From 21w05a
+/// mcprogedit::material::LeavesMaterial::Azalea;
+/// mcprogedit::material::LeaaesMaterial::FloweringAzalea;
+/// ```
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum LeavesMaterial {
     Acacia,
+    Azalea,
     Birch,
     DarkOak,
+    FloweringAzalea,
     Jungle,
     Oak,
     Spruce,
@@ -394,6 +402,7 @@ impl TryFrom<WoodMaterial> for LeavesMaterial {
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum Material {
     Acacia,
+    Azalea,
     Andesite,
     Bamboo,
     Beetroot,
@@ -403,16 +412,24 @@ pub enum Material {
     Brick,
     Bubble,
     Chainmail,
+    CobbledDeepslate,
     Cobblestone,
+    Copper {
+        oxidation: Oxidation,
+        waxed: bool,
+    },
     Crimson,
     CutRedSandstone,
     CutSandstone,
     DarkOak,
     DarkPrismarine,
+    DeepslateBrick,
+    DeepslateTile,
     Diamond,
     Diorite,
     EndStoneBrick,
     Fire,
+    FloweringAzalea,
     Gold,
     Granite,
     Horn,
@@ -429,6 +446,7 @@ pub enum Material {
     PolishedAndesite,
     PolishedBlackstone,
     PolishedBlackstoneBrick,
+    PolishedDeepslate,
     PolishedDiorite,
     PolishedGranite,
     Prismarine,
@@ -550,8 +568,10 @@ impl From<LeavesMaterial> for Material {
     fn from(item: LeavesMaterial) -> Self {
         match item {
             LeavesMaterial::Acacia => Self::Acacia,
+            LeavesMaterial::Azalea => Self::Azalea,
             LeavesMaterial::Birch => Self::Birch,
             LeavesMaterial::DarkOak => Self::DarkOak,
+            LeavesMaterial::FloweringAzalea => Self::FloweringAzalea,
             LeavesMaterial::Jungle => Self::Jungle,
             LeavesMaterial::Oak => Self::Oak,
             LeavesMaterial::Spruce => Self::Spruce,
@@ -620,12 +640,16 @@ impl From<SlabMaterial> for Material {
             SlabMaterial::Birch => Self::Birch,
             SlabMaterial::Blackstone => Self::Blackstone,
             SlabMaterial::Brick => Self::Brick,
+            SlabMaterial::CobbledDeepslate => Self::CobbledDeepslate,
             SlabMaterial::Cobblestone => Self::Cobblestone,
+            SlabMaterial::Copper{oxidation, waxed} => Self::Copper{oxidation, waxed},
             SlabMaterial::Crimson => Self::Crimson,
             SlabMaterial::CutRedSandstone => Self::CutRedSandstone,
             SlabMaterial::CutSandstone => Self::CutSandstone,
             SlabMaterial::DarkOak => Self::DarkOak,
             SlabMaterial::DarkPrismarine => Self::DarkPrismarine,
+            SlabMaterial::DeepslateBrick => Self::DeepslateBrick,
+            SlabMaterial::DeepslateTile => Self::DeepslateTile,
             SlabMaterial::Diorite => Self::Diorite,
             SlabMaterial::EndStoneBrick => Self::EndStoneBrick,
             SlabMaterial::Granite => Self::Granite,
@@ -638,6 +662,7 @@ impl From<SlabMaterial> for Material {
             SlabMaterial::PolishedAndesite => Self::PolishedAndesite,
             SlabMaterial::PolishedBlackstone => Self::PolishedBlackstone,
             SlabMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            SlabMaterial::PolishedDeepslate => Self::PolishedDeepslate,
             SlabMaterial::PolishedDiorite => Self::PolishedDiorite,
             SlabMaterial::PolishedGranite => Self::PolishedGranite,
             SlabMaterial::Prismarine => Self::Prismarine,
@@ -667,10 +692,14 @@ impl From<StairMaterial> for Material {
             StairMaterial::Birch => Self::Birch,
             StairMaterial::Blackstone => Self::Blackstone,
             StairMaterial::Brick => Self::Brick,
+            StairMaterial::CobbledDeepslate => Self::CobbledDeepslate,
             StairMaterial::Cobblestone => Self::Cobblestone,
+            StairMaterial::Copper{oxidation, waxed} => Self::Copper{oxidation, waxed},
             StairMaterial::Crimson => Self::Crimson,
             StairMaterial::DarkOak => Self::DarkOak,
             StairMaterial::DarkPrismarine => Self::DarkPrismarine,
+            StairMaterial::DeepslateBrick => Self::DeepslateBrick,
+            StairMaterial::DeepslateTile => Self::DeepslateTile,
             StairMaterial::Diorite => Self::Diorite,
             StairMaterial::EndStoneBrick => Self::EndStoneBrick,
             StairMaterial::Granite => Self::Granite,
@@ -682,6 +711,7 @@ impl From<StairMaterial> for Material {
             StairMaterial::PolishedAndesite => Self::PolishedAndesite,
             StairMaterial::PolishedBlackstone => Self::PolishedBlackstone,
             StairMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            StairMaterial::PolishedDeepslate => Self::PolishedDeepslate,
             StairMaterial::PolishedDiorite => Self::PolishedDiorite,
             StairMaterial::PolishedGranite => Self::PolishedGranite,
             StairMaterial::Prismarine => Self::Prismarine,
@@ -721,7 +751,10 @@ impl From<WallMaterial> for Material {
             WallMaterial::Andesite => Self::Andesite,
             WallMaterial::Blackstone => Self::Blackstone,
             WallMaterial::Brick => Self::Brick,
+            WallMaterial::CobbledDeepslate => Self::CobbledDeepslate,
             WallMaterial::Cobblestone => Self::Cobblestone,
+            WallMaterial::DeepslateBrick => Self::DeepslateBrick,
+            WallMaterial::DeepslateTile => Self::DeepslateTile,
             WallMaterial::Diorite => Self::Diorite,
             WallMaterial::EndStoneBrick => Self::EndStoneBrick,
             WallMaterial::Granite => Self::Granite,
@@ -730,6 +763,7 @@ impl From<WallMaterial> for Material {
             WallMaterial::NetherBrick => Self::NetherBrick,
             WallMaterial::PolishedBlackstone => Self::PolishedBlackstone,
             WallMaterial::PolishedBlackstoneBrick => Self::PolishedBlackstoneBrick,
+            WallMaterial::PolishedDeepslate => Self::PolishedDeepslate,
             WallMaterial::Prismarine => Self::Prismarine,
             WallMaterial::RedNetherBrick => Self::RedNetherBrick,
             WallMaterial::RedSandstone => Self::RedSandstone,
@@ -946,6 +980,14 @@ impl TryFrom<Material> for SeedMaterial {
     }
 }
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+pub enum Oxidation {
+    None,
+    Exposed,
+    Weathered,
+    Oxidized,
+}
+
 /// Materials for the "Slab" family of blocks.
 ///
 /// # Variant availability
@@ -1036,6 +1078,26 @@ impl TryFrom<Material> for SeedMaterial {
 /// mcprogedit::material::SlabMaterial::PolishedBlackstone;
 /// mcprogedit::material::SlabMaterial::PolishedBlackstoneBrick;
 /// ```
+/// ## Introduced in Minecraft 1.17
+/// ```
+/// // From 20w45a
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::None, waxed: false};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Exposed, waxed: false};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Weathered, waxed: false};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Oxidized, waxed: false};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Exposed, waxed: true};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Weathered, waxed: true};
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::Oxidized, waxed: true};
+///
+/// // From 21w07a
+/// mcprogedit::material::SlabMaterial::CobbledDeepslate;
+/// mcprogedit::material::SlabMaterial::DeepslateBrick;
+/// mcprogedit::material::SlabMaterial::DeepslateTile;
+/// mcprogedit::material::SlabMaterial::PolishedDeepslate;
+///
+/// // From 21w14a
+/// mcprogedit::material::SlabMaterial::Copper{oxidation: Oxidation::None, waxed: true};
+/// ```
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum SlabMaterial {
     Acacia,
@@ -1043,12 +1105,19 @@ pub enum SlabMaterial {
     Birch,
     Blackstone,
     Brick,
+    CobbledDeepslate,
     Cobblestone,
+    Copper {
+        oxidation: Oxidation,
+        waxed: bool,
+    },
     Crimson,
     CutRedSandstone,
     CutSandstone,
     DarkOak,
     DarkPrismarine,
+    DeepslateBrick,
+    DeepslateTile,
     Diorite,
     EndStoneBrick,
     Granite,
@@ -1064,6 +1133,7 @@ pub enum SlabMaterial {
     PolishedAndesite,
     PolishedBlackstone,
     PolishedBlackstoneBrick,
+    PolishedDeepslate,
     PolishedDiorite,
     PolishedGranite,
     Prismarine,
@@ -1222,6 +1292,26 @@ impl TryFrom<Material> for SlabMaterial {
 /// mcprogedit::material::StairMaterial::PolishedBlackstone;
 /// mcprogedit::material::StairMaterial::PolishedBlackstoneBrick;
 /// ```
+/// ## Introduced in Minecraft 1.17
+/// ```
+/// // From 20w45a
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::None, waxed: false};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Exposed, waxed: false};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Weathered, waxed: false};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Oxidized, waxed: false};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Exposed, waxed: true};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Weathered, waxed: true};
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::Oxidized, waxed: true};
+///
+/// // From 21w07a
+/// mcprogedit::material::StairMaterial::CobbledDeepslate;
+/// mcprogedit::material::StairMaterial::DeepslateBrick;
+/// mcprogedit::material::StairMaterial::DeepslateTile;
+/// mcprogedit::material::StairMaterial::PolishedDeepslate;
+///
+/// // From 21w14a
+/// mcprogedit::material::StairMaterial::Copper{oxidation: Oxidation::None, waxed: true};
+/// ```
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum StairMaterial {
     Acacia,
@@ -1229,10 +1319,17 @@ pub enum StairMaterial {
     Birch,
     Blackstone,
     Brick,
+    CobbledDeepslate,
     Cobblestone,
+    Copper {
+        oxidation: Oxidation,
+        waxed: bool,
+    },
     Crimson,
     DarkOak,
     DarkPrismarine,
+    DeepslateBrick,
+    DeepslateTile,
     Diorite,
     EndStoneBrick,
     Granite,
@@ -1244,6 +1341,7 @@ pub enum StairMaterial {
     PolishedAndesite,
     PolishedBlackstone,
     PolishedBlackstoneBrick,
+    PolishedDeepslate,
     PolishedDiorite,
     PolishedGranite,
     Prismarine,
@@ -1383,12 +1481,23 @@ impl TryFrom<Material> for ToolMaterial {
 /// mcprogedit::material::WallMaterial::PolishedBlackstone;
 /// mcprogedit::material::WallMaterial::PolishedBlackstoneBrick;
 /// ```
+/// ## Introduced in Minecraft 1.17
+/// ```
+/// // From 21w07a
+/// mcprogedit::material::WallMaterial::CobbledDeepslate;
+/// mcprogedit::material::WallMaterial::DeepslateBrick;
+/// mcprogedit::material::WallMaterial::DeepslateTile;
+/// mcprogedit::material::WallMaterial::PolishedDeepslate;
+/// ```
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum WallMaterial {
     Andesite,
     Blackstone,
     Brick,
+    CobbledDeepslate,
     Cobblestone,
+    DeepslateBrick,
+    DeepslateTile,
     Diorite,
     EndStoneBrick,
     Granite,
@@ -1397,6 +1506,7 @@ pub enum WallMaterial {
     NetherBrick,
     PolishedBlackstone,
     PolishedBlackstoneBrick,
+    PolishedDeepslate,
     Prismarine,
     RedNetherBrick,
     RedSandstone,
@@ -1533,8 +1643,10 @@ impl TryFrom<LeavesMaterial> for WoodMaterial {
     fn try_from(item: LeavesMaterial) -> Result<Self, Self::Error> {
         match item {
             LeavesMaterial::Acacia => Ok(Self::Acacia),
+            LeavesMaterial::Azalea => Err(()),
             LeavesMaterial::Birch => Ok(Self::Birch),
             LeavesMaterial::DarkOak => Ok(Self::DarkOak),
+            LeavesMaterial::FloweringAzalea => Err(()),
             LeavesMaterial::Jungle => Ok(Self::Jungle),
             LeavesMaterial::Oak => Ok(Self::Oak),
             LeavesMaterial::Spruce => Ok(Self::Spruce),

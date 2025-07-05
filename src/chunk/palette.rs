@@ -241,30 +241,30 @@ impl PaletteItem {
                 properties.insert("type".into(), nbt::Value::String(position.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { attached: Surface5::North })
-            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::North })
-            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::North }) => {
+            PaletteItem::Block(Block::Torch { mounted_at: Surface5::North })
+            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::North })
+            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::North }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("south".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { attached: Surface5::South })
-            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::South })
-            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::South }) => {
+            PaletteItem::Block(Block::Torch { mounted_at: Surface5::South })
+            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::South })
+            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::South }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("north".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { attached: Surface5::East })
-            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::East })
-            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::East }) => {
+            PaletteItem::Block(Block::Torch { mounted_at: Surface5::East })
+            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::East })
+            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::East }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("west".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { attached: Surface5::West })
-            | PaletteItem::Block(Block::RedstoneTorch { attached: Surface5::West })
-            | PaletteItem::Block(Block::SoulTorch { attached: Surface5::West }) => {
+            PaletteItem::Block(Block::Torch { mounted_at: Surface5::West })
+            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::West })
+            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::West }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("east".into()));
                 Some(nbt::Value::Compound(properties))
@@ -899,6 +899,7 @@ impl PaletteItem {
                 LeavesMaterial::Jungle => "minecraft:jungle_leaves",
                 LeavesMaterial::Acacia => "minecraft:acacia_leaves",
                 LeavesMaterial::DarkOak => "minecraft:dark_oak_leaves",
+                LeavesMaterial::Azalea | LeavesMaterial::FloweringAzalea => todo!(),
             }
             PaletteItem::Block(Block::Sponge) => "minecraft:sponge",
             PaletteItem::Block(Block::WetSponge) => "minecraft:wet_sponge",
@@ -996,46 +997,51 @@ impl PaletteItem {
             PaletteItem::Block(Block::BlockOfGold) => "minecraft:gold_block",
             PaletteItem::Block(Block::BlockOfIron) => "minecraft:iron_block",
             PaletteItem::Block(Block::Slab(Slab { material, .. })) => match material {
-                SlabMaterial::Oak => "minecraft:oak_slab",
-                SlabMaterial::Spruce => "minecraft:spruce_slab",
-                SlabMaterial::Birch => "minecraft:birch_slab",
-                SlabMaterial::Jungle => "minecraft:jungle_slab",
                 SlabMaterial::Acacia => "minecraft:acacia_slab",
-                SlabMaterial::DarkOak => "minecraft:dark_oak_slab",
-                SlabMaterial::Crimson => "minecraft:crimson_slab",
-                SlabMaterial::Warped => "minecraft:warped_slab",
-                SlabMaterial::Stone => "minecraft:stone_slab",
-                SlabMaterial::Sandstone => "minecraft:sandstone_slab",
-                SlabMaterial::PetrifiedOak => "minecraft:petrified_oak_slab",
-                SlabMaterial::Cobblestone => "minecraft:cobblestone_slab",
-                SlabMaterial::Brick => "minecraft:brick_slab",
-                SlabMaterial::StoneBrick => "minecraft:stone_brick_slab",
-                SlabMaterial::NetherBrick => "minecraft:nether_brick_slab",
-                SlabMaterial::Quartz => "minecraft:quartz_slab",
-                SlabMaterial::RedSandstone => "minecraft:red_sandstone_slab",
-                SlabMaterial::Purpur => "minecraft:purpur_slab",
-                SlabMaterial::Prismarine => "minecraft:prismarine_slab",
-                SlabMaterial::PrismarineBrick => "minecraft:prismarine_brick_slab",
-                SlabMaterial::DarkPrismarine => "minecraft:dark_prismarine_slab",
                 SlabMaterial::Andesite => "minecraft:andesite_slab",
-                SlabMaterial::Granite => "minecraft:granite_slab",
-                SlabMaterial::Diorite => "minecraft:diorite_slab",
-                SlabMaterial::PolishedAndesite => "minecraft:polished_andesite_slab",
-                SlabMaterial::PolishedGranite => "minecraft:polished_granite_slab",
-                SlabMaterial::PolishedDiorite => "minecraft:polished_diorite_slab",
-                SlabMaterial::CutSandstone => "minecraft:cut_sandstone_slab",
-                SlabMaterial::CutRedSandstone => "minecraft:cut_red_sandstone_slab",
-                SlabMaterial::SmoothSandstone => "minecraft:smooth_sandstone_slab",
-                SlabMaterial::SmoothRedSandstone => "minecraft:smooth_red_sandstone_slab",
-                SlabMaterial::SmoothQuartz => "minecraft:smooth_quartz_slab",
-                SlabMaterial::SmoothStone => "minecraft:smooth_stone_slab",
-                SlabMaterial::RedNetherBrick => "minecraft:red_nether_brick_slab",
-                SlabMaterial::EndStoneBrick => "minecraft:end_stone_brick_slab",
+                SlabMaterial::Birch => "minecraft:birch_slab",
                 SlabMaterial::Blackstone => "minecraft:blackstone_slab",
-                SlabMaterial::PolishedBlackstone => "minecraft:polished_blackstone_slab",
-                SlabMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_slab",
+                SlabMaterial::Brick => "minecraft:brick_slab",
+                SlabMaterial::Copper{..} => todo!(),
+                SlabMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_slab",
+                SlabMaterial::Cobblestone => "minecraft:cobblestone_slab",
+                SlabMaterial::Crimson => "minecraft:crimson_slab",
+                SlabMaterial::CutRedSandstone => "minecraft:cut_red_sandstone_slab",
+                SlabMaterial::CutSandstone => "minecraft:cut_sandstone_slab",
+                SlabMaterial::DarkOak => "minecraft:dark_oak_slab",
+                SlabMaterial::DarkPrismarine => "minecraft:dark_prismarine_slab",
+                SlabMaterial::DeepslateBrick => "minecraft:deepslate_brick_slab",
+                SlabMaterial::DeepslateTile => "minecraft:deepslate_tile_slab",
+                SlabMaterial::Diorite => "minecraft:diorite_slab",
+                SlabMaterial::EndStoneBrick => "minecraft:end_stone_brick_slab",
+                SlabMaterial::Granite => "minecraft:granite_slab",
+                SlabMaterial::Jungle => "minecraft:jungle_slab",
                 SlabMaterial::MossyCobblestone => "minecraft:mossy_cobblestone_slab",
                 SlabMaterial::MossyStoneBrick => "minecraft:mossy_stone_brick_slab",
+                SlabMaterial::NetherBrick => "minecraft:nether_brick_slab",
+                SlabMaterial::Oak => "minecraft:oak_slab",
+                SlabMaterial::PetrifiedOak => "minecraft:petrified_oak_slab",
+                SlabMaterial::PolishedAndesite => "minecraft:polished_andesite_slab",
+                SlabMaterial::PolishedBlackstone => "minecraft:polished_blackstone_slab",
+                SlabMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_slab",
+                SlabMaterial::PolishedDeepslate => "minecraft:polished_deepslate_slab",
+                SlabMaterial::PolishedDiorite => "minecraft:polished_diorite_slab",
+                SlabMaterial::PolishedGranite => "minecraft:polished_granite_slab",
+                SlabMaterial::Prismarine => "minecraft:prismarine_slab",
+                SlabMaterial::PrismarineBrick => "minecraft:prismarine_brick_slab",
+                SlabMaterial::Purpur => "minecraft:purpur_slab",
+                SlabMaterial::Quartz => "minecraft:quartz_slab",
+                SlabMaterial::RedNetherBrick => "minecraft:red_nether_brick_slab",
+                SlabMaterial::RedSandstone => "minecraft:red_sandstone_slab",
+                SlabMaterial::Sandstone => "minecraft:sandstone_slab",
+                SlabMaterial::SmoothQuartz => "minecraft:smooth_quartz_slab",
+                SlabMaterial::SmoothRedSandstone => "minecraft:smooth_red_sandstone_slab",
+                SlabMaterial::SmoothSandstone => "minecraft:smooth_sandstone_slab",
+                SlabMaterial::SmoothStone => "minecraft:smooth_stone_slab",
+                SlabMaterial::Spruce => "minecraft:spruce_slab",
+                SlabMaterial::Stone => "minecraft:stone_slab",
+                SlabMaterial::StoneBrick => "minecraft:stone_brick_slab",
+                SlabMaterial::Warped => "minecraft:warped_slab",
             }
             PaletteItem::Block(Block::SmoothQuartz) => "minecraft:smooth_quartz",
             PaletteItem::Block(Block::SmoothStone) => "minecraft:smooth_stone",
@@ -1045,15 +1051,15 @@ impl PaletteItem {
             PaletteItem::Block(Block::MossyCobblestone) => "minecraft:mossy_cobblestone",
             PaletteItem::Block(Block::Obsidian) => "minecraft:obsidian",
             PaletteItem::Block(Block::CryingObsidian) => "minecraft:crying_obsidian",
-            PaletteItem::Block(Block::Torch { attached }) => match attached {
+            PaletteItem::Block(Block::Torch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:torch",
                 _ => "minecraft:wall_torch",
             }
-            PaletteItem::Block(Block::RedstoneTorch { attached }) => match attached {
+            PaletteItem::Block(Block::RedstoneTorch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:redstone_torch",
                 _ => "minecraft:redstone_wall_torch",
             }
-            PaletteItem::Block(Block::SoulTorch { attached }) => match attached {
+            PaletteItem::Block(Block::SoulTorch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:soul_torch",
                 _ => "minecraft:soul_wall_torch",
             }
@@ -1069,10 +1075,14 @@ impl PaletteItem {
                 StairMaterial::Birch => "minecraft:birch_stairs",
                 StairMaterial::Blackstone => "minecraft:blackstone_stairs",
                 StairMaterial::Brick => "minecraft:brick_stairs",
+                StairMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_stairs",
                 StairMaterial::Cobblestone => "minecraft:cobblestone_stairs",
+                StairMaterial::Copper { .. } => todo!(),
                 StairMaterial::Crimson => "minecraft:crimson_stairs",
                 StairMaterial::DarkOak => "minecraft:dark_oak_stairs",
                 StairMaterial::DarkPrismarine => "minecraft:dark_prismarine_stairs",
+                StairMaterial::DeepslateBrick => "minecraft:deepslate_brick_stairs",
+                StairMaterial::DeepslateTile => "minecraft:deepslate_tile_stairs",
                 StairMaterial::Diorite => "minecraft:diorite_stairs",
                 StairMaterial::EndStoneBrick => "minecraft:end_stone_brick_stairs",
                 StairMaterial::Granite => "minecraft:granite_stairs",
@@ -1084,6 +1094,7 @@ impl PaletteItem {
                 StairMaterial::PolishedAndesite => "minecraft:polished_andesite_stairs",
                 StairMaterial::PolishedBlackstone => "minecraft:polished_blackstone_stairs",
                 StairMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_stairs",
+                StairMaterial::PolishedDeepslate => "minecraft:polished_deepslate_stairs",
                 StairMaterial::PolishedDiorite => "minecraft:polished_diorite_stairs",
                 StairMaterial::PolishedGranite => "minecraft:polished_granite_stairs",
                 StairMaterial::Prismarine => "minecraft:prismarine_stairs",
@@ -1168,7 +1179,7 @@ impl PaletteItem {
                 PressurePlateMaterial::Stone => "minecraft:stone_pressure_plate",
                 PressurePlateMaterial::Warped => "minecraft:warped_pressure_plate",
             }
-            PaletteItem::Block(Block::RedstoneOre) => "minecraft:redstone_ore",
+            PaletteItem::Block(Block::RedstoneOre { .. }) => "minecraft:redstone_ore",
             PaletteItem::Block(Block::Button(material, _)) => match material {
                 ButtonMaterial::Acacia => "minecraft:acacia_button",
                 ButtonMaterial::Birch => "minecraft:birch_button",
@@ -1292,7 +1303,10 @@ impl PaletteItem {
                 WallMaterial::Andesite => "minecraft:andesite_wall",
                 WallMaterial::Blackstone => "minecraft:blackstone_wall",
                 WallMaterial::Brick => "minecraft:brick_wall",
+                WallMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_wall",
                 WallMaterial::Cobblestone => "minecraft:cobblestone_wall",
+                WallMaterial::DeepslateBrick => "minecraft:deepslate_brick_wall",
+                WallMaterial::DeepslateTile => "minecraft:deepslate_tile_wall",
                 WallMaterial::Diorite => "minecraft:diorite_wall",
                 WallMaterial::EndStoneBrick => "minecraft:end_stone_brick_wall",
                 WallMaterial::Granite => "minecraft:granite_wall",
@@ -1301,6 +1315,7 @@ impl PaletteItem {
                 WallMaterial::NetherBrick => "minecraft:nether_brick_wall",
                 WallMaterial::PolishedBlackstone => "minecraft:polished_blackstone_wall",
                 WallMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_wall",
+                WallMaterial::PolishedDeepslate => "minecraft:polished_deepslate_wall",
                 WallMaterial::Prismarine => "minecraft:prismarine_wall",
                 WallMaterial::RedNetherBrick => "minecraft:red_nether_brick_wall",
                 WallMaterial::RedSandstone => "minecraft:red_sandstone_wall",
@@ -1312,6 +1327,7 @@ impl PaletteItem {
                 Some(plant) => match plant {
                     PottedPlant::AcaciaSapling => "minecraft:potted_acacia_sapling",
                     PottedPlant::Allium => "minecraft:potted_allium",
+                    PottedPlant::Azalea => "minecraft:potted_azalea_bush",
                     PottedPlant::AzureBluet => "minecraft:potted_azure_bluet",
                     PottedPlant::Bamboo => "minecraft:potted_bamboo",
                     PottedPlant::BirchSapling => "minecraft:potted_birch_sapling",
@@ -1325,6 +1341,7 @@ impl PaletteItem {
                     PottedPlant::DarkOakSapling => "minecraft:potted_dark_oak_sapling",
                     PottedPlant::DeadBush => "minecraft:potted_dead_bush",
                     PottedPlant::Fern => "minecraft:potted_fern",
+                    PottedPlant::FloweringAzalea => "minecraft:potted_flowering_azalea_bush",
                     PottedPlant::JungleSapling => "minecraft:potted_jungle_sapling",
                     PottedPlant::LilyOfTheValley => "minecraft:potted_lily_of_the_valley",
                     PottedPlant::OakSapling => "minecraft:potted_oak_sapling",
@@ -1694,6 +1711,24 @@ impl PaletteItem {
             PaletteItem::ProtoBlock(ProtoBlock::BeeNest { .. }) => "minecraft:bee_nest",
             PaletteItem::ProtoBlock(ProtoBlock::BlastFurnace { .. }) => "minecraft:blast_furnace",
             PaletteItem::ProtoBlock(ProtoBlock::Smoker { .. }) => "minecraft:smoker",
+            PaletteItem::Block(Block::CobbledDeepslate) => "minecraft:cobbled_deepslate",
+            PaletteItem::Block(Block::Calcite) => "minecraft:calcite",
+            PaletteItem::Block(Block::CopperOre) => "minecraft:copper_ore",
+            PaletteItem::Block(Block::DeepslateCoalOre) => "minecraft:deepslate_coal_ore",
+            PaletteItem::Block(Block::DeepslateCopperOre) => "minecraft:deepslate_copper_ore",
+            PaletteItem::Block(Block::DeepslateIronOre) => "minecraft:deepslate_iron_ore",
+            PaletteItem::Block(Block::DeepslateGoldOre) => "minecraft:deepslate_gold_ore",
+            PaletteItem::Block(Block::DeepslateDiamondOre) => "minecraft:deepslate_diamond_ore",
+            PaletteItem::Block(Block::DeepslateRedstoneOre { .. }) => "minecraft:deepslate_redstone_ore",
+            PaletteItem::Block(Block::DeepslateLapisLazuliOre) => "minecraft:deepslate_lapis_ore",
+            PaletteItem::Block(Block::DeepslateEmeraldOre) => "minecraft:deepslate_emerald_ore",
+            PaletteItem::Block(Block::Deepslate { .. }) => "minecraft:deepslate",
+            PaletteItem::Block(Block::PolishedDeepslate) => "minecraft:polished_deepslate",
+            PaletteItem::Block(Block::DeepslateBricks) => "minecraft:deepslate_bricks",
+            PaletteItem::Block(Block::CrackedDeepslateBricks) => "minecraft:cracked_deepslate_bricks",
+            PaletteItem::Block(Block::DeepslateTiles) => "minecraft:deepslate_tiles",
+            PaletteItem::Block(Block::CrackedDeepslateTiles) => "minecraft:cracked_deepslate_tiles",
+            PaletteItem::Block(Block::ChiseledDeepslate { .. }) => "minecraft:chiseled_deepslate",
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
@@ -1949,11 +1984,11 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:mossy_cobblestone" => block(Block::MossyCobblestone),
             "minecraft:obsidian" => block(Block::Obsidian),
             "minecraft:crying_obsidian" => block(Block::CryingObsidian),
-            "minecraft:torch" => block(Block::Torch { attached: Surface5::Down }),
+            "minecraft:torch" => block(Block::Torch { mounted_at: Surface5::Down }),
             "minecraft:wall_torch" => block(wall_torch(&properties)),
-            "minecraft:redstone_torch" => block(Block::RedstoneTorch { attached: Surface5::Down }),
+            "minecraft:redstone_torch" => block(Block::RedstoneTorch { mounted_at: Surface5::Down }),
             "minecraft:redstone_wall_torch" => block(redstone_wall_torch(&properties)),
-            "minecraft:soul_torch" => block(Block::SoulTorch { attached: Surface5::Down }),
+            "minecraft:soul_torch" => block(Block::SoulTorch { mounted_at: Surface5::Down }),
             "minecraft:soul_wall_torch" => block(soul_wall_torch(&properties)),
             "minecraft:fire" => block(fire(&properties)),
             "minecraft:soul_fire" => block(Block::SoulFire),
@@ -2041,7 +2076,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:polished_blackstone_pressure_plate" => block(pressure_plate(PressurePlateMaterial::PolishedBlackstone)),
             "minecraft:heavy_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Iron)),
             "minecraft:light_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Gold)),
-            "minecraft:redstone_ore" => block(Block::RedstoneOre),
+            "minecraft:redstone_ore" => todo!(),
             "minecraft:oak_button" => block(button(ButtonMaterial::Oak, &properties)),
             "minecraft:spruce_button" => block(button(ButtonMaterial::Spruce, &properties)),
             "minecraft:birch_button" => block(button(ButtonMaterial::Birch, &properties)),
@@ -2794,15 +2829,15 @@ fn slab(material: SlabMaterial, properties: &Option<Value>) -> Block {
 }
 
 fn wall_torch(properties: &Option<Value>) -> Block {
-    Block::Torch { attached: wall_torch_attached(properties) }
+    Block::Torch { mounted_at: wall_torch_attached(properties) }
 }
 
 fn redstone_wall_torch(properties: &Option<Value>) -> Block {
-    Block::RedstoneTorch { attached: wall_torch_attached(properties) }
+    Block::RedstoneTorch { mounted_at: wall_torch_attached(properties) }
 }
 
 fn soul_wall_torch(properties: &Option<Value>) -> Block {
-    Block::SoulTorch { attached: wall_torch_attached(properties) }
+    Block::SoulTorch { mounted_at: wall_torch_attached(properties) }
 }
 
 fn wall_torch_attached(properties: &Option<Value>) -> Surface5 {

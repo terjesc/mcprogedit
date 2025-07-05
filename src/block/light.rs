@@ -62,15 +62,16 @@ impl Block {
 
             // Light level 9
             // Missing: Candles (x3, lit)
-            // DeepslateRedstoneOre(touched)
-            // RedstoneOre(touched)
+            Block::DeepslateRedstoneOre { lit: true }
+            | Block::RedstoneOre { lit: true } => Some(9),
             Block::SeaPickle { count: n, waterlogged: true } if *n == 2 => Some(9),
 
             // Light level 8
 
             // Light level 7
-            Block::EnderChest { .. } => Some(7),
-            // Missing: GlowLichen, RedstoneTorch(lit), RespawnAnchor(2/4 charged)
+            Block::EnderChest { .. }
+            | Block::GlowLichen { .. } => Some(7),
+            // Missing: RedstoneTorch(lit), RespawnAnchor(2/4 charged)
 
             // Light level 6
             Block::SeaPickle { count: n, waterlogged: true } if *n == 1 => Some(6),
@@ -264,7 +265,7 @@ impl Block {
             | Block::RedSand
             | Block::RedSandstone
             | Block::RedstoneLamp // Transparent when lit?
-            | Block::RedstoneOre
+            | Block::RedstoneOre { .. }
             | Block::RespawnAnchor { .. }
             | Block::Sand
             | Block::Sandstone
@@ -525,7 +526,7 @@ impl Block {
             | Block::RedSand
             | Block::RedSandstone
             | Block::RedstoneLamp // Transparent when lit?
-            | Block::RedstoneOre
+            | Block::RedstoneOre { .. }
             | Block::RespawnAnchor { .. }
             | Block::Sand
             | Block::Sandstone

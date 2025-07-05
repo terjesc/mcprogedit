@@ -236,6 +236,7 @@ impl Chunk {
                                     LeavesMaterial::Jungle => (18, data | 3),
                                     LeavesMaterial::Acacia => (161, data),
                                     LeavesMaterial::DarkOak => (161, data | 1),
+                                    _ => (18, data), // fallback to oak
                                 }
                             }
                             Block::Sponge => (19, 0),
@@ -399,7 +400,7 @@ impl Chunk {
                             Block::Bookshelf => (47, 0),
                             Block::MossyCobblestone => (48, 0),
                             Block::Obsidian => (49, 0),
-                            Block::Torch { attached } => (50, facing5_xwensd(attached)),
+                            Block::Torch { mounted_at } => (50, facing5_xwensd(mounted_at)),
                             Block::Fire { age } => (51, age.get() as u8),
                             // NB 52 mob spawner is not implemented
                             Block::Stairs(stair) => {
@@ -489,10 +490,10 @@ impl Chunk {
                             }
                             // 71 iron door already handled
                             // 72 oak pressure plate already handled
-                            Block::RedstoneOre => (73, 0),
-                            // NB 74 lit redstone ore is not implemented
+                            Block::RedstoneOre { lit: false } => (73, 0),
+                            Block::RedstoneOre { lit: true } => (74, 0),
                             // NB 75 unlit redstone torch is not implemented
-                            Block::RedstoneTorch { attached } => (76, facing5_xwensd(attached)),
+                            Block::RedstoneTorch { mounted_at } => (76, facing5_xwensd(mounted_at)),
                             Block::Button(material, facing) => {
                                 let data = button_facing(facing);
                                 match material {
@@ -1355,7 +1356,7 @@ impl Chunk {
                         48 => Block::MossyCobblestone,
                         49 => Block::Obsidian,
                         50 => Block::Torch {
-                            attached: facing5_xwensd(data[index]),
+                            mounted_at: facing5_xwensd(data[index]),
                         },
                         51 => Block::Fire {
                             age: Int0Through15::new(data[index] & 0xF).unwrap(),
@@ -1515,9 +1516,14 @@ impl Chunk {
                         72 => Block::PressurePlate {
                             material: PressurePlateMaterial::Oak,
                         },
-                        73 | 74 => Block::RedstoneOre,
+                        73 => Block::RedstoneOre {
+                            lit: false,
+                        },
+                        74 => Block::RedstoneOre {
+                            lit: true,
+                        },
                         75 | 76 => Block::RedstoneTorch {
-                            attached: facing5_xwensd(data[index]),
+                            mounted_at: facing5_xwensd(data[index]),
                         },
                         77 => Block::Button(ButtonMaterial::Stone, button_facing(data[index])),
                         78 => Block::Snow {
