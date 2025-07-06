@@ -789,6 +789,12 @@ impl PaletteItem {
                 properties.insert("honey_level".into(), nbt::Value::String(honey_level.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Amethyst { facing, waterlogged, .. }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
 
             /*
             */
@@ -1002,7 +1008,16 @@ impl PaletteItem {
                 SlabMaterial::Birch => "minecraft:birch_slab",
                 SlabMaterial::Blackstone => "minecraft:blackstone_slab",
                 SlabMaterial::Brick => "minecraft:brick_slab",
-                SlabMaterial::Copper{..} => todo!(),
+                SlabMaterial::Copper { oxidation, waxed } => match (oxidation, waxed) {
+                    (Oxidation::None, false) => "minecraft:cut_copper_slab",
+                    (Oxidation::Exposed, false) => "minecraft:exposed_cut_copper_slab",
+                    (Oxidation::Weathered, false) => "minecraft:weathered_cut_copper_slab",
+                    (Oxidation::Oxidized, false) => "minecraft:oxidized_cut_copper_slab",
+                    (Oxidation::None, true) => "minecraft:waxed_cut_copper_slab",
+                    (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper_slab",
+                    (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper_slab",
+                    (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper_slab",
+                }
                 SlabMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_slab",
                 SlabMaterial::Cobblestone => "minecraft:cobblestone_slab",
                 SlabMaterial::Crimson => "minecraft:crimson_slab",
@@ -1077,7 +1092,16 @@ impl PaletteItem {
                 StairMaterial::Brick => "minecraft:brick_stairs",
                 StairMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_stairs",
                 StairMaterial::Cobblestone => "minecraft:cobblestone_stairs",
-                StairMaterial::Copper { .. } => todo!(),
+                StairMaterial::Copper { oxidation, waxed } => match (oxidation, waxed) {
+                    (Oxidation::None, false) => "minecraft:cut_copper_stairs",
+                    (Oxidation::Exposed, false) => "minecraft:exposed_cut_copper_stairs",
+                    (Oxidation::Weathered, false) => "minecraft:weathered_cut_copper_stairs",
+                    (Oxidation::Oxidized, false) => "minecraft:oxidized_cut_copper_stairs",
+                    (Oxidation::None, true) => "minecraft:waxed_cut_copper_stairs",
+                    (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper_stairs",
+                    (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper_stairs",
+                    (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper_stairs",
+                }
                 StairMaterial::Crimson => "minecraft:crimson_stairs",
                 StairMaterial::DarkOak => "minecraft:dark_oak_stairs",
                 StairMaterial::DarkPrismarine => "minecraft:dark_prismarine_stairs",
@@ -1711,9 +1735,76 @@ impl PaletteItem {
             PaletteItem::ProtoBlock(ProtoBlock::BeeNest { .. }) => "minecraft:bee_nest",
             PaletteItem::ProtoBlock(ProtoBlock::BlastFurnace { .. }) => "minecraft:blast_furnace",
             PaletteItem::ProtoBlock(ProtoBlock::Smoker { .. }) => "minecraft:smoker",
-            PaletteItem::Block(Block::CobbledDeepslate) => "minecraft:cobbled_deepslate",
+
+            // Added in 1.17
+            PaletteItem::Block(Block::Amethyst { size, .. }) => match size {
+                AmethystSize::Small => "minecraft:small_amethyst_bud",
+                AmethystSize::Medium => "minecraft:medium_amethyst_bud",
+                AmethystSize::Large => "minecraft:large_amethyst_bud",
+                AmethystSize::Cluster => "minecraft:amethyst_cluster",
+            }
+            PaletteItem::Block(Block::Azalea) => "minecraft:azalea",
+            PaletteItem::Block(Block::BlockOfAmethyst) => "minecraft:amethyst_block",
+            PaletteItem::Block(Block::BlockOfCopper { oxidation, waxed }) => match (oxidation, waxed) {
+                (Oxidation::None, false) => "minecraft:copper_block",
+                (Oxidation::Exposed, false) => "minecraft:exposed_copper",
+                (Oxidation::Weathered, false) => "minecraft:weathered_copper",
+                (Oxidation::Oxidized, false) => "minecraft:oxidized_copper",
+                (Oxidation::None, true) => "minecraft:waxed_copper_block",
+                (Oxidation::Exposed, true) => "minecraft:waxed_exposed_copper",
+                (Oxidation::Weathered, true) => "minecraft:waxed_weathered_copper",
+                (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_copper",
+            }
+            PaletteItem::Block(Block::BlockOfRawCopper) => "minecraft:raw_copper_block",
+            PaletteItem::Block(Block::BlockOfRawGold) => "minecraft:raw_gold_block",
+            PaletteItem::Block(Block::BlockOfRawIron) => "minecraft:raw_iron_block",
+            PaletteItem::Block(Block::BuddingAmethyst) => "minecraft:budding_amethyst",
             PaletteItem::Block(Block::Calcite) => "minecraft:calcite",
+            PaletteItem::Block(Block::Candle { colour, .. }) => match colour {
+                None => "minecraft:candle",
+                Some(Colour::White) => "minecraft:white_candle",
+                Some(Colour::Orange) => "minecraft:orange_candle",
+                Some(Colour::Magenta) => "minecraft:magenta_candle",
+                Some(Colour::LightBlue)=> "minecraft:light_blue_candle",
+                Some(Colour::Yellow) => "minecraft:yellow_candle",
+                Some(Colour::Lime) => "minecraft:lime_candle",
+                Some(Colour::Pink) => "minecraft:pink_candle",
+                Some(Colour::Gray) => "minecraft:gray_candle",
+                Some(Colour::LightGray) => "minecraft:light_gray_candle",
+                Some(Colour::Cyan) => "minecraft:cyan_candle",
+                Some(Colour::Purple) => "minecraft:purple_candle",
+                Some(Colour::Blue) => "minecraft:blue_candle",
+                Some(Colour::Brown)=> "minecraft:brown_candle",
+                Some(Colour::Green) => "minecraft:green_candle",
+                Some(Colour::Red) => "minecraft:red_candle",
+                Some(Colour::Black) => "minecraft:black_candle",
+            }
+            PaletteItem::Block(Block::CaveVines { growth_stage, .. }) => {
+                if growth_stage.is_some() {
+                    "minecraft:cave_vines"
+                } else {
+                    "minecraft:cave_vines_plant"
+                }
+            }
+            PaletteItem::Block(Block::CobbledDeepslate) => "minecraft:cobbled_deepslate",
             PaletteItem::Block(Block::CopperOre) => "minecraft:copper_ore",
+            PaletteItem::Block(Block::CutCopper { oxidation, waxed }) => match (oxidation, waxed) {
+                (Oxidation::None, false) => "minecraft:cut_copper",
+                (Oxidation::Exposed, false) => "minecraft:exposed_cut_copper",
+                (Oxidation::Weathered, false) => "minecraft:weathered_cut_copper",
+                (Oxidation::Oxidized, false) => "minecraft:oxidized_cut_copper",
+                (Oxidation::None, true) => "minecraft:waxed_cut_copper",
+                (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper",
+                (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper",
+                (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper",
+            }
+            PaletteItem::Block(Block::Deepslate { .. }) => "minecraft:deepslate",
+            PaletteItem::Block(Block::PolishedDeepslate) => "minecraft:polished_deepslate",
+            PaletteItem::Block(Block::DeepslateBricks) => "minecraft:deepslate_bricks",
+            PaletteItem::Block(Block::CrackedDeepslateBricks) => "minecraft:cracked_deepslate_bricks",
+            PaletteItem::Block(Block::DeepslateTiles) => "minecraft:deepslate_tiles",
+            PaletteItem::Block(Block::CrackedDeepslateTiles) => "minecraft:cracked_deepslate_tiles",
+            PaletteItem::Block(Block::ChiseledDeepslate) => "minecraft:chiseled_deepslate",
             PaletteItem::Block(Block::DeepslateCoalOre) => "minecraft:deepslate_coal_ore",
             PaletteItem::Block(Block::DeepslateCopperOre) => "minecraft:deepslate_copper_ore",
             PaletteItem::Block(Block::DeepslateIronOre) => "minecraft:deepslate_iron_ore",
@@ -1722,13 +1813,9 @@ impl PaletteItem {
             PaletteItem::Block(Block::DeepslateRedstoneOre { .. }) => "minecraft:deepslate_redstone_ore",
             PaletteItem::Block(Block::DeepslateLapisLazuliOre) => "minecraft:deepslate_lapis_ore",
             PaletteItem::Block(Block::DeepslateEmeraldOre) => "minecraft:deepslate_emerald_ore",
-            PaletteItem::Block(Block::Deepslate { .. }) => "minecraft:deepslate",
-            PaletteItem::Block(Block::PolishedDeepslate) => "minecraft:polished_deepslate",
-            PaletteItem::Block(Block::DeepslateBricks) => "minecraft:deepslate_bricks",
-            PaletteItem::Block(Block::CrackedDeepslateBricks) => "minecraft:cracked_deepslate_bricks",
-            PaletteItem::Block(Block::DeepslateTiles) => "minecraft:deepslate_tiles",
-            PaletteItem::Block(Block::CrackedDeepslateTiles) => "minecraft:cracked_deepslate_tiles",
-            PaletteItem::Block(Block::ChiseledDeepslate { .. }) => "minecraft:chiseled_deepslate",
+
+            // TODO: remaining 1.17 blocks from Dripleaf, at https://minecraft.wiki/w/Java_Edition_1.17
+
             //PaletteItem::Block(Block::) => "minecraft:",
 
             /*
@@ -2561,6 +2648,27 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:bee_nest" => proto(proto_bee_nest(&properties)),
             "minecraft:blast_furnace" => proto(proto_blast_furnace(&properties)),
             "minecraft:smoker" => proto(proto_smoker(&properties)),
+            "minecraft:candle" => block(candles(&properties, None)),
+            "minecraft:white_candle" => block(candles(&properties, Some(Colour::White))),
+            "minecraft:orange_candle" => block(candles(&properties, Some(Colour::Orange))),
+            "minecraft:magenta_candle" => block(candles(&properties, Some(Colour::Magenta))),
+            "minecraft:light_blue_candle" => block(candles(&properties, Some(Colour::LightBlue))),
+            "minecraft:yellow_candle" => block(candles(&properties, Some(Colour::Yellow))),
+            "minecraft:lime_candle" => block(candles(&properties, Some(Colour::Lime))),
+            "minecraft:pink_candle" => block(candles(&properties, Some(Colour::Pink))),
+            "minecraft:gray_candle" => block(candles(&properties, Some(Colour::Gray))),
+            "minecraft:light_gray_candle" => block(candles(&properties, Some(Colour::LightGray))),
+            "minecraft:cyan_candle" => block(candles(&properties, Some(Colour::Cyan))),
+            "minecraft:purple_candle" => block(candles(&properties, Some(Colour::Purple))),
+            "minecraft:blue_candle" => block(candles(&properties, Some(Colour::Blue))),
+            "minecraft:brown_candle" => block(candles(&properties, Some(Colour::Brown))),
+            "minecraft:green_candle" => block(candles(&properties, Some(Colour::Green))),
+            "minecraft:red_candle" => block(candles(&properties, Some(Colour::Red))),
+            "minecraft:black_candle" => block(candles(&properties, Some(Colour::Black))),
+            "minecraft:small_amethyst_bud" => block(amethyst(&properties, AmethystSize::Small)),
+            "minecraft:medium_amethyst_bud" => block(amethyst(&properties, AmethystSize::Medium)),
+            "minecraft:large_amethyst_bud" => block(amethyst(&properties, AmethystSize::Large)),
+            "minecraft:amethyst_cluster" => block(amethyst(&properties, AmethystSize::Cluster)),
             //"minecraft:" => block(Block::),
 
             /*
@@ -2643,6 +2751,14 @@ fn wood_alignment(properties: &Option<Value>) -> Axis3 {
 //
 // Convenience functions for blocks
 //
+
+fn amethyst(properties: &Option<Value>, size: AmethystSize) -> Block {
+    Block::Amethyst {
+        facing: facing_surface6(properties),
+        size,
+        waterlogged: waterlogged(properties),
+    }
+}
 
 fn sapling(material: SaplingMaterial, properties: &Option<Value>) -> Block {
     let growth_stage = properties_lookup_string(properties, "stage")
@@ -3215,6 +3331,15 @@ fn sea_pickle(properties: &Option<Value>) -> Block {
     }
 }
 
+fn candles(properties: &Option<Value>, colour: Option<Colour>) -> Block {
+    Block::Candle{
+        colour: colour,
+        count: candles1_4(properties),
+        lit: lit(properties),
+        waterlogged: waterlogged(properties),
+    }
+}
+
 fn kelp(properties: &Option<Value>) -> Block {
     Block::Kelp{ growth_stage: age0_25(properties) }
 }
@@ -3328,6 +3453,7 @@ fn soul_campfire(properties: &Option<Value>) -> Block {
         waterlogged: waterlogged(properties),
     }
 }
+
 
 /*
 */
@@ -3674,6 +3800,15 @@ fn pickles1_4(properties: &Option<Value>) -> Int1Through4 {
         .and_then(i_1_through_4)
         .unwrap_or_else(|| {
             warn!("Using fallback value for \"pickles\" property of a block.");
+            Int1Through4::new(1).unwrap()
+        })
+}
+
+fn candles1_4(properties: &Option<Value>) -> Int1Through4 {
+    properties_lookup_string(properties, "candles")
+        .and_then(i_1_through_4)
+        .unwrap_or_else(|| {
+            warn!("Using fallback value for \"candles\" property of a block.");
             Int1Through4::new(1).unwrap()
         })
 }

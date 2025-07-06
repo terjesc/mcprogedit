@@ -18,7 +18,7 @@ use crate::utils;
 impl Chunk {
     // This function reads a "Section" nbt entry, converting it into an array of
     // block::Block elements, using the save format for Minecraft 1.13 and higher.
-    // It also needs a pre-parsed hasmap of block entities, and some meta data
+    // It also needs a pre-parsed hashmap of block entities, and some meta data
     // such as save format version (data version) and where the chunk is located
     // in the world.
     pub(crate) fn post_flattening_fill_block_cuboid_from_section(
@@ -102,6 +102,7 @@ impl Chunk {
     pub(crate) fn post_flattening_sections(&self) -> nbt::Value {
         let mut sections = Vec::new();
 
+        // TODO start at y -4 after the downwards world extension
         for y in 0..=15 {
             sections.push(self.post_flattening_section(y));
         }

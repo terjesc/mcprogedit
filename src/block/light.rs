@@ -30,10 +30,10 @@ impl Block {
             | Block::EndPortal
             | Block::Fire { .. }
             | Block::Glowstone
-            | Block::Lantern { .. }
-            | Block::LavaSource
-            | Block::Lava { .. }
             | Block::JackOLantern { .. }
+            | Block::Lantern { .. }
+            | Block::Lava { .. }
+            | Block::LavaSource
             // Missing: RedstoneLamp (must know if lit or not)
             // Missing: RespawnAnchor (fully (4/4) charged)
             | Block::SeaLantern
@@ -50,7 +50,7 @@ impl Block {
             | Block::Smoker(_) => Some(13),
 
             // Light level 12
-            // Missing: Candles (x4, lit)
+            Block::Candle { count: n, lit: true, .. } if *n == 4 => Some(12),
             Block::SeaPickle { count: n, waterlogged: true } if *n == 3 => Some(12),
 
             // Light level 11
@@ -61,7 +61,7 @@ impl Block {
             // Missing: CryingObsidian, SoulCampfire(lit), SoulFire, SoulLantern, SoulTorch
 
             // Light level 9
-            // Missing: Candles (x3, lit)
+            Block::Candle { count: n, lit: true, .. } if *n == 3 => Some(9),
             Block::DeepslateRedstoneOre { lit: true }
             | Block::RedstoneOre { lit: true } => Some(9),
             Block::SeaPickle { count: n, waterlogged: true } if *n == 2 => Some(9),
@@ -74,8 +74,8 @@ impl Block {
             // Missing: RedstoneTorch(lit), RespawnAnchor(2/4 charged)
 
             // Light level 6
+            Block::Candle { count: n, lit: true, .. } if *n == 2 => Some(6),
             Block::SeaPickle { count: n, waterlogged: true } if *n == 1 => Some(6),
-            // Missing: Candles (x2, lit)
 
             // Light level 5
             // Missing: AmethystCluster
@@ -84,8 +84,9 @@ impl Block {
             // Missing: AmethystBud(large)
 
             // Light level 3
+            Block::Candle { count: n, lit: true, .. } if *n == 1 => Some(3),
             Block::MagmaBlock => Some(3),
-            // Missing: Candles (x1, lit), RespawnAnchor(1/4 charged)
+            // Missing: RespawnAnchor(1/4 charged)
 
             // Light level 2
             // Missing: AmethystBud(medium)
@@ -95,10 +96,11 @@ impl Block {
             Block::BrewingStand(_)
             | Block::BrownMushroom
             | Block::DragonEgg
-            | Block::EndPortalFrame { .. } => Some(1),
+            | Block::EndPortalFrame { .. }
+            | Block::SculkSensor { .. } => Some(1),
 
             // All levels possible
-            // Missing: LightBlock
+            Block::Light { level, .. } => Some(i8::from(*level) as u8),
 
             _ => None,
         }
@@ -158,12 +160,17 @@ impl Block {
             | Block::BeeNest { .. }
             | Block::Blackstone
             | Block::BlastFurnace(_)
+            | Block::BlockOfAmethyst
             | Block::BlockOfCoal
+            | Block::BlockOfCopper { .. }
             | Block::BlockOfDiamond
             | Block::BlockOfEmerald
             | Block::BlockOfGold
             | Block::BlockOfIron
             | Block::BlockOfNetherite
+            | Block::BlockOfRawCopper
+            | Block::BlockOfRawGold
+            | Block::BlockOfRawIron
             | Block::BlockOfQuartz
             | Block::BlockOfRedstone
             | Block::BlueIce
@@ -171,9 +178,12 @@ impl Block {
             | Block::Bookshelf
             | Block::BrickBlock
             | Block::BrownMushroomBlock { .. }
+            | Block::BuddingAmethyst
             | Block::Cactus { .. }
+            | Block::Calcite
             | Block::CartographyTable
             | Block::CarvedPumpkin { .. }
+            | Block::ChiseledDeepslate
             | Block::ChiseledNetherBricks
             | Block::ChiseledPolishedBlackstone
             | Block::ChiseledQuartzBlock
@@ -183,25 +193,42 @@ impl Block {
             | Block::Clay
             | Block::CoalOre
             | Block::CoarseDirt
+            | Block::CobbledDeepslate
             | Block::Cobblestone
             | Block::CommandBlock(_)
             | Block::Concrete { .. }
             | Block::ConcretePowder { .. }
+            | Block::CopperOre
             | Block::CoralBlock { .. }
+            | Block::CrackedDeepslateBricks
+            | Block::CrackedDeepslateTiles
             | Block::CrackedNetherBricks
             | Block::CrackedPolishedBlackstoneBricks
             | Block::CrackedStoneBricks
             | Block::CraftingTable
             | Block::CrimsonNylium
             | Block::CryingObsidian
+            | Block::CutCopper { .. }
             | Block::CutRedSandstone
             | Block::CutSandstone
             | Block::DarkPrismarine
+            | Block::Deepslate { .. }
+            | Block::DeepslateBricks
+            | Block::DeepslateCoalOre
+            | Block::DeepslateCopperOre
+            | Block::DeepslateIronOre
+            | Block::DeepslateGoldOre
+            | Block::DeepslateDiamondOre
+            | Block::DeepslateRedstoneOre { .. }
+            | Block::DeepslateLapisLazuliOre
+            | Block::DeepslateEmeraldOre
+            | Block::DeepslateTiles
             | Block::DiamondOre
             | Block::Diorite
             | Block::Dirt
             | Block::Dispenser(_)
             | Block::DriedKelpBlock
+            | Block::Dripstone
             | Block::Dropper(_)
             | Block::EmeraldOre
             | Block::EndStone
@@ -216,6 +243,7 @@ impl Block {
             | Block::Gravel
             | Block::HayBale { .. }
             | Block::HoneycombBlock
+            | Block::InfestedDeepslate { .. }
             | Block::InfestedChiseledStoneBricks
             | Block::InfestedCobblestone
             | Block::InfestedCrackedStoneBricks
@@ -232,6 +260,7 @@ impl Block {
             | Block::Loom { .. }
             | Block::MagmaBlock
             | Block::Melon
+            | Block::Moss
             | Block::MossyCobblestone
             | Block::MossyStoneBricks
             | Block::MushroomStem { .. }
@@ -250,6 +279,7 @@ impl Block {
             | Block::PolishedBasalt { .. }
             | Block::PolishedBlackstone
             | Block::PolishedBlackstoneBricks
+            | Block::PolishedDeepslate
             | Block::PolishedDiorite
             | Block::PolishedGranite
             | Block::Prismarine
@@ -267,12 +297,14 @@ impl Block {
             | Block::RedstoneLamp // Transparent when lit?
             | Block::RedstoneOre { .. }
             | Block::RespawnAnchor { .. }
+            | Block::RootedDirt
             | Block::Sand
             | Block::Sandstone
             | Block::SeaLantern
             | Block::Shroomlight
             | Block::SmithingTable
             | Block::Smoker { .. }
+            | Block::SmoothBasalt
             | Block::SmoothQuartz
             | Block::SmoothRedSandstone
             | Block::SmoothSandstone
@@ -280,11 +312,14 @@ impl Block {
             | Block::SnowBlock
             | Block::SoulSoil
             | Block::Sponge
+            | Block::SporeBlossom
             | Block::Stone
             | Block::StoneBricks
             | Block::Target
             | Block::Terracotta { .. }
+            | Block::TintedGlass
             | Block::TNT
+            | Block::Tuff
             | Block::WarpedNylium
             | Block::WarpedRoots
             | Block::WarpedWartBlock
@@ -294,7 +329,9 @@ impl Block {
             // Transparent
             Block::None
             | Block::Air
+            | Block::Amethyst { .. }
             | Block::Anvil { .. }
+            | Block::Azalea
             | Block::Bamboo { .. }
             | Block::Banner(_)
             | Block::Barrier
@@ -306,10 +343,12 @@ impl Block {
             | Block::Button(_, _)
             | Block::Cake { .. }
             | Block::Campfire { .. }
+            | Block::Candle { .. }
             | Block::Carpet { .. }
             | Block::Carrots { .. }
             | Block::Cauldron { .. }
             | Block::CaveAir
+            | Block::CaveVines { .. }
             | Block::Chain { .. }
             | Block::Chest(_)
             | Block::Cocoa { .. }
@@ -322,6 +361,7 @@ impl Block {
             | Block::DeadBush
             | Block::Door(_)
             | Block::DragonEgg
+            | Block::Dripleaf { .. }
             | Block::EndPortal
             | Block::EndRod { .. }
             | Block::EnderChest { .. }
@@ -332,9 +372,11 @@ impl Block {
             | Block::FlowerPot(_)
             | Block::Glass { .. }
             | Block::GlassPane { .. }
+            | Block::GlowLichen { .. }
             | Block::Glowstone
             | Block::Grass(_)
             | Block::Grindstone(_)
+            | Block::HangingRoots { .. }
             | Block::Head(_)
             | Block::Hopper(_)
             | Block::IronBars { .. }
@@ -343,12 +385,17 @@ impl Block {
             | Block::Ladder { .. }
             | Block::Lantern { .. }
             | Block::Lever(_, _)
+            | Block::Light { .. }
+            | Block::LightningRod { .. }
             | Block::LilyPad
             | Block::MelonStem { .. }
+            | Block::MossCarpet
             | Block::NetherPortal { .. }
             | Block::NetherSprouts
             | Block::NetherWart { .. }
+            | Block::PointedDripstone { .. }
             | Block::Potatoes { .. }
+            | Block::PowderSnow
             | Block::PressurePlate { .. }
             | Block::PumpkinStem { .. }
             | Block::Rail { .. }
@@ -360,6 +407,7 @@ impl Block {
             | Block::RedstoneWire
             | Block::Sapling { .. }
             | Block::Scaffolding { .. }
+            | Block::SculkSensor { .. }
             | Block::SeaPickle { .. }
             | Block::Seagrass { .. }
             | Block::Sign(_)
@@ -681,6 +729,8 @@ impl Block {
             | Block::Spawner
             | Block::StructureBlock
             => LightBlockingProperty::Unknown,
+
+            _ => LightBlockingProperty::Unknown,
         }
     }
 }

@@ -142,7 +142,7 @@ impl BlockCuboid {
         cuboid
     }
 
-    fn generic_height_map(&self, block_filter: &Fn(&Block) -> bool) -> HeightMap {
+    fn generic_height_map(&self, block_filter: &dyn Fn(&Block) -> bool) -> HeightMap {
         let mut height_map = HeightMap::new((self.x_dim, self.z_dim));
 
         for x in 0..self.x_dim {

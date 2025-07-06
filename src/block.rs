@@ -277,10 +277,11 @@ pub enum OnOffState {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
-pub enum AmethystBudSize {
+pub enum AmethystSize {
     Small,
     Medium,
     Large,
+    Cluster,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
@@ -322,19 +323,15 @@ pub enum SculkSensorPhase {
 /// Some of the more complex blocks have their own data structures, that are put inside
 /// the corresponding enum variant (often boxed.)
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub enum Block { // TODO Next addition is `Dripleaf` from https://minecraft.wiki/w/Java_Edition_1.17
+pub enum Block {
     None,
     Unknown(Option<u16>),
     Air,
-    AmethystBud {
-        size: AmethystBudSize,
+    Amethyst {
         facing: Surface6,
+        size: AmethystSize,
         waterlogged: bool,
     }, // TODO 1.17 (added in 1.17)
-    AmethystCluster {
-        facing: Surface6,
-        waterlogged: bool,
-    }, // TODO 1.17
     AncientDebris,
     Anvil {
         facing: Surface4,
@@ -412,6 +409,7 @@ pub enum Block { // TODO Next addition is `Dripleaf` from https://minecraft.wiki
         waterlogged: bool,
     },
     Candle { // TODO 1.17
+        colour: Option<Colour>,
         count: Int1Through4,
         lit: bool,
         waterlogged: bool,
@@ -612,7 +610,9 @@ pub enum Block { // TODO Next addition is `Dripleaf` from https://minecraft.wiki
     InfestedChiseledStoneBricks,
     InfestedCobblestone,
     InfestedCrackedStoneBricks,
-    InfestedDeepslate, // TODO 1.17
+    InfestedDeepslate {
+        alignment: Axis3,
+    }, // TODO: 1.17
     InfestedMossyStoneBricks,
     InfestedStone,
     InfestedStoneBricks,
@@ -730,7 +730,7 @@ pub enum Block { // TODO Next addition is `Dripleaf` from https://minecraft.wiki
     Potatoes {
         growth_stage: Int0Through7,
     },
-    PowderedSnow, // TODO 1.17
+    PowderSnow, // TODO 1.17
     PressurePlate {
         material: PressurePlateMaterial,
     },
