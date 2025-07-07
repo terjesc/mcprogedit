@@ -12,7 +12,8 @@ Yet some `Block` variants hold blocks with a lot of associated data. Those block
 
 ## Block storage format in Minecraft
 
-TODO: Before "the flattening". Minecraft block IDs. Block state. Block entities.
+* TODO: Before "the flattening". Minecraft block IDs. Block state. Block entities.
+* TODO: Explain the `PaletteItem::Block()` schenanigans!
 
 ## Adding trivial blocks
 
@@ -21,22 +22,20 @@ For blocks without variants or block states, the `Block` enum variant doesn't ne
 `Block` variant implementation for the _bedrock_ block, in _/src/block.rs_:
 ```
 pub enum Block {
-(...)
+    (...)
     Bedrock,
-(...)
-}
-
+    (...)
 ```
 
 Mapping _bedrock_ from `Block` to block ID, in _/src/chunk/palette.rs_:
 ```
+impl PaletteItem {
+    (...)
     fn name(&self) -> &str {
         match self {
             (...)
             PaletteItem::Block(Block::Bedrock) => "minecraft:bedrock",
             (...)
-        }
-    }
 ```
 
 Mapping _bedrock_ from block ID to `Block`, in _/src/chunk/palette.rs_:
@@ -47,10 +46,6 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             (...)
             "minecraft:bedrock" => block(Block::Bedrock),
             (...)
-        }
-    (...)
-}
-
 ```
 
 Trivial blocks don't have any block states or other data fields, so the main part of the implementation is complete at this point, having added only three lines of code. (\*TODO: Helper functions, lighting categories (transparence), etc., etc.)
@@ -62,20 +57,21 @@ Sometimes it makes sense to represent multiple similar or related blocks as one 
 `Block` variant implementation for all _glass block_ variants, in _/src/block.rs_:
 ```
 pub enum Block {
-(...)
+    (...)
     Glass {
         colour: Option<Colour>,
     },
-(...)
-}
+    (...)
 ```
 
 For this implementation, the colour is represented with an `Option`, in order for `colour: None` to represent the clear glass block variant. The similar implementation for `Block::Concrete { colour: Colour }` doesn't have any uncoloured variant to map, and therefore uses `Colour` directly. Other block types, such as `Block::Wall { .. }`, use other fields for distinguishing between variants.
 
-The conversion to and from block ID is simply an act of matching between enum variants and strings.
+The conversion to and from block ID, while slightly more involved than for the trivial case, is still simply an act of matching between enum variants and strings.
 
 Mapping _glass_ from `Block` to block IDs, in _/src/chunk/palette.rs_:
 ```
+impl PaletteItem {
+    (...)
     fn name(&self) -> &str {
         match self {
             (...)
@@ -99,8 +95,6 @@ Mapping _glass_ from `Block` to block IDs, in _/src/chunk/palette.rs_:
                 Some(Colour::Black) => "minecraft:black_stained_glass",
             }
             (...)
-        }
-    }
 ```
 
 Mapping _glass_ from block IDs to `Block`, in _/src/chunk/palette.rs_:
@@ -127,41 +121,65 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:red_stained_glass" => block(Block::Glass { colour: Some(Colour::Red )}),
             "minecraft:black_stained_glass" => block(Block::Glass { colour: Some(Colour::Black )}),
             (...)
-        }
-    (...)
-}
-
 ```
+
+If there are no block states or other data fields, then the main implementation is complete at this point, just as for implementing trivial blocks.
 
 ## Adding blocks with some (limited) _block state_
 
-Some blocks come with additional state. Such state can be either fixed (e.g. rotational orientation), or the state can change during gameplay (e.g. hydration level of a block of farmland). For those blocks, in addition to ID conversion, it is also necessary to convert the _block state_ information.
+Some blocks come with additional state. Such state can be either fixed (e.g. rotational orientation), or the state can change during gameplay (e.g. hydration level of a block of farmland). For those blocks, in addition to ID conversion, it is also necessary to convert the _block state_ information. Block state information is held as data in the `Block` variant.
 
 `Block` variant implementation for _farmland_, in _/src/block.rs_:
 ```
 pub enum Block {
-(...)
+    (...)
     Farmland {
         wetness: Int0Through7,
     },
-(...)
-}
+    (...)
 ```
 
-The definition of the `Farmland` variant should not be too surprising. _Farmland_ has a hydration level which can go from 0 to 7 inclusive, and Int0Through7 is an int data type which is bounded to that range.
-
-The main difference from [adding blocks with different variants], is that this time around the data of the `Block` variant comes from _block state_, and not from the block ID alone.
+The above definition of the `Farmland` variant should not be too surprising. _Farmland_ has a hydration level which can go from 0 to 7 inclusive, and `Int0Through7` is a data type which is bounded to that range. The below conversion to block ID is also straight-forward.
 
 Mapping _farmland_ from `Block` to block ID, in _/src/chunk/palette.rs_:
 ```
+impl PaletteItem {
+    (...)
     fn name(&self) -> &str {
         match self {
             (...)
-            "minecraft:farmland" => block(Block::Farmland { wetness: moisture0_7(&properties) }),
+            PaletteItem::Block(Block::Farmland { .. }) => "minecraft:farmland",
             (...)
-        }
-    }
 ```
+
+The main difference from [Adding blocks with different variants], is that this time around the data of the `Block` variant comes from _block state_, and not from the block ID alone. Nor is the block ID alone sufficient for storing the block.
+
+Storing block state involves the creation of NBT structures, which is the storage format used in Minecraft savefiles. For storing the block state, the `properties()` function of `PaletteItem` must return some `nbt::Value` containing that block state, on the match of a `PaletteItem` containing that `Block` variant. Below is the block state creation for _farmland_.
+
+Storing the block state of _farmland_, in _/src/chunk/palette.rs_:
+```
+impl PaletteItem {
+    (...)
+    fn properties(&self) -> Option<nbt::Value> {
+        match self {
+            (...)
+            PaletteItem::Block(Block::Farmland { wetness }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("moisture".into(), nbt::Value::String(wetness.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            (...)
+```
+
+Block states consist of an `nbt::Map` inside of an `nbt::Value::Compound`. The typical flow of generating the full block state NBT structure, is therefore to:
+
+1. Create an `nbt::Map`, i.e. `let mut properties = nbt::Map::new();`
+2. Fill it with the properties, e.g. `properties.insert("moisture".into(), nbt::Value::String(wetness.to_string()));`
+3. Return the filled structure, packed in the correct NBT structure, i.e. `Some(nbt::Value::Compound(properties))`
+
+In step 2. above, the _key_ of "moisture" comes from the official block state name for that block state, for the _farmland_ block. The _value_ of a block state is always an `nbt::Value::String`, in this case containing the number as a string using decimal notation.
+
+Finally, for converting from block ID and block state, the NBT structure containing the block state is available at the needed location within `from_section()`, as a variable named `properties`. Block state values are fetched by lookup on the block state name, then converted to the corerct data type for inclusion in the returned `Block` variant instance.
 
 Mapping _farmland_ from block ID to `Block`, in _/src/chunk/palette.rs_:
 ```
@@ -169,25 +187,69 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
     (...)
         let palette_item = match name.as_str() {
             (...)
-            "minecraft:bedrock" => block(Block::Bedrock),
+            "minecraft:farmland" => block(Block::Farmland { wetness: moisture0_7(&properties) }),
             (...)
-        }
-    (...)
-}
-
 ```
 
+There is a whole mess of convenience functions for extracting values from the NBT structure. In the case of _farmland_, the wetness value, with the NBT tag "moisture", and possible value from 0 to 7 inclusive, is read using the convenience function `moisture0_7()`. This part of the library is in dire need of refactoring, but for the time being this is how the NBT values are extracted for `Block` variant creation.
 
+For another example, below is the implementation of _End rod_.
 
-TODO: Examples: EndRod, Farmland
+`Block` variant implementation for the _End rod_ block, in _/src/block.rs_:
+```
+pub enum Block {
+    (...)
+    EndRod {
+        facing: Surface6,
+    },
+    (...)
+```
+
+Mapping _End rod_ from `Block` to block ID, in _/src/chunk/palette.rs_:
+```
+impl PaletteItem {
+    (...)
+    fn name(&self) -> &str {
+        match self {
+            (...)
+            PaletteItem::Block(Block::EndRod { .. }) => "minecraft:end_rod",
+            (...)
+```
+
+Storing the block state of _End rod_, in _/src/chunk/palette.rs_:
+```
+impl PaletteItem {
+    (...)
+    fn properties(&self) -> Option<nbt::Value> {
+        match self {
+            (...)
+            PaletteItem::Block(Block::EndRod { facing }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            (...)
+```
+
+Mapping _End rod_ from block ID to `Block`, in _/src/chunk/palette.rs_:
+```
+pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
+    (...)
+        let palette_item = match name.as_str() {
+            (...)
+            "minecraft:end_rod" => block(Block::EndRod { facing: facing_surface6(&properties)}),
+            (...)
+```
+
+As for trivial blocks and blocks with different variants, this is the point where the main implementation of the block is complete.
 
 ## Adding blocks with many parameters
 
-TODO: Example: Door
+TODO: Blocks with struct. Example: Door
 
 ## Adding blocks with block entities
 
-TODO: Example: Banner
+TODO: Blocks with struct and block entity. Example: Banner
 
 ## Adding remaining book-keeping, congregate functions, etc.
 
