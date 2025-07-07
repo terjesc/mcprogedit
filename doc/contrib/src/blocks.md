@@ -1,0 +1,221 @@
+# Implementing new blocks
+
+Blocks are the basic building blocks of a Minecraft world. Some are cube shaped voxels, such as `Block::Dirt`, or `Block::Stone`. Others have various shapes, such as `Block::Cobweb`, or `Block::DeadBush`. Some have additional properties describing various states such as the block's orientation, variant or contents. Further, some of that state can be stored in convoluted ways by the game itself. This guide shows how to add to mcprogedit support for all kinds of new blocks; both trivial and more difficult blocks.
+
+## Block storage format in mcprogedit
+
+In mcprogedit, all blocks are variants of the `Block` enum found in _/src/block.rs_.
+
+Many enum variants of `Block` correspond to individual Minecraft blocks as per Minecraft's block IDs. Some `Block` variants group similar or related Minecraft blocks into one single `Block` variant, and use data fields to distinguish between the various underlying Minecraft blocks. Examples of the former are `Block::Bedrock` and `Block::Dirt`. Examples of the latter are `Block::Glass { .. }` and `Block::Wall { .. }`, which in turn distinguish between subvariants through data fields `colour` and `material` respectively.
+
+Yet some `Block` variants hold blocks with a lot of associated data. Those blocks are implemented as individual structures, with the `Block` variant simply `Box`ing the corresponding structure. `Block::Chest(Box<Chest>)` is such an example. Some `Block`s, such as `Block::Slab(Slab)`, even hold the full (non-`Box`ed) structure.
+
+## Block storage format in Minecraft
+
+TODO: Before "the flattening". Minecraft block IDs. Block state. Block entities.
+
+## Adding trivial blocks
+
+For blocks without variants or block states, the `Block` enum variant doesn't need any data, and the rest of the implementation is pretty straight-forward.
+
+`Block` variant implementation for the _bedrock_ block, in _/src/block.rs_:
+```
+pub enum Block {
+(...)
+    Bedrock,
+(...)
+}
+
+```
+
+Mapping _bedrock_ from `Block` to block ID, in _/src/chunk/palette.rs_:
+```
+    fn name(&self) -> &str {
+        match self {
+            (...)
+            PaletteItem::Block(Block::Bedrock) => "minecraft:bedrock",
+            (...)
+        }
+    }
+```
+
+Mapping _bedrock_ from block ID to `Block`, in _/src/chunk/palette.rs_:
+```
+pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
+    (...)
+        let palette_item = match name.as_str() {
+            (...)
+            "minecraft:bedrock" => block(Block::Bedrock),
+            (...)
+        }
+    (...)
+}
+
+```
+
+Trivial blocks don't have any block states or other data fields, so the main part of the implementation is complete at this point, having added only three lines of code. (\*TODO: Helper functions, lighting categories (transparence), etc., etc.)
+
+## Adding blocks with different variants
+
+Sometimes it makes sense to represent multiple similar or related blocks as one `Block` enum variant, and use variant data to distinguish the related blocks. A prominent example is the set of clear and stained _glass_ blocks. In addition to the uncoloured (clear) variant, there are 16 coloured (stained) variants corresponding to the 16 main colours.
+
+`Block` variant implementation for all _glass block_ variants, in _/src/block.rs_:
+```
+pub enum Block {
+(...)
+    Glass {
+        colour: Option<Colour>,
+    },
+(...)
+}
+```
+
+For this implementation, the colour is represented with an `Option`, in order for `colour: None` to represent the clear glass block variant. The similar implementation for `Block::Concrete { colour: Colour }` doesn't have any uncoloured variant to map, and therefore uses `Colour` directly. Other block types, such as `Block::Wall { .. }`, use other fields for distinguishing between variants.
+
+The conversion to and from block ID is simply an act of matching between enum variants and strings.
+
+Mapping _glass_ from `Block` to block IDs, in _/src/chunk/palette.rs_:
+```
+    fn name(&self) -> &str {
+        match self {
+            (...)
+            PaletteItem::Block(Block::Glass { colour }) => match colour {
+                None => "minecraft:glass",
+                Some(Colour::White) => "minecraft:white_stained_glass",
+                Some(Colour::Orange) => "minecraft:orange_stained_glass",
+                Some(Colour::Magenta) => "minecraft:magenta_stained_glass",
+                Some(Colour::LightBlue) => "minecraft:light_blue_stained_glass",
+                Some(Colour::Yellow) => "minecraft:yellow_stained_glass",
+                Some(Colour::Lime) => "minecraft:lime_stained_glass",
+                Some(Colour::Pink) => "minecraft:pink_stained_glass",
+                Some(Colour::Gray) => "minecraft:gray_stained_glass",
+                Some(Colour::LightGray) => "minecraft:light_gray_stained_glass",
+                Some(Colour::Cyan) => "minecraft:cyan_stained_glass",
+                Some(Colour::Purple) => "minecraft:purple_stained_glass",
+                Some(Colour::Blue) => "minecraft:blue_stained_glass",
+                Some(Colour::Brown) => "minecraft:brown_stained_glass",
+                Some(Colour::Green) => "minecraft:green_stained_glass",
+                Some(Colour::Red) => "minecraft:red_stained_glass",
+                Some(Colour::Black) => "minecraft:black_stained_glass",
+            }
+            (...)
+        }
+    }
+```
+
+Mapping _glass_ from block IDs to `Block`, in _/src/chunk/palette.rs_:
+```
+pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
+    (...)
+        let palette_item = match name.as_str() {
+            (...)
+            "minecraft:glass" => block(Block::Glass { colour: None }),
+            "minecraft:white_stained_glass" => block(Block::Glass { colour: Some(Colour::White )}),
+            "minecraft:orange_stained_glass" => block(Block::Glass { colour: Some(Colour::Orange )}),
+            "minecraft:magenta_stained_glass" => block(Block::Glass { colour: Some(Colour::Magenta )}),
+            "minecraft:light_blue_stained_glass" => block(Block::Glass { colour: Some(Colour::LightBlue )}),
+            "minecraft:yellow_stained_glass" => block(Block::Glass { colour: Some(Colour::Yellow )}),
+            "minecraft:lime_stained_glass" => block(Block::Glass { colour: Some(Colour::Lime )}),
+            "minecraft:pink_stained_glass" => block(Block::Glass { colour: Some(Colour::Pink )}),
+            "minecraft:gray_stained_glass" => block(Block::Glass { colour: Some(Colour::Gray )}),
+            "minecraft:light_gray_stained_glass" => block(Block::Glass { colour: Some(Colour::LightGray )}),
+            "minecraft:cyan_stained_glass" => block(Block::Glass { colour: Some(Colour::Cyan )}),
+            "minecraft:purple_stained_glass" => block(Block::Glass { colour: Some(Colour::Purple )}),
+            "minecraft:blue_stained_glass" => block(Block::Glass { colour: Some(Colour::Blue )}),
+            "minecraft:brown_stained_glass" => block(Block::Glass { colour: Some(Colour::Brown )}),
+            "minecraft:green_stained_glass" => block(Block::Glass { colour: Some(Colour::Green )}),
+            "minecraft:red_stained_glass" => block(Block::Glass { colour: Some(Colour::Red )}),
+            "minecraft:black_stained_glass" => block(Block::Glass { colour: Some(Colour::Black )}),
+            (...)
+        }
+    (...)
+}
+
+```
+
+## Adding blocks with some (limited) _block state_
+
+Some blocks come with additional state. Such state can be either fixed (e.g. rotational orientation), or the state can change during gameplay (e.g. hydration level of a block of farmland). For those blocks, in addition to ID conversion, it is also necessary to convert the _block state_ information.
+
+`Block` variant implementation for _farmland_, in _/src/block.rs_:
+```
+pub enum Block {
+(...)
+    Farmland {
+        wetness: Int0Through7,
+    },
+(...)
+}
+```
+
+The definition of the `Farmland` variant should not be too surprising. _Farmland_ has a hydration level which can go from 0 to 7 inclusive, and Int0Through7 is an int data type which is bounded to that range.
+
+The main difference from [adding blocks with different variants], is that this time around the data of the `Block` variant comes from _block state_, and not from the block ID alone.
+
+Mapping _farmland_ from `Block` to block ID, in _/src/chunk/palette.rs_:
+```
+    fn name(&self) -> &str {
+        match self {
+            (...)
+            "minecraft:farmland" => block(Block::Farmland { wetness: moisture0_7(&properties) }),
+            (...)
+        }
+    }
+```
+
+Mapping _farmland_ from block ID to `Block`, in _/src/chunk/palette.rs_:
+```
+pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
+    (...)
+        let palette_item = match name.as_str() {
+            (...)
+            "minecraft:bedrock" => block(Block::Bedrock),
+            (...)
+        }
+    (...)
+}
+
+```
+
+
+
+TODO: Examples: EndRod, Farmland
+
+## Adding blocks with many parameters
+
+TODO: Example: Door
+
+## Adding blocks with block entities
+
+TODO: Example: Banner
+
+## Adding remaining book-keeping, congregate functions, etc.
+
+TODO: Lighting information (transparence, etc.) Direction, material, waterlogged, etc. congregate functions (polling for traits and values). Long term goal: Automate most of these. For now: Manual work.
+
+## Some rambling about what is found in various files
+
+### /src/block.rs
+
+The `Block` enum contains all block types and variants, either directly or indirectly. Any new block implementation therefore starts by adding the new block to the `Block` enum, or through extending one of the existing variants.
+
+For the implementation, some data types (defined elsewhere) are worth mentioning:
+
+* Bounded ints (/src/bounded\_ints.rs): Data types with restricted ranges for integer values. Naming is on the form Int[min]Through[max], where [min] is the lower (inclusive) value, and [max] is the upper (inclusive) value that the integer data type may hold. E.g. an `Int0Through3` can hold the values 0, 1, 2 and 3, but no other integer values.
+* Colour (/src/colour.rs): Minecraft has 16 default colours, represented by the `Colour` enum. Blocks which have these colour variants should have a field of type `Colour`, or alternatively `Option<Colour>` if there is also an uncoloured version of the block.
+* Materials (/src/material.rs): Some materials are common for a large array of blocks. Typically each type of block, such as e.g. "Slab", "Stair", etc., has 
+
+### /src/chunk/palette.rs
+
+
+
+
+## Checklist
+
+- [ ] /src/block.rs: Add new block to `Block` enum, or extend on one of the existing variants
+- [ ] /src/bounded\_ints.rs, /src/colour.rs, /src/material.rs, etc.: Update if appropriate
+
+
+- [ ] /src/chunk/palette.rs: ProtoBlock
+- [ ] /src/chunk/palette.rs: ProtoBlock
+- [ ] /src/chunk/palette.rs: ProtoBlock
