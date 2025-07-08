@@ -1,3 +1,6 @@
+use std::fmt::Display;
+use std::str::FromStr;
+
 use log::warn;
 use nbt::Value;
 
@@ -1813,10 +1816,33 @@ impl PaletteItem {
             PaletteItem::Block(Block::DeepslateRedstoneOre { .. }) => "minecraft:deepslate_redstone_ore",
             PaletteItem::Block(Block::DeepslateLapisLazuliOre) => "minecraft:deepslate_lapis_ore",
             PaletteItem::Block(Block::DeepslateEmeraldOre) => "minecraft:deepslate_emerald_ore",
+            PaletteItem::Block(Block::Dripleaf { variant, .. }) => match variant {
+                DripleafVariant::BigLeaf(_) => "minecraft:big_dripleaf",
+                DripleafVariant::BigStem => "minecraft:big_dripleaf_stem",
+                DripleafVariant::SmallTop
+                | DripleafVariant::SmallBottom => "minecraft:small_dripleaf",
+            }
+            PaletteItem::Block(Block::Dripstone) => "minecraft:dripstone_block",
+            PaletteItem::Block(Block::GlowLichen { .. }) => "minecraft:glow_lichen",
+            PaletteItem::Block(Block::HangingRoots { .. }) => "minecraft:hanging_roots",
+            PaletteItem::Block(Block::InfestedDeepslate { .. }) => "minecraft:infested_deepslate",
+            PaletteItem::Block(Block::Light {..}) => "minecraft:light",
+            PaletteItem::Block(Block::LightningRod {..}) => "minecraft:lightning_rod",
+            PaletteItem::Block(Block::Moss) => "minecraft:moss_block",
+            PaletteItem::Block(Block::MossCarpet) => "minecraft:moss_carpet",
+            PaletteItem::Block(Block::PointedDripstone {..}) => "minecraft:pointed_dripstone",
+            PaletteItem::Block(Block::PowderSnow) => "minecraft:powder_snow",
+            PaletteItem::Block(Block::RootedDirt) => "minecraft:rooted_dirt",
+            PaletteItem::Block(Block::SculkSensor {..}) => "minecraft:sculk_sensor",
+            PaletteItem::Block(Block::SmoothBasalt) => "minecraft:smooth_basalt",
+            PaletteItem::Block(Block::SporeBlossom) => "minecraft:spore_blossom",
+            PaletteItem::Block(Block::TintedGlass) => "minecraft:tinted_glass",
+            PaletteItem::Block(Block::Tuff) => "minecraft:tuff",
 
             // TODO: remaining 1.17 blocks from Dripleaf, at https://minecraft.wiki/w/Java_Edition_1.17
 
             //PaletteItem::Block(Block::) => "minecraft:",
+            //PaletteItem::Block(Block:: {..}) => "minecraft:",
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
@@ -2121,8 +2147,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:diamond_ore" => block(Block::DiamondOre),
             "minecraft:diamond_block" => block(Block::BlockOfDiamond),
             "minecraft:crafting_table" => block(Block::CraftingTable),
-            "minecraft:wheat" => block(Block::Wheat { growth_stage: age0_7(&properties) }),
-            "minecraft:farmland" => block(Block::Farmland { wetness: moisture0_7(&properties) }),
+            "minecraft:wheat" => block(Block::Wheat { growth_stage: prop(&properties, "age") }),
+            "minecraft:farmland" => block(Block::Farmland { wetness: prop(&properties, "moisture") }),
             "minecraft:furnace" => proto(proto_furnace(&properties)),
             "minecraft:oak_sign" => proto(proto_sign(WoodMaterial::Oak, &properties)),
             "minecraft:oak_wall_sign" => proto(proto_wall_sign(WoodMaterial::Oak, &properties)),
@@ -2240,7 +2266,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             "minecraft:brown_mushroom_block" => block(brown_mushroom_block(&properties)),
             "minecraft:red_mushroom_block" => block(red_mushroom_block(&properties)),
             "minecraft:mushroom_stem" => block(mushroom_stem(&properties)),
-            "minecraft:iron_bars" => block(Block::IronBars { waterlogged: waterlogged(&properties) }),
+            "minecraft:iron_bars" => block(Block::IronBars { waterlogged: prop(&properties, "waterlogged")}),
             "minecraft:glass_pane" => block(glass_pane(&properties)),
             "minecraft:melon" => block(Block::Melon),
             "minecraft:pumpkin_stem" => block(pumpkin_stem(&properties)),
@@ -2703,6 +2729,20 @@ fn proto(proto_block: ProtoBlock) -> PaletteItem {
 //
 // Convenience functions for extracting values from properties
 //
+
+/// Get the property with name `name` from `properties`, and convert it into the target type.
+fn prop<T>(properties: &Option<Value>, name: &'static str) -> T
+where
+    T: FromStr + Default + Display
+{
+    properties_lookup_string(properties, name)
+        .and_then(|s| T::from_str(&s).ok())
+        .unwrap_or_else(|| {
+            let fallback = T::default();
+            warn!("Using \"{}\" as fallback value for a \"{}\" property.", fallback, name);
+            fallback
+        })
+}
 
 /// Get the string value at tag `name` within `properties`, if it exists.
 fn properties_lookup_string(properties: &Option<Value>, name: &'static str) -> Option<String> {
@@ -3745,10 +3785,6 @@ fn i0_6(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
 
 fn age0_7(properties: &Option<Value>) -> Int0Through7 {
     i0_7(properties, "age", 0)
-}
-
-fn moisture0_7(properties: &Option<Value>) -> Int0Through7 {
-    i0_7(properties, "moisture", 7)
 }
 
 fn i0_7(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Through7 {

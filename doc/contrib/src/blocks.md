@@ -193,6 +193,8 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
 
 There is a whole mess of convenience functions for extracting values from the NBT structure. In the case of _farmland_, the wetness value, with the NBT tag "moisture", and possible value from 0 to 7 inclusive, is read using the convenience function `moisture0_7()`. This part of the library is in dire need of refactoring, but for the time being this is how the NBT values are extracted for `Block` variant creation.
 
+TODO: The above mentioned mess has been somewhat cleaned up, and `Block::Farmland { ..}` now uses the generic `prop()` function for looking up "moisture" and automatically get the correct type.
+
 For another example, below is the implementation of _End rod_.
 
 `Block` variant implementation for the _End rod_ block, in _/src/block.rs_:
@@ -241,7 +243,7 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
             (...)
 ```
 
-As for trivial blocks and blocks with different variants, this is the point where the main implementation of the block is complete.
+Just as for trivial blocks and blocks with different variants, this is the point where the main implementation of the block is complete.
 
 ## Adding blocks with many parameters
 
