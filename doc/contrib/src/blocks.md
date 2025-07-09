@@ -2,65 +2,6 @@
 
 Blocks are the basic building blocks of a Minecraft world. Some are cube shaped voxels, such as _dirt_ and _stone_. Others have various shapes, such as _cobweb_ and _dead bush_. Some have additional properties describing various states such as the block's orientation, variant or contents (e.g. _torch_, _lever_). Further, some of that state can be stored in convoluted ways by the game itself (e.g. _chest_, _furnace_). This guide aims to show how to add support to mcprogedit for all kinds of new blocks, regardless of complexity.
 
-## The Minecraft block storage format
-
-### Block ID, block states, and block data
-
-All Minecraft blocks are identified through a textual _block ID_, such as `"minecraft:Air"` or `"minecraft:Dirt"`.
-
-Many blocks also come with _block states_, describing properties of a particular instance of the block in the Minecraft world. Such block states can describe e.g. the rotational orientation of a chest, the power level of a redstone wire, the on/off status of a lever, or the growth stage of a beetroot. Each block state has a _name_ used for lookup, a set of _allowed values_, and a _default value_. As an example, _wheat crops_ has a block state whose name is _age_, holding a value in the range 0 through 7, with a default value of 0. This state encodes the growth stage of the wheat crops, from newly sown (0) to ripe (7).
-
-A small number of blocks have additional data in the form of a _block entity_. A typical example is a _chest_, which can hold a large inventory of items. The block entity is used for storing complex data, and is formatted using an _NBT structure_. In this structurre, some nodes are present for all block entities, while others are specific to the block entity of one particular block ID. Basic information is still stored as block states, even for blocks associated with a block entity.
-
-Formats and values for block ID, block states and block entity data are documented under the _Data values_ section of the Minecraft wiki entry for each block. Block ID is listed as _ID_ or _identifier_. For blocks having block states, those are listed under _Block states_, and for blocks with a block entity the full NBT structure is documented under _Block data_.
-
-### The blocks within a Minecraft world
-
-In the current save format, blocks are stored within _chunks_, which are smaller sections of the Minecraft world. Each chunk holds 16 x 16 blocks in the horizontal plane, and extend to the full height and depth of the world. The chunk is further subdivided into _sections_, each 16 blocks tall, leaving a cube of 16 x 16 x 16 blocks, 4096 blocks in total, to each section.
-
-Among other data, each section holds an array of 4096 blocks, with each position in that array mapping to a location within the 16^3 cube. Instead of storing the block's ID and states directly, the block array stores _indexes_ into a different array; the _palette_. The palette in turn holds _each distinct block ID + block states combination_ from within the section. Any block entities come in addition to the palette, with each block entity mapping to a single block within the section.
-
-The use of palettes saves storage space, since sections typically hold a lot of repeating blocks. It does however come at the expense of added complexity. Nevertheless, in practical terms this has implications only for _where_ the different parts of a block implementation go. Luckliy the main _complexity_ of chunks, sections and palettes can be abstracted away in the respective modules. To a large extent the same goes for block entities.
-
-Please note that the Minecraft storage format _has_ changed in the past, and it _might_ do so again in the future. For instance, prior to Minecraft 1.13, block ID was an 8 bit integer, further bits were used for block states, and there was no palette. The switch from numeric IDs was so impactful that the change got its own name: [_The Flattening_](https://minecraft.wiki/w/Java_Edition_Flattening).
-
-## Block storage format in mcprogedit
-
-In mcprogedit, all blocks are variants of the `Block` enum found in _/src/block.rs_.
-
-Many enum variants of `Block` correspond to individual Minecraft blocks as per Minecraft's block IDs. Some `Block` variants group similar or related Minecraft blocks into one single `Block` variant, and use data fields to distinguish between the various underlying Minecraft blocks. Examples of the former are `Block::Bedrock` and `Block::Dirt`. Examples of the latter are `Block::Glass { .. }` and `Block::Wall { .. }`, which in turn distinguish between subvariants through data fields `colour` and `material` respectively.
-
-Yet some `Block` variants hold blocks with a lot of associated data. Those blocks are implemented as individual structures, with the `Block` variant simply `Box`ing the corresponding structure. `Block::Chest(Box<Chest>)` is such an example. Some blocks, such as `Block::Slab(Slab)`, even hold the full (non-`Box`ed) structure.
-
-Below are excerpts from the `Block` enum definition, to illustrate the range of complexity for different variants:
-
-```rust
-pub enum Block {
-    (...)
-    Bedrock,
-    (...)
-    Glass {
-        colour: Option<Colour>,
-    },
-    (...)
-    GlassPane {
-        colour: Option<Colour>,
-        waterlogged: bool,
-    },
-    (...)
-    Grass(Grass),
-    (...)
-    Hopper(Box<Hopper>),
-    (...)
-    Slab(Slab),
-    (...)
-}
-```
-
-In the above excerpt, `Bedrock` is a trivial block with no variants and no block state. `Glass` is a common enum variant for multiple _glass_ block variants. `GlassPane` comes with both block variants (`colour`) and block state (`waterlogged`). `Grass` directly holds an enum of the same name for holding the variants. `Hopper` holds a `Box`ed struct of the same name, which holds larger amounts of data, including entity data. That struct is even implemented in a separate file (_/block/hopper.rs_). `Slab` also holds a struct, but due to its small size that struct is held directly instead of in a `Box`.
-
-TODO: Mention the convenience functions and/or other things related to blocks that might need updating when blocks are added.
-
 ## Adding trivial blocks
 
 For blocks without variants or block states, the `Block` enum variant doesn't need any data, and the rest of the implementation is pretty straight-forward.
@@ -434,19 +375,4 @@ For the implementation, some data types (defined elsewhere) are worth mentioning
 
 ### /src/chunk/palette.rs
 
-
-
-
-## Checklist
-
-- [ ] In _/src/block.rs_: Add new block to `Block` enum, or extend on one of the existing variants
-    - [ ] This includes any additons or changes to _/src/bounded\_ints.rs_, _/src/material.rs_, _/src/colour.rs_, etc., as appropriate
-    - [ ] This may include creating new files / structs, for the new or existing `Block` enum variant.
-- [ ] In _/src/chunk/palette.rs_: Map from `PaletteItem` to _block ID_, in `PaletteItem::name()`.
-- [ ] In _/src/chunk/palette.rs_: Map from `PaletteItem` to _block states_ in NBT format, in `PaletteItem::properties()`.
-- [ ] In _/src/chunk/palette.rs_: Map from _block ID_, and if applicable from _block states_ (`properties`), to `PaletteItem`, in `from_section()`.
-
-
 TODO: Split this document into separate chapters.
-
-TODO: Check the checklist

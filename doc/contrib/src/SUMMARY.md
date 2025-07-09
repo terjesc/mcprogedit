@@ -1,3 +1,15 @@
 # Summary
 
 - [Blocks](./blocks.md)
+    - [Block formats]()
+        - [Minecraft block format](blocks/formats/minecraft.md)
+        - [mcprogedit block format](blocks/formats/mcprogedit.md)
+    - [Adding blocks to mcprogedit]()
+        - [Trivial blocks]()
+        - [Blocks with different variants]()
+        - [Blocks with _block state_]()
+        - [Blocks with many parameters]()
+        - [Blocks with block entity data]()
+        - [Additional book-keeping etc.]()
+        - [Checklist](blocks/adding/checklist.md)
+    - [Utility functions and conventions, etc.]()
