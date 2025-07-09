@@ -3,3 +3,6 @@ authors = ["Terje Schjelderup"]
 language = "en"
 src = "src"
 title = "mcprogedit contributor guide"
+
+[output.html]
+smart-punctuation = true
