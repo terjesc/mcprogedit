@@ -544,10 +544,10 @@ fn v_1_12_2_block_group_5() {
 
     assert_block_eq(&excerpt, (8, 0, 0), &Block::pressure_plate(Material::Oak));
 
-    assert_block_eq(&excerpt, (9, 0, 0), &Block::RedstoneOre);
+    assert_block_eq(&excerpt, (9, 0, 0), &Block::RedstoneOre { lit: false });
 
     // NB Block ID 74 "lit redstone ore" should be here at x position 10,
-    // but it is not present in the save file, and lit status is not implemented.
+    // but it is not present in the save file.
 
     // NB Block ID 75 "unlit redstone torch" should be here at x position 11,
     // but is placed above the lit variant at x position 12 instead.

@@ -14,7 +14,7 @@ pub struct Banner {
     pub custom_name: Option<String>,
     pub placement: WallOrRotatedOnFloor,
     /// List of (normally) up to 6 coloured patterns,
-    /// that are featured on top of each other the banner.
+    /// that are featured on top of each other on the banner.
     pub patterns: Vec<ColouredPattern>,
 }
 
