@@ -157,21 +157,57 @@ impl Chunk {
         //NB Temporarily disabled save version check; should be used for import details
         //assert!(data_version < McVersion::from_str(THE_FLATTENING).unwrap());
 
-        let x_pos = nbt_blob_lookup_int(&nbt, "Level/xPos").unwrap();
-        let z_pos = nbt_blob_lookup_int(&nbt, "Level/zPos").unwrap();
+        let x_pos = nbt_blob_lookup_int(
+            &nbt,
+            if data_version < McVersion::from_str("21w43a").unwrap() {
+                "Level/xPos"
+            } else {
+                "xPos"
+            },
+        ).unwrap();
+
+        let z_pos = nbt_blob_lookup_int(
+            &nbt,
+            if data_version < McVersion::from_str("21w43a").unwrap() {
+                "Level/zPos"
+            } else {
+                "zPos"
+            },
+        ).unwrap();
+
         let global_pos: ChunkCoord = (x_pos.into(), z_pos.into()).into();
 
-        let _last_update = nbt_blob_lookup_long(&nbt, "Level/LastUpdate").unwrap();
+        let _last_update = nbt_blob_lookup_long(
+            &nbt,
+            if data_version < McVersion::from_str("21w43a").unwrap() {
+                "Level/LastUpdate"
+            } else {
+                "LastUpdate"
+            },
+        ).unwrap();
 
-        let tile_entities = nbt_blob_lookup(&nbt, "Level/TileEntities")
-            .unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
+        let tile_entities = nbt_blob_lookup(
+            &nbt,
+            if data_version < McVersion::from_str("21w43a").unwrap() {
+                "Level/TileEntities"
+            } else {
+                "block_entities"
+            },
+        ).unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
+
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities, data_version);
 
         let biomes: Option<Vec<Biome>> = nbt_blob_lookup_byte_array(&nbt, "Level/Biomes")
             .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect::<Vec<Biome>>()).ok();
 
-        let sections = nbt_blob_lookup_list(&nbt, "Level/Sections")
-            .unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
+        let sections = nbt_blob_lookup_list(
+            &nbt,
+            if data_version < McVersion::from_str("21w43a").unwrap() {
+                "Level/Sections"
+            } else {
+                "sections"
+            },
+        ).unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
 
         // TODO import height maps
         /*
