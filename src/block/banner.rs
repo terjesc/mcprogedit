@@ -162,3 +162,51 @@ impl From<&str> for BannerPattern {
         }
     }
 }
+
+impl BannerPattern {
+    pub(crate) fn nbt_name(&self) -> &str {
+        match self {
+            Self::BaseColor => "b",                // b (base)
+            Self::Base => "bs",                    // bs (bottom stripe)
+            Self::Chief => "ts",                   // ts (top stripe)
+            Self::PaleDexter => "ls",              // ls (left stripe)
+            Self::PaleSinister => "rs",            // rs (right sripe)
+            Self::Pale => "cs",                    // cs (center stripe, vertical)
+            Self::Fess => "ms",                    // ms (middle sripe, horizontal)
+            Self::Bend => "drs",                   // drs (down right stripe)
+            Self::BendSinister => "dls",           // dls (down left stripe)
+            Self::Paly => "ss",                    // ss (smal vertical stripes)
+            Self::Saltire => "cr",                 // cr (diagonal cross)
+            Self::Cross => "sc",                   // sc (square cross)
+            Self::PerBendSinister => "ld",         // ld (left of diagonal)
+            Self::PerBend => "rud",                // rud (right of upside-down diagonal)
+            Self::PerBendInverted => "lud",        // lud (left of upside-down diagonal)
+            Self::PerBendSinisterInverted => "rd", // rd (right of diagonal)
+            Self::PerPale => "vh",                 // vh (vertical half left)
+            Self::PerPaleInverted => "vhr",        // vhr (vertical half right)
+            Self::PerFess => "hh",                 // hh (horizontal half top)
+            Self::PerFessInverted => "hhb",        // hhb (horizontal half bottom)
+            Self::BaseDexterCanton => "bl",        // bl (bottom left corner)
+            Self::BaseSinisterCanton => "br",      // br (bottom right corner)
+            Self::ChiefDexterCanton => "tl",       // tl (top left corner)
+            Self::ChiefSinisterCanton => "tr",     // tr (top right corner)
+            Self::Chevron => "bt",                 // bt (bottom triangle)
+            Self::InvertedChevron => "tt",         // tt (top triangle)
+            Self::BaseIndented => "bts",           // bts (bottom triangle sawtooth
+            Self::ChiefIndented => "tts",          // tts (top triangle sawtooth
+            Self::Roundel => "mc",                 // mc (middle circle)
+            Self::Lozenge => "mr",                 // mr (middle rhombus)
+            Self::Bordure => "bo",                 // bo (border)
+            Self::BordureIndented => "cbo",        // cbo (curly border)
+            Self::FieldMasoned => "bri",           // bri (brick)
+            Self::Gradient => "gra",               // gra (gradient)
+            Self::BaseGradient => "gru",           // gru (gradient upside-down)
+            Self::CreeperCharge => "cre",          // cre (creeper)
+            Self::SkullCharge => "sku",            // sku (skull)
+            Self::FlowerCharge => "flo",           // flo (flower)
+            Self::Thing => "moj",                  // moj (mojang)
+            Self::Globe => "glb",                  // glb (globe)
+            Self::Snout => "pig",                  // pig (piglin)
+        }
+    }
+}
