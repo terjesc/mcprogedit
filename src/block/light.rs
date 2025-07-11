@@ -331,7 +331,7 @@ impl Block {
             | Block::Air
             | Block::Amethyst { .. }
             | Block::Anvil { .. }
-            | Block::Azalea
+            | Block::Azalea { .. }
             | Block::Bamboo { .. }
             | Block::Banner(_)
             | Block::Barrier

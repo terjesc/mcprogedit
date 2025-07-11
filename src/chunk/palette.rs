@@ -909,7 +909,8 @@ impl PaletteItem {
                 LeavesMaterial::Jungle => "minecraft:jungle_leaves",
                 LeavesMaterial::Acacia => "minecraft:acacia_leaves",
                 LeavesMaterial::DarkOak => "minecraft:dark_oak_leaves",
-                LeavesMaterial::Azalea | LeavesMaterial::FloweringAzalea => todo!(),
+                LeavesMaterial::Azalea => "minecraft:azalea_leaves",
+                LeavesMaterial::FloweringAzalea => "minecraft:flowering_azalea_leaves",
             }
             PaletteItem::Block(Block::Sponge) => "minecraft:sponge",
             PaletteItem::Block(Block::WetSponge) => "minecraft:wet_sponge",
@@ -1747,7 +1748,8 @@ impl PaletteItem {
                 AmethystSize::Large => "minecraft:large_amethyst_bud",
                 AmethystSize::Cluster => "minecraft:amethyst_cluster",
             }
-            PaletteItem::Block(Block::Azalea) => "minecraft:azalea",
+            PaletteItem::Block(Block::Azalea { flowering: false }) => "minecraft:azalea",
+            PaletteItem::Block(Block::Azalea { flowering: true }) => "minecraft:flowering_azalea",
             PaletteItem::Block(Block::BlockOfAmethyst) => "minecraft:amethyst_block",
             PaletteItem::Block(Block::BlockOfCopper { oxidation, waxed }) => match (oxidation, waxed) {
                 (Oxidation::None, false) => "minecraft:copper_block",
@@ -1839,8 +1841,6 @@ impl PaletteItem {
             PaletteItem::Block(Block::SporeBlossom) => "minecraft:spore_blossom",
             PaletteItem::Block(Block::TintedGlass) => "minecraft:tinted_glass",
             PaletteItem::Block(Block::Tuff) => "minecraft:tuff",
-
-            // TODO: remaining 1.17 blocks from Dripleaf, at https://minecraft.wiki/w/Java_Edition_1.17
 
             //PaletteItem::Block(Block::) => "minecraft:",
             //PaletteItem::Block(Block:: {..}) => "minecraft:",
@@ -2679,6 +2679,28 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:bee_nest" => proto(proto_bee_nest(&properties)),
             "minecraft:blast_furnace" => proto(proto_blast_furnace(&properties)),
             "minecraft:smoker" => proto(proto_smoker(&properties)),
+            "minecraft:small_amethyst_bud" => block(amethyst(&properties, AmethystSize::Small)),
+            "minecraft:medium_amethyst_bud" => block(amethyst(&properties, AmethystSize::Medium)),
+            "minecraft:large_amethyst_bud" => block(amethyst(&properties, AmethystSize::Large)),
+            "minecraft:amethyst_cluster" => block(amethyst(&properties, AmethystSize::Cluster)),
+            "minecraft:azalea" => block(Block::Azalea { flowering: false }),
+            "minecraft:flowering_azalea" => block(Block::Azalea { flowering: true }),
+            "minecraft:azalea_leaves" => block(leaves(LeavesMaterial::Azalea, &properties)),
+            "minecraft:flowering_azalea_leaves" => block(leaves(LeavesMaterial::FloweringAzalea, &properties)),
+            "minecraft:amethyst_block" => block(Block::BlockOfAmethyst),
+            "minecraft:copper_block" => block(copper_block(Oxidation::None, false)),
+            "minecraft:exposed_copper" => block(copper_block(Oxidation::Exposed, false)),
+            "minecraft:weathered_copper" => block(copper_block(Oxidation::Weathered, false)),
+            "minecraft:oxidized_copper" => block(copper_block(Oxidation::Oxidized, false)),
+            "minecraft:waxed_copper_block" => block(copper_block(Oxidation::None, true)),
+            "minecraft:waxed_exposed_copper" => block(copper_block(Oxidation::Exposed, true)),
+            "minecraft:waxed_weathered_copper" => block(copper_block(Oxidation::Weathered, true)),
+            "minecraft:waxed_oxidized_copper" => block(copper_block(Oxidation::Oxidized, true)),
+            "minecraft:raw_copper_block" => block(Block::BlockOfRawCopper),
+            "minecraft:raw_gold_block" => block(Block::BlockOfRawGold),
+            "minecraft:raw_iron_block" => block(Block::BlockOfRawIron),
+            "minecraft:budding_amethyst" => block(Block::BuddingAmethyst),
+            "minecraft:calcite" => block(Block::Calcite),
             "minecraft:candle" => block(candles(&properties, None)),
             "minecraft:white_candle" => block(candles(&properties, Some(Colour::White))),
             "minecraft:orange_candle" => block(candles(&properties, Some(Colour::Orange))),
@@ -2696,11 +2718,51 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:green_candle" => block(candles(&properties, Some(Colour::Green))),
             "minecraft:red_candle" => block(candles(&properties, Some(Colour::Red))),
             "minecraft:black_candle" => block(candles(&properties, Some(Colour::Black))),
-            "minecraft:small_amethyst_bud" => block(amethyst(&properties, AmethystSize::Small)),
-            "minecraft:medium_amethyst_bud" => block(amethyst(&properties, AmethystSize::Medium)),
-            "minecraft:large_amethyst_bud" => block(amethyst(&properties, AmethystSize::Large)),
-            "minecraft:amethyst_cluster" => block(amethyst(&properties, AmethystSize::Cluster)),
+            "minecraft:cave_vines" => block(cave_vines(&properties)),
+            "minecraft:cave_vines_plant" => block(cave_vines_plant(&properties)),
+            "minecraft:cobbled_deepslate" => block(Block::CobbledDeepslate),
+            "minecraft:copper_ore" => block(Block::CopperOre),
+            "minecraft:cut_copper" => block(cut_copper(Oxidation::None, false)),
+            "minecraft:exposed_cut_copper" => block(cut_copper(Oxidation::Exposed, false)),
+            "minecraft:weathered_cut_copper" => block(cut_copper(Oxidation::Weathered, false)),
+            "minecraft:oxidized_cut_copper" => block(cut_copper(Oxidation::Oxidized, false)),
+            "minecraft:waxed_cut_copper" => block(cut_copper(Oxidation::None, true)),
+            "minecraft:waxed_exposed_cut_copper" => block(cut_copper(Oxidation::Exposed, true)),
+            "minecraft:waxed_weathered_cut_copper" => block(cut_copper(Oxidation::Weathered, true)),
+            "minecraft:waxed_oxidized_cut_copper" => block(cut_copper(Oxidation::Oxidized, true)),
+            "minecraft:cut_copper_slab" => block(copper_slab(&properties, Oxidation::None, false)),
+            "minecraft:exposed_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Exposed, false)),
+            "minecraft:weathered_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Weathered, false)),
+            "minecraft:oxidized_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Oxidized, false)),
+            "minecraft:waxed_cut_copper_slab" => block(copper_slab(&properties, Oxidation::None, true)),
+            "minecraft:waxed_exposed_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Exposed, true)),
+            "minecraft:waxed_weathered_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Weathered, true)),
+            "minecraft:waxed_oxidized_cut_copper_slab"
+                => block(copper_slab(&properties, Oxidation::Oxidized, true)),
+            "minecraft:cut_copper_stairs" => block(copper_stairs(&properties, Oxidation::None, false)),
+            "minecraft:exposed_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Exposed, false)),
+            "minecraft:weathered_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Weathered, false)),
+            "minecraft:oxidized_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Oxidized, false)),
+            "minecraft:waxed_cut_copper_stairs" => block(copper_stairs(&properties, Oxidation::None, true)),
+            "minecraft:waxed_exposed_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Exposed, true)),
+            "minecraft:waxed_weathered_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Weathered, true)),
+            "minecraft:waxed_oxidized_cut_copper_stairs"
+                => block(copper_stairs(&properties, Oxidation::Oxidized, true)),
+            "minecraft:deepslate" => block(deepslate(&properties)),
+
+            // TODO Next new block is "Cobbled deepslate slab", on https://minecraft.wiki/w/Java_Edition_1.17
             //"minecraft:" => block(Block::),
+
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
@@ -2803,6 +2865,46 @@ fn amethyst(properties: &Option<Value>, size: AmethystSize) -> Block {
         size,
         waterlogged: waterlogged(properties),
     }
+}
+
+fn copper_block(oxidation: Oxidation, waxed: bool) -> Block {
+    Block::BlockOfCopper {
+        oxidation,
+        waxed,
+    }
+}
+
+fn copper_slab(properties: &Option<Value>, oxidation: Oxidation, waxed: bool) -> Block {
+    slab(SlabMaterial::Copper { oxidation, waxed }, properties)
+}
+
+fn copper_stairs(properties: &Option<Value>, oxidation: Oxidation, waxed: bool) -> Block {
+    stairs(StairMaterial::Copper { oxidation, waxed }, properties)
+}
+
+fn cave_vines(properties: &Option<Value>) -> Block {
+    Block::CaveVines {
+        berries: prop(properties, "berries"),
+        growth_stage: Some(prop(properties, "age")),
+    }
+}
+
+fn cave_vines_plant(properties: &Option<Value>) -> Block {
+    Block::CaveVines {
+        berries: prop(properties, "berries"),
+        growth_stage: None,
+    }
+}
+
+fn cut_copper(oxidation: Oxidation, waxed: bool) -> Block {
+    Block::CutCopper {
+        oxidation,
+        waxed,
+    }
+}
+
+fn deepslate(properties: &Option<Value>) -> Block {
+    Block::Deepslate { alignment: wood_alignment(&properties) }
 }
 
 fn sapling(material: SaplingMaterial, properties: &Option<Value>) -> Block {

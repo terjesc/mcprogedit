@@ -338,7 +338,9 @@ pub enum Block {
         damage: AnvilDamage,
     },
     Andesite,
-    Azalea, // TODO 1.17 (blossoms / no blossoms variants)
+    Azalea {
+        flowering: bool,
+    }, // TODO 1.17
     Bamboo {
         growth_stage: Int0Through1,
         leaves: BambooLeaves,
