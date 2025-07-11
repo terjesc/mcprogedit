@@ -8,6 +8,7 @@ use crate::block::*;
 use crate::bounded_ints::*;
 use crate::colour::Colour;
 use crate::material::*;
+use crate::mc_version::McVersion;
 use crate::nbt_lookup::*;
 use crate::positioning::*;
 
@@ -1903,14 +1904,18 @@ impl PaletteItem {
 }
 
 /// From a section NBT value, generate a palette in the form of a vector of PaletteItems.
-pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
+pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Option<Vec<PaletteItem>> {
     // Import Palette. It contains a list of compounds, each with a Name:String (Namespaced block ID)
     // and optionally a Properties:Compound which contains pairs of Name:String, value (for
     // e.g. facing.) Essentially holding all info previously encoded in blocks + add + data.
     let mut palette: Vec<PaletteItem> = Vec::new();
-    let raw_palette = if let Ok(p) = nbt_value_lookup_list(section, "Palette") { p } else { return None };
 
-//    println!("Raw palette: {:#?}", raw_palette);
+    let raw_palette = if data_version < McVersion::from_str("21w39a").unwrap() {
+        if let Ok(p) = nbt_value_lookup_list(section, "Palette") { p } else { return None }
+    } else {
+        if let Ok(p) = nbt_value_lookup_list(section, "block_states/palette") { p } else { return None }
+    };
+
     for raw_block in raw_palette {
         let name = nbt_value_lookup_string(&raw_block, "Name").unwrap();
         let properties = nbt_value_lookup(&raw_block, "Properties").ok();

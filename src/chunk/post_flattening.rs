@@ -1,5 +1,7 @@
-use log::warn;
 use std::collections::HashMap;
+use std::str::FromStr;
+
+use log::warn;
 
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
@@ -10,8 +12,7 @@ use crate::chunk::palette::{PaletteItem, ProtoBlock};
 use crate::colour::Colour;
 use crate::coordinates::{BlockCoord, ChunkCoord};
 use crate::inventory::Inventory;
-use crate::mc_version::McVersion;
-use crate::mc_version;
+use crate::mc_version::{McVersion, BLOCK_STATES_PADDED};
 use crate::nbt_lookup::*;
 use crate::utils;
 
@@ -33,7 +34,7 @@ impl Chunk {
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
 
         // If there's no palette, then there's no blocks in this section
-        let palette = match palette::from_section(&section) {
+        let palette = match palette::from_section(&section, data_version) {
             Some(palette) => palette,
             None => return,
         };
@@ -66,8 +67,14 @@ impl Chunk {
 
         // Exctract the block state array
         let bits_per_value = bits_per_value(palette.len());
-        let block_states = nbt_value_lookup_long_array(&section, "BlockStates").unwrap();
-        let block_states = if data_version >= mc_version::BLOCK_STATES_PADDED {
+
+        let block_states = if data_version < McVersion::from_str("21w39a").unwrap() {
+            nbt_value_lookup_long_array(&section, "BlockStates").unwrap()
+        } else {
+            nbt_value_lookup_long_array(&section, "block_states/data").unwrap()
+        };
+
+        let block_states = if data_version >= BLOCK_STATES_PADDED {
             utils::paddedly_unpacked::<u64>(&utils::vec_i64_into_vec_u64(block_states), bits_per_value)
         } else {
             utils::tightly_unpacked::<u64>(&utils::vec_i64_into_vec_u64(block_states), bits_per_value)
@@ -143,7 +150,7 @@ impl Chunk {
         // Restructure block_states according to the number of bits needed for the palette
         let bits_per_value = bits_per_value(palette_vec.len());
 //        println!("Palette with {} elements --> {} bits per index.", palette_vec.len(), bits_per_value);
-        let block_states = if self.data_version >= mc_version::BLOCK_STATES_PADDED {
+        let block_states = if self.data_version >= BLOCK_STATES_PADDED {
             utils::paddedly_packed(&block_states, bits_per_value)
         } else {
             utils::tightly_packed(&block_states, bits_per_value)
@@ -160,8 +167,17 @@ impl Chunk {
         let mut section = nbt::Map::new();
 
         section.insert("Y".into(), nbt::Value::Byte(section_y));
-        section.insert("BlockStates".into(), nbt::Value::LongArray(block_states));
-        section.insert("Palette".into(), nbt::Value::List(palette_nbt));
+
+        if self.data_version < McVersion::from_str("21w39a").unwrap() {
+            section.insert("BlockStates".into(), nbt::Value::LongArray(block_states));
+            section.insert("Palette".into(), nbt::Value::List(palette_nbt));
+        } else {
+            let mut block_states_nbt = nbt::Map::new();
+            block_states_nbt.insert("data".into(), nbt::Value::LongArray(block_states));
+            block_states_nbt.insert("palette".into(), nbt::Value::List(palette_nbt));
+            section.insert("block_states".into(), nbt::Value::Compound(block_states_nbt));
+        }
+        // TODO light maps
 //        section.insert("BlockLight".into(), nbt::Value::ByteArray(block_light));
 //        section.insert("SkyLight".into(), nbt::Value::ByteArray(sky_light));
 

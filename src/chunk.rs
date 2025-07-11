@@ -84,7 +84,6 @@ impl Chunk {
     }
 
     /// Generates Zlib compressed raw chunk data from the chunk object.
-    // NB only pre-flattening chunk saving as of yet
     pub fn raw_chunk_zlib(&self) -> RawChunkData {
         // Time of update is now
         let last_update = SystemTime::now()
@@ -108,18 +107,36 @@ impl Chunk {
         };
         let tile_entities = self.pre_flattening_tile_entities();
 
-        // Create the Level compund tag
+        // Prior to 21w43a, most tags were inside a tag named "Level".
+        // From 21w43a onwards, those tags are directly in the base tag.
+        // We still create the level tag here, and optionally fills it (or not) depending on
+        // version.
         let mut level: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(13);
-        level.insert("xPos".into(), nbt::Value::Int(self.global_pos.0 as i32));
-        level.insert("zPos".into(), nbt::Value::Int(self.global_pos.1 as i32));
-        level.insert("LastUpdate".into(), nbt::Value::Long(last_update as i64));
-        level.insert("InhabitedTime".into(), nbt::Value::Long(0));
-        
-        // Different tags after and before the flattening
-        if self.data_version >= THE_FLATTENING {
-            level.insert("Status".into(), nbt::Value::String("full".into()));
-            level.insert("isLightOn".into(), nbt::Value::Byte(0));
+        let mut nbt = nbt::Blob::new();
+
+        // Prepare values to go either in "Level" or base tag.
+        let x_pos = nbt::Value::Int(self.global_pos.0 as i32);
+        let z_pos = nbt::Value::Int(self.global_pos.1 as i32);
+        let last_update = nbt::Value::Long(last_update as i64);
+        let inhabited_time = nbt::Value::Long(0); // TODO implement
+
+        // Put values in correct tag.
+        if self.data_version < McVersion::from_str("21w43a").unwrap() {
+            // Fill the Level compund tag (before 21w43a)
+            level.insert("xPos".into(), x_pos);
+            level.insert("zPos".into(), z_pos);
+            level.insert("LastUpdate".into(), last_update);
+            level.insert("InhabitedTime".into(), inhabited_time);
         } else {
+            // Fill the base nbt structure (21w43a or later)
+            nbt.insert("xPos", x_pos).unwrap();
+            nbt.insert("zPos", z_pos).unwrap();
+            nbt.insert("LastUpdate", last_update).unwrap();
+            nbt.insert("InhabitedTime", inhabited_time).unwrap();
+        }
+
+        if self.data_version < THE_FLATTENING {
+            // Legacy format
             level.insert("TerrainPopulated".into(), nbt::Value::Byte(1));
             level.insert("LightPopulated".into(), nbt::Value::Byte(1));
             level.insert("V".into(), nbt::Value::Byte(1));
@@ -128,21 +145,36 @@ impl Chunk {
                 "HeightMap".into(),
                 nbt::Value::IntArray(self.height_map().into()),
             );
+            level.insert("Sections".into(), sections);
+        } else if self.data_version < McVersion::from_str("21w43a").unwrap() {
+            // Fill the level compound tag
+            level.insert("Status".into(), nbt::Value::String("full".into()));
+            level.insert("isLightOn".into(), nbt::Value::Byte(0));
+            level.insert("Sections".into(), sections);
+        } else {
+            // Fill the base nbt structure
+            nbt.insert("Status", nbt::Value::String("full".into())).unwrap();
+            nbt.insert("isLightOn", nbt::Value::Byte(0)).unwrap();
+            nbt.insert("sections", sections).unwrap();
         }
 
-        level.insert("Sections".into(), sections);
-        // TODO Add proper handling of entities, instead of forgetting them:
-        level.insert(
-            "Entities".into(),
-            nbt::Value::List(Vec::<nbt::Value>::new()),
-        );
-        level.insert("TileEntities".into(), tile_entities);
+        // TODO Add proper handling of entities, instead of forgetting them
+        let entities = nbt::Value::List(Vec::<nbt::Value>::new());
+
+        if self.data_version < McVersion::from_str("21w43a").unwrap() {
+            level.insert("Entities".into(), entities);
+            level.insert("TileEntities".into(), tile_entities);
+        } else {
+            nbt.insert("Entities", entities).unwrap();
+            nbt.insert("block_entities", tile_entities).unwrap();
+        }
         // TODO Also insert "TileTicks" (optional)
 
-        // Create and return nbt blob
-        let mut nbt = nbt::Blob::new();
         nbt.insert("DataVersion", self.data_version.id()).unwrap();
-        nbt.insert("Level", nbt::Value::Compound(level)).unwrap();
+        if self.data_version < McVersion::from_str("21w43a").unwrap() {
+            nbt.insert("Level", nbt::Value::Compound(level)).unwrap();
+        }
+
         RawChunkData::new_zlib(&nbt)
     }
 
@@ -154,8 +186,6 @@ impl Chunk {
         let data_version = nbt_blob_lookup_int(&nbt, "DataVersion")
             .map(McVersion::from_id)
             .unwrap();
-        //NB Temporarily disabled save version check; should be used for import details
-        //assert!(data_version < McVersion::from_str(THE_FLATTENING).unwrap());
 
         let x_pos = nbt_blob_lookup_int(
             &nbt,

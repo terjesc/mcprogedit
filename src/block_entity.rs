@@ -266,6 +266,7 @@ impl BlockEntity {
         let mut patterns = Vec::new();
 
         if let Ok(pattern_entries) = nbt_value_lookup_list(value, "Patterns") {
+            println!("{:?}", pattern_entries);
             for pattern_entry in pattern_entries {
                 let pattern = ColouredPattern {
                     colour: Colour::from(nbt_value_lookup_int(&pattern_entry, "Color").unwrap()),
@@ -299,7 +300,7 @@ impl BlockEntity {
             common,
             colour,
             custom_name,
-            patterns: _,
+            patterns,
         } = self
         {
             for (key, value) in common.to_nbt_values() {
@@ -315,9 +316,18 @@ impl BlockEntity {
                 entity.insert("CustomName".into(), nbt::Value::String(name.clone()));
             }
 
-            // TODO Add all TAG_Compound("Color", "Pattern") to the patterns list
-            entity.insert("Patterns".into(), nbt::Value::List(Vec::new()));
+            let mut nbt_patterns_list = Vec::new();
+            for pattern in patterns {
+                let mut nbt_pattern = nbt::Map::new();
+                nbt_pattern.insert("Color".into(), nbt::Value::Int(Into::<u8>::into(pattern.colour) as i32));
+                nbt_pattern.insert("Pattern".into(), nbt::Value::String(pattern.pattern.nbt_name().to_string()));
+                nbt_patterns_list.push(nbt::Value::Compound(nbt_pattern));
+            }
+            let nbt_patterns = nbt::Value::List(nbt_patterns_list);
 
+            entity.insert("Patterns".into(), nbt_patterns);
+
+            println!("Banner entity: {:?}", entity);
             Some(nbt::Value::Compound(entity))
         } else {
             None
