@@ -163,6 +163,7 @@ fn matches() -> clap::ArgMatches<'static> {
                 .value_name("block x")
                 .help("Selection corner x coordinate.")
                 .takes_value(true)
+                .allow_hyphen_values(true)
                 .required(true),
         )
         .arg(
@@ -181,6 +182,7 @@ fn matches() -> clap::ArgMatches<'static> {
                 .value_name("block y")
                 .help("Selection corner y coordinate.")
                 .takes_value(true)
+                .allow_hyphen_values(true)
                 .required(false),
         )
         .arg(
@@ -199,6 +201,7 @@ fn matches() -> clap::ArgMatches<'static> {
                 .value_name("block z")
                 .help("Selection corner z coordinate.")
                 .takes_value(true)
+                .allow_hyphen_values(true)
                 .required(true),
         )
         .arg(
