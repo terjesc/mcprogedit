@@ -62,7 +62,7 @@ pub enum BannerPattern {
     Chief,                   // ts (top stripe)
     PaleDexter,              // ls (left stripe)
     PaleSinister,            // rs (right sripe)
-    (...)
+    (...) Remaining entries left out for brevity.
 }
 ```
 
@@ -77,7 +77,7 @@ impl From<&str> for BannerPattern {
             "ts" => Self::Chief,                   // ts (top stripe)
             "ls" => Self::PaleDexter,              // ls (left stripe)
             "rs" => Self::PaleSinister,            // rs (right sripe)
-            (...)
+            (...) Remaining entries left out for brevity.
         }
     }
 }

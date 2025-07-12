@@ -82,11 +82,13 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
     (...)
         let palette_item = match name.as_str() {
             (...)
-            "minecraft:farmland" => block(Block::Farmland { wetness: prop(&properties, "moisture") }),
+            "minecraft:farmland" => block(Block::Farmland {
+                wetness: prop(&properties, "moisture"),
+            }),
             (...)
 ```
 
-For a more complex block, we could have made a dedicated function for creating the block from the `properties` variable. For `Block::Farmland` there is only one field, `wetness`, and so the full implementation fits in one line. We fetch the value of the `moisture` block state from `properties` with the generic utility function `prop()`. When given the `properties` NBT structure and the name of the block state, it returns the value with the required type -- in this case an `Int0Through7`.
+For a more complex block, we could have made a dedicated function for creating the block from the `properties` variable. For `Block::Farmland` there is only one field, `wetness`, and so the full implementation is short. We fetch the value of the `moisture` block state from `properties` with the generic utility function `prop()`. When given the `properties` NBT structure and the name of the block state, it returns the value with the required type -- in this case an `Int0Through7`.
 
 There are some instances where the `prop()` function doesn't work. In those instances there might be more manual work for extracting the block state and converting it to the correct type. Luckily for us, _farmland_ is not one of those instances.
 
@@ -140,7 +142,9 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
     (...)
         let palette_item = match name.as_str() {
             (...)
-            "minecraft:end_rod" => block(Block::EndRod { facing: facing_surface6(&properties)}),
+            "minecraft:end_rod" => block(Block::EndRod {
+                facing: facing_surface6(&properties),
+            }),
             (...)
 ```
 

@@ -33,18 +33,7 @@ impl PaletteItem {
                 None => "minecraft:glass",
                 Some(Colour::White) => "minecraft:white_stained_glass",
                 Some(Colour::Orange) => "minecraft:orange_stained_glass",
-                Some(Colour::Magenta) => "minecraft:magenta_stained_glass",
-                Some(Colour::LightBlue) => "minecraft:light_blue_stained_glass",
-                Some(Colour::Yellow) => "minecraft:yellow_stained_glass",
-                Some(Colour::Lime) => "minecraft:lime_stained_glass",
-                Some(Colour::Pink) => "minecraft:pink_stained_glass",
-                Some(Colour::Gray) => "minecraft:gray_stained_glass",
-                Some(Colour::LightGray) => "minecraft:light_gray_stained_glass",
-                Some(Colour::Cyan) => "minecraft:cyan_stained_glass",
-                Some(Colour::Purple) => "minecraft:purple_stained_glass",
-                Some(Colour::Blue) => "minecraft:blue_stained_glass",
-                Some(Colour::Brown) => "minecraft:brown_stained_glass",
-                Some(Colour::Green) => "minecraft:green_stained_glass",
+                (...) // Skipping 12 entries, for brevity.
                 Some(Colour::Red) => "minecraft:red_stained_glass",
                 Some(Colour::Black) => "minecraft:black_stained_glass",
             }
@@ -61,22 +50,19 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
         let palette_item = match name.as_str() {
             (...)
             "minecraft:glass" => block(Block::Glass { colour: None }),
-            "minecraft:white_stained_glass" => block(Block::Glass { colour: Some(Colour::White )}),
-            "minecraft:orange_stained_glass" => block(Block::Glass { colour: Some(Colour::Orange )}),
-            "minecraft:magenta_stained_glass" => block(Block::Glass { colour: Some(Colour::Magenta )}),
-            "minecraft:light_blue_stained_glass" => block(Block::Glass { colour: Some(Colour::LightBlue )}),
-            "minecraft:yellow_stained_glass" => block(Block::Glass { colour: Some(Colour::Yellow )}),
-            "minecraft:lime_stained_glass" => block(Block::Glass { colour: Some(Colour::Lime )}),
-            "minecraft:pink_stained_glass" => block(Block::Glass { colour: Some(Colour::Pink )}),
-            "minecraft:gray_stained_glass" => block(Block::Glass { colour: Some(Colour::Gray )}),
-            "minecraft:light_gray_stained_glass" => block(Block::Glass { colour: Some(Colour::LightGray )}),
-            "minecraft:cyan_stained_glass" => block(Block::Glass { colour: Some(Colour::Cyan )}),
-            "minecraft:purple_stained_glass" => block(Block::Glass { colour: Some(Colour::Purple )}),
-            "minecraft:blue_stained_glass" => block(Block::Glass { colour: Some(Colour::Blue )}),
-            "minecraft:brown_stained_glass" => block(Block::Glass { colour: Some(Colour::Brown )}),
-            "minecraft:green_stained_glass" => block(Block::Glass { colour: Some(Colour::Green )}),
-            "minecraft:red_stained_glass" => block(Block::Glass { colour: Some(Colour::Red )}),
-            "minecraft:black_stained_glass" => block(Block::Glass { colour: Some(Colour::Black )}),
+            "minecraft:white_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::White),
+            }),
+            "minecraft:orange_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Orange),
+            }),
+            (...) // Skipping 12 entries, for brevity.
+            "minecraft:red_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Red),
+            }),
+            "minecraft:black_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Black),
+            }),
             (...)
 ```
 
