@@ -189,8 +189,10 @@ impl PaletteItem {
             PaletteItem::Block(Block::Basalt { alignment })
             | PaletteItem::Block(Block::BoneBlock { alignment })
             | PaletteItem::Block(Block::Chain { alignment })
+            | PaletteItem::Block(Block::Deepslate { alignment })
             | PaletteItem::Block(Block::Log(Log { alignment, .. }))
             | PaletteItem::Block(Block::HayBale { alignment })
+            | PaletteItem::Block(Block::InfestedDeepslate { alignment })
             | PaletteItem::Block(Block::PolishedBasalt { alignment })
             | PaletteItem::Block(Block::PurpurPillar { alignment })
             | PaletteItem::Block(Block::QuartzPillar { alignment }) => {
@@ -586,7 +588,13 @@ impl PaletteItem {
                 );
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Fence { waterlogged, .. }) => {
+            PaletteItem::Block(Block::Coral { waterlogged, .. })
+            | PaletteItem::Block(Block::Fence { waterlogged, .. })
+            | PaletteItem::Block(Block::GlassPane { waterlogged, .. })
+            | PaletteItem::Block(Block::HangingRoots { waterlogged })
+            | PaletteItem::Block(Block::IronBars { waterlogged })
+            | PaletteItem::Block(Block::Scaffolding { waterlogged })
+            | PaletteItem::Block(Block::Wall { waterlogged, .. }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert(
                     "waterlogged".into(),
@@ -683,15 +691,6 @@ impl PaletteItem {
                 );
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::IronBars { waterlogged })
-            | PaletteItem::Block(Block::GlassPane { waterlogged, .. }) => {
-                let mut properties = nbt::Map::new();
-                properties.insert(
-                    "waterlogged".into(),
-                    nbt::Value::String(waterlogged.to_string()),
-                );
-                Some(nbt::Value::Compound(properties))
-            }
             PaletteItem::Block(Block::Vines(Vines { anchored_at })) => {
                 let mut properties = nbt::Map::new();
                 properties.insert(
@@ -769,14 +768,6 @@ impl PaletteItem {
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 // TODO attached (bool as string)
                 // TODO powered (bool as string)
-                Some(nbt::Value::Compound(properties))
-            }
-            PaletteItem::Block(Block::Wall { waterlogged, .. }) => {
-                let mut properties = nbt::Map::new();
-                properties.insert(
-                    "waterlogged".into(),
-                    nbt::Value::String(waterlogged.to_string()),
-                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Anvil { facing, .. }) => {
@@ -884,22 +875,6 @@ impl PaletteItem {
                 let mut properties = nbt::Map::new();
                 properties.insert("hatch".into(), nbt::Value::String(age.to_string()));
                 properties.insert("eggs".into(), nbt::Value::String(count.to_string()));
-                Some(nbt::Value::Compound(properties))
-            }
-            PaletteItem::Block(Block::Scaffolding { waterlogged }) => {
-                let mut properties = nbt::Map::new();
-                properties.insert(
-                    "waterlogged".into(),
-                    nbt::Value::String(waterlogged.to_string()),
-                );
-                Some(nbt::Value::Compound(properties))
-            }
-            PaletteItem::Block(Block::Coral { waterlogged, .. }) => {
-                let mut properties = nbt::Map::new();
-                properties.insert(
-                    "waterlogged".into(),
-                    nbt::Value::String(waterlogged.to_string()),
-                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::CoralFan {
@@ -1043,9 +1018,156 @@ impl PaletteItem {
                 );
                 Some(nbt::Value::Compound(properties))
             }
+            PaletteItem::Block(Block::Candle {
+                count,
+                lit,
+                waterlogged,
+                ..
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("candles".into(), nbt::Value::String(count.to_string()));
+                properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::CaveVines {
+                berries,
+                growth_stage,
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("berries".into(), nbt::Value::String(berries.to_string()));
+                if let Some(age) = growth_stage {
+                    properties.insert("age".into(), nbt::Value::String(age.to_string()));
+                }
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::RedstoneOre { lit })
+            | PaletteItem::Block(Block::DeepslateRedstoneOre { lit }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Dripleaf {
+                facing,
+                variant,
+                waterlogged,
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
+                match variant {
+                    DripleafVariant::SmallTop => {
+                        properties.insert("half".into(), nbt::Value::String("upper".into()));
+                    }
+                    DripleafVariant::SmallBottom => {
+                        properties.insert("half".into(), nbt::Value::String("lower".into()));
+                    }
+                    DripleafVariant::BigLeaf(tilt) => match tilt {
+                        DripleafTilt::None => {
+                            properties.insert("tilt".into(), nbt::Value::String("none".into()));
+                        }
+                        DripleafTilt::Unstable => {
+                            properties.insert("tilt".into(), nbt::Value::String("unstable".into()));
+                        }
+                        DripleafTilt::Partial => {
+                            properties.insert("tilt".into(), nbt::Value::String("partial".into()));
+                        }
+                        DripleafTilt::Full => {
+                            properties.insert("tilt".into(), nbt::Value::String("full".into()));
+                        }
+                    },
+                    _ => (),
+                }
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::GlowLichen {
+                mounted_at,
+                waterlogged,
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert(
+                    "east".into(),
+                    nbt::Value::String(mounted_at.east.to_string()),
+                );
+                properties.insert(
+                    "down".into(),
+                    nbt::Value::String(mounted_at.down.to_string()),
+                );
+                properties.insert(
+                    "north".into(),
+                    nbt::Value::String(mounted_at.north.to_string()),
+                );
+                properties.insert(
+                    "south".into(),
+                    nbt::Value::String(mounted_at.south.to_string()),
+                );
+                properties.insert("up".into(), nbt::Value::String(mounted_at.up.to_string()));
+                properties.insert(
+                    "west".into(),
+                    nbt::Value::String(mounted_at.west.to_string()),
+                );
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::Light { level, waterlogged }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert("level".into(), nbt::Value::String(level.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::LightningRod {
+                mounted_at,
+                powered,
+                waterlogged,
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert(
+                    "facing".into(),
+                    nbt::Value::String(mounted_at.opposite().to_string()),
+                );
+                properties.insert("powered".into(), nbt::Value::String(powered.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
+            PaletteItem::Block(Block::PointedDripstone {
+                thickness,
+                mounted_at,
+                waterlogged,
+            }) => {
+                let mut properties = nbt::Map::new();
+                properties.insert(
+                    "thickness".into(),
+                    nbt::Value::String(thickness.to_nbt_str().to_string()),
+                );
+                properties.insert(
+                    "vertical_direction".into(),
+                    nbt::Value::String(mounted_at.opposite().to_string()),
+                );
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
+                Some(nbt::Value::Compound(properties))
+            }
 
-            /*
-             */
+            // TODO SculkSensor (comes with block entity data)
+            //      https://minecraft.wiki/w/Java_Edition_1.17
+
             // TODO Figure out what to do with:
             //      ChorusPlant, Fence, FenceGate, GlassPane, IronBars, RedstoneWire, Tripwire, Wall.
             //      They all have connection info in the Properties tag.
@@ -1822,7 +1944,6 @@ impl PaletteItem {
             // TODO 217 StructureVoid
             PaletteItem::Block(Block::Observer { .. }) => "minecraft:observer",
             //PaletteItem::Block(Block::) => "minecraft:",
-
             PaletteItem::ProtoBlock(ProtoBlock::ShulkerBox { colour, .. }) => match colour {
                 None => "minecraft:shulker_box",
                 Some(Colour::White) => "minecraft:white_shulker_box",
@@ -2170,7 +2291,6 @@ impl PaletteItem {
                 // TODO Figure out how bamboo / bamboo_sapling works.
                 //      Is it similar to Kelp, TwistingVines and WeepingVines?
             */
-
             // Blocks that should only appear as proto blocks
             PaletteItem::Block(Block::Banner(_))
             | PaletteItem::Block(Block::Barrel(_))
@@ -2194,11 +2314,13 @@ impl PaletteItem {
             }
 
             // Blocks that should not appear as proto blocks
+            // TODO check if Jukebox belong here
+            /*
             PaletteItem::ProtoBlock(ProtoBlock::Jukebox) => {
                 warn!("Unexpected PaletteItem::ProtoBlock variant: {:?}", self);
                 "minecraft:sponge"
             }
-
+            */
             // TODO Remove this match section when all variants are handled.
             // This is a temporary listing for missing (unimplemented) patterns.
             PaletteItem::Block(Block::Bamboo { .. })
@@ -3559,16 +3681,108 @@ pub(super) fn from_section(
                 block(copper_stairs(&properties, Oxidation::Oxidized, true))
             }
             "minecraft:deepslate" => block(deepslate(&properties)),
+            "minecraft:cobbled_deepslate_slab" => {
+                block(slab(SlabMaterial::CobbledDeepslate, &properties))
+            }
+            "minecraft:cobbled_deepslate_stairs" => {
+                block(stairs(StairMaterial::CobbledDeepslate, &properties))
+            }
+            "minecraft:cobbled_deepslate_wall" => {
+                block(wall(WallMaterial::CobbledDeepslate, &properties))
+            }
+            "minecraft:polished_deepslate" => block(Block::PolishedDeepslate),
+            "minecraft:polished_deepslate_slab" => {
+                block(slab(SlabMaterial::PolishedDeepslate, &properties))
+            }
+            "minecraft:polished_deepslate_stairs" => {
+                block(stairs(StairMaterial::PolishedDeepslate, &properties))
+            }
+            "minecraft:polished_deepslate_wall" => {
+                block(wall(WallMaterial::PolishedDeepslate, &properties))
+            }
+            "minecraft:deepslate_bricks" => block(Block::DeepslateBricks),
+            "minecraft:cracked_deepslate_bricks" => block(Block::CrackedDeepslateBricks),
+            "minecraft:deepslate_brick_slab" => {
+                block(slab(SlabMaterial::DeepslateBrick, &properties))
+            }
+            "minecraft:deepslate_brick_stairs" => {
+                block(stairs(StairMaterial::DeepslateBrick, &properties))
+            }
+            "minecraft:deepslate_brick_wall" => {
+                block(wall(WallMaterial::DeepslateBrick, &properties))
+            }
+            "minecraft:deepslate_tiles" => block(Block::DeepslateTiles),
+            "minecraft:cracked_deepslate_tiles" => block(Block::CrackedDeepslateTiles),
+            "minecraft:deepslate_tile_slab" => {
+                block(slab(SlabMaterial::DeepslateTile, &properties))
+            }
+            "minecraft:deepslate_tile_stairs" => {
+                block(stairs(StairMaterial::DeepslateTile, &properties))
+            }
+            "minecraft:deepslate_tile_wall" => {
+                block(wall(WallMaterial::DeepslateTile, &properties))
+            }
+            "minecraft:chiseled_deepslate" => block(Block::ChiseledDeepslate),
+            "minecraft:deepslate_coal_ore" => block(Block::DeepslateCoalOre),
+            "minecraft:deepslate_copper_ore" => block(Block::DeepslateCopperOre),
+            "minecraft:deepslate_iron_ore" => block(Block::DeepslateIronOre),
+            "minecraft:deepslate_gold_ore" => block(Block::DeepslateGoldOre),
+            "minecraft:deepslate_diamond_ore" => block(Block::DeepslateDiamondOre),
+            "minecraft:deepslate_redstone_ore" => block(Block::DeepslateRedstoneOre {
+                lit: prop(&properties, "lit"),
+            }),
+            "minecraft:deepslate_lapis_ore" => block(Block::DeepslateLapisLazuliOre),
+            "minecraft:deepslate_emerald_ore" => block(Block::DeepslateEmeraldOre),
+            "minecraft:big_dripleaf" => block(big_dripleaf(&properties)),
+            "minecraft:big_dripleaf_stem" => block(dripleaf(DripleafVariant::BigStem, &properties)),
+            "minecraft:small_dripleaf" => block(small_dripleaf(&properties)),
+            "minecraft:dripstone_block" => block(Block::Dripstone),
+            "minecraft:glow_lichen" => block(glow_lichen(&properties)),
+            "minecraft:hanging_roots" => block(Block::HangingRoots {
+                waterlogged: prop(&properties, "waterlogged"),
+            }),
+            "minecraft:infested_deepslate" => block(infested_deepslate(&properties)),
+            "minecraft:light" => block(Block::Light {
+                level: prop(&properties, "level"),
+                waterlogged: prop(&properties, "waterlogged"),
+            }),
+            "minecraft:lightning_rod" => block(Block::LightningRod {
+                mounted_at: facing_surface6(&properties).opposite(),
+                powered: prop(&properties, "powered"),
+                waterlogged: prop(&properties, "waterlogged"),
+            }),
+            "minecraft:moss_block" => block(Block::Moss),
+            "minecraft:moss_carpet" => block(Block::MossCarpet),
+            "minecraft:pointed_dripstone" => block(Block::PointedDripstone {
+                thickness: prop(&properties, "thickness"),
+                mounted_at: prop::<Surface2>(&properties, "vertical_direction").opposite(),
+                waterlogged: prop(&properties, "waterlogged"),
+            }),
+            "minecraft:potted_azalea_bush" => block(potted_plant(PottedPlant::Azalea)),
+            "minecraft:potted_flowering_azalea_bush" => {
+                block(potted_plant(PottedPlant::FloweringAzalea))
+            }
+            "minecraft:powder_snow" => block(Block::PowderSnow),
+            "minecraft:rooted_dirt" => block(Block::RootedDirt),
+            /* TODO Sculk Sensor has block entity data
+            "minecraft:sculk_sensor" => proto(Block::SculkSensor {
+                power: prop(&properties, "power"),
+                phase:
+                waterlogged: prop(&properties, "waterlogged"),
+            }),*/
+            "minecraft:smooth_basalt" => block(Block::SmoothBasalt),
+            "minecraft:spore_blossom" => block(Block::SporeBlossom),
+            "minecraft:tinted_glass" => block(Block::TintedGlass),
+            "minecraft:tuff" => block(Block::Tuff),
 
-            // TODO Next new block is "Cobbled deepslate slab", on https://minecraft.wiki/w/Java_Edition_1.17
             //"minecraft:" => block(Block::),
-
 
             /*
                 // Missing blocks with tile entity (and possibly also properties)
-                lectern
-                conduit
                 bell
+                conduit
+                lectern
+                sculk_sensor
             */
             // Catch-all
             _ => {
@@ -3703,6 +3917,57 @@ fn cut_copper(oxidation: Oxidation, waxed: bool) -> Block {
 
 fn deepslate(properties: &Option<Value>) -> Block {
     Block::Deepslate {
+        alignment: wood_alignment(&properties),
+    }
+}
+
+fn dripleaf(variant: DripleafVariant, properties: &Option<Value>) -> Block {
+    Block::Dripleaf {
+        facing: facing_surface4(&properties),
+        variant,
+        waterlogged: prop(&properties, "waterlogged"),
+    }
+}
+
+fn big_dripleaf(properties: &Option<Value>) -> Block {
+    let tilt = properties_lookup_string(properties, "tilt");
+    let tilt = tilt.as_deref();
+    let variant = match tilt {
+        Some("none") => DripleafVariant::BigLeaf(DripleafTilt::None),
+        Some("unstable") => DripleafVariant::BigLeaf(DripleafTilt::Unstable),
+        Some("partial") => DripleafVariant::BigLeaf(DripleafTilt::Partial),
+        Some("full") => DripleafVariant::BigLeaf(DripleafTilt::Full),
+        _ => {
+            warn!("Treating {:?} as DripleafTilt::None", tilt);
+            DripleafVariant::BigLeaf(DripleafTilt::Full)
+        }
+    };
+    dripleaf(variant, properties)
+}
+
+fn small_dripleaf(properties: &Option<Value>) -> Block {
+    let variant = properties_lookup_string(properties, "half");
+    let variant = variant.as_deref();
+    let variant = match variant {
+        Some("lower") => DripleafVariant::SmallBottom,
+        Some("upper") => DripleafVariant::SmallTop,
+        _ => {
+            warn!("Treating {:?} as DripleafVariant::SmallTop", variant);
+            DripleafVariant::SmallTop
+        }
+    };
+    dripleaf(variant, properties)
+}
+
+fn glow_lichen(properties: &Option<Value>) -> Block {
+    Block::GlowLichen {
+        mounted_at: direction_flags6(properties),
+        waterlogged: prop(&properties, "waterlogged"),
+    }
+}
+
+fn infested_deepslate(properties: &Option<Value>) -> Block {
+    Block::InfestedDeepslate {
         alignment: wood_alignment(&properties),
     }
 }

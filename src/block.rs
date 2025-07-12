@@ -1,5 +1,8 @@
 use std::convert::TryFrom;
 use std::fmt;
+use std::str::FromStr;
+
+use strum::Display;
 
 mod banner;
 mod barrel;
@@ -308,13 +311,46 @@ pub enum DripleafTilt {
     Full,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17
+#[derive(Clone, Copy, Debug, Display, Eq, Hash, PartialEq)] // TODO 1.17
 pub enum PointedDripstoneThickness {
     Tip,
     TipMerge,
     Frustum,
     Middle,
     Base,
+}
+
+impl PointedDripstoneThickness {
+    pub(crate) fn to_nbt_str(&self) -> &str {
+        match self {
+            Self::Tip => "tip",
+            Self::TipMerge => "tip_merge",
+            Self::Frustum => "frustum",
+            Self::Middle => "middle",
+            Self::Base => "base",
+        }
+    }
+}
+
+impl FromStr for PointedDripstoneThickness {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "tip" => Ok(Self::Tip),
+            "tip_merge" => Ok(Self::TipMerge),
+            "frustum" => Ok(Self::Frustum),
+            "middle" => Ok(Self::Middle),
+            "base" => Ok(Self::Base),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Default for PointedDripstoneThickness {
+    fn default() -> Self {
+        Self::Tip
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)] // TODO 1.17

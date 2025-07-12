@@ -2,7 +2,9 @@
 
 use std::convert::TryFrom;
 use std::fmt;
+use std::str::FromStr;
 
+use strum::Display;
 use thiserror::Error;
 
 // TODO Consider adding door placement data structure to this file...
@@ -196,6 +198,18 @@ impl From<Surface2> for Direction {
         match item {
             Surface2::Down => Self::Down,
             Surface2::Up => Self::Up,
+        }
+    }
+}
+
+impl FromStr for Surface2 {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "down" => Ok(Self::Down),
+            "up" => Ok(Self::Up),
+            _ => Err(()),
         }
     }
 }
@@ -570,10 +584,20 @@ impl Default for Axis3 {
 }
 
 /// The top and bottom surfaces of the voxel volume populated by the block.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Display, Eq, Hash, PartialEq)]
 pub enum Surface2 {
     Down,
     Up,
+}
+
+impl Surface2 {
+    /// Returns an instance of the opposite direction.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Self::Up => Self::Down,
+            Self::Down => Self::Up,
+        }
+    }
 }
 
 impl Default for Surface2 {
@@ -726,6 +750,20 @@ pub enum Surface6 {
     South,
     Up,
     West,
+}
+
+impl Surface6 {
+    /// Returns an instance of the opposite direction.
+    pub fn opposite(&self) -> Self {
+        match self {
+            Surface6::East => Surface6::West,
+            Surface6::West => Surface6::East,
+            Surface6::North => Surface6::South,
+            Surface6::South => Surface6::North,
+            Surface6::Up => Surface6::Down,
+            Surface6::Down => Surface6::Up,
+        }
+    }
 }
 
 impl fmt::Display for Surface6 {
