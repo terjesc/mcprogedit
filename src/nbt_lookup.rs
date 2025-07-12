@@ -94,7 +94,10 @@ pub fn nbt_blob_lookup_string(blob: &nbt::Blob, path: &'static str) -> Result<St
 }
 
 #[allow(dead_code)]
-pub fn nbt_blob_lookup_list(blob: &nbt::Blob, path: &'static str) -> Result<Vec<nbt::Value>, Error> {
+pub fn nbt_blob_lookup_list(
+    blob: &nbt::Blob,
+    path: &'static str,
+) -> Result<Vec<nbt::Value>, Error> {
     match nbt_blob_lookup(blob, path)? {
         nbt::Value::List(list) => Ok(list),
         _ => Err(Error::UnexpectedValueType),
@@ -186,7 +189,10 @@ pub fn nbt_value_lookup_double(value: &nbt::Value, path: &'static str) -> Result
 }
 
 #[allow(dead_code)]
-pub fn nbt_value_lookup_byte_array(value: &nbt::Value, path: &'static str) -> Result<Vec<i8>, Error> {
+pub fn nbt_value_lookup_byte_array(
+    value: &nbt::Value,
+    path: &'static str,
+) -> Result<Vec<i8>, Error> {
     match nbt_value_lookup(value, path)? {
         nbt::Value::ByteArray(byte_array) => Ok(byte_array),
         _ => Err(Error::UnexpectedValueType),
@@ -202,7 +208,10 @@ pub fn nbt_value_lookup_string(value: &nbt::Value, path: &'static str) -> Result
 }
 
 #[allow(dead_code)]
-pub fn nbt_value_lookup_list(value: &nbt::Value, path: &'static str) -> Result<Vec<nbt::Value>, Error> {
+pub fn nbt_value_lookup_list(
+    value: &nbt::Value,
+    path: &'static str,
+) -> Result<Vec<nbt::Value>, Error> {
     match nbt_value_lookup(value, path)? {
         nbt::Value::List(list) => Ok(list),
         _ => Err(Error::UnexpectedValueType),
@@ -210,7 +219,10 @@ pub fn nbt_value_lookup_list(value: &nbt::Value, path: &'static str) -> Result<V
 }
 
 #[allow(dead_code)]
-pub fn nbt_value_lookup_int_array(value: &nbt::Value, path: &'static str) -> Result<Vec<i32>, Error> {
+pub fn nbt_value_lookup_int_array(
+    value: &nbt::Value,
+    path: &'static str,
+) -> Result<Vec<i32>, Error> {
     match nbt_value_lookup(value, path)? {
         nbt::Value::IntArray(int_array) => Ok(int_array),
         _ => Err(Error::UnexpectedValueType),
@@ -218,7 +230,10 @@ pub fn nbt_value_lookup_int_array(value: &nbt::Value, path: &'static str) -> Res
 }
 
 #[allow(dead_code)]
-pub fn nbt_value_lookup_long_array(value: &nbt::Value, path: &'static str) -> Result<Vec<i64>, Error> {
+pub fn nbt_value_lookup_long_array(
+    value: &nbt::Value,
+    path: &'static str,
+) -> Result<Vec<i64>, Error> {
     match nbt_value_lookup(value, path)? {
         nbt::Value::LongArray(long_array) => Ok(long_array),
         _ => Err(Error::UnexpectedValueType),

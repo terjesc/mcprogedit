@@ -185,8 +185,7 @@ impl BlockCuboid {
     /// layer of blocks in the block cuboid, excluding air, foilage and snow blocks.
     pub fn ground_height_map(&self) -> HeightMap {
         self.generic_height_map(&|block: &Block| {
-            block.is_affecting_sky_light_old()
-            && !block.is_foilage()
+            block.is_affecting_sky_light_old() && !block.is_foilage()
             // Todo: handle snow (and possibly other non-ground blocks)
         })
     }

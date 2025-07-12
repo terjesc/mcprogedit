@@ -77,7 +77,8 @@ impl LightCuboid {
                 let from_y = to_y as i64 - offset.1;
                 for to_z in min.2..=max.2 {
                     let from_z = to_z as i64 - offset.2;
-                    if let Some(light_level) = other.light_level_at((from_x, from_y, from_z).into()) {
+                    if let Some(light_level) = other.light_level_at((from_x, from_y, from_z).into())
+                    {
                         self.set_light_level_at((to_x, to_y, to_z).into(), light_level);
                     } else {
                         eprintln!("[warning] Tried to paste light level from invalid source position ({}, {}, {})", from_x, from_y, from_z);
@@ -88,11 +89,7 @@ impl LightCuboid {
     }
 
     /// Creates a new `LightCuboid` from part of an existing `LightCuboid`.
-    pub fn from_light_cuboid(
-        p1: BlockCoord,
-        p2: BlockCoord,
-        other: &Self,
-    ) -> Self {
+    pub fn from_light_cuboid(p1: BlockCoord, p2: BlockCoord, other: &Self) -> Self {
         let min = (
             i64::min(p1.0, p2.0),
             i64::min(p1.1, p2.1),
@@ -104,7 +101,11 @@ impl LightCuboid {
             i64::max(p1.2, p2.2),
         );
 
-        let dimensions = ((max.0 - min.0) as usize, (max.1 - min.1) as usize, (max.2 - min.2) as usize);
+        let dimensions = (
+            (max.0 - min.0) as usize,
+            (max.1 - min.1) as usize,
+            (max.2 - min.2) as usize,
+        );
 
         let mut cuboid = Self::new(dimensions);
 
@@ -114,7 +115,8 @@ impl LightCuboid {
                 let to_y = from_y - min.1;
                 for from_z in min.2..=max.2 {
                     let to_z = from_z - min.2;
-                    if let Some(light_level) = other.light_level_at((from_x, from_y, from_z).into()) {
+                    if let Some(light_level) = other.light_level_at((from_x, from_y, from_z).into())
+                    {
                         cuboid.set_light_level_at((to_x, to_y, to_z).into(), light_level);
                     } else {
                         eprintln!("[warning] Tried to copy light level from invalid source position ({}, {}, {})", from_x, from_y, from_z);
@@ -128,11 +130,12 @@ impl LightCuboid {
 
     fn index(&self, BlockCoord(x, y, z): BlockCoord) -> Option<usize> {
         if x < 0
-        || x >= self.x_dim as i64
-        || y < 0
-        || y >= self.y_dim as i64
-        || z < 0
-        || z >= self.z_dim as i64 {
+            || x >= self.x_dim as i64
+            || y < 0
+            || y >= self.y_dim as i64
+            || z < 0
+            || z >= self.z_dim as i64
+        {
             None
         } else {
             Some(self.y_dim * self.z_dim * x as usize + self.y_dim * z as usize + y as usize)

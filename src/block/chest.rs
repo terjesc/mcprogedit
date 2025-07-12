@@ -37,7 +37,7 @@ impl Chest {
                 items: self.items.clone(),
                 loot_table: None,      // TODO
                 loot_table_seed: None, // TODO
-            }
+            },
         }
     }
 
@@ -57,7 +57,7 @@ impl Chest {
                 items: self.items.clone(),
                 loot_table: None,      // TODO
                 loot_table_seed: None, // TODO
-            }
+            },
         }
     }
 }
@@ -83,11 +83,14 @@ pub enum ChestVariant {
 
 impl fmt::Display for ChestVariant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Self::Left => "left",
-            Self::Right => "right",
-            Self::Single => "single",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Left => "left",
+                Self::Right => "right",
+                Self::Single => "single",
+            }
+        )
     }
 }
-

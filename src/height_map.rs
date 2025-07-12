@@ -49,7 +49,8 @@ impl HeightMap {
     }
 
     pub fn height_at(&self, coordinates: (usize, usize)) -> Option<u32> {
-        self.index(coordinates).map(|index| *self.heights.get(index).unwrap())
+        self.index(coordinates)
+            .map(|index| *self.heights.get(index).unwrap())
     }
 
     pub fn to_vec_u32(&self) -> Vec<u32> {

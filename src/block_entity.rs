@@ -149,7 +149,10 @@ pub enum BlockEntity {
 }
 
 impl BlockEntity {
-    pub fn map_from_nbt_list(list: &nbt::Value, data_version: McVersion) -> HashMap<BlockCoord, Self> {
+    pub fn map_from_nbt_list(
+        list: &nbt::Value,
+        data_version: McVersion,
+    ) -> HashMap<BlockCoord, Self> {
         Self::vec_from_nbt_list(list, data_version)
             .iter()
             .map(|entity| (entity.coordinates(), entity))
@@ -192,7 +195,9 @@ impl BlockEntity {
                 "minecraft:ender_chest" => Self::ender_chest_from_nbt_value(value),
                 "minecraft:end_gateway" => Self::end_gateway_from_nbt_value(value),
                 "minecraft:end_portal" => Self::end_portal_from_nbt_value(value),
-                "minecraft:flower_pot" if data_version < THE_FLATTENING => Self::flower_pot_from_nbt_value(value),
+                "minecraft:flower_pot" if data_version < THE_FLATTENING => {
+                    Self::flower_pot_from_nbt_value(value)
+                }
                 "minecraft:furnace" => Self::furnace_from_nbt_value(value),
                 "minecraft:hopper" => Self::hopper_from_nbt_value(value),
                 "minecraft:jigsaw" => Self::jigsaw_from_nbt_value(value),
@@ -319,8 +324,14 @@ impl BlockEntity {
             let mut nbt_patterns_list = Vec::new();
             for pattern in patterns {
                 let mut nbt_pattern = nbt::Map::new();
-                nbt_pattern.insert("Color".into(), nbt::Value::Int(Into::<u8>::into(pattern.colour) as i32));
-                nbt_pattern.insert("Pattern".into(), nbt::Value::String(pattern.pattern.nbt_name().to_string()));
+                nbt_pattern.insert(
+                    "Color".into(),
+                    nbt::Value::Int(Into::<u8>::into(pattern.colour) as i32),
+                );
+                nbt_pattern.insert(
+                    "Pattern".into(),
+                    nbt::Value::String(pattern.pattern.nbt_name().to_string()),
+                );
                 nbt_patterns_list.push(nbt::Value::Compound(nbt_pattern));
             }
             let nbt_patterns = nbt::Value::List(nbt_patterns_list);
@@ -770,9 +781,14 @@ impl BlockEntity {
     }
 
     fn jukebox_from_nbt_value(value: &nbt::Value) -> Self {
-        let record = nbt_value_lookup(value, "RecordItem").map(|value| Item::from_nbt_value(&value)).ok();
+        let record = nbt_value_lookup(value, "RecordItem")
+            .map(|value| Item::from_nbt_value(&value))
+            .ok();
         //trace!("Imported record: {:?}", record);
-        BlockEntity::Jukebox { common: CommonTags::from_nbt_value(value), record }
+        BlockEntity::Jukebox {
+            common: CommonTags::from_nbt_value(value),
+            record,
+        }
     }
 
     fn jukebox_to_nbt_value(&self) -> Option<nbt::Value> {
@@ -797,7 +813,10 @@ impl BlockEntity {
                     ItemKind::Record(Recording::Ward) => "minecraft:music_disc_ward",
                     ItemKind::Record(Recording::Wait) => "minecraft:music_disc_wait",
                     _ => {
-                        warn!("Unknown record item {:?} in jukebox, defaulting to \"Chirp\"", recording);
+                        warn!(
+                            "Unknown record item {:?} in jukebox, defaulting to \"Chirp\"",
+                            recording
+                        );
                         "minecraft:music_disc_chirp"
                     }
                 };
@@ -815,10 +834,14 @@ impl BlockEntity {
     fn lectern_from_nbt_value(value: &nbt::Value) -> Self {
         BlockEntity::Lectern {
             common: CommonTags::from_nbt_value(value),
-            book: nbt_value_lookup(value, "Book").map(|book_value| (
-                    Item::from_nbt_value(&book_value),
-                    nbt_value_lookup_int(value, "Page").unwrap(),
-                )).ok(),
+            book: nbt_value_lookup(value, "Book")
+                .map(|book_value| {
+                    (
+                        Item::from_nbt_value(&book_value),
+                        nbt_value_lookup_int(value, "Page").unwrap(),
+                    )
+                })
+                .ok(),
         }
     }
 
@@ -915,7 +938,12 @@ impl BlockEntity {
     fn sign_to_nbt_value(&self) -> Option<nbt::Value> {
         let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
 
-        if let Self::Sign { common, colour, text } = self {
+        if let Self::Sign {
+            common,
+            colour,
+            text,
+        } = self
+        {
             for (key, value) in common.to_nbt_values() {
                 entity.insert(key, value);
             }
@@ -958,7 +986,12 @@ impl BlockEntity {
     fn skull_to_nbt_value(&self) -> Option<nbt::Value> {
         let mut entity: nbt::Map<String, nbt::Value> = nbt::Map::with_capacity(5 + 5);
 
-        if let Self::Skull { common, facing, skull_type } = self {
+        if let Self::Skull {
+            common,
+            facing,
+            skull_type,
+        } = self
+        {
             for (key, value) in common.to_nbt_values() {
                 entity.insert(key, value);
             }
@@ -1114,7 +1147,13 @@ pub struct CommonTags {
 impl CommonTags {
     pub(crate) fn new(id: &'static str, at: (i32, i32, i32)) -> Self {
         let (x, y, z) = at;
-        Self { id: id.to_string(), x, y, z, keep_packed: false }
+        Self {
+            id: id.to_string(),
+            x,
+            y,
+            z,
+            keep_packed: false,
+        }
     }
 
     pub(crate) fn new_nbt(id: &'static str, at: (i32, i32, i32)) -> nbt::Value {
@@ -1158,7 +1197,7 @@ pub struct ChestTags {
     pub(crate) custom_name: Option<String>,
     pub(crate) lock: Option<String>,
     pub(crate) items: Inventory,
-    pub(crate) loot_table: Option<()>,      // TODO support for loot tables
+    pub(crate) loot_table: Option<()>, // TODO support for loot tables
     pub(crate) loot_table_seed: Option<()>, // TODO support for loot tables
 }
 
@@ -1237,7 +1276,10 @@ impl FurnaceTags {
         nbt_values.push(("Items".into(), self.items.to_nbt_value()));
         nbt_values.push(("BurnTime".into(), nbt::Value::Short(self.burn_time)));
         nbt_values.push(("CookTime".into(), nbt::Value::Short(self.cook_time)));
-        nbt_values.push(("CookTimeTotal".into(), nbt::Value::Short(self.cook_time_total)));
+        nbt_values.push((
+            "CookTimeTotal".into(),
+            nbt::Value::Short(self.cook_time_total),
+        ));
         // TODO Add compound RecipesUsed
         nbt_values
     }

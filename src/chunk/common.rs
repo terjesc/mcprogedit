@@ -6,7 +6,11 @@ impl Chunk {
     /// of the "Blocks" and similar NBT tags, within section `section_y_index`
     /// of the chunk whose local (0, 0, 0) coordinates are at global block
     /// coordinates `chunk_offset`.
-    pub(in crate::chunk) fn coordinates(section_y_index: i64, chunk_offset: BlockCoord, index: usize) -> BlockCoord {
+    pub(in crate::chunk) fn coordinates(
+        section_y_index: i64,
+        chunk_offset: BlockCoord,
+        index: usize,
+    ) -> BlockCoord {
         // index = (y * X_LENGTH * Z_LENGTH) + (z * X_LENGTH) + x
         const X_LENGTH: i64 = 16;
         const Y_HEIGHT: i64 = 16;
@@ -23,7 +27,10 @@ impl Chunk {
     /// Calculates the index into the "Blocks" and similar NBT tags, for a block
     /// within section `section_y_index`, located at chunk local coordinates
     /// `local_block_coords`.
-    pub(in crate::chunk) fn local_index(section_y_index: i64, local_block_coords: BlockCoord) -> usize {
+    pub(in crate::chunk) fn local_index(
+        section_y_index: i64,
+        local_block_coords: BlockCoord,
+    ) -> usize {
         const X_LENGTH: i64 = 16;
         const Y_HEIGHT: i64 = 16;
         const Z_LENGTH: i64 = 16;

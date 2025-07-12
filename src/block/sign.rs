@@ -42,7 +42,12 @@ impl Sign {
                 keep_packed: false,
             },
             colour: self.colour,
-            text: vec![self.text1.clone(), self.text2.clone(), self.text3.clone(), self.text4.clone()],
+            text: vec![
+                self.text1.clone(),
+                self.text2.clone(),
+                self.text3.clone(),
+                self.text4.clone(),
+            ],
         }
     }
 }

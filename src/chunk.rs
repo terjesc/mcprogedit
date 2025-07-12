@@ -1,7 +1,7 @@
 mod common;
+mod palette;
 mod post_flattening;
 mod pre_flattening;
-mod palette;
 
 use std::str::FromStr;
 use std::time::SystemTime;
@@ -153,7 +153,8 @@ impl Chunk {
             level.insert("Sections".into(), sections);
         } else {
             // Fill the base nbt structure
-            nbt.insert("Status", nbt::Value::String("full".into())).unwrap();
+            nbt.insert("Status", nbt::Value::String("full".into()))
+                .unwrap();
             nbt.insert("isLightOn", nbt::Value::Byte(0)).unwrap();
             nbt.insert("sections", sections).unwrap();
         }
@@ -194,7 +195,8 @@ impl Chunk {
             } else {
                 "xPos"
             },
-        ).unwrap();
+        )
+        .unwrap();
 
         let z_pos = nbt_blob_lookup_int(
             &nbt,
@@ -203,7 +205,8 @@ impl Chunk {
             } else {
                 "zPos"
             },
-        ).unwrap();
+        )
+        .unwrap();
 
         let global_pos: ChunkCoord = (x_pos.into(), z_pos.into()).into();
 
@@ -214,7 +217,8 @@ impl Chunk {
             } else {
                 "LastUpdate"
             },
-        ).unwrap();
+        )
+        .unwrap();
 
         let tile_entities = nbt_blob_lookup(
             &nbt,
@@ -223,12 +227,19 @@ impl Chunk {
             } else {
                 "block_entities"
             },
-        ).unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
+        )
+        .unwrap_or_else(|err| panic!("Level/TileEntities not found: {}", err));
 
         let mut block_entities = BlockEntity::map_from_nbt_list(&tile_entities, data_version);
 
         let biomes: Option<Vec<Biome>> = nbt_blob_lookup_byte_array(&nbt, "Level/Biomes")
-            .map(|biomes| biomes.iter().map(|biome| Biome::from(*biome as u8)).collect::<Vec<Biome>>()).ok();
+            .map(|biomes| {
+                biomes
+                    .iter()
+                    .map(|biome| Biome::from(*biome as u8))
+                    .collect::<Vec<Biome>>()
+            })
+            .ok();
 
         let sections = nbt_blob_lookup_list(
             &nbt,
@@ -237,7 +248,8 @@ impl Chunk {
             } else {
                 "sections"
             },
-        ).unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
+        )
+        .unwrap_or_else(|err| panic!("Level/Sections not found: {}", err));
 
         // TODO import height maps
         /*
@@ -259,7 +271,7 @@ impl Chunk {
         // Second pass: Collect the full set of (finished) blocks
         // TODO chunk height increased at some point and must be handled correctly here
         let mut block_cuboid = BlockCuboid::new_filled((16, 256, 16), Block::Air);
-        
+
         if data_version < McVersion::from_str(THE_FLATTENING).unwrap() {
             for section in &sections {
                 Chunk::pre_flattening_fill_block_cuboid_from_section(

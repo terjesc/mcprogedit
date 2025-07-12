@@ -39,8 +39,7 @@ impl TryFrom<Block> for Beehive {
 
     fn try_from(block: Block) -> Result<Self, Self::Error> {
         match block {
-            Block::Beehive(beehive)
-            | Block::BeeNest(beehive) => Ok(*beehive),
+            Block::Beehive(beehive) | Block::BeeNest(beehive) => Ok(*beehive),
             _ => Err(()),
         }
     }

@@ -41,9 +41,13 @@ pub enum BedEnd {
 
 impl fmt::Display for BedEnd {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            BedEnd::Foot => "foot",
-            BedEnd::Head => "head",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                BedEnd::Foot => "foot",
+                BedEnd::Head => "head",
+            }
+        )
     }
 }

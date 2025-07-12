@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
 use crate::block::Block;
-use crate::block_entity::{BlockEntity, FurnaceTags, CommonTags};
+use crate::block_entity::{BlockEntity, CommonTags, FurnaceTags};
 use crate::inventory::Inventory;
 use crate::positioning::{Direction, Surface4};
 
@@ -39,7 +39,7 @@ impl Furnace {
                 burn_time: self.burn_time,
                 cook_time: self.cook_time,
                 cook_time_total: self.cook_time_total,
-            }
+            },
         }
     }
 }
@@ -49,9 +49,9 @@ impl TryFrom<Block> for Furnace {
 
     fn try_from(block: Block) -> Result<Self, Self::Error> {
         match block {
-            Block::Furnace(furnace)
-            | Block::BlastFurnace(furnace)
-            | Block::Smoker(furnace) => Ok(*furnace),
+            Block::Furnace(furnace) | Block::BlastFurnace(furnace) | Block::Smoker(furnace) => {
+                Ok(*furnace)
+            }
             _ => Err(()),
         }
     }

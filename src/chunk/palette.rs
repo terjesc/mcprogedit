@@ -19,24 +19,65 @@ use crate::positioning::*;
 /// form the actual blocks.
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum ProtoBlock {
-    Banner { colour: Colour, placement: WallOrRotatedOnFloor },
-    Barrel { facing: Surface6 },
+    Banner {
+        colour: Colour,
+        placement: WallOrRotatedOnFloor,
+    },
+    Barrel {
+        facing: Surface6,
+    },
     Beacon,
-    Beehive { facing: Surface4, honey_level: Int0Through6 },
-    BeeNest { facing: Surface4, honey_level: Int0Through6 },
-    BlastFurnace { facing: Surface4, lit: bool },
+    Beehive {
+        facing: Surface4,
+        honey_level: Int0Through6,
+    },
+    BeeNest {
+        facing: Surface4,
+        honey_level: Int0Through6,
+    },
+    BlastFurnace {
+        facing: Surface4,
+        lit: bool,
+    },
     BrewingStand,
-    Chest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
-    Dispenser { facing: Surface6 },
-    Dropper { facing: Surface6 },
+    Chest {
+        facing: Surface4,
+        variant: Option<ChestVariant>,
+        waterlogged: bool,
+    },
+    Dispenser {
+        facing: Surface6,
+    },
+    Dropper {
+        facing: Surface6,
+    },
     EnchantingTable,
-    Furnace { facing: Surface4, lit: bool },
-    Hopper { facing: Surface5 },
+    Furnace {
+        facing: Surface4,
+        lit: bool,
+    },
+    Hopper {
+        facing: Surface5,
+    },
     Jukebox,
-    ShulkerBox { colour: Option<Colour>, facing: Surface6 },
-    Sign { material: WoodMaterial, placement: WallOrRotatedOnFloor, waterlogged: bool },
-    Smoker { facing: Surface4, lit: bool },
-    TrappedChest { facing: Surface4, variant: Option<ChestVariant>, waterlogged: bool },
+    ShulkerBox {
+        colour: Option<Colour>,
+        facing: Surface6,
+    },
+    Sign {
+        material: WoodMaterial,
+        placement: WallOrRotatedOnFloor,
+        waterlogged: bool,
+    },
+    Smoker {
+        facing: Surface4,
+        lit: bool,
+    },
+    TrappedChest {
+        facing: Surface4,
+        variant: Option<ChestVariant>,
+        waterlogged: bool,
+    },
 }
 
 /// The palette will contain some fully parsed blocks, and some blocks for which the block
@@ -80,10 +121,10 @@ impl PaletteItem {
                 waterlogged: chest.waterlogged,
             }),
             Block::Dispenser(dispenser) => proto(ProtoBlock::Dispenser {
-                facing: dispenser.facing
+                facing: dispenser.facing,
             }),
             Block::Dropper(dropper) => proto(ProtoBlock::Dropper {
-                facing: dropper.facing
+                facing: dropper.facing,
             }),
             Block::EnchantingTable { .. } => proto(ProtoBlock::EnchantingTable),
             Block::Furnace(furnace) => proto(ProtoBlock::Furnace {
@@ -122,7 +163,9 @@ impl PaletteItem {
         palette_item.insert("Name".into(), nbt::Value::String(self.name().into()));
 
         match self.properties() {
-            Some(properties) => { palette_item.insert("Properties".into(), properties); }
+            Some(properties) => {
+                palette_item.insert("Properties".into(), properties);
+            }
             None => (),
         }
 
@@ -131,7 +174,10 @@ impl PaletteItem {
 
     fn properties(&self) -> Option<nbt::Value> {
         match self {
-            PaletteItem::Block(Block::Sapling { growth_stage, material }) => {
+            PaletteItem::Block(Block::Sapling {
+                growth_stage,
+                material,
+            }) => {
                 if *material == SaplingMaterial::Bamboo {
                     None
                 } else {
@@ -152,8 +198,7 @@ impl PaletteItem {
                 properties.insert("axis".into(), nbt::Value::String(alignment.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::WaterSource)
-            | PaletteItem::Block(Block::LavaSource) => {
+            PaletteItem::Block(Block::WaterSource) | PaletteItem::Block(Block::LavaSource) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("level".into(), nbt::Value::String("0".into()));
                 Some(nbt::Value::Compound(properties))
@@ -166,12 +211,20 @@ impl PaletteItem {
                 properties.insert("level".into(), nbt::Value::String(level.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Leaves { distance_to_trunk, persistent, .. }) => {
+            PaletteItem::Block(Block::Leaves {
+                distance_to_trunk,
+                persistent,
+                ..
+            }) => {
                 let mut properties = nbt::Map::new();
                 if let Some(distance) = distance_to_trunk {
                     properties.insert("distance".into(), nbt::Value::String(distance.to_string()));
                 }
-                let persistent = if *persistent { "true".into() } else { "false".into() };
+                let persistent = if *persistent {
+                    "true".into()
+                } else {
+                    "false".into()
+                };
                 properties.insert("persistent".into(), nbt::Value::String(persistent));
                 Some(nbt::Value::Compound(properties))
             }
@@ -239,36 +292,67 @@ impl PaletteItem {
                 properties.insert("half".into(), nbt::Value::String("lower".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Slab(Slab { position, waterlogged, .. })) => {
+            PaletteItem::Block(Block::Slab(Slab {
+                position,
+                waterlogged,
+                ..
+            })) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 properties.insert("type".into(), nbt::Value::String(position.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { mounted_at: Surface5::North })
-            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::North })
-            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::North }) => {
+            PaletteItem::Block(Block::Torch {
+                mounted_at: Surface5::North,
+            })
+            | PaletteItem::Block(Block::RedstoneTorch {
+                mounted_at: Surface5::North,
+            })
+            | PaletteItem::Block(Block::SoulTorch {
+                mounted_at: Surface5::North,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("south".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { mounted_at: Surface5::South })
-            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::South })
-            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::South }) => {
+            PaletteItem::Block(Block::Torch {
+                mounted_at: Surface5::South,
+            })
+            | PaletteItem::Block(Block::RedstoneTorch {
+                mounted_at: Surface5::South,
+            })
+            | PaletteItem::Block(Block::SoulTorch {
+                mounted_at: Surface5::South,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("north".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { mounted_at: Surface5::East })
-            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::East })
-            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::East }) => {
+            PaletteItem::Block(Block::Torch {
+                mounted_at: Surface5::East,
+            })
+            | PaletteItem::Block(Block::RedstoneTorch {
+                mounted_at: Surface5::East,
+            })
+            | PaletteItem::Block(Block::SoulTorch {
+                mounted_at: Surface5::East,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("west".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Torch { mounted_at: Surface5::West })
-            | PaletteItem::Block(Block::RedstoneTorch { mounted_at: Surface5::West })
-            | PaletteItem::Block(Block::SoulTorch { mounted_at: Surface5::West }) => {
+            PaletteItem::Block(Block::Torch {
+                mounted_at: Surface5::West,
+            })
+            | PaletteItem::Block(Block::RedstoneTorch {
+                mounted_at: Surface5::West,
+            })
+            | PaletteItem::Block(Block::SoulTorch {
+                mounted_at: Surface5::West,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String("east".into()));
                 Some(nbt::Value::Compound(properties))
@@ -278,40 +362,55 @@ impl PaletteItem {
                 properties.insert("age".into(), nbt::Value::String(age.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Stairs(Stair { position, waterlogged, .. })) => {
+            PaletteItem::Block(Block::Stairs(Stair {
+                position,
+                waterlogged,
+                ..
+            })) => {
                 let facing = match position {
-                    Edge8::DownEast
-                    | Edge8::UpEast => "east".to_string(),
-                    Edge8::DownNorth
-                    | Edge8::UpNorth => "north".to_string(),
-                    Edge8::DownSouth
-                    | Edge8::UpSouth => "south".to_string(),
-                    Edge8::DownWest
-                    | Edge8::UpWest => "west".to_string(),
+                    Edge8::DownEast | Edge8::UpEast => "east".to_string(),
+                    Edge8::DownNorth | Edge8::UpNorth => "north".to_string(),
+                    Edge8::DownSouth | Edge8::UpSouth => "south".to_string(),
+                    Edge8::DownWest | Edge8::UpWest => "west".to_string(),
                 };
                 let half = match position {
-                    Edge8::DownEast
-                    | Edge8::DownNorth
-                    | Edge8::DownSouth
-                    | Edge8::DownWest => "bottom".to_string(),
-                    Edge8::UpEast
-                    | Edge8::UpNorth
-                    | Edge8::UpSouth
-                    | Edge8::UpWest => "top".to_string(),
+                    Edge8::DownEast | Edge8::DownNorth | Edge8::DownSouth | Edge8::DownWest => {
+                        "bottom".to_string()
+                    }
+                    Edge8::UpEast | Edge8::UpNorth | Edge8::UpSouth | Edge8::UpWest => {
+                        "top".to_string()
+                    }
                 };
 
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 properties.insert("facing".into(), nbt::Value::String(facing));
                 properties.insert("half".into(), nbt::Value::String(half));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::Chest { facing, variant, waterlogged })
-            | PaletteItem::ProtoBlock(ProtoBlock::TrappedChest { facing, variant, waterlogged }) => {
+            PaletteItem::ProtoBlock(ProtoBlock::Chest {
+                facing,
+                variant,
+                waterlogged,
+            })
+            | PaletteItem::ProtoBlock(ProtoBlock::TrappedChest {
+                facing,
+                variant,
+                waterlogged,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("type".into(), nbt::Value::String(variant.unwrap_or(ChestVariant::Single).to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "type".into(),
+                    nbt::Value::String(variant.unwrap_or(ChestVariant::Single).to_string()),
+                );
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::GlazedTerracotta(GlazedTerracotta { facing, .. })) => {
@@ -363,22 +462,43 @@ impl PaletteItem {
                 properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::Sign { placement, waterlogged, .. })
-            | PaletteItem::Block(Block::Head(Head { placement, waterlogged, .. })) => {
+            PaletteItem::ProtoBlock(ProtoBlock::Sign {
+                placement,
+                waterlogged,
+                ..
+            })
+            | PaletteItem::Block(Block::Head(Head {
+                placement,
+                waterlogged,
+                ..
+            })) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 match placement {
                     WallOrRotatedOnFloor::Floor(rotation) => {
                         let rotation = u8::from(*rotation);
-                        properties.insert("rotation".into(), nbt::Value::String(rotation.to_string()));
+                        properties
+                            .insert("rotation".into(), nbt::Value::String(rotation.to_string()));
                     }
                     WallOrRotatedOnFloor::Wall(facing) => {
-                        properties.insert("facing".into(), nbt::Value::String(facing.opposite().to_string()));
+                        properties.insert(
+                            "facing".into(),
+                            nbt::Value::String(facing.opposite().to_string()),
+                        );
                     }
                 }
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Door(Door { facing, half, hinged_at, open, .. })) => {
+            PaletteItem::Block(Block::Door(Door {
+                facing,
+                half,
+                hinged_at,
+                open,
+                ..
+            })) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 properties.insert("half".into(), nbt::Value::String(half.to_string()));
@@ -387,10 +507,16 @@ impl PaletteItem {
                 properties.insert("powered".into(), nbt::Value::String("false".into()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Ladder { facing, waterlogged }) => {
+            PaletteItem::Block(Block::Ladder {
+                facing,
+                waterlogged,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Lever(position, state)) => {
@@ -454,12 +580,18 @@ impl PaletteItem {
             }
             PaletteItem::Block(Block::Jukebox(jukebox)) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("has_record".into(), nbt::Value::String(jukebox.record.is_some().to_string()));
+                properties.insert(
+                    "has_record".into(),
+                    nbt::Value::String(jukebox.record.is_some().to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Fence { waterlogged, .. }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::CarvedPumpkin { facing })
@@ -475,7 +607,10 @@ impl PaletteItem {
             }
             PaletteItem::Block(Block::NetherPortal { alignment }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("axis".into(), nbt::Value::String(alignment.unwrap_or(Axis2::X).to_string()));
+                properties.insert(
+                    "axis".into(),
+                    nbt::Value::String(alignment.unwrap_or(Axis2::X).to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::RedstoneRepeater(RedstoneRepeater { facing, delay })) => {
@@ -484,60 +619,98 @@ impl PaletteItem {
                 properties.insert("delay".into(), nbt::Value::String(delay.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Trapdoor(Trapdoor { hinge_at, open, waterlogged, .. })) => {
+            PaletteItem::Block(Block::Trapdoor(Trapdoor {
+                hinge_at,
+                open,
+                waterlogged,
+                ..
+            })) => {
                 let facing = match hinge_at {
-                    Edge8::DownEast
-                    | Edge8::UpEast => "east".to_string(),
-                    Edge8::DownNorth
-                    | Edge8::UpNorth => "north".to_string(),
-                    Edge8::DownSouth
-                    | Edge8::UpSouth => "south".to_string(),
-                    Edge8::DownWest
-                    | Edge8::UpWest => "west".to_string(),
+                    Edge8::DownEast | Edge8::UpEast => "east".to_string(),
+                    Edge8::DownNorth | Edge8::UpNorth => "north".to_string(),
+                    Edge8::DownSouth | Edge8::UpSouth => "south".to_string(),
+                    Edge8::DownWest | Edge8::UpWest => "west".to_string(),
                 };
                 let half = match hinge_at {
-                    Edge8::DownEast
-                    | Edge8::DownNorth
-                    | Edge8::DownSouth
-                    | Edge8::DownWest => "bottom".to_string(),
-                    Edge8::UpEast
-                    | Edge8::UpNorth
-                    | Edge8::UpSouth
-                    | Edge8::UpWest => "top".to_string(),
+                    Edge8::DownEast | Edge8::DownNorth | Edge8::DownSouth | Edge8::DownWest => {
+                        "bottom".to_string()
+                    }
+                    Edge8::UpEast | Edge8::UpNorth | Edge8::UpSouth | Edge8::UpWest => {
+                        "top".to_string()
+                    }
                 };
 
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 properties.insert("facing".into(), nbt::Value::String(facing));
                 properties.insert("half".into(), nbt::Value::String(half));
                 properties.insert("open".into(), nbt::Value::String(open.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::BrownMushroomBlock { cap_directions: directions })
-            | PaletteItem::Block(Block::RedMushroomBlock { cap_directions: directions })
-            | PaletteItem::Block(Block::MushroomStem { stem_directions: directions }) => {
+            PaletteItem::Block(Block::BrownMushroomBlock {
+                cap_directions: directions,
+            })
+            | PaletteItem::Block(Block::RedMushroomBlock {
+                cap_directions: directions,
+            })
+            | PaletteItem::Block(Block::MushroomStem {
+                stem_directions: directions,
+            }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("east".into(), nbt::Value::String(directions.east.to_string()));
-                properties.insert("down".into(), nbt::Value::String(directions.down.to_string()));
-                properties.insert("north".into(), nbt::Value::String(directions.north.to_string()));
-                properties.insert("south".into(), nbt::Value::String(directions.south.to_string()));
+                properties.insert(
+                    "east".into(),
+                    nbt::Value::String(directions.east.to_string()),
+                );
+                properties.insert(
+                    "down".into(),
+                    nbt::Value::String(directions.down.to_string()),
+                );
+                properties.insert(
+                    "north".into(),
+                    nbt::Value::String(directions.north.to_string()),
+                );
+                properties.insert(
+                    "south".into(),
+                    nbt::Value::String(directions.south.to_string()),
+                );
                 properties.insert("up".into(), nbt::Value::String(directions.up.to_string()));
-                properties.insert("west".into(), nbt::Value::String(directions.west.to_string()));
+                properties.insert(
+                    "west".into(),
+                    nbt::Value::String(directions.west.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::IronBars { waterlogged })
             | PaletteItem::Block(Block::GlassPane { waterlogged, .. }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Vines(Vines { anchored_at })) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("east".into(), nbt::Value::String(anchored_at.east.to_string()));
-                properties.insert("north".into(), nbt::Value::String(anchored_at.north.to_string()));
-                properties.insert("south".into(), nbt::Value::String(anchored_at.south.to_string()));
+                properties.insert(
+                    "east".into(),
+                    nbt::Value::String(anchored_at.east.to_string()),
+                );
+                properties.insert(
+                    "north".into(),
+                    nbt::Value::String(anchored_at.north.to_string()),
+                );
+                properties.insert(
+                    "south".into(),
+                    nbt::Value::String(anchored_at.south.to_string()),
+                );
                 properties.insert("up".into(), nbt::Value::String(anchored_at.up.to_string()));
-                properties.insert("west".into(), nbt::Value::String(anchored_at.west.to_string()));
+                properties.insert(
+                    "west".into(),
+                    nbt::Value::String(anchored_at.west.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::FenceGate { facing, open, .. }) => {
@@ -570,16 +743,25 @@ impl PaletteItem {
                 properties.insert("eye".into(), nbt::Value::String(has_eye.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Cocoa { growth_stage, facing }) => {
+            PaletteItem::Block(Block::Cocoa {
+                growth_stage,
+                facing,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::EnderChest { facing, waterlogged }) => {
+            PaletteItem::Block(Block::EnderChest {
+                facing,
+                waterlogged,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::TripwireHook { facing }) => {
@@ -591,7 +773,10 @@ impl PaletteItem {
             }
             PaletteItem::Block(Block::Wall { waterlogged, .. }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Anvil { facing, .. }) => {
@@ -633,15 +818,19 @@ impl PaletteItem {
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::Banner{ placement, .. }) => {
+            PaletteItem::ProtoBlock(ProtoBlock::Banner { placement, .. }) => {
                 let mut properties = nbt::Map::new();
                 match placement {
                     WallOrRotatedOnFloor::Floor(rotation) => {
                         let rotation = u8::from(*rotation);
-                        properties.insert("rotation".into(), nbt::Value::String(rotation.to_string()));
+                        properties
+                            .insert("rotation".into(), nbt::Value::String(rotation.to_string()));
                     }
                     WallOrRotatedOnFloor::Wall(facing) => {
-                        properties.insert("facing".into(), nbt::Value::String(facing.opposite().to_string()));
+                        properties.insert(
+                            "facing".into(),
+                            nbt::Value::String(facing.opposite().to_string()),
+                        );
                     }
                 }
                 Some(nbt::Value::Compound(properties))
@@ -674,11 +863,14 @@ impl PaletteItem {
                     properties.insert("half".into(), nbt::Value::String("lower".into()));
                     Some(nbt::Value::Compound(properties))
                 }
-            }
+            },
             PaletteItem::Block(Block::SeaPickle { count, waterlogged }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("pickles".into(), nbt::Value::String(count.to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Kelp { growth_stage })
@@ -696,17 +888,30 @@ impl PaletteItem {
             }
             PaletteItem::Block(Block::Scaffolding { waterlogged }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Coral { waterlogged, .. }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::CoralFan { waterlogged, facing, .. }) => {
+            PaletteItem::Block(Block::CoralFan {
+                waterlogged,
+                facing,
+                ..
+            }) => {
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 match facing {
                     Surface5::Down => (),
                     facing => {
@@ -716,19 +921,28 @@ impl PaletteItem {
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::Block(Block::Loom { facing })
-            | PaletteItem::Block(Block::Stonecutter { facing}) => {
+            | PaletteItem::Block(Block::Stonecutter { facing }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Lantern { mounted_at, waterlogged })
-            | PaletteItem::Block(Block::SoulLantern { mounted_at, waterlogged }) => {
+            PaletteItem::Block(Block::Lantern {
+                mounted_at,
+                waterlogged,
+            })
+            | PaletteItem::Block(Block::SoulLantern {
+                mounted_at,
+                waterlogged,
+            }) => {
                 let hanging = match mounted_at {
                     Surface2::Up => true,
                     Surface2::Down => false,
                 };
                 let mut properties = nbt::Map::new();
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 properties.insert("hanging".into(), nbt::Value::String(hanging.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
@@ -758,7 +972,7 @@ impl PaletteItem {
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::SweetBerryBush{ growth_stage }) => {
+            PaletteItem::Block(Block::SweetBerryBush { growth_stage }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("age".into(), nbt::Value::String(growth_stage.to_string()));
                 Some(nbt::Value::Compound(properties))
@@ -768,12 +982,23 @@ impl PaletteItem {
                 properties.insert("charges".into(), nbt::Value::String(charges.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Campfire { facing, lit, waterlogged })
-            | PaletteItem::Block(Block::SoulCampfire { facing, lit, waterlogged }) => {
+            PaletteItem::Block(Block::Campfire {
+                facing,
+                lit,
+                waterlogged,
+            })
+            | PaletteItem::Block(Block::SoulCampfire {
+                facing,
+                lit,
+                waterlogged,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 properties.insert("lit".into(), nbt::Value::String(lit.to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
             PaletteItem::ProtoBlock(ProtoBlock::Barrel { facing }) => {
@@ -781,34 +1006,51 @@ impl PaletteItem {
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::Beehive { facing, honey_level }) => {
+            PaletteItem::ProtoBlock(ProtoBlock::Beehive {
+                facing,
+                honey_level,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("honey_level".into(), nbt::Value::String(honey_level.to_string()));
+                properties.insert(
+                    "honey_level".into(),
+                    nbt::Value::String(honey_level.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::ProtoBlock(ProtoBlock::BeeNest { facing, honey_level }) => {
+            PaletteItem::ProtoBlock(ProtoBlock::BeeNest {
+                facing,
+                honey_level,
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("honey_level".into(), nbt::Value::String(honey_level.to_string()));
+                properties.insert(
+                    "honey_level".into(),
+                    nbt::Value::String(honey_level.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
-            PaletteItem::Block(Block::Amethyst { facing, waterlogged, .. }) => {
+            PaletteItem::Block(Block::Amethyst {
+                facing,
+                waterlogged,
+                ..
+            }) => {
                 let mut properties = nbt::Map::new();
                 properties.insert("facing".into(), nbt::Value::String(facing.to_string()));
-                properties.insert("waterlogged".into(), nbt::Value::String(waterlogged.to_string()));
+                properties.insert(
+                    "waterlogged".into(),
+                    nbt::Value::String(waterlogged.to_string()),
+                );
                 Some(nbt::Value::Compound(properties))
             }
 
             /*
-            */
-
+             */
             // TODO Figure out what to do with:
             //      ChorusPlant, Fence, FenceGate, GlassPane, IronBars, RedstoneWire, Tripwire, Wall.
             //      They all have connection info in the Properties tag.
             //      Also:
             //      Campfire, SoulCampfire: "signal_fire" = "true" if on top of HayBale
-
             _ => None, // TODO should have compile time warning for unhandled block types. Perhaps list all?
         }
     }
@@ -862,45 +1104,65 @@ impl PaletteItem {
             PaletteItem::Block(Block::GoldOre) => "minecraft:gold_ore",
             PaletteItem::Block(Block::IronOre) => "minecraft:iron_ore",
             PaletteItem::Block(Block::CoalOre) => "minecraft:coal_ore",
-            PaletteItem::Block(Block::Log(Log { material, stripped: false, bark_on_all_sides: false, .. })) => match material {
-                    WoodMaterial::Oak => "minecraft:oak_log",
-                    WoodMaterial::Spruce => "minecraft:spruce_log",
-                    WoodMaterial::Birch => "minecraft:birch_log",
-                    WoodMaterial::Jungle => "minecraft:jungle_log",
-                    WoodMaterial::Acacia => "minecraft:acacia_log",
-                    WoodMaterial::DarkOak => "minecraft:dark_oak_log",
-                    WoodMaterial::Crimson => "minecraft:crimson_stem",
-                    WoodMaterial::Warped => "minecraft:warped_stem",
+            PaletteItem::Block(Block::Log(Log {
+                material,
+                stripped: false,
+                bark_on_all_sides: false,
+                ..
+            })) => match material {
+                WoodMaterial::Oak => "minecraft:oak_log",
+                WoodMaterial::Spruce => "minecraft:spruce_log",
+                WoodMaterial::Birch => "minecraft:birch_log",
+                WoodMaterial::Jungle => "minecraft:jungle_log",
+                WoodMaterial::Acacia => "minecraft:acacia_log",
+                WoodMaterial::DarkOak => "minecraft:dark_oak_log",
+                WoodMaterial::Crimson => "minecraft:crimson_stem",
+                WoodMaterial::Warped => "minecraft:warped_stem",
             },
-            PaletteItem::Block(Block::Log(Log { material, stripped: true, bark_on_all_sides: false, .. })) => match material {
-                    WoodMaterial::Oak => "minecraft:stripped_oak_log",
-                    WoodMaterial::Spruce => "minecraft:stripped_spruce_log",
-                    WoodMaterial::Birch => "minecraft:stripped_birch_log",
-                    WoodMaterial::Jungle => "minecraft:stripped_jungle_log",
-                    WoodMaterial::Acacia => "minecraft:stripped_acacia_log",
-                    WoodMaterial::DarkOak => "minecraft:stripped_dark_oak_log",
-                    WoodMaterial::Crimson => "minecraft:stripped_crimson_stem",
-                    WoodMaterial::Warped => "minecraft:stripped_warped_stem",
+            PaletteItem::Block(Block::Log(Log {
+                material,
+                stripped: true,
+                bark_on_all_sides: false,
+                ..
+            })) => match material {
+                WoodMaterial::Oak => "minecraft:stripped_oak_log",
+                WoodMaterial::Spruce => "minecraft:stripped_spruce_log",
+                WoodMaterial::Birch => "minecraft:stripped_birch_log",
+                WoodMaterial::Jungle => "minecraft:stripped_jungle_log",
+                WoodMaterial::Acacia => "minecraft:stripped_acacia_log",
+                WoodMaterial::DarkOak => "minecraft:stripped_dark_oak_log",
+                WoodMaterial::Crimson => "minecraft:stripped_crimson_stem",
+                WoodMaterial::Warped => "minecraft:stripped_warped_stem",
             },
-            PaletteItem::Block(Block::Log(Log { material, stripped: false, bark_on_all_sides: true, .. })) => match material {
-                    WoodMaterial::Oak => "minecraft:oak_wood",
-                    WoodMaterial::Spruce => "minecraft:spruce_wood",
-                    WoodMaterial::Birch => "minecraft:birch_wood",
-                    WoodMaterial::Jungle => "minecraft:jungle_wood",
-                    WoodMaterial::Acacia => "minecraft:acacia_wood",
-                    WoodMaterial::DarkOak => "minecraft:dark_oak_wood",
-                    WoodMaterial::Crimson => "minecraft:crimson_hyphae",
-                    WoodMaterial::Warped => "minecraft:warped_hyphae",
+            PaletteItem::Block(Block::Log(Log {
+                material,
+                stripped: false,
+                bark_on_all_sides: true,
+                ..
+            })) => match material {
+                WoodMaterial::Oak => "minecraft:oak_wood",
+                WoodMaterial::Spruce => "minecraft:spruce_wood",
+                WoodMaterial::Birch => "minecraft:birch_wood",
+                WoodMaterial::Jungle => "minecraft:jungle_wood",
+                WoodMaterial::Acacia => "minecraft:acacia_wood",
+                WoodMaterial::DarkOak => "minecraft:dark_oak_wood",
+                WoodMaterial::Crimson => "minecraft:crimson_hyphae",
+                WoodMaterial::Warped => "minecraft:warped_hyphae",
             },
-            PaletteItem::Block(Block::Log(Log { material, stripped: true, bark_on_all_sides: true, .. })) => match material {
-                    WoodMaterial::Oak => "minecraft:stripped_oak_wood",
-                    WoodMaterial::Spruce => "minecraft:stripped_spruce_wood",
-                    WoodMaterial::Birch => "minecraft:stripped_birch_wood",
-                    WoodMaterial::Jungle => "minecraft:stripped_jungle_wood",
-                    WoodMaterial::Acacia => "minecraft:stripped_acacia_wood",
-                    WoodMaterial::DarkOak => "minecraft:stripped_dark_oak_wood",
-                    WoodMaterial::Crimson => "minecraft:stripped_crimson_hyphae",
-                    WoodMaterial::Warped => "minecraft:stripped_warped_hyphae",
+            PaletteItem::Block(Block::Log(Log {
+                material,
+                stripped: true,
+                bark_on_all_sides: true,
+                ..
+            })) => match material {
+                WoodMaterial::Oak => "minecraft:stripped_oak_wood",
+                WoodMaterial::Spruce => "minecraft:stripped_spruce_wood",
+                WoodMaterial::Birch => "minecraft:stripped_birch_wood",
+                WoodMaterial::Jungle => "minecraft:stripped_jungle_wood",
+                WoodMaterial::Acacia => "minecraft:stripped_acacia_wood",
+                WoodMaterial::DarkOak => "minecraft:stripped_dark_oak_wood",
+                WoodMaterial::Crimson => "minecraft:stripped_crimson_hyphae",
+                WoodMaterial::Warped => "minecraft:stripped_warped_hyphae",
             },
             PaletteItem::Block(Block::Leaves { material, .. }) => match material {
                 LeavesMaterial::Oak => "minecraft:oak_leaves",
@@ -911,7 +1173,7 @@ impl PaletteItem {
                 LeavesMaterial::DarkOak => "minecraft:dark_oak_leaves",
                 LeavesMaterial::Azalea => "minecraft:azalea_leaves",
                 LeavesMaterial::FloweringAzalea => "minecraft:flowering_azalea_leaves",
-            }
+            },
             PaletteItem::Block(Block::Sponge) => "minecraft:sponge",
             PaletteItem::Block(Block::WetSponge) => "minecraft:wet_sponge",
             PaletteItem::Block(Block::Glass { colour }) => match colour {
@@ -932,7 +1194,7 @@ impl PaletteItem {
                 Some(Colour::Green) => "minecraft:green_stained_glass",
                 Some(Colour::Red) => "minecraft:red_stained_glass",
                 Some(Colour::Black) => "minecraft:black_stained_glass",
-            }
+            },
             PaletteItem::Block(Block::LapisLazuliOre) => "minecraft:lapis_ore",
             PaletteItem::Block(Block::LapisLazuliBlock) => "minecraft:lapis_block",
             PaletteItem::ProtoBlock(ProtoBlock::Dispenser { .. }) => "minecraft:dispenser",
@@ -946,7 +1208,7 @@ impl PaletteItem {
                 RailType::Detector => "minecraft:detector_rail",
                 RailType::Normal => "minecraft:rail",
                 RailType::Powered => "minecraft:powered_rail",
-            }
+            },
             PaletteItem::Block(Block::PistonHead { .. })
             | PaletteItem::Block(Block::StickyPistonHead { .. }) => "minecraft:piston_head",
             PaletteItem::Block(Block::Piston { .. }) => "minecraft:piston",
@@ -955,11 +1217,9 @@ impl PaletteItem {
             PaletteItem::Block(Block::Grass(grass_variant)) => match grass_variant {
                 Grass::Grass => "minecraft:grass",
                 Grass::Fern => "minecraft:fern",
-                Grass::TallGrassTop
-                | Grass::TallGrassBottom => "minecraft:tall_grass",
-                Grass::LargeFernTop
-                | Grass::LargeFernBottom => "minecraft:large_fern",
-            }
+                Grass::TallGrassTop | Grass::TallGrassBottom => "minecraft:tall_grass",
+                Grass::LargeFernTop | Grass::LargeFernBottom => "minecraft:large_fern",
+            },
             PaletteItem::Block(Block::DeadBush) => "minecraft:dead_bush",
             PaletteItem::Block(Block::Wool { colour }) => match colour {
                 Colour::White => "minecraft:white_wool",
@@ -978,7 +1238,7 @@ impl PaletteItem {
                 Colour::Green => "minecraft:green_wool",
                 Colour::Red => "minecraft:red_wool",
                 Colour::Black => "minecraft:black_wool",
-            }
+            },
             // TODO block 36 piston_extension ("Block moved by Piston")
             PaletteItem::Block(Block::Flower(flower_variant)) => match flower_variant {
                 Flower::Dandelion => "minecraft:dandelion",
@@ -994,15 +1254,11 @@ impl PaletteItem {
                 Flower::Cornflower => "minecraft:cornflower",
                 Flower::LilyOfTheValley => "minecraft:lily_of_the_valley",
                 Flower::WitherRose => "minecraft:wither_rose",
-                Flower::SunflowerTop
-                | Flower::SunflowerBottom => "minecraft:sunflower",
-                Flower::LilacTop
-                | Flower::LilacBottom => "minecraft:lilac",
-                Flower::PeonyTop
-                | Flower::PeonyBottom => "minecraft:peony",
-                Flower::RoseBushTop
-                | Flower::RoseBushBottom => "minecraft:rose_bush",
-            }
+                Flower::SunflowerTop | Flower::SunflowerBottom => "minecraft:sunflower",
+                Flower::LilacTop | Flower::LilacBottom => "minecraft:lilac",
+                Flower::PeonyTop | Flower::PeonyBottom => "minecraft:peony",
+                Flower::RoseBushTop | Flower::RoseBushBottom => "minecraft:rose_bush",
+            },
             PaletteItem::Block(Block::BrownMushroom) => "minecraft:brown_mushroom",
             PaletteItem::Block(Block::RedMushroom) => "minecraft:red_mushroom",
             PaletteItem::Block(Block::BlockOfGold) => "minecraft:gold_block",
@@ -1022,7 +1278,7 @@ impl PaletteItem {
                     (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper_slab",
                     (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper_slab",
                     (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper_slab",
-                }
+                },
                 SlabMaterial::CobbledDeepslate => "minecraft:cobbled_deepslate_slab",
                 SlabMaterial::Cobblestone => "minecraft:cobblestone_slab",
                 SlabMaterial::Crimson => "minecraft:crimson_slab",
@@ -1062,7 +1318,7 @@ impl PaletteItem {
                 SlabMaterial::Stone => "minecraft:stone_slab",
                 SlabMaterial::StoneBrick => "minecraft:stone_brick_slab",
                 SlabMaterial::Warped => "minecraft:warped_slab",
-            }
+            },
             PaletteItem::Block(Block::SmoothQuartz) => "minecraft:smooth_quartz",
             PaletteItem::Block(Block::SmoothStone) => "minecraft:smooth_stone",
             PaletteItem::Block(Block::BrickBlock) => "minecraft:bricks",
@@ -1074,15 +1330,15 @@ impl PaletteItem {
             PaletteItem::Block(Block::Torch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:torch",
                 _ => "minecraft:wall_torch",
-            }
+            },
             PaletteItem::Block(Block::RedstoneTorch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:redstone_torch",
                 _ => "minecraft:redstone_wall_torch",
-            }
+            },
             PaletteItem::Block(Block::SoulTorch { mounted_at }) => match mounted_at {
                 Surface5::Down => "minecraft:soul_torch",
                 _ => "minecraft:soul_wall_torch",
-            }
+            },
             PaletteItem::Block(Block::Fire { .. }) => "minecraft:fire",
             PaletteItem::Block(Block::SoulFire) => "minecraft:soul_fire",
             // TODO block 52 / minecraft:spawner / mob spawner
@@ -1106,7 +1362,7 @@ impl PaletteItem {
                     (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper_stairs",
                     (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper_stairs",
                     (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper_stairs",
-                }
+                },
                 StairMaterial::Crimson => "minecraft:crimson_stairs",
                 StairMaterial::DarkOak => "minecraft:dark_oak_stairs",
                 StairMaterial::DarkPrismarine => "minecraft:dark_prismarine_stairs",
@@ -1122,7 +1378,9 @@ impl PaletteItem {
                 StairMaterial::Oak => "minecraft:oak_stairs",
                 StairMaterial::PolishedAndesite => "minecraft:polished_andesite_stairs",
                 StairMaterial::PolishedBlackstone => "minecraft:polished_blackstone_stairs",
-                StairMaterial::PolishedBlackstoneBrick => "minecraft:polished_blackstone_brick_stairs",
+                StairMaterial::PolishedBlackstoneBrick => {
+                    "minecraft:polished_blackstone_brick_stairs"
+                }
                 StairMaterial::PolishedDeepslate => "minecraft:polished_deepslate_stairs",
                 StairMaterial::PolishedDiorite => "minecraft:polished_diorite_stairs",
                 StairMaterial::PolishedGranite => "minecraft:polished_granite_stairs",
@@ -1140,7 +1398,7 @@ impl PaletteItem {
                 StairMaterial::Stone => "minecraft:stone_stairs",
                 StairMaterial::StoneBrick => "minecraft:stone_brick_stairs",
                 StairMaterial::Warped => "minecraft:warped_stairs",
-            }
+            },
             PaletteItem::ProtoBlock(ProtoBlock::Chest { .. }) => "minecraft:chest",
             PaletteItem::Block(Block::RedstoneWire) => "minecraft:redstone_wire",
             PaletteItem::Block(Block::Farmland { .. }) => "minecraft:farmland",
@@ -1151,15 +1409,19 @@ impl PaletteItem {
             PaletteItem::Block(Block::PumpkinStem { state }) => match state {
                 StemState::Growing(_) => "minecraft:pumpkin_stem",
                 StemState::Attached(_) => "minecraft:attached_pumpkin_stem",
-            }
+            },
             PaletteItem::Block(Block::MelonStem { state }) => match state {
                 StemState::Growing(_) => "minecraft:melon_stem",
                 StemState::Attached(_) => "minecraft:attached_melon_stem",
-            }
+            },
             PaletteItem::Block(Block::Pumpkin) => "minecraft:pumpkin",
             PaletteItem::Block(Block::Melon) => "minecraft:melon",
             PaletteItem::ProtoBlock(ProtoBlock::Furnace { .. }) => "minecraft:furnace",
-            PaletteItem::ProtoBlock(ProtoBlock::Sign { placement, material, .. }) => match placement {
+            PaletteItem::ProtoBlock(ProtoBlock::Sign {
+                placement,
+                material,
+                ..
+            }) => match placement {
                 WallOrRotatedOnFloor::Floor(_) => match material {
                     WoodMaterial::Acacia => "minecraft:acacia_sign",
                     WoodMaterial::Birch => "minecraft:birch_sign",
@@ -1169,7 +1431,7 @@ impl PaletteItem {
                     WoodMaterial::Oak => "minecraft:oak_sign",
                     WoodMaterial::Spruce => "minecraft:spruce_sign",
                     WoodMaterial::Warped => "minecraft:warped_sign",
-                }
+                },
                 WallOrRotatedOnFloor::Wall(_) => match material {
                     WoodMaterial::Acacia => "minecraft:acacia_wall_sign",
                     WoodMaterial::Birch => "minecraft:birch_wall_sign",
@@ -1179,8 +1441,8 @@ impl PaletteItem {
                     WoodMaterial::Oak => "minecraft:oak_wall_sign",
                     WoodMaterial::Spruce => "minecraft:spruce_wall_sign",
                     WoodMaterial::Warped => "minecraft:warped_wall_sign",
-                }
-            }
+                },
+            },
             PaletteItem::Block(Block::Door(Door { material, .. })) => match material {
                 DoorMaterial::Acacia => "minecraft:acacia_door",
                 DoorMaterial::Birch => "minecraft:birch_door",
@@ -1191,7 +1453,7 @@ impl PaletteItem {
                 DoorMaterial::Oak => "minecraft:oak_door",
                 DoorMaterial::Spruce => "minecraft:spruce_door",
                 DoorMaterial::Warped => "minecraft:warped_door",
-            }
+            },
             PaletteItem::Block(Block::Ladder { .. }) => "minecraft:ladder",
             PaletteItem::Block(Block::Lever(..)) => "minecraft:lever",
             PaletteItem::Block(Block::PressurePlate { material }) => match material {
@@ -1203,11 +1465,13 @@ impl PaletteItem {
                 PressurePlateMaterial::Iron => "minecraft:heavy_weighted_pressure_plate",
                 PressurePlateMaterial::Jungle => "minecraft:jungle_pressure_plate",
                 PressurePlateMaterial::Oak => "minecraft:oak_pressure_plate",
-                PressurePlateMaterial::PolishedBlackstone => "minecraft:polished_blackstone_pressure_plate",
+                PressurePlateMaterial::PolishedBlackstone => {
+                    "minecraft:polished_blackstone_pressure_plate"
+                }
                 PressurePlateMaterial::Spruce => "minecraft:spruce_pressure_plate",
                 PressurePlateMaterial::Stone => "minecraft:stone_pressure_plate",
                 PressurePlateMaterial::Warped => "minecraft:warped_pressure_plate",
-            }
+            },
             PaletteItem::Block(Block::RedstoneOre { .. }) => "minecraft:redstone_ore",
             PaletteItem::Block(Block::Button(material, _)) => match material {
                 ButtonMaterial::Acacia => "minecraft:acacia_button",
@@ -1220,7 +1484,7 @@ impl PaletteItem {
                 ButtonMaterial::Spruce => "minecraft:spruce_button",
                 ButtonMaterial::Stone => "minecraft:stone_button",
                 ButtonMaterial::Warped => "minecraft:warped_button",
-            }
+            },
             PaletteItem::Block(Block::Snow { .. }) => "minecraft:snow",
             PaletteItem::Block(Block::SnowBlock) => "minecraft:snow_block",
             PaletteItem::Block(Block::Ice) => "minecraft:ice",
@@ -1241,7 +1505,7 @@ impl PaletteItem {
                 FenceMaterial::Oak => "minecraft:oak_fence",
                 FenceMaterial::Spruce => "minecraft:spruce_fence",
                 FenceMaterial::Warped => "minecraft:warped_fence",
-            }
+            },
             PaletteItem::Block(Block::CarvedPumpkin { .. }) => "minecraft:carved_pumpkin",
             PaletteItem::Block(Block::Netherrack) => "minecraft:netherrack",
             PaletteItem::Block(Block::SoulSand) => "minecraft:soul_sand",
@@ -1261,18 +1525,26 @@ impl PaletteItem {
                 DoorMaterial::Oak => "minecraft:oak_trapdoor",
                 DoorMaterial::Spruce => "minecraft:spruce_trapdoor",
                 DoorMaterial::Warped => "minecraft:warped_trapdoor",
-            }
+            },
             PaletteItem::Block(Block::InfestedStone) => "minecraft:infested_stone",
             PaletteItem::Block(Block::InfestedCobblestone) => "minecraft:infested_cobblestone",
             PaletteItem::Block(Block::InfestedStoneBricks) => "minecraft:infested_stone_bricks",
-            PaletteItem::Block(Block::InfestedMossyStoneBricks) => "minecraft:infested_mossy_stone_bricks",
-            PaletteItem::Block(Block::InfestedCrackedStoneBricks) => "minecraft:infested_cracked_stone_bricks",
-            PaletteItem::Block(Block::InfestedChiseledStoneBricks) => "minecraft:infested_chiseled_stone_bricks",
+            PaletteItem::Block(Block::InfestedMossyStoneBricks) => {
+                "minecraft:infested_mossy_stone_bricks"
+            }
+            PaletteItem::Block(Block::InfestedCrackedStoneBricks) => {
+                "minecraft:infested_cracked_stone_bricks"
+            }
+            PaletteItem::Block(Block::InfestedChiseledStoneBricks) => {
+                "minecraft:infested_chiseled_stone_bricks"
+            }
             PaletteItem::Block(Block::StoneBricks) => "minecraft:stone_bricks",
             PaletteItem::Block(Block::MossyStoneBricks) => "minecraft:mossy_stone_bricks",
             PaletteItem::Block(Block::CrackedStoneBricks) => "minecraft:cracked_stone_bricks",
             PaletteItem::Block(Block::ChiseledStoneBricks) => "minecraft:chiseled_stone_bricks",
-            PaletteItem::Block(Block::BrownMushroomBlock { .. }) => "minecraft:brown_mushroom_block",
+            PaletteItem::Block(Block::BrownMushroomBlock { .. }) => {
+                "minecraft:brown_mushroom_block"
+            }
             PaletteItem::Block(Block::RedMushroomBlock { .. }) => "minecraft:red_mushroom_block",
             PaletteItem::Block(Block::MushroomStem { .. }) => "minecraft:mushroom_stem",
             PaletteItem::Block(Block::IronBars { .. }) => "minecraft:iron_bars",
@@ -1294,7 +1566,7 @@ impl PaletteItem {
                 Some(Colour::Green) => "minecraft:green_stained_glass_pane",
                 Some(Colour::Red) => "minecraft:red_stained_glass_pane",
                 Some(Colour::Black) => "minecraft:black_stained_glass_pane",
-            }
+            },
             PaletteItem::Block(Block::Vines(_)) => "minecraft:vine",
             PaletteItem::Block(Block::FenceGate { material, .. }) => match material {
                 WoodMaterial::Acacia => "minecraft:acacia_fence_gate",
@@ -1350,7 +1622,7 @@ impl PaletteItem {
                 WallMaterial::RedSandstone => "minecraft:red_sandstone_wall",
                 WallMaterial::Sandstone => "minecraft:sandstone_wall",
                 WallMaterial::StoneBrick => "minecraft:stone_brick_wall",
-            }
+            },
             PaletteItem::Block(Block::FlowerPot(FlowerPot { plant })) => match plant {
                 None => "minecraft:flower_pot",
                 Some(plant) => match plant {
@@ -1385,9 +1657,11 @@ impl PaletteItem {
                     PottedPlant::WarpedFungus => "minecraft:potted_warped_fungus",
                     PottedPlant::WarpedRoots => "minecraft:potted_warped_roots",
                     PottedPlant::WitherRose => "minecraft:potted_wither_rose",
-                }
-            }
-            PaletteItem::Block(Block::Head(Head { variant, placement, .. })) => match placement {
+                },
+            },
+            PaletteItem::Block(Block::Head(Head {
+                variant, placement, ..
+            })) => match placement {
                 WallOrRotatedOnFloor::Floor(_) => match variant {
                     HeadVariant::CreeperHead => "minecraft:creeper_head",
                     HeadVariant::DragonHead => "minecraft:dragon_head",
@@ -1395,7 +1669,7 @@ impl PaletteItem {
                     HeadVariant::SkeletonSkull => "minecraft:skeleton_skull",
                     HeadVariant::WitherSkeletonSkull => "minecraft:wither_skeleton_skull",
                     HeadVariant::ZombieHead => "minecraft:zombie_head",
-                }
+                },
                 WallOrRotatedOnFloor::Wall(_) => match variant {
                     HeadVariant::CreeperHead => "minecraft:creeper_wall_head",
                     HeadVariant::DragonHead => "minecraft:dragon_wall_head",
@@ -1403,13 +1677,13 @@ impl PaletteItem {
                     HeadVariant::SkeletonSkull => "minecraft:skeleton_wall_skull",
                     HeadVariant::WitherSkeletonSkull => "minecraft:wither_skeleton_wall_skull",
                     HeadVariant::ZombieHead => "minecraft:zombie_wall_head",
-                }
-            }
+                },
+            },
             PaletteItem::Block(Block::Anvil { damage, .. }) => match damage {
-               AnvilDamage::Intact => "minecraft:anvil",
-               AnvilDamage::SlightlyDamaged => "minecraft:chipped_anvil",
-               AnvilDamage::VeryDamaged => "minecraft:damaged_anvil",
-            }
+                AnvilDamage::Intact => "minecraft:anvil",
+                AnvilDamage::SlightlyDamaged => "minecraft:chipped_anvil",
+                AnvilDamage::VeryDamaged => "minecraft:damaged_anvil",
+            },
             PaletteItem::ProtoBlock(ProtoBlock::TrappedChest { .. }) => "minecraft:trapped_chest",
             PaletteItem::Block(Block::RedstoneComparator { .. })
             | PaletteItem::Block(Block::RedstoneSubtractor { .. }) => "minecraft:comparator",
@@ -1440,7 +1714,7 @@ impl PaletteItem {
                 Some(Colour::Green) => "minecraft:green_terracotta",
                 Some(Colour::Red) => "minecraft:red_terracotta",
                 Some(Colour::Black) => "minecraft:black_terracotta",
-            }
+            },
             PaletteItem::Block(Block::BlockOfSlime) => "minecraft:slime_block",
             PaletteItem::Block(Block::Barrier) => "minecraft:barrier",
             PaletteItem::Block(Block::Prismarine) => "minecraft:prismarine",
@@ -1465,7 +1739,7 @@ impl PaletteItem {
                 Colour::Green => "minecraft:green_carpet",
                 Colour::Red => "minecraft:red_carpet",
                 Colour::Black => "minecraft:black_carpet",
-            }
+            },
             PaletteItem::Block(Block::BlockOfCoal) => "minecraft:coal_block",
             PaletteItem::Block(Block::Bed(Bed { colour, .. })) => match colour {
                 Colour::White => "minecraft:white_bed",
@@ -1484,8 +1758,10 @@ impl PaletteItem {
                 Colour::Green => "minecraft:green_bed",
                 Colour::Red => "minecraft:red_bed",
                 Colour::Black => "minecraft:black_bed",
-            }
-            PaletteItem::ProtoBlock(ProtoBlock::Banner { placement, colour, .. }) => match placement {
+            },
+            PaletteItem::ProtoBlock(ProtoBlock::Banner {
+                placement, colour, ..
+            }) => match placement {
                 WallOrRotatedOnFloor::Floor(_) => match colour {
                     Colour::White => "minecraft:white_banner",
                     Colour::Orange => "minecraft:orange_banner",
@@ -1503,7 +1779,7 @@ impl PaletteItem {
                     Colour::Green => "minecraft:green_banner",
                     Colour::Red => "minecraft:red_banner",
                     Colour::Black => "minecraft:black_banner",
-                }
+                },
                 WallOrRotatedOnFloor::Wall(_) => match colour {
                     Colour::White => "minecraft:white_wall_banner",
                     Colour::Orange => "minecraft:orange_wall_banner",
@@ -1521,8 +1797,8 @@ impl PaletteItem {
                     Colour::Green => "minecraft:green_wall_banner",
                     Colour::Red => "minecraft:red_wall_banner",
                     Colour::Black => "minecraft:black_wall_banner",
-                }
-            }
+                },
+            },
             PaletteItem::Block(Block::RedSandstone) => "minecraft:red_sandstone",
             PaletteItem::Block(Block::ChiseledRedSandstone) => "minecraft:chiseled_red_sandstone",
             PaletteItem::Block(Block::SmoothRedSandstone) => "minecraft:smooth_red_sandstone",
@@ -1565,24 +1841,26 @@ impl PaletteItem {
                 Some(Colour::Green) => "minecraft:green_shulker_box",
                 Some(Colour::Red) => "minecraft:red_shulker_box",
                 Some(Colour::Black) => "minecraft:black_shulker_box",
-            }
-            PaletteItem::Block(Block::GlazedTerracotta(GlazedTerracotta { colour, .. })) => match colour {
-                Colour::White => "minecraft:white_glazed_terracotta",
-                Colour::Orange => "minecraft:orange_glazed_terracotta",
-                Colour::Magenta => "minecraft:magenta_glazed_terracotta",
-                Colour::LightBlue => "minecraft:light_blue_glazed_terracotta",
-                Colour::Yellow => "minecraft:yellow_glazed_terracotta",
-                Colour::Lime => "minecraft:lime_glazed_terracotta",
-                Colour::Pink => "minecraft:pink_glazed_terracotta",
-                Colour::Gray => "minecraft:gray_glazed_terracotta",
-                Colour::LightGray => "minecraft:light_gray_glazed_terracotta",
-                Colour::Cyan => "minecraft:cyan_glazed_terracotta",
-                Colour::Purple => "minecraft:purple_glazed_terracotta",
-                Colour::Blue => "minecraft:blue_glazed_terracotta",
-                Colour::Brown => "minecraft:brown_glazed_terracotta",
-                Colour::Green => "minecraft:green_glazed_terracotta",
-                Colour::Red => "minecraft:red_glazed_terracotta",
-                Colour::Black => "minecraft:black_glazed_terracotta",
+            },
+            PaletteItem::Block(Block::GlazedTerracotta(GlazedTerracotta { colour, .. })) => {
+                match colour {
+                    Colour::White => "minecraft:white_glazed_terracotta",
+                    Colour::Orange => "minecraft:orange_glazed_terracotta",
+                    Colour::Magenta => "minecraft:magenta_glazed_terracotta",
+                    Colour::LightBlue => "minecraft:light_blue_glazed_terracotta",
+                    Colour::Yellow => "minecraft:yellow_glazed_terracotta",
+                    Colour::Lime => "minecraft:lime_glazed_terracotta",
+                    Colour::Pink => "minecraft:pink_glazed_terracotta",
+                    Colour::Gray => "minecraft:gray_glazed_terracotta",
+                    Colour::LightGray => "minecraft:light_gray_glazed_terracotta",
+                    Colour::Cyan => "minecraft:cyan_glazed_terracotta",
+                    Colour::Purple => "minecraft:purple_glazed_terracotta",
+                    Colour::Blue => "minecraft:blue_glazed_terracotta",
+                    Colour::Brown => "minecraft:brown_glazed_terracotta",
+                    Colour::Green => "minecraft:green_glazed_terracotta",
+                    Colour::Red => "minecraft:red_glazed_terracotta",
+                    Colour::Black => "minecraft:black_glazed_terracotta",
+                }
             }
             PaletteItem::Block(Block::Concrete { colour }) => match colour {
                 Colour::White => "minecraft:white_concrete",
@@ -1601,7 +1879,7 @@ impl PaletteItem {
                 Colour::Green => "minecraft:green_concrete",
                 Colour::Red => "minecraft:red_concrete",
                 Colour::Black => "minecraft:black_concrete",
-            }
+            },
             PaletteItem::Block(Block::ConcretePowder { colour }) => match colour {
                 Colour::White => "minecraft:white_concrete_powder",
                 Colour::Orange => "minecraft:orange_concrete_powder",
@@ -1619,16 +1897,17 @@ impl PaletteItem {
                 Colour::Green => "minecraft:green_concrete_powder",
                 Colour::Red => "minecraft:red_concrete_powder",
                 Colour::Black => "minecraft:black_concrete_powder",
-            }
+            },
             // TODO 255 structure block
             PaletteItem::Block(Block::CrimsonNylium) => "minecraft:crimson_nylium",
             PaletteItem::Block(Block::WarpedNylium) => "minecraft:warped_nylium",
             PaletteItem::Block(Block::NetherGoldOre) => "minecraft:nether_gold_ore",
             PaletteItem::Block(Block::Seagrass { variant }) => match variant {
                 Seagrass::Seagrass => "minecraft:seagrass",
-                Seagrass::TallSeagrassBottom
-                | Seagrass::TallSeagrassTop => "minecraft:tall_seagrass",
-            }
+                Seagrass::TallSeagrassBottom | Seagrass::TallSeagrassTop => {
+                    "minecraft:tall_seagrass"
+                }
+            },
             PaletteItem::Block(Block::SeaPickle { .. }) => "minecraft:sea_pickle",
             PaletteItem::Block(Block::Kelp { .. }) => "minecraft:kelp",
             PaletteItem::Block(Block::KelpPlant) => "minecraft:kelp_plant",
@@ -1644,66 +1923,90 @@ impl PaletteItem {
             PaletteItem::Block(Block::DriedKelpBlock) => "minecraft:dried_kelp_block",
             PaletteItem::Block(Block::Scaffolding { .. }) => "minecraft:scaffolding",
 
-            PaletteItem::Block(Block::Coral { material, dead: false, .. }) => match material {
+            PaletteItem::Block(Block::Coral {
+                material,
+                dead: false,
+                ..
+            }) => match material {
                 CoralMaterial::Bubble => "minecraft:bubble_coral",
                 CoralMaterial::Brain => "minecraft:brain_coral",
                 CoralMaterial::Fire => "minecraft:fire_coral",
                 CoralMaterial::Horn => "minecraft:horn_coral",
                 CoralMaterial::Tube => "minecraft:tube_coral",
-            }
-            PaletteItem::Block(Block::Coral { material, dead: true, .. }) => match material {
+            },
+            PaletteItem::Block(Block::Coral {
+                material,
+                dead: true,
+                ..
+            }) => match material {
                 CoralMaterial::Bubble => "minecraft:dead_bubble_coral",
                 CoralMaterial::Brain => "minecraft:dead_brain_coral",
                 CoralMaterial::Fire => "minecraft:dead_fire_coral",
                 CoralMaterial::Horn => "minecraft:dead_horn_coral",
                 CoralMaterial::Tube => "minecraft:dead_tube_coral",
-            }
-            PaletteItem::Block(Block::CoralBlock { material, dead: false }) => match material {
+            },
+            PaletteItem::Block(Block::CoralBlock {
+                material,
+                dead: false,
+            }) => match material {
                 CoralMaterial::Bubble => "minecraft:bubble_coral_block",
                 CoralMaterial::Brain => "minecraft:brain_coral_block",
                 CoralMaterial::Fire => "minecraft:fire_coral_block",
                 CoralMaterial::Horn => "minecraft:horn_coral_block",
                 CoralMaterial::Tube => "minecraft:tube_coral_block",
-            }
-            PaletteItem::Block(Block::CoralBlock { material, dead: true }) => match material {
+            },
+            PaletteItem::Block(Block::CoralBlock {
+                material,
+                dead: true,
+            }) => match material {
                 CoralMaterial::Bubble => "minecraft:dead_bubble_coral_block",
                 CoralMaterial::Brain => "minecraft:dead_brain_coral_block",
                 CoralMaterial::Fire => "minecraft:dead_fire_coral_block",
                 CoralMaterial::Horn => "minecraft:dead_horn_coral_block",
                 CoralMaterial::Tube => "minecraft:dead_tube_coral_block",
-            }
-            PaletteItem::Block(Block::CoralFan { material, dead: false, facing, .. }) => match facing {
+            },
+            PaletteItem::Block(Block::CoralFan {
+                material,
+                dead: false,
+                facing,
+                ..
+            }) => match facing {
                 Surface5::Down => match material {
                     CoralMaterial::Bubble => "minecraft:bubble_coral_fan",
                     CoralMaterial::Brain => "minecraft:brain_coral_fan",
                     CoralMaterial::Fire => "minecraft:fire_coral_fan",
                     CoralMaterial::Horn => "minecraft:horn_coral_fan",
                     CoralMaterial::Tube => "minecraft:tube_coral_fan",
-                }
+                },
                 _facing => match material {
                     CoralMaterial::Bubble => "minecraft:bubble_coral_wall_fan",
                     CoralMaterial::Brain => "minecraft:brain_coral_wall_fan",
                     CoralMaterial::Fire => "minecraft:fire_coral_wall_fan",
                     CoralMaterial::Horn => "minecraft:horn_coral_wall_fan",
                     CoralMaterial::Tube => "minecraft:tube_coral_wall_fan",
-                }
-            }
-            PaletteItem::Block(Block::CoralFan { material, dead: true, facing, .. }) => match facing {
+                },
+            },
+            PaletteItem::Block(Block::CoralFan {
+                material,
+                dead: true,
+                facing,
+                ..
+            }) => match facing {
                 Surface5::Down => match material {
                     CoralMaterial::Bubble => "minecraft:dead_bubble_coral_fan",
                     CoralMaterial::Brain => "minecraft:dead_brain_coral_fan",
                     CoralMaterial::Fire => "minecraft:dead_fire_coral_fan",
                     CoralMaterial::Horn => "minecraft:dead_horn_coral_fan",
                     CoralMaterial::Tube => "minecraft:dead_tube_coral_fan",
-                }
+                },
                 _facing => match material {
                     CoralMaterial::Bubble => "minecraft:dead_bubble_coral_wall_fan",
                     CoralMaterial::Brain => "minecraft:dead_brain_coral_wall_fan",
                     CoralMaterial::Fire => "minecraft:dead_fire_coral_wall_fan",
                     CoralMaterial::Horn => "minecraft:dead_horn_coral_wall_fan",
                     CoralMaterial::Tube => "minecraft:dead_tube_coral_wall_fan",
-                }
-            }
+                },
+            },
             PaletteItem::Block(Block::CartographyTable) => "minecraft:cartography_table",
             PaletteItem::Block(Block::SmithingTable) => "minecraft:smithing_table",
             PaletteItem::Block(Block::FletchingTable) => "minecraft:fletching_table",
@@ -1716,9 +2019,15 @@ impl PaletteItem {
             PaletteItem::Block(Block::Blackstone) => "minecraft:blackstone",
             PaletteItem::Block(Block::GildedBlackstone) => "minecraft:gilded_blackstone",
             PaletteItem::Block(Block::PolishedBlackstone) => "minecraft:polished_blackstone",
-            PaletteItem::Block(Block::ChiseledPolishedBlackstone) => "minecraft:chiseled_polished_blackstone",
-            PaletteItem::Block(Block::PolishedBlackstoneBricks) => "minecraft:polished_blackstone_bricks",
-            PaletteItem::Block(Block::CrackedPolishedBlackstoneBricks) => "minecraft:cracked_polished_blackstone_bricks",
+            PaletteItem::Block(Block::ChiseledPolishedBlackstone) => {
+                "minecraft:chiseled_polished_blackstone"
+            }
+            PaletteItem::Block(Block::PolishedBlackstoneBricks) => {
+                "minecraft:polished_blackstone_bricks"
+            }
+            PaletteItem::Block(Block::CrackedPolishedBlackstoneBricks) => {
+                "minecraft:cracked_polished_blackstone_bricks"
+            }
             PaletteItem::Block(Block::Loom { .. }) => "minecraft:loom",
             PaletteItem::Block(Block::Stonecutter { .. }) => "minecraft:stonecutter",
             PaletteItem::Block(Block::Lantern { .. }) => "minecraft:lantern",
@@ -1747,19 +2056,21 @@ impl PaletteItem {
                 AmethystSize::Medium => "minecraft:medium_amethyst_bud",
                 AmethystSize::Large => "minecraft:large_amethyst_bud",
                 AmethystSize::Cluster => "minecraft:amethyst_cluster",
-            }
+            },
             PaletteItem::Block(Block::Azalea { flowering: false }) => "minecraft:azalea",
             PaletteItem::Block(Block::Azalea { flowering: true }) => "minecraft:flowering_azalea",
             PaletteItem::Block(Block::BlockOfAmethyst) => "minecraft:amethyst_block",
-            PaletteItem::Block(Block::BlockOfCopper { oxidation, waxed }) => match (oxidation, waxed) {
-                (Oxidation::None, false) => "minecraft:copper_block",
-                (Oxidation::Exposed, false) => "minecraft:exposed_copper",
-                (Oxidation::Weathered, false) => "minecraft:weathered_copper",
-                (Oxidation::Oxidized, false) => "minecraft:oxidized_copper",
-                (Oxidation::None, true) => "minecraft:waxed_copper_block",
-                (Oxidation::Exposed, true) => "minecraft:waxed_exposed_copper",
-                (Oxidation::Weathered, true) => "minecraft:waxed_weathered_copper",
-                (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_copper",
+            PaletteItem::Block(Block::BlockOfCopper { oxidation, waxed }) => {
+                match (oxidation, waxed) {
+                    (Oxidation::None, false) => "minecraft:copper_block",
+                    (Oxidation::Exposed, false) => "minecraft:exposed_copper",
+                    (Oxidation::Weathered, false) => "minecraft:weathered_copper",
+                    (Oxidation::Oxidized, false) => "minecraft:oxidized_copper",
+                    (Oxidation::None, true) => "minecraft:waxed_copper_block",
+                    (Oxidation::Exposed, true) => "minecraft:waxed_exposed_copper",
+                    (Oxidation::Weathered, true) => "minecraft:waxed_weathered_copper",
+                    (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_copper",
+                }
             }
             PaletteItem::Block(Block::BlockOfRawCopper) => "minecraft:raw_copper_block",
             PaletteItem::Block(Block::BlockOfRawGold) => "minecraft:raw_gold_block",
@@ -1771,7 +2082,7 @@ impl PaletteItem {
                 Some(Colour::White) => "minecraft:white_candle",
                 Some(Colour::Orange) => "minecraft:orange_candle",
                 Some(Colour::Magenta) => "minecraft:magenta_candle",
-                Some(Colour::LightBlue)=> "minecraft:light_blue_candle",
+                Some(Colour::LightBlue) => "minecraft:light_blue_candle",
                 Some(Colour::Yellow) => "minecraft:yellow_candle",
                 Some(Colour::Lime) => "minecraft:lime_candle",
                 Some(Colour::Pink) => "minecraft:pink_candle",
@@ -1780,11 +2091,11 @@ impl PaletteItem {
                 Some(Colour::Cyan) => "minecraft:cyan_candle",
                 Some(Colour::Purple) => "minecraft:purple_candle",
                 Some(Colour::Blue) => "minecraft:blue_candle",
-                Some(Colour::Brown)=> "minecraft:brown_candle",
+                Some(Colour::Brown) => "minecraft:brown_candle",
                 Some(Colour::Green) => "minecraft:green_candle",
                 Some(Colour::Red) => "minecraft:red_candle",
                 Some(Colour::Black) => "minecraft:black_candle",
-            }
+            },
             PaletteItem::Block(Block::CaveVines { growth_stage, .. }) => {
                 if growth_stage.is_some() {
                     "minecraft:cave_vines"
@@ -1803,11 +2114,13 @@ impl PaletteItem {
                 (Oxidation::Exposed, true) => "minecraft:waxed_exposed_cut_copper",
                 (Oxidation::Weathered, true) => "minecraft:waxed_weathered_cut_copper",
                 (Oxidation::Oxidized, true) => "minecraft:waxed_oxidized_cut_copper",
-            }
+            },
             PaletteItem::Block(Block::Deepslate { .. }) => "minecraft:deepslate",
             PaletteItem::Block(Block::PolishedDeepslate) => "minecraft:polished_deepslate",
             PaletteItem::Block(Block::DeepslateBricks) => "minecraft:deepslate_bricks",
-            PaletteItem::Block(Block::CrackedDeepslateBricks) => "minecraft:cracked_deepslate_bricks",
+            PaletteItem::Block(Block::CrackedDeepslateBricks) => {
+                "minecraft:cracked_deepslate_bricks"
+            }
             PaletteItem::Block(Block::DeepslateTiles) => "minecraft:deepslate_tiles",
             PaletteItem::Block(Block::CrackedDeepslateTiles) => "minecraft:cracked_deepslate_tiles",
             PaletteItem::Block(Block::ChiseledDeepslate) => "minecraft:chiseled_deepslate",
@@ -1816,27 +2129,30 @@ impl PaletteItem {
             PaletteItem::Block(Block::DeepslateIronOre) => "minecraft:deepslate_iron_ore",
             PaletteItem::Block(Block::DeepslateGoldOre) => "minecraft:deepslate_gold_ore",
             PaletteItem::Block(Block::DeepslateDiamondOre) => "minecraft:deepslate_diamond_ore",
-            PaletteItem::Block(Block::DeepslateRedstoneOre { .. }) => "minecraft:deepslate_redstone_ore",
+            PaletteItem::Block(Block::DeepslateRedstoneOre { .. }) => {
+                "minecraft:deepslate_redstone_ore"
+            }
             PaletteItem::Block(Block::DeepslateLapisLazuliOre) => "minecraft:deepslate_lapis_ore",
             PaletteItem::Block(Block::DeepslateEmeraldOre) => "minecraft:deepslate_emerald_ore",
             PaletteItem::Block(Block::Dripleaf { variant, .. }) => match variant {
                 DripleafVariant::BigLeaf(_) => "minecraft:big_dripleaf",
                 DripleafVariant::BigStem => "minecraft:big_dripleaf_stem",
-                DripleafVariant::SmallTop
-                | DripleafVariant::SmallBottom => "minecraft:small_dripleaf",
-            }
+                DripleafVariant::SmallTop | DripleafVariant::SmallBottom => {
+                    "minecraft:small_dripleaf"
+                }
+            },
             PaletteItem::Block(Block::Dripstone) => "minecraft:dripstone_block",
             PaletteItem::Block(Block::GlowLichen { .. }) => "minecraft:glow_lichen",
             PaletteItem::Block(Block::HangingRoots { .. }) => "minecraft:hanging_roots",
             PaletteItem::Block(Block::InfestedDeepslate { .. }) => "minecraft:infested_deepslate",
-            PaletteItem::Block(Block::Light {..}) => "minecraft:light",
-            PaletteItem::Block(Block::LightningRod {..}) => "minecraft:lightning_rod",
+            PaletteItem::Block(Block::Light { .. }) => "minecraft:light",
+            PaletteItem::Block(Block::LightningRod { .. }) => "minecraft:lightning_rod",
             PaletteItem::Block(Block::Moss) => "minecraft:moss_block",
             PaletteItem::Block(Block::MossCarpet) => "minecraft:moss_carpet",
-            PaletteItem::Block(Block::PointedDripstone {..}) => "minecraft:pointed_dripstone",
+            PaletteItem::Block(Block::PointedDripstone { .. }) => "minecraft:pointed_dripstone",
             PaletteItem::Block(Block::PowderSnow) => "minecraft:powder_snow",
             PaletteItem::Block(Block::RootedDirt) => "minecraft:rooted_dirt",
-            PaletteItem::Block(Block::SculkSensor {..}) => "minecraft:sculk_sensor",
+            PaletteItem::Block(Block::SculkSensor { .. }) => "minecraft:sculk_sensor",
             PaletteItem::Block(Block::SmoothBasalt) => "minecraft:smooth_basalt",
             PaletteItem::Block(Block::SporeBlossom) => "minecraft:spore_blossom",
             PaletteItem::Block(Block::TintedGlass) => "minecraft:tinted_glass",
@@ -1896,7 +2212,10 @@ impl PaletteItem {
             | PaletteItem::Block(Block::Lectern { .. })
             | PaletteItem::Block(Block::Spawner)
             | PaletteItem::Block(Block::StructureBlock) => {
-                warn!("Block to name conversion not implemented for block: {:?}", self);
+                warn!(
+                    "Block to name conversion not implemented for block: {:?}",
+                    self
+                );
                 "minecraft:sponge"
             }
         }
@@ -1904,16 +2223,27 @@ impl PaletteItem {
 }
 
 /// From a section NBT value, generate a palette in the form of a vector of PaletteItems.
-pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Option<Vec<PaletteItem>> {
+pub(super) fn from_section(
+    section: &nbt::Value,
+    data_version: McVersion,
+) -> Option<Vec<PaletteItem>> {
     // Import Palette. It contains a list of compounds, each with a Name:String (Namespaced block ID)
     // and optionally a Properties:Compound which contains pairs of Name:String, value (for
     // e.g. facing.) Essentially holding all info previously encoded in blocks + add + data.
     let mut palette: Vec<PaletteItem> = Vec::new();
 
     let raw_palette = if data_version < McVersion::from_str("21w39a").unwrap() {
-        if let Ok(p) = nbt_value_lookup_list(section, "Palette") { p } else { return None }
+        if let Ok(p) = nbt_value_lookup_list(section, "Palette") {
+            p
+        } else {
+            return None;
+        }
     } else {
-        if let Ok(p) = nbt_value_lookup_list(section, "block_states/palette") { p } else { return None }
+        if let Ok(p) = nbt_value_lookup_list(section, "block_states/palette") {
+            p
+        } else {
+            return None;
+        }
     };
 
     for raw_block in raw_palette {
@@ -1936,14 +2266,30 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:coarse_dirt" => block(Block::CoarseDirt),
             "minecraft:podzol" => block(Block::Podzol),
             "minecraft:cobblestone" => block(Block::Cobblestone),
-            "minecraft:oak_planks" => block(Block::Planks { material: WoodMaterial::Oak }),
-            "minecraft:spruce_planks" => block(Block::Planks { material: WoodMaterial::Spruce }),
-            "minecraft:birch_planks" => block(Block::Planks { material: WoodMaterial::Birch }),
-            "minecraft:jungle_planks" => block(Block::Planks { material: WoodMaterial::Jungle }),
-            "minecraft:acacia_planks" => block(Block::Planks { material: WoodMaterial::Acacia }),
-            "minecraft:dark_oak_planks" => block(Block::Planks { material: WoodMaterial::DarkOak }),
-            "minecraft:crimson_planks" => block(Block::Planks { material: WoodMaterial::Crimson }),
-            "minecraft:warped_planks" => block(Block::Planks { material: WoodMaterial::Warped }),
+            "minecraft:oak_planks" => block(Block::Planks {
+                material: WoodMaterial::Oak,
+            }),
+            "minecraft:spruce_planks" => block(Block::Planks {
+                material: WoodMaterial::Spruce,
+            }),
+            "minecraft:birch_planks" => block(Block::Planks {
+                material: WoodMaterial::Birch,
+            }),
+            "minecraft:jungle_planks" => block(Block::Planks {
+                material: WoodMaterial::Jungle,
+            }),
+            "minecraft:acacia_planks" => block(Block::Planks {
+                material: WoodMaterial::Acacia,
+            }),
+            "minecraft:dark_oak_planks" => block(Block::Planks {
+                material: WoodMaterial::DarkOak,
+            }),
+            "minecraft:crimson_planks" => block(Block::Planks {
+                material: WoodMaterial::Crimson,
+            }),
+            "minecraft:warped_planks" => block(Block::Planks {
+                material: WoodMaterial::Warped,
+            }),
             "minecraft:oak_sapling" => block(sapling(SaplingMaterial::Oak, &properties)),
             "minecraft:spruce_sapling" => block(sapling(SaplingMaterial::Spruce, &properties)),
             "minecraft:birch_sapling" => block(sapling(SaplingMaterial::Birch, &properties)),
@@ -1969,13 +2315,25 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:crimson_stem" => block(log(WoodMaterial::Crimson, &properties)),
             "minecraft:warped_stem" => block(log(WoodMaterial::Warped, &properties)),
             "minecraft:stripped_oak_log" => block(stripped_log(WoodMaterial::Oak, &properties)),
-            "minecraft:stripped_spruce_log" => block(stripped_log(WoodMaterial::Spruce, &properties)),
+            "minecraft:stripped_spruce_log" => {
+                block(stripped_log(WoodMaterial::Spruce, &properties))
+            }
             "minecraft:stripped_birch_log" => block(stripped_log(WoodMaterial::Birch, &properties)),
-            "minecraft:stripped_jungle_log" => block(stripped_log(WoodMaterial::Jungle, &properties)),
-            "minecraft:stripped_acacia_log" => block(stripped_log(WoodMaterial::Acacia, &properties)),
-            "minecraft:stripped_dark_oak_log" => block(stripped_log(WoodMaterial::DarkOak, &properties)),
-            "minecraft:stripped_crimson_stem" => block(stripped_log(WoodMaterial::Crimson, &properties)),
-            "minecraft:stripped_warped_stem" => block(stripped_log(WoodMaterial::Warped, &properties)),
+            "minecraft:stripped_jungle_log" => {
+                block(stripped_log(WoodMaterial::Jungle, &properties))
+            }
+            "minecraft:stripped_acacia_log" => {
+                block(stripped_log(WoodMaterial::Acacia, &properties))
+            }
+            "minecraft:stripped_dark_oak_log" => {
+                block(stripped_log(WoodMaterial::DarkOak, &properties))
+            }
+            "minecraft:stripped_crimson_stem" => {
+                block(stripped_log(WoodMaterial::Crimson, &properties))
+            }
+            "minecraft:stripped_warped_stem" => {
+                block(stripped_log(WoodMaterial::Warped, &properties))
+            }
             "minecraft:oak_wood" => block(wood(WoodMaterial::Oak, &properties)),
             "minecraft:spruce_wood" => block(wood(WoodMaterial::Spruce, &properties)),
             "minecraft:birch_wood" => block(wood(WoodMaterial::Birch, &properties)),
@@ -1985,13 +2343,27 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:crimson_hyphae" => block(wood(WoodMaterial::Crimson, &properties)),
             "minecraft:warped_hyphae" => block(wood(WoodMaterial::Warped, &properties)),
             "minecraft:stripped_oak_wood" => block(stripped_wood(WoodMaterial::Oak, &properties)),
-            "minecraft:stripped_spruce_wood" => block(stripped_wood(WoodMaterial::Spruce, &properties)),
-            "minecraft:stripped_birch_wood" => block(stripped_wood(WoodMaterial::Birch, &properties)),
-            "minecraft:stripped_jungle_wood" => block(stripped_wood(WoodMaterial::Jungle, &properties)),
-            "minecraft:stripped_acacia_wood" => block(stripped_wood(WoodMaterial::Acacia, &properties)),
-            "minecraft:stripped_dark_oak_wood" => block(stripped_wood(WoodMaterial::DarkOak, &properties)),
-            "minecraft:stripped_crimson_hyphae" => block(stripped_wood(WoodMaterial::Crimson, &properties)),
-            "minecraft:stripped_warped_hyphae" => block(stripped_wood(WoodMaterial::Warped, &properties)),
+            "minecraft:stripped_spruce_wood" => {
+                block(stripped_wood(WoodMaterial::Spruce, &properties))
+            }
+            "minecraft:stripped_birch_wood" => {
+                block(stripped_wood(WoodMaterial::Birch, &properties))
+            }
+            "minecraft:stripped_jungle_wood" => {
+                block(stripped_wood(WoodMaterial::Jungle, &properties))
+            }
+            "minecraft:stripped_acacia_wood" => {
+                block(stripped_wood(WoodMaterial::Acacia, &properties))
+            }
+            "minecraft:stripped_dark_oak_wood" => {
+                block(stripped_wood(WoodMaterial::DarkOak, &properties))
+            }
+            "minecraft:stripped_crimson_hyphae" => {
+                block(stripped_wood(WoodMaterial::Crimson, &properties))
+            }
+            "minecraft:stripped_warped_hyphae" => {
+                block(stripped_wood(WoodMaterial::Warped, &properties))
+            }
             "minecraft:oak_leaves" => block(leaves(LeavesMaterial::Oak, &properties)),
             "minecraft:spruce_leaves" => block(leaves(LeavesMaterial::Spruce, &properties)),
             "minecraft:birch_leaves" => block(leaves(LeavesMaterial::Birch, &properties)),
@@ -2020,22 +2392,54 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:grass" => block(Block::Grass(Grass::Grass)),
             "minecraft:fern" => block(Block::Grass(Grass::Fern)),
             "minecraft:dead_bush" => block(Block::DeadBush),
-            "minecraft:white_wool" => block(Block::Wool { colour: Colour::White }),
-            "minecraft:orange_wool" => block(Block::Wool { colour: Colour::Orange }),
-            "minecraft:magenta_wool" => block(Block::Wool { colour: Colour::Magenta }),
-            "minecraft:light_blue_wool" => block(Block::Wool { colour: Colour::LightBlue }),
-            "minecraft:yellow_wool" => block(Block::Wool { colour: Colour::Yellow }),
-            "minecraft:lime_wool" => block(Block::Wool { colour: Colour::Lime }),
-            "minecraft:pink_wool" => block(Block::Wool { colour: Colour::Pink }),
-            "minecraft:gray_wool" => block(Block::Wool { colour: Colour::Gray }),
-            "minecraft:light_gray_wool" => block(Block::Wool { colour: Colour::LightGray }),
-            "minecraft:cyan_wool" => block(Block::Wool { colour: Colour::Cyan }),
-            "minecraft:purple_wool" => block(Block::Wool { colour: Colour::Purple }),
-            "minecraft:blue_wool" => block(Block::Wool { colour: Colour::Blue }),
-            "minecraft:brown_wool" => block(Block::Wool { colour: Colour::Brown }),
-            "minecraft:green_wool" => block(Block::Wool { colour: Colour::Green }),
-            "minecraft:red_wool" => block(Block::Wool { colour: Colour::Red }),
-            "minecraft:black_wool" => block(Block::Wool { colour: Colour::Black }),
+            "minecraft:white_wool" => block(Block::Wool {
+                colour: Colour::White,
+            }),
+            "minecraft:orange_wool" => block(Block::Wool {
+                colour: Colour::Orange,
+            }),
+            "minecraft:magenta_wool" => block(Block::Wool {
+                colour: Colour::Magenta,
+            }),
+            "minecraft:light_blue_wool" => block(Block::Wool {
+                colour: Colour::LightBlue,
+            }),
+            "minecraft:yellow_wool" => block(Block::Wool {
+                colour: Colour::Yellow,
+            }),
+            "minecraft:lime_wool" => block(Block::Wool {
+                colour: Colour::Lime,
+            }),
+            "minecraft:pink_wool" => block(Block::Wool {
+                colour: Colour::Pink,
+            }),
+            "minecraft:gray_wool" => block(Block::Wool {
+                colour: Colour::Gray,
+            }),
+            "minecraft:light_gray_wool" => block(Block::Wool {
+                colour: Colour::LightGray,
+            }),
+            "minecraft:cyan_wool" => block(Block::Wool {
+                colour: Colour::Cyan,
+            }),
+            "minecraft:purple_wool" => block(Block::Wool {
+                colour: Colour::Purple,
+            }),
+            "minecraft:blue_wool" => block(Block::Wool {
+                colour: Colour::Blue,
+            }),
+            "minecraft:brown_wool" => block(Block::Wool {
+                colour: Colour::Brown,
+            }),
+            "minecraft:green_wool" => block(Block::Wool {
+                colour: Colour::Green,
+            }),
+            "minecraft:red_wool" => block(Block::Wool {
+                colour: Colour::Red,
+            }),
+            "minecraft:black_wool" => block(Block::Wool {
+                colour: Colour::Black,
+            }),
             // TODO block 36 piston_extension ("Block moved by Piston")
             "minecraft:dandelion" => block(Block::Flower(Flower::Dandelion)),
             "minecraft:poppy" => block(Block::Flower(Flower::Poppy)),
@@ -2074,26 +2478,54 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:red_sandstone_slab" => block(slab(SlabMaterial::RedSandstone, &properties)),
             "minecraft:purpur_slab" => block(slab(SlabMaterial::Purpur, &properties)),
             "minecraft:prismarine_slab" => block(slab(SlabMaterial::Prismarine, &properties)),
-            "minecraft:prismarine_brick_slab" => block(slab(SlabMaterial::PrismarineBrick, &properties)),
-            "minecraft:dark_prismarine_slab" => block(slab(SlabMaterial::DarkPrismarine, &properties)),
+            "minecraft:prismarine_brick_slab" => {
+                block(slab(SlabMaterial::PrismarineBrick, &properties))
+            }
+            "minecraft:dark_prismarine_slab" => {
+                block(slab(SlabMaterial::DarkPrismarine, &properties))
+            }
             "minecraft:andesite_slab" => block(slab(SlabMaterial::Andesite, &properties)),
             "minecraft:diorite_slab" => block(slab(SlabMaterial::Diorite, &properties)),
             "minecraft:granite_slab" => block(slab(SlabMaterial::Granite, &properties)),
-            "minecraft:polished_andesite_slab" => block(slab(SlabMaterial::PolishedAndesite, &properties)),
-            "minecraft:polished_diorite_slab" => block(slab(SlabMaterial::PolishedDiorite, &properties)),
-            "minecraft:polished_granite_slab" => block(slab(SlabMaterial::PolishedGranite, &properties)),
+            "minecraft:polished_andesite_slab" => {
+                block(slab(SlabMaterial::PolishedAndesite, &properties))
+            }
+            "minecraft:polished_diorite_slab" => {
+                block(slab(SlabMaterial::PolishedDiorite, &properties))
+            }
+            "minecraft:polished_granite_slab" => {
+                block(slab(SlabMaterial::PolishedGranite, &properties))
+            }
             "minecraft:cut_sandstone_slab" => block(slab(SlabMaterial::CutSandstone, &properties)),
-            "minecraft:cut_red_sandstone_slab" => block(slab(SlabMaterial::CutRedSandstone, &properties)),
-            "minecraft:smooth_sandstone_slab" => block(slab(SlabMaterial::SmoothSandstone, &properties)),
-            "minecraft:smooth_red_sandstone_slab" => block(slab(SlabMaterial::SmoothRedSandstone, &properties)),
+            "minecraft:cut_red_sandstone_slab" => {
+                block(slab(SlabMaterial::CutRedSandstone, &properties))
+            }
+            "minecraft:smooth_sandstone_slab" => {
+                block(slab(SlabMaterial::SmoothSandstone, &properties))
+            }
+            "minecraft:smooth_red_sandstone_slab" => {
+                block(slab(SlabMaterial::SmoothRedSandstone, &properties))
+            }
             "minecraft:smooth_quartz_slab" => block(slab(SlabMaterial::SmoothQuartz, &properties)),
-            "minecraft:red_nether_brick_slab" => block(slab(SlabMaterial::RedNetherBrick, &properties)),
-            "minecraft:end_stone_brick_slab" => block(slab(SlabMaterial::EndStoneBrick, &properties)),
-            "minecraft:mossy_cobblestone_slab" => block(slab(SlabMaterial::MossyCobblestone, &properties)),
-            "minecraft:mossy_stone_brick_slab" => block(slab(SlabMaterial::MossyStoneBrick, &properties)),
+            "minecraft:red_nether_brick_slab" => {
+                block(slab(SlabMaterial::RedNetherBrick, &properties))
+            }
+            "minecraft:end_stone_brick_slab" => {
+                block(slab(SlabMaterial::EndStoneBrick, &properties))
+            }
+            "minecraft:mossy_cobblestone_slab" => {
+                block(slab(SlabMaterial::MossyCobblestone, &properties))
+            }
+            "minecraft:mossy_stone_brick_slab" => {
+                block(slab(SlabMaterial::MossyStoneBrick, &properties))
+            }
             "minecraft:blackstone_slab" => block(slab(SlabMaterial::Blackstone, &properties)),
-            "minecraft:polished_blackstone_slab" => block(slab(SlabMaterial::PolishedBlackstone, &properties)),
-            "minecraft:polished_blackstone_brick_slab" => block(slab(SlabMaterial::PolishedBlackstoneBrick, &properties)),
+            "minecraft:polished_blackstone_slab" => {
+                block(slab(SlabMaterial::PolishedBlackstone, &properties))
+            }
+            "minecraft:polished_blackstone_brick_slab" => {
+                block(slab(SlabMaterial::PolishedBlackstoneBrick, &properties))
+            }
             "minecraft:smooth_quartz" => block(Block::SmoothQuartz),
             "minecraft:smooth_stone" => block(Block::SmoothStone),
             "minecraft:bricks" => block(Block::BrickBlock),
@@ -2102,11 +2534,17 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:mossy_cobblestone" => block(Block::MossyCobblestone),
             "minecraft:obsidian" => block(Block::Obsidian),
             "minecraft:crying_obsidian" => block(Block::CryingObsidian),
-            "minecraft:torch" => block(Block::Torch { mounted_at: Surface5::Down }),
+            "minecraft:torch" => block(Block::Torch {
+                mounted_at: Surface5::Down,
+            }),
             "minecraft:wall_torch" => block(wall_torch(&properties)),
-            "minecraft:redstone_torch" => block(Block::RedstoneTorch { mounted_at: Surface5::Down }),
+            "minecraft:redstone_torch" => block(Block::RedstoneTorch {
+                mounted_at: Surface5::Down,
+            }),
             "minecraft:redstone_wall_torch" => block(redstone_wall_torch(&properties)),
-            "minecraft:soul_torch" => block(Block::SoulTorch { mounted_at: Surface5::Down }),
+            "minecraft:soul_torch" => block(Block::SoulTorch {
+                mounted_at: Surface5::Down,
+            }),
             "minecraft:soul_wall_torch" => block(soul_wall_torch(&properties)),
             "minecraft:fire" => block(fire(&properties)),
             "minecraft:soul_fire" => block(Block::SoulFire),
@@ -2117,60 +2555,110 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:jungle_stairs" => block(stairs(StairMaterial::Jungle, &properties)),
             "minecraft:acacia_stairs" => block(stairs(StairMaterial::Acacia, &properties)),
             "minecraft:dark_oak_stairs" => block(stairs(StairMaterial::DarkOak, &properties)),
-            "minecraft:cobblestone_stairs" => block(stairs(StairMaterial::Cobblestone, &properties)),
+            "minecraft:cobblestone_stairs" => {
+                block(stairs(StairMaterial::Cobblestone, &properties))
+            }
             "minecraft:brick_stairs" => block(stairs(StairMaterial::Brick, &properties)),
             "minecraft:stone_brick_stairs" => block(stairs(StairMaterial::StoneBrick, &properties)),
-            "minecraft:nether_brick_stairs" => block(stairs(StairMaterial::NetherBrick, &properties)),
+            "minecraft:nether_brick_stairs" => {
+                block(stairs(StairMaterial::NetherBrick, &properties))
+            }
             "minecraft:sandstone_stairs" => block(stairs(StairMaterial::Sandstone, &properties)),
             "minecraft:quartz_stairs" => block(stairs(StairMaterial::Quartz, &properties)),
-            "minecraft:red_sandstone_stairs" => block(stairs(StairMaterial::RedSandstone, &properties)),
+            "minecraft:red_sandstone_stairs" => {
+                block(stairs(StairMaterial::RedSandstone, &properties))
+            }
             "minecraft:purpur_stairs" => block(stairs(StairMaterial::Purpur, &properties)),
-            "minecraft:dark_prismarine_stairs" => block(stairs(StairMaterial::DarkPrismarine, &properties)),
-            "minecraft:smooth_sandstone_stairs" => block(stairs(StairMaterial::SmoothSandstone, &properties)),
-            "minecraft:polished_blackstone_brick_stairs" => block(stairs(StairMaterial::PolishedBlackstoneBrick, &properties)),
-            "minecraft:prismarine_brick_stairs" => block(stairs(StairMaterial::PrismarineBrick, &properties)),
+            "minecraft:dark_prismarine_stairs" => {
+                block(stairs(StairMaterial::DarkPrismarine, &properties))
+            }
+            "minecraft:smooth_sandstone_stairs" => {
+                block(stairs(StairMaterial::SmoothSandstone, &properties))
+            }
+            "minecraft:polished_blackstone_brick_stairs" => {
+                block(stairs(StairMaterial::PolishedBlackstoneBrick, &properties))
+            }
+            "minecraft:prismarine_brick_stairs" => {
+                block(stairs(StairMaterial::PrismarineBrick, &properties))
+            }
             "minecraft:stone_stairs" => block(stairs(StairMaterial::Stone, &properties)),
-            "minecraft:polished_blackstone_stairs" => block(stairs(StairMaterial::PolishedBlackstone, &properties)),
+            "minecraft:polished_blackstone_stairs" => {
+                block(stairs(StairMaterial::PolishedBlackstone, &properties))
+            }
             "minecraft:prismarine_stairs" => block(stairs(StairMaterial::Prismarine, &properties)),
-            "minecraft:end_stone_brick_stairs" => block(stairs(StairMaterial::EndStoneBrick, &properties)),
+            "minecraft:end_stone_brick_stairs" => {
+                block(stairs(StairMaterial::EndStoneBrick, &properties))
+            }
             "minecraft:blackstone_stairs" => block(stairs(StairMaterial::Blackstone, &properties)),
-            "minecraft:mossy_cobblestone_stairs" => block(stairs(StairMaterial::MossyCobblestone, &properties)),
+            "minecraft:mossy_cobblestone_stairs" => {
+                block(stairs(StairMaterial::MossyCobblestone, &properties))
+            }
             "minecraft:diorite_stairs" => block(stairs(StairMaterial::Diorite, &properties)),
-            "minecraft:polished_diorite_stairs" => block(stairs(StairMaterial::PolishedDiorite, &properties)),
-            "minecraft:polished_andesite_stairs" => block(stairs(StairMaterial::PolishedAndesite, &properties)),
-            "minecraft:mossy_stone_brick_stairs" => block(stairs(StairMaterial::MossyStoneBrick, &properties)),
-            "minecraft:red_nether_brick_stairs" => block(stairs(StairMaterial::RedNetherBrick, &properties)),
+            "minecraft:polished_diorite_stairs" => {
+                block(stairs(StairMaterial::PolishedDiorite, &properties))
+            }
+            "minecraft:polished_andesite_stairs" => {
+                block(stairs(StairMaterial::PolishedAndesite, &properties))
+            }
+            "minecraft:mossy_stone_brick_stairs" => {
+                block(stairs(StairMaterial::MossyStoneBrick, &properties))
+            }
+            "minecraft:red_nether_brick_stairs" => {
+                block(stairs(StairMaterial::RedNetherBrick, &properties))
+            }
             "minecraft:warped_stairs" => block(stairs(StairMaterial::Warped, &properties)),
-            "minecraft:smooth_red_sandstone_stairs" => block(stairs(StairMaterial::SmoothRedSandstone, &properties)),
+            "minecraft:smooth_red_sandstone_stairs" => {
+                block(stairs(StairMaterial::SmoothRedSandstone, &properties))
+            }
             "minecraft:andesite_stairs" => block(stairs(StairMaterial::Andesite, &properties)),
             "minecraft:crimson_stairs" => block(stairs(StairMaterial::Crimson, &properties)),
-            "minecraft:polished_granite_stairs" => block(stairs(StairMaterial::PolishedGranite, &properties)),
+            "minecraft:polished_granite_stairs" => {
+                block(stairs(StairMaterial::PolishedGranite, &properties))
+            }
             "minecraft:granite_stairs" => block(stairs(StairMaterial::Granite, &properties)),
-            "minecraft:smooth_quartz_stairs" => block(stairs(StairMaterial::SmoothQuartz, &properties)),
+            "minecraft:smooth_quartz_stairs" => {
+                block(stairs(StairMaterial::SmoothQuartz, &properties))
+            }
             "minecraft:chest" => proto(proto_chest(&properties)),
             "minecraft:redstone_wire" => block(Block::RedstoneWire),
             "minecraft:diamond_ore" => block(Block::DiamondOre),
             "minecraft:diamond_block" => block(Block::BlockOfDiamond),
             "minecraft:crafting_table" => block(Block::CraftingTable),
-            "minecraft:wheat" => block(Block::Wheat { growth_stage: prop(&properties, "age") }),
-            "minecraft:farmland" => block(Block::Farmland { wetness: prop(&properties, "moisture") }),
+            "minecraft:wheat" => block(Block::Wheat {
+                growth_stage: prop(&properties, "age"),
+            }),
+            "minecraft:farmland" => block(Block::Farmland {
+                wetness: prop(&properties, "moisture"),
+            }),
             "minecraft:furnace" => proto(proto_furnace(&properties)),
             "minecraft:oak_sign" => proto(proto_sign(WoodMaterial::Oak, &properties)),
             "minecraft:oak_wall_sign" => proto(proto_wall_sign(WoodMaterial::Oak, &properties)),
             "minecraft:spruce_sign" => proto(proto_sign(WoodMaterial::Spruce, &properties)),
-            "minecraft:spruce_wall_sign" => proto(proto_wall_sign(WoodMaterial::Spruce, &properties)),
+            "minecraft:spruce_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::Spruce, &properties))
+            }
             "minecraft:birch_sign" => proto(proto_sign(WoodMaterial::Birch, &properties)),
             "minecraft:birch_wall_sign" => proto(proto_wall_sign(WoodMaterial::Birch, &properties)),
             "minecraft:jungle_sign" => proto(proto_sign(WoodMaterial::Jungle, &properties)),
-            "minecraft:jungle_wall_sign" => proto(proto_wall_sign(WoodMaterial::Jungle, &properties)),
+            "minecraft:jungle_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::Jungle, &properties))
+            }
             "minecraft:acacia_sign" => proto(proto_sign(WoodMaterial::Acacia, &properties)),
-            "minecraft:acacia_wall_sign" => proto(proto_wall_sign(WoodMaterial::Acacia, &properties)),
+            "minecraft:acacia_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::Acacia, &properties))
+            }
             "minecraft:dark_oak_sign" => proto(proto_sign(WoodMaterial::DarkOak, &properties)),
-            "minecraft:dark_oak_wall_sign" => proto(proto_wall_sign(WoodMaterial::DarkOak, &properties)),
+            "minecraft:dark_oak_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::DarkOak, &properties))
+            }
             "minecraft:crimson_sign" => proto(proto_sign(WoodMaterial::Crimson, &properties)),
-            "minecraft:crimson_wall_sign" => proto(proto_wall_sign(WoodMaterial::Crimson, &properties)),
+            "minecraft:crimson_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::Crimson, &properties))
+            }
             "minecraft:warped_sign" => proto(proto_sign(WoodMaterial::Warped, &properties)),
-            "minecraft:warped_wall_sign" => proto(proto_wall_sign(WoodMaterial::Warped, &properties)),
+            "minecraft:warped_wall_sign" => {
+                proto(proto_wall_sign(WoodMaterial::Warped, &properties))
+            }
             "minecraft:oak_door" => block(door(DoorMaterial::Oak, &properties)),
             "minecraft:spruce_door" => block(door(DoorMaterial::Spruce, &properties)),
             "minecraft:birch_door" => block(door(DoorMaterial::Birch, &properties)),
@@ -2183,18 +2671,38 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:ladder" => block(ladder(&properties)),
             "minecraft:lever" => block(lever(&properties)),
             "minecraft:oak_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Oak)),
-            "minecraft:spruce_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Spruce)),
+            "minecraft:spruce_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Spruce))
+            }
             "minecraft:birch_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Birch)),
-            "minecraft:jungle_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Jungle)),
-            "minecraft:acacia_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Acacia)),
-            "minecraft:dark_oak_pressure_plate" => block(pressure_plate(PressurePlateMaterial::DarkOak)),
-            "minecraft:crimson_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Crimson)),
-            "minecraft:warped_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Warped)),
+            "minecraft:jungle_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Jungle))
+            }
+            "minecraft:acacia_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Acacia))
+            }
+            "minecraft:dark_oak_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::DarkOak))
+            }
+            "minecraft:crimson_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Crimson))
+            }
+            "minecraft:warped_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Warped))
+            }
             "minecraft:stone_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Stone)),
-            "minecraft:polished_blackstone_pressure_plate" => block(pressure_plate(PressurePlateMaterial::PolishedBlackstone)),
-            "minecraft:heavy_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Iron)),
-            "minecraft:light_weighted_pressure_plate" => block(pressure_plate(PressurePlateMaterial::Gold)),
-            "minecraft:redstone_ore" => todo!(),
+            "minecraft:polished_blackstone_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::PolishedBlackstone))
+            }
+            "minecraft:heavy_weighted_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Iron))
+            }
+            "minecraft:light_weighted_pressure_plate" => {
+                block(pressure_plate(PressurePlateMaterial::Gold))
+            }
+            "minecraft:redstone_ore" => block(Block::RedstoneOre {
+                lit: prop(&properties, "lit"),
+            }),
             "minecraft:oak_button" => block(button(ButtonMaterial::Oak, &properties)),
             "minecraft:spruce_button" => block(button(ButtonMaterial::Spruce, &properties)),
             "minecraft:birch_button" => block(button(ButtonMaterial::Birch, &properties)),
@@ -2204,7 +2712,9 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:crimson_button" => block(button(ButtonMaterial::Crimson, &properties)),
             "minecraft:warped_button" => block(button(ButtonMaterial::Warped, &properties)),
             "minecraft:stone_button" => block(button(ButtonMaterial::Stone, &properties)),
-            "minecraft:polished_blackstone_button" => block(button(ButtonMaterial::PolishedBlackstone, &properties)),
+            "minecraft:polished_blackstone_button" => {
+                block(button(ButtonMaterial::PolishedBlackstone, &properties))
+            }
             "minecraft:snow" => block(snow(&properties)),
             "minecraft:ice" => block(Block::Ice),
             "minecraft:packed_ice" => block(Block::PackedIce),
@@ -2233,22 +2743,54 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:jack_o_lantern" => block(jack_o_lantern(&properties)),
             "minecraft:cake" => block(cake(&properties)),
             "minecraft:repeater" => block(repeater(&properties)),
-            "minecraft:white_stained_glass" => block(Block::Glass { colour: Some(Colour::White )}),
-            "minecraft:orange_stained_glass" => block(Block::Glass { colour: Some(Colour::Orange )}),
-            "minecraft:magenta_stained_glass" => block(Block::Glass { colour: Some(Colour::Magenta )}),
-            "minecraft:light_blue_stained_glass" => block(Block::Glass { colour: Some(Colour::LightBlue )}),
-            "minecraft:yellow_stained_glass" => block(Block::Glass { colour: Some(Colour::Yellow )}),
-            "minecraft:lime_stained_glass" => block(Block::Glass { colour: Some(Colour::Lime )}),
-            "minecraft:pink_stained_glass" => block(Block::Glass { colour: Some(Colour::Pink )}),
-            "minecraft:gray_stained_glass" => block(Block::Glass { colour: Some(Colour::Gray )}),
-            "minecraft:light_gray_stained_glass" => block(Block::Glass { colour: Some(Colour::LightGray )}),
-            "minecraft:cyan_stained_glass" => block(Block::Glass { colour: Some(Colour::Cyan )}),
-            "minecraft:purple_stained_glass" => block(Block::Glass { colour: Some(Colour::Purple )}),
-            "minecraft:blue_stained_glass" => block(Block::Glass { colour: Some(Colour::Blue )}),
-            "minecraft:brown_stained_glass" => block(Block::Glass { colour: Some(Colour::Brown )}),
-            "minecraft:green_stained_glass" => block(Block::Glass { colour: Some(Colour::Green )}),
-            "minecraft:red_stained_glass" => block(Block::Glass { colour: Some(Colour::Red )}),
-            "minecraft:black_stained_glass" => block(Block::Glass { colour: Some(Colour::Black )}),
+            "minecraft:white_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::White),
+            }),
+            "minecraft:orange_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Orange),
+            }),
+            "minecraft:magenta_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Magenta),
+            }),
+            "minecraft:light_blue_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::LightBlue),
+            }),
+            "minecraft:yellow_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Yellow),
+            }),
+            "minecraft:lime_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Lime),
+            }),
+            "minecraft:pink_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Pink),
+            }),
+            "minecraft:gray_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Gray),
+            }),
+            "minecraft:light_gray_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::LightGray),
+            }),
+            "minecraft:cyan_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Cyan),
+            }),
+            "minecraft:purple_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Purple),
+            }),
+            "minecraft:blue_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Blue),
+            }),
+            "minecraft:brown_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Brown),
+            }),
+            "minecraft:green_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Green),
+            }),
+            "minecraft:red_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Red),
+            }),
+            "minecraft:black_stained_glass" => block(Block::Glass {
+                colour: Some(Colour::Black),
+            }),
             "minecraft:oak_trapdoor" => block(trapdoor(DoorMaterial::Oak, &properties)),
             "minecraft:spruce_trapdoor" => block(trapdoor(DoorMaterial::Spruce, &properties)),
             "minecraft:birch_trapdoor" => block(trapdoor(DoorMaterial::Birch, &properties)),
@@ -2271,7 +2813,9 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:brown_mushroom_block" => block(brown_mushroom_block(&properties)),
             "minecraft:red_mushroom_block" => block(red_mushroom_block(&properties)),
             "minecraft:mushroom_stem" => block(mushroom_stem(&properties)),
-            "minecraft:iron_bars" => block(Block::IronBars { waterlogged: prop(&properties, "waterlogged")}),
+            "minecraft:iron_bars" => block(Block::IronBars {
+                waterlogged: prop(&properties, "waterlogged"),
+            }),
             "minecraft:glass_pane" => block(glass_pane(&properties)),
             "minecraft:melon" => block(Block::Melon),
             "minecraft:pumpkin_stem" => block(pumpkin_stem(&properties)),
@@ -2284,7 +2828,9 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:birch_fence_gate" => block(fence_gate(WoodMaterial::Birch, &properties)),
             "minecraft:jungle_fence_gate" => block(fence_gate(WoodMaterial::Jungle, &properties)),
             "minecraft:acacia_fence_gate" => block(fence_gate(WoodMaterial::Acacia, &properties)),
-            "minecraft:dark_oak_fence_gate" => block(fence_gate(WoodMaterial::DarkOak, &properties)),
+            "minecraft:dark_oak_fence_gate" => {
+                block(fence_gate(WoodMaterial::DarkOak, &properties))
+            }
             "minecraft:crimson_fence_gate" => block(fence_gate(WoodMaterial::Crimson, &properties)),
             "minecraft:warped_fence_gate" => block(fence_gate(WoodMaterial::Warped, &properties)),
             "minecraft:mycelium" => block(Block::Mycelium),
@@ -2310,22 +2856,34 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             // TODO 137 command block // Deferred for now, too complicated
             "minecraft:beacon" => proto(ProtoBlock::Beacon),
             "minecraft:cobblestone_wall" => block(wall(WallMaterial::Cobblestone, &properties)),
-            "minecraft:mossy_cobblestone_wall" => block(wall(WallMaterial::MossyCobblestone, &properties)),
+            "minecraft:mossy_cobblestone_wall" => {
+                block(wall(WallMaterial::MossyCobblestone, &properties))
+            }
             "minecraft:brick_wall" => block(wall(WallMaterial::Brick, &properties)),
             "minecraft:prismarine_wall" => block(wall(WallMaterial::Prismarine, &properties)),
             "minecraft:red_sandstone_wall" => block(wall(WallMaterial::RedSandstone, &properties)),
-            "minecraft:mossy_stone_brick_wall" => block(wall(WallMaterial::MossyStoneBrick, &properties)),
+            "minecraft:mossy_stone_brick_wall" => {
+                block(wall(WallMaterial::MossyStoneBrick, &properties))
+            }
             "minecraft:granite_wall" => block(wall(WallMaterial::Granite, &properties)),
             "minecraft:stone_brick_wall" => block(wall(WallMaterial::StoneBrick, &properties)),
             "minecraft:nether_brick_wall" => block(wall(WallMaterial::NetherBrick, &properties)),
             "minecraft:andesite_wall" => block(wall(WallMaterial::Andesite, &properties)),
-            "minecraft:red_nether_brick_wall" => block(wall(WallMaterial::RedNetherBrick, &properties)),
+            "minecraft:red_nether_brick_wall" => {
+                block(wall(WallMaterial::RedNetherBrick, &properties))
+            }
             "minecraft:sandstone_wall" => block(wall(WallMaterial::Sandstone, &properties)),
-            "minecraft:end_stone_brick_wall" => block(wall(WallMaterial::EndStoneBrick, &properties)),
+            "minecraft:end_stone_brick_wall" => {
+                block(wall(WallMaterial::EndStoneBrick, &properties))
+            }
             "minecraft:diorite_wall" => block(wall(WallMaterial::Diorite, &properties)),
             "minecraft:blackstone_wall" => block(wall(WallMaterial::Blackstone, &properties)),
-            "minecraft:polished_blackstone_wall" => block(wall(WallMaterial::PolishedBlackstone, &properties)),
-            "minecraft:polished_blackstone_brick_wall" => block(wall(WallMaterial::PolishedBlackstoneBrick, &properties)),
+            "minecraft:polished_blackstone_wall" => {
+                block(wall(WallMaterial::PolishedBlackstone, &properties))
+            }
+            "minecraft:polished_blackstone_brick_wall" => {
+                block(wall(WallMaterial::PolishedBlackstoneBrick, &properties))
+            }
             "minecraft:flower_pot" => block(Block::FlowerPot(FlowerPot { plant: None })),
             "minecraft:potted_dandelion" => block(potted_plant(PottedPlant::Dandelion)),
             "minecraft:potted_poppy" => block(potted_plant(PottedPlant::Poppy)),
@@ -2338,7 +2896,9 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:potted_pink_tulip" => block(potted_plant(PottedPlant::TulipPink)),
             "minecraft:potted_oxeye_daisy" => block(potted_plant(PottedPlant::OxeyeDaisy)),
             "minecraft:potted_cornflower" => block(potted_plant(PottedPlant::Cornflower)),
-            "minecraft:potted_lily_of_the_valley" => block(potted_plant(PottedPlant::LilyOfTheValley)),
+            "minecraft:potted_lily_of_the_valley" => {
+                block(potted_plant(PottedPlant::LilyOfTheValley))
+            }
             "minecraft:potted_wither_rose" => block(potted_plant(PottedPlant::WitherRose)),
             "minecraft:potted_oak_sapling" => block(potted_plant(PottedPlant::OakSapling)),
             "minecraft:potted_spruce_sapling" => block(potted_plant(PottedPlant::SpruceSapling)),
@@ -2356,19 +2916,31 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:potted_warped_fungus" => block(potted_plant(PottedPlant::WarpedFungus)),
             "minecraft:potted_crimson_roots" => block(potted_plant(PottedPlant::CrimsonRoots)),
             "minecraft:potted_warped_roots" => block(potted_plant(PottedPlant::WarpedRoots)),
-            "minecraft:carrots" => block(Block::Carrots { growth_stage: age0_7(&properties) }),
-            "minecraft:potatoes" => block(Block::Potatoes { growth_stage: age0_7(&properties) }),
+            "minecraft:carrots" => block(Block::Carrots {
+                growth_stage: age0_7(&properties),
+            }),
+            "minecraft:potatoes" => block(Block::Potatoes {
+                growth_stage: age0_7(&properties),
+            }),
             "minecraft:skeleton_skull" => block(head(HeadVariant::SkeletonSkull, &properties)),
-            "minecraft:wither_skeleton_skull" => block(head(HeadVariant::WitherSkeletonSkull, &properties)),
+            "minecraft:wither_skeleton_skull" => {
+                block(head(HeadVariant::WitherSkeletonSkull, &properties))
+            }
             "minecraft:player_head" => block(head(HeadVariant::PlayerHead, &properties)),
             "minecraft:zombie_head" => block(head(HeadVariant::ZombieHead, &properties)),
             "minecraft:creeper_head" => block(head(HeadVariant::CreeperHead, &properties)),
             "minecraft:dragon_head" => block(head(HeadVariant::DragonHead, &properties)),
-            "minecraft:skeleton_wall_skull" => block(wall_head(HeadVariant::SkeletonSkull, &properties)),
-            "minecraft:wither_skeleton_wall_skull" => block(wall_head(HeadVariant::WitherSkeletonSkull, &properties)),
+            "minecraft:skeleton_wall_skull" => {
+                block(wall_head(HeadVariant::SkeletonSkull, &properties))
+            }
+            "minecraft:wither_skeleton_wall_skull" => {
+                block(wall_head(HeadVariant::WitherSkeletonSkull, &properties))
+            }
             "minecraft:player_wall_head" => block(wall_head(HeadVariant::PlayerHead, &properties)),
             "minecraft:zombie_wall_head" => block(wall_head(HeadVariant::ZombieHead, &properties)),
-            "minecraft:creeper_wall_head" => block(wall_head(HeadVariant::CreeperHead, &properties)),
+            "minecraft:creeper_wall_head" => {
+                block(wall_head(HeadVariant::CreeperHead, &properties))
+            }
             "minecraft:dragon_wall_head" => block(wall_head(HeadVariant::DragonHead, &properties)),
             "minecraft:anvil" => block(anvil(AnvilDamage::Intact, &properties)),
             "minecraft:chipped_anvil" => block(anvil(AnvilDamage::SlightlyDamaged, &properties)),
@@ -2384,38 +2956,102 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:quartz_pillar" => block(quartz_pillar(&properties)),
             "minecraft:dropper" => proto(proto_dropper(&properties)),
             "minecraft:terracotta" => block(Block::Terracotta { colour: None }),
-            "minecraft:white_terracotta" => block(Block::Terracotta { colour: Some(Colour::White) }),
-            "minecraft:orange_terracotta" => block(Block::Terracotta { colour: Some(Colour::Orange) }),
-            "minecraft:magenta_terracotta" => block(Block::Terracotta { colour: Some(Colour::Magenta) }),
-            "minecraft:light_blue_terracotta" => block(Block::Terracotta { colour: Some(Colour::LightBlue) }),
-            "minecraft:yellow_terracotta" => block(Block::Terracotta { colour: Some(Colour::Yellow) }),
-            "minecraft:lime_terracotta" => block(Block::Terracotta { colour: Some(Colour::Lime) }),
-            "minecraft:pink_terracotta" => block(Block::Terracotta { colour: Some(Colour::Pink) }),
-            "minecraft:gray_terracotta" => block(Block::Terracotta { colour: Some(Colour::Gray) }),
-            "minecraft:light_gray_terracotta" => block(Block::Terracotta { colour: Some(Colour::LightGray) }),
-            "minecraft:cyan_terracotta" => block(Block::Terracotta { colour: Some(Colour::Cyan) }),
-            "minecraft:purple_terracotta" => block(Block::Terracotta { colour: Some(Colour::Purple) }),
-            "minecraft:blue_terracotta" => block(Block::Terracotta { colour: Some(Colour::Blue) }),
-            "minecraft:brown_terracotta" => block(Block::Terracotta { colour: Some(Colour::Brown) }),
-            "minecraft:green_terracotta" => block(Block::Terracotta { colour: Some(Colour::Green) }),
-            "minecraft:red_terracotta" => block(Block::Terracotta { colour: Some(Colour::Red) }),
-            "minecraft:black_terracotta" => block(Block::Terracotta { colour: Some(Colour::Black) }),
-            "minecraft:white_stained_glass_pane" => block(stained_glass_pane(Colour::White, &properties)),
-            "minecraft:orange_stained_glass_pane" => block(stained_glass_pane(Colour::Orange, &properties)),
-            "minecraft:magenta_stained_glass_pane" => block(stained_glass_pane(Colour::Magenta, &properties)),
-            "minecraft:light_blue_stained_glass_pane" => block(stained_glass_pane(Colour::LightBlue, &properties)),
-            "minecraft:yellow_stained_glass_pane" => block(stained_glass_pane(Colour::Yellow, &properties)),
-            "minecraft:lime_stained_glass_pane" => block(stained_glass_pane(Colour::Lime, &properties)),
-            "minecraft:pink_stained_glass_pane" => block(stained_glass_pane(Colour::Pink, &properties)),
-            "minecraft:gray_stained_glass_pane" => block(stained_glass_pane(Colour::Gray, &properties)),
-            "minecraft:light_gray_stained_glass_pane" => block(stained_glass_pane(Colour::LightGray, &properties)),
-            "minecraft:cyan_stained_glass_pane" => block(stained_glass_pane(Colour::Cyan, &properties)),
-            "minecraft:purple_stained_glass_pane" => block(stained_glass_pane(Colour::Purple, &properties)),
-            "minecraft:blue_stained_glass_pane" => block(stained_glass_pane(Colour::Blue, &properties)),
-            "minecraft:brown_stained_glass_pane" => block(stained_glass_pane(Colour::Brown, &properties)),
-            "minecraft:green_stained_glass_pane" => block(stained_glass_pane(Colour::Green, &properties)),
-            "minecraft:red_stained_glass_pane" => block(stained_glass_pane(Colour::Red, &properties)),
-            "minecraft:black_stained_glass_pane" => block(stained_glass_pane(Colour::Black, &properties)),
+            "minecraft:white_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::White),
+            }),
+            "minecraft:orange_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Orange),
+            }),
+            "minecraft:magenta_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Magenta),
+            }),
+            "minecraft:light_blue_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::LightBlue),
+            }),
+            "minecraft:yellow_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Yellow),
+            }),
+            "minecraft:lime_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Lime),
+            }),
+            "minecraft:pink_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Pink),
+            }),
+            "minecraft:gray_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Gray),
+            }),
+            "minecraft:light_gray_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::LightGray),
+            }),
+            "minecraft:cyan_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Cyan),
+            }),
+            "minecraft:purple_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Purple),
+            }),
+            "minecraft:blue_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Blue),
+            }),
+            "minecraft:brown_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Brown),
+            }),
+            "minecraft:green_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Green),
+            }),
+            "minecraft:red_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Red),
+            }),
+            "minecraft:black_terracotta" => block(Block::Terracotta {
+                colour: Some(Colour::Black),
+            }),
+            "minecraft:white_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::White, &properties))
+            }
+            "minecraft:orange_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Orange, &properties))
+            }
+            "minecraft:magenta_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Magenta, &properties))
+            }
+            "minecraft:light_blue_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::LightBlue, &properties))
+            }
+            "minecraft:yellow_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Yellow, &properties))
+            }
+            "minecraft:lime_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Lime, &properties))
+            }
+            "minecraft:pink_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Pink, &properties))
+            }
+            "minecraft:gray_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Gray, &properties))
+            }
+            "minecraft:light_gray_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::LightGray, &properties))
+            }
+            "minecraft:cyan_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Cyan, &properties))
+            }
+            "minecraft:purple_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Purple, &properties))
+            }
+            "minecraft:blue_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Blue, &properties))
+            }
+            "minecraft:brown_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Brown, &properties))
+            }
+            "minecraft:green_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Green, &properties))
+            }
+            "minecraft:red_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Red, &properties))
+            }
+            "minecraft:black_stained_glass_pane" => {
+                block(stained_glass_pane(Colour::Black, &properties))
+            }
             "minecraft:slime_block" => block(Block::BlockOfSlime),
             "minecraft:barrier" => block(Block::Barrier),
             "minecraft:prismarine" => block(Block::Prismarine),
@@ -2423,22 +3059,54 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:dark_prismarine" => block(Block::DarkPrismarine),
             "minecraft:sea_lantern" => block(Block::SeaLantern),
             "minecraft:hay_block" => block(hay_bale(&properties)),
-            "minecraft:white_carpet" => block(Block::Carpet { colour: Colour::White }),
-            "minecraft:orange_carpet" => block(Block::Carpet { colour: Colour::Orange }),
-            "minecraft:magenta_carpet" => block(Block::Carpet { colour: Colour::Magenta }),
-            "minecraft:light_blue_carpet" => block(Block::Carpet { colour: Colour::LightBlue }),
-            "minecraft:yellow_carpet" => block(Block::Carpet { colour: Colour::Yellow }),
-            "minecraft:lime_carpet" => block(Block::Carpet { colour: Colour::Lime }),
-            "minecraft:pink_carpet" => block(Block::Carpet { colour: Colour::Pink }),
-            "minecraft:gray_carpet" => block(Block::Carpet { colour: Colour::Gray }),
-            "minecraft:light_gray_carpet" => block(Block::Carpet { colour: Colour::LightGray }),
-            "minecraft:cyan_carpet" => block(Block::Carpet { colour: Colour::Cyan }),
-            "minecraft:purple_carpet" => block(Block::Carpet { colour: Colour::Purple }),
-            "minecraft:blue_carpet" => block(Block::Carpet { colour: Colour::Blue }),
-            "minecraft:brown_carpet" => block(Block::Carpet { colour: Colour::Brown }),
-            "minecraft:green_carpet" => block(Block::Carpet { colour: Colour::Green }),
-            "minecraft:red_carpet" => block(Block::Carpet { colour: Colour::Red }),
-            "minecraft:black_carpet" => block(Block::Carpet { colour: Colour::Black }),
+            "minecraft:white_carpet" => block(Block::Carpet {
+                colour: Colour::White,
+            }),
+            "minecraft:orange_carpet" => block(Block::Carpet {
+                colour: Colour::Orange,
+            }),
+            "minecraft:magenta_carpet" => block(Block::Carpet {
+                colour: Colour::Magenta,
+            }),
+            "minecraft:light_blue_carpet" => block(Block::Carpet {
+                colour: Colour::LightBlue,
+            }),
+            "minecraft:yellow_carpet" => block(Block::Carpet {
+                colour: Colour::Yellow,
+            }),
+            "minecraft:lime_carpet" => block(Block::Carpet {
+                colour: Colour::Lime,
+            }),
+            "minecraft:pink_carpet" => block(Block::Carpet {
+                colour: Colour::Pink,
+            }),
+            "minecraft:gray_carpet" => block(Block::Carpet {
+                colour: Colour::Gray,
+            }),
+            "minecraft:light_gray_carpet" => block(Block::Carpet {
+                colour: Colour::LightGray,
+            }),
+            "minecraft:cyan_carpet" => block(Block::Carpet {
+                colour: Colour::Cyan,
+            }),
+            "minecraft:purple_carpet" => block(Block::Carpet {
+                colour: Colour::Purple,
+            }),
+            "minecraft:blue_carpet" => block(Block::Carpet {
+                colour: Colour::Blue,
+            }),
+            "minecraft:brown_carpet" => block(Block::Carpet {
+                colour: Colour::Brown,
+            }),
+            "minecraft:green_carpet" => block(Block::Carpet {
+                colour: Colour::Green,
+            }),
+            "minecraft:red_carpet" => block(Block::Carpet {
+                colour: Colour::Red,
+            }),
+            "minecraft:black_carpet" => block(Block::Carpet {
+                colour: Colour::Black,
+            }),
             "minecraft:coal_block" => block(Block::BlockOfCoal),
             "minecraft:sunflower" => block(tall("sunflower", &properties)),
             "minecraft:lilac" => block(tall("lilac", &properties)),
@@ -2480,13 +3148,19 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:black_banner" => proto(proto_banner(Colour::Black, &properties)),
             "minecraft:white_wall_banner" => proto(proto_wall_banner(Colour::White, &properties)),
             "minecraft:orange_wall_banner" => proto(proto_wall_banner(Colour::Orange, &properties)),
-            "minecraft:magenta_wall_banner" => proto(proto_wall_banner(Colour::Magenta, &properties)),
-            "minecraft:light_blue_wall_banner" => proto(proto_wall_banner(Colour::LightBlue, &properties)),
+            "minecraft:magenta_wall_banner" => {
+                proto(proto_wall_banner(Colour::Magenta, &properties))
+            }
+            "minecraft:light_blue_wall_banner" => {
+                proto(proto_wall_banner(Colour::LightBlue, &properties))
+            }
             "minecraft:yellow_wall_banner" => proto(proto_wall_banner(Colour::Yellow, &properties)),
             "minecraft:lime_wall_banner" => proto(proto_wall_banner(Colour::Lime, &properties)),
             "minecraft:pink_wall_banner" => proto(proto_wall_banner(Colour::Pink, &properties)),
             "minecraft:gray_wall_banner" => proto(proto_wall_banner(Colour::Gray, &properties)),
-            "minecraft:light_gray_wall_banner" => proto(proto_wall_banner(Colour::LightGray, &properties)),
+            "minecraft:light_gray_wall_banner" => {
+                proto(proto_wall_banner(Colour::LightGray, &properties))
+            }
             "minecraft:cyan_wall_banner" => proto(proto_wall_banner(Colour::Cyan, &properties)),
             "minecraft:purple_wall_banner" => proto(proto_wall_banner(Colour::Purple, &properties)),
             "minecraft:blue_wall_banner" => proto(proto_wall_banner(Colour::Blue, &properties)),
@@ -2498,13 +3172,17 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:chiseled_red_sandstone" => block(Block::ChiseledRedSandstone),
             "minecraft:smooth_red_sandstone" => block(Block::SmoothRedSandstone),
             "minecraft:cut_red_sandstone" => block(Block::CutRedSandstone),
-            "minecraft:end_rod" => block(Block::EndRod { facing: facing_surface6(&properties)}),
+            "minecraft:end_rod" => block(Block::EndRod {
+                facing: facing_surface6(&properties),
+            }),
             "minecraft:chorus_plant" => block(Block::ChorusPlant),
             "minecraft:chorus_flower" => block(chorus_flower(&properties)),
             "minecraft:purpur_block" => block(Block::PurpurBlock),
             "minecraft:purpur_pillar" => block(purpur_pillar(&properties)),
             "minecraft:end_stone_bricks" => block(Block::EndStoneBricks),
-            "minecraft:beetroots" => block(Block::Beetroots { growth_stage: age0_3(&properties) }),
+            "minecraft:beetroots" => block(Block::Beetroots {
+                growth_stage: age0_3(&properties),
+            }),
             "minecraft:grass_path" => block(Block::GrassPath),
             // TODO 209 EndGateway
             // TODO 210 repeating command block
@@ -2518,38 +3196,98 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             // TODO 217 StructureVoid
             "minecraft:observer" => block(observer(&properties)),
             "minecraft:shulker_box" => proto(proto_shulker_box(None, &properties)),
-            "minecraft:white_shulker_box" => proto(proto_shulker_box(Some(Colour::White), &properties)),
-            "minecraft:orange_shulker_box" => proto(proto_shulker_box(Some(Colour::Orange), &properties)),
-            "minecraft:magenta_shulker_box" => proto(proto_shulker_box(Some(Colour::Magenta), &properties)),
-            "minecraft:light_blue_shulker_box" => proto(proto_shulker_box(Some(Colour::LightBlue), &properties)),
-            "minecraft:yellow_shulker_box" => proto(proto_shulker_box(Some(Colour::Yellow), &properties)),
-            "minecraft:lime_shulker_box" => proto(proto_shulker_box(Some(Colour::Lime), &properties)),
-            "minecraft:pink_shulker_box" => proto(proto_shulker_box(Some(Colour::Pink), &properties)),
-            "minecraft:gray_shulker_box" => proto(proto_shulker_box(Some(Colour::Gray), &properties)),
-            "minecraft:light_gray_shulker_box" => proto(proto_shulker_box(Some(Colour::LightGray), &properties)),
-            "minecraft:cyan_shulker_box" => proto(proto_shulker_box(Some(Colour::Cyan), &properties)),
-            "minecraft:purple_shulker_box" => proto(proto_shulker_box(Some(Colour::Purple), &properties)),
-            "minecraft:blue_shulker_box" => proto(proto_shulker_box(Some(Colour::Blue), &properties)),
-            "minecraft:brown_shulker_box" => proto(proto_shulker_box(Some(Colour::Brown), &properties)),
-            "minecraft:green_shulker_box" => proto(proto_shulker_box(Some(Colour::Green), &properties)),
+            "minecraft:white_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::White), &properties))
+            }
+            "minecraft:orange_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Orange), &properties))
+            }
+            "minecraft:magenta_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Magenta), &properties))
+            }
+            "minecraft:light_blue_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::LightBlue), &properties))
+            }
+            "minecraft:yellow_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Yellow), &properties))
+            }
+            "minecraft:lime_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Lime), &properties))
+            }
+            "minecraft:pink_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Pink), &properties))
+            }
+            "minecraft:gray_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Gray), &properties))
+            }
+            "minecraft:light_gray_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::LightGray), &properties))
+            }
+            "minecraft:cyan_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Cyan), &properties))
+            }
+            "minecraft:purple_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Purple), &properties))
+            }
+            "minecraft:blue_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Blue), &properties))
+            }
+            "minecraft:brown_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Brown), &properties))
+            }
+            "minecraft:green_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Green), &properties))
+            }
             "minecraft:red_shulker_box" => proto(proto_shulker_box(Some(Colour::Red), &properties)),
-            "minecraft:black_shulker_box" => proto(proto_shulker_box(Some(Colour::Black), &properties)),
-            "minecraft:white_glazed_terracotta" => block(glazed_terracotta(Colour::White, &properties)),
-            "minecraft:orange_glazed_terracotta" => block(glazed_terracotta(Colour::Orange, &properties)),
-            "minecraft:magenta_glazed_terracotta" => block(glazed_terracotta(Colour::Magenta, &properties)),
-            "minecraft:light_blue_glazed_terracotta" => block(glazed_terracotta(Colour::LightBlue, &properties)),
-            "minecraft:yellow_glazed_terracotta" => block(glazed_terracotta(Colour::Yellow, &properties)),
-            "minecraft:lime_glazed_terracotta" => block(glazed_terracotta(Colour::Lime, &properties)),
-            "minecraft:pink_glazed_terracotta" => block(glazed_terracotta(Colour::Pink, &properties)),
-            "minecraft:gray_glazed_terracotta" => block(glazed_terracotta(Colour::Gray, &properties)),
-            "minecraft:light_gray_glazed_terracotta" => block(glazed_terracotta(Colour::LightGray, &properties)),
-            "minecraft:cyan_glazed_terracotta" => block(glazed_terracotta(Colour::Cyan, &properties)),
-            "minecraft:purple_glazed_terracotta" => block(glazed_terracotta(Colour::Purple, &properties)),
-            "minecraft:blue_glazed_terracotta" => block(glazed_terracotta(Colour::Blue, &properties)),
-            "minecraft:brown_glazed_terracotta" => block(glazed_terracotta(Colour::Brown, &properties)),
-            "minecraft:green_glazed_terracotta" => block(glazed_terracotta(Colour::Green, &properties)),
+            "minecraft:black_shulker_box" => {
+                proto(proto_shulker_box(Some(Colour::Black), &properties))
+            }
+            "minecraft:white_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::White, &properties))
+            }
+            "minecraft:orange_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Orange, &properties))
+            }
+            "minecraft:magenta_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Magenta, &properties))
+            }
+            "minecraft:light_blue_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::LightBlue, &properties))
+            }
+            "minecraft:yellow_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Yellow, &properties))
+            }
+            "minecraft:lime_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Lime, &properties))
+            }
+            "minecraft:pink_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Pink, &properties))
+            }
+            "minecraft:gray_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Gray, &properties))
+            }
+            "minecraft:light_gray_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::LightGray, &properties))
+            }
+            "minecraft:cyan_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Cyan, &properties))
+            }
+            "minecraft:purple_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Purple, &properties))
+            }
+            "minecraft:blue_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Blue, &properties))
+            }
+            "minecraft:brown_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Brown, &properties))
+            }
+            "minecraft:green_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Green, &properties))
+            }
             "minecraft:red_glazed_terracotta" => block(glazed_terracotta(Colour::Red, &properties)),
-            "minecraft:black_glazed_terracotta" => block(glazed_terracotta(Colour::Black, &properties)),
+            "minecraft:black_glazed_terracotta" => {
+                block(glazed_terracotta(Colour::Black, &properties))
+            }
             "minecraft:white_concrete" => block(concrete(Colour::White)),
             "minecraft:orange_concrete" => block(concrete(Colour::Orange)),
             "minecraft:magenta_concrete" => block(concrete(Colour::Magenta)),
@@ -2603,16 +3341,16 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:dried_kelp_block" => block(Block::DriedKelpBlock),
             "minecraft:scaffolding" => block(scaffolding(&properties)),
 
-            "minecraft:tube_coral" => block(coral(CoralMaterial::Tube , &properties)),
-            "minecraft:brain_coral" => block(coral(CoralMaterial::Brain , &properties)),
-            "minecraft:bubble_coral" => block(coral(CoralMaterial::Bubble , &properties)),
-            "minecraft:fire_coral" => block(coral(CoralMaterial::Fire , &properties)),
-            "minecraft:horn_coral" => block(coral(CoralMaterial::Horn , &properties)),
-            "minecraft:dead_tube_coral" => block(dead_coral(CoralMaterial::Tube , &properties)),
-            "minecraft:dead_brain_coral" => block(dead_coral(CoralMaterial::Brain , &properties)),
-            "minecraft:dead_bubble_coral" => block(dead_coral(CoralMaterial::Bubble , &properties)),
-            "minecraft:dead_fire_coral" => block(dead_coral(CoralMaterial::Fire , &properties)),
-            "minecraft:dead_horn_coral" => block(dead_coral(CoralMaterial::Horn , &properties)),
+            "minecraft:tube_coral" => block(coral(CoralMaterial::Tube, &properties)),
+            "minecraft:brain_coral" => block(coral(CoralMaterial::Brain, &properties)),
+            "minecraft:bubble_coral" => block(coral(CoralMaterial::Bubble, &properties)),
+            "minecraft:fire_coral" => block(coral(CoralMaterial::Fire, &properties)),
+            "minecraft:horn_coral" => block(coral(CoralMaterial::Horn, &properties)),
+            "minecraft:dead_tube_coral" => block(dead_coral(CoralMaterial::Tube, &properties)),
+            "minecraft:dead_brain_coral" => block(dead_coral(CoralMaterial::Brain, &properties)),
+            "minecraft:dead_bubble_coral" => block(dead_coral(CoralMaterial::Bubble, &properties)),
+            "minecraft:dead_fire_coral" => block(dead_coral(CoralMaterial::Fire, &properties)),
+            "minecraft:dead_horn_coral" => block(dead_coral(CoralMaterial::Horn, &properties)),
             "minecraft:tube_coral_block" => block(coral_block(CoralMaterial::Tube)),
             "minecraft:brain_coral_block" => block(coral_block(CoralMaterial::Brain)),
             "minecraft:bubble_coral_block" => block(coral_block(CoralMaterial::Bubble)),
@@ -2623,26 +3361,56 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:dead_bubble_coral_block" => block(dead_coral_block(CoralMaterial::Bubble)),
             "minecraft:dead_fire_coral_block" => block(dead_coral_block(CoralMaterial::Fire)),
             "minecraft:dead_horn_coral_block" => block(dead_coral_block(CoralMaterial::Horn)),
-            "minecraft:tube_coral_fan" => block(coral_fan(CoralMaterial::Tube , &properties)),
-            "minecraft:brain_coral_fan" => block(coral_fan(CoralMaterial::Brain , &properties)),
-            "minecraft:bubble_coral_fan" => block(coral_fan(CoralMaterial::Bubble , &properties)),
-            "minecraft:fire_coral_fan" => block(coral_fan(CoralMaterial::Fire , &properties)),
-            "minecraft:horn_coral_fan" => block(coral_fan(CoralMaterial::Horn , &properties)),
-            "minecraft:dead_tube_coral_fan" => block(dead_coral_fan(CoralMaterial::Tube , &properties)),
-            "minecraft:dead_brain_coral_fan" => block(dead_coral_fan(CoralMaterial::Brain , &properties)),
-            "minecraft:dead_bubble_coral_fan" => block(dead_coral_fan(CoralMaterial::Bubble , &properties)),
-            "minecraft:dead_fire_coral_fan" => block(dead_coral_fan(CoralMaterial::Fire , &properties)),
-            "minecraft:dead_horn_coral_fan" => block(dead_coral_fan(CoralMaterial::Horn , &properties)),
-            "minecraft:tube_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Tube , &properties)),
-            "minecraft:brain_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Brain , &properties)),
-            "minecraft:bubble_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Bubble , &properties)),
-            "minecraft:fire_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Fire , &properties)),
-            "minecraft:horn_coral_wall_fan" => block(coral_wall_fan(CoralMaterial::Horn , &properties)),
-            "minecraft:dead_tube_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Tube , &properties)),
-            "minecraft:dead_brain_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Brain , &properties)),
-            "minecraft:dead_bubble_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Bubble , &properties)),
-            "minecraft:dead_fire_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Fire , &properties)),
-            "minecraft:dead_horn_coral_wall_fan" => block(dead_coral_wall_fan(CoralMaterial::Horn , &properties)),
+            "minecraft:tube_coral_fan" => block(coral_fan(CoralMaterial::Tube, &properties)),
+            "minecraft:brain_coral_fan" => block(coral_fan(CoralMaterial::Brain, &properties)),
+            "minecraft:bubble_coral_fan" => block(coral_fan(CoralMaterial::Bubble, &properties)),
+            "minecraft:fire_coral_fan" => block(coral_fan(CoralMaterial::Fire, &properties)),
+            "minecraft:horn_coral_fan" => block(coral_fan(CoralMaterial::Horn, &properties)),
+            "minecraft:dead_tube_coral_fan" => {
+                block(dead_coral_fan(CoralMaterial::Tube, &properties))
+            }
+            "minecraft:dead_brain_coral_fan" => {
+                block(dead_coral_fan(CoralMaterial::Brain, &properties))
+            }
+            "minecraft:dead_bubble_coral_fan" => {
+                block(dead_coral_fan(CoralMaterial::Bubble, &properties))
+            }
+            "minecraft:dead_fire_coral_fan" => {
+                block(dead_coral_fan(CoralMaterial::Fire, &properties))
+            }
+            "minecraft:dead_horn_coral_fan" => {
+                block(dead_coral_fan(CoralMaterial::Horn, &properties))
+            }
+            "minecraft:tube_coral_wall_fan" => {
+                block(coral_wall_fan(CoralMaterial::Tube, &properties))
+            }
+            "minecraft:brain_coral_wall_fan" => {
+                block(coral_wall_fan(CoralMaterial::Brain, &properties))
+            }
+            "minecraft:bubble_coral_wall_fan" => {
+                block(coral_wall_fan(CoralMaterial::Bubble, &properties))
+            }
+            "minecraft:fire_coral_wall_fan" => {
+                block(coral_wall_fan(CoralMaterial::Fire, &properties))
+            }
+            "minecraft:horn_coral_wall_fan" => {
+                block(coral_wall_fan(CoralMaterial::Horn, &properties))
+            }
+            "minecraft:dead_tube_coral_wall_fan" => {
+                block(dead_coral_wall_fan(CoralMaterial::Tube, &properties))
+            }
+            "minecraft:dead_brain_coral_wall_fan" => {
+                block(dead_coral_wall_fan(CoralMaterial::Brain, &properties))
+            }
+            "minecraft:dead_bubble_coral_wall_fan" => {
+                block(dead_coral_wall_fan(CoralMaterial::Bubble, &properties))
+            }
+            "minecraft:dead_fire_coral_wall_fan" => {
+                block(dead_coral_wall_fan(CoralMaterial::Fire, &properties))
+            }
+            "minecraft:dead_horn_coral_wall_fan" => {
+                block(dead_coral_wall_fan(CoralMaterial::Horn, &properties))
+            }
             "minecraft:cartography_table" => block(Block::CartographyTable),
             "minecraft:smithing_table" => block(Block::SmithingTable),
             "minecraft:fletching_table" => block(Block::FletchingTable),
@@ -2657,15 +3425,27 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:polished_blackstone" => block(Block::PolishedBlackstone),
             "minecraft:chiseled_polished_blackstone" => block(Block::ChiseledPolishedBlackstone),
             "minecraft:polished_blackstone_bricks" => block(Block::PolishedBlackstoneBricks),
-            "minecraft:cracked_polished_blackstone_bricks" => block(Block::CrackedPolishedBlackstoneBricks),
-            "minecraft:loom" => block(Block::Loom { facing: facing_surface4(&properties) }),
-            "minecraft:stonecutter" => block(Block::Stonecutter { facing: facing_surface4(&properties) }),
+            "minecraft:cracked_polished_blackstone_bricks" => {
+                block(Block::CrackedPolishedBlackstoneBricks)
+            }
+            "minecraft:loom" => block(Block::Loom {
+                facing: facing_surface4(&properties),
+            }),
+            "minecraft:stonecutter" => block(Block::Stonecutter {
+                facing: facing_surface4(&properties),
+            }),
             "minecraft:lantern" => block(lantern(&properties)),
             "minecraft:soul_lantern" => block(soul_lantern(&properties)),
-            "minecraft:composter" => block(Block::Composter { fullness: level0_8(&properties)}),
+            "minecraft:composter" => block(Block::Composter {
+                fullness: level0_8(&properties),
+            }),
             "minecraft:grindstone" => block(Block::Grindstone(surface_rotation12(&properties))),
-            "minecraft:sweet_berry_bush" => block(Block::SweetBerryBush { growth_stage: age0_3(&properties) }),
-            "minecraft:respawn_anchor" => block(Block::RespawnAnchor { charges: charges0_15(&properties) }),
+            "minecraft:sweet_berry_bush" => block(Block::SweetBerryBush {
+                growth_stage: age0_3(&properties),
+            }),
+            "minecraft:respawn_anchor" => block(Block::RespawnAnchor {
+                charges: charges0_15(&properties),
+            }),
             "minecraft:target" => block(Block::Target),
             "minecraft:warped_fungus" => block(Block::WarpedFungus),
             "minecraft:crimson_fungus" => block(Block::CrimsonFungus),
@@ -2686,7 +3466,9 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:azalea" => block(Block::Azalea { flowering: false }),
             "minecraft:flowering_azalea" => block(Block::Azalea { flowering: true }),
             "minecraft:azalea_leaves" => block(leaves(LeavesMaterial::Azalea, &properties)),
-            "minecraft:flowering_azalea_leaves" => block(leaves(LeavesMaterial::FloweringAzalea, &properties)),
+            "minecraft:flowering_azalea_leaves" => {
+                block(leaves(LeavesMaterial::FloweringAzalea, &properties))
+            }
             "minecraft:amethyst_block" => block(Block::BlockOfAmethyst),
             "minecraft:copper_block" => block(copper_block(Oxidation::None, false)),
             "minecraft:exposed_copper" => block(copper_block(Oxidation::Exposed, false)),
@@ -2731,33 +3513,51 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
             "minecraft:waxed_weathered_cut_copper" => block(cut_copper(Oxidation::Weathered, true)),
             "minecraft:waxed_oxidized_cut_copper" => block(cut_copper(Oxidation::Oxidized, true)),
             "minecraft:cut_copper_slab" => block(copper_slab(&properties, Oxidation::None, false)),
-            "minecraft:exposed_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Exposed, false)),
-            "minecraft:weathered_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Weathered, false)),
-            "minecraft:oxidized_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Oxidized, false)),
-            "minecraft:waxed_cut_copper_slab" => block(copper_slab(&properties, Oxidation::None, true)),
-            "minecraft:waxed_exposed_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Exposed, true)),
-            "minecraft:waxed_weathered_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Weathered, true)),
-            "minecraft:waxed_oxidized_cut_copper_slab"
-                => block(copper_slab(&properties, Oxidation::Oxidized, true)),
-            "minecraft:cut_copper_stairs" => block(copper_stairs(&properties, Oxidation::None, false)),
-            "minecraft:exposed_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Exposed, false)),
-            "minecraft:weathered_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Weathered, false)),
-            "minecraft:oxidized_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Oxidized, false)),
-            "minecraft:waxed_cut_copper_stairs" => block(copper_stairs(&properties, Oxidation::None, true)),
-            "minecraft:waxed_exposed_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Exposed, true)),
-            "minecraft:waxed_weathered_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Weathered, true)),
-            "minecraft:waxed_oxidized_cut_copper_stairs"
-                => block(copper_stairs(&properties, Oxidation::Oxidized, true)),
+            "minecraft:exposed_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Exposed, false))
+            }
+            "minecraft:weathered_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Weathered, false))
+            }
+            "minecraft:oxidized_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Oxidized, false))
+            }
+            "minecraft:waxed_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::None, true))
+            }
+            "minecraft:waxed_exposed_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Exposed, true))
+            }
+            "minecraft:waxed_weathered_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Weathered, true))
+            }
+            "minecraft:waxed_oxidized_cut_copper_slab" => {
+                block(copper_slab(&properties, Oxidation::Oxidized, true))
+            }
+            "minecraft:cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::None, false))
+            }
+            "minecraft:exposed_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Exposed, false))
+            }
+            "minecraft:weathered_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Weathered, false))
+            }
+            "minecraft:oxidized_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Oxidized, false))
+            }
+            "minecraft:waxed_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::None, true))
+            }
+            "minecraft:waxed_exposed_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Exposed, true))
+            }
+            "minecraft:waxed_weathered_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Weathered, true))
+            }
+            "minecraft:waxed_oxidized_cut_copper_stairs" => {
+                block(copper_stairs(&properties, Oxidation::Oxidized, true))
+            }
             "minecraft:deepslate" => block(deepslate(&properties)),
 
             // TODO Next new block is "Cobbled deepslate slab", on https://minecraft.wiki/w/Java_Edition_1.17
@@ -2778,7 +3578,7 @@ pub(super) fn from_section(section: &nbt::Value, data_version: McVersion) -> Opt
         };
         palette.push(palette_item);
     }
-//    println!("Palette: {:#?}", palette);
+    //    println!("Palette: {:#?}", palette);
 
     Some(palette)
 }
@@ -2800,13 +3600,16 @@ fn proto(proto_block: ProtoBlock) -> PaletteItem {
 /// Get the property with name `name` from `properties`, and convert it into the target type.
 fn prop<T>(properties: &Option<Value>, name: &'static str) -> T
 where
-    T: FromStr + Default + Display
+    T: FromStr + Default + Display,
 {
     properties_lookup_string(properties, name)
         .and_then(|s| T::from_str(&s).ok())
         .unwrap_or_else(|| {
             let fallback = T::default();
-            warn!("Using \"{}\" as fallback value for a \"{}\" property.", fallback, name);
+            warn!(
+                "Using \"{}\" as fallback value for a \"{}\" property.",
+                fallback, name
+            );
             fallback
         })
 }
@@ -2822,7 +3625,10 @@ fn properties_lookup_bool(properties: &Option<Value>, name: &'static str, fallba
     properties_lookup_string(properties, name)
         .and_then(boolean)
         .unwrap_or_else(|| {
-            warn!("Using \"{}\" as fallback value for a boolean \"{}\" property.", fallback, name);
+            warn!(
+                "Using \"{}\" as fallback value for a boolean \"{}\" property.",
+                fallback, name
+            );
             fallback
         })
 }
@@ -2838,15 +3644,13 @@ fn fluid_raw_level(properties: &Option<Value>) -> i8 {
 
 fn wood_alignment(properties: &Option<Value>) -> Axis3 {
     properties_lookup_string(properties, "axis")
-        .and_then(|s| {
-            match s.as_str() {
-                "x" => Some(Axis3::X),
-                "y" => Some(Axis3::Y),
-                "z" => Some(Axis3::Z),
-                s => {
-                    warn!("Unknown \"axis\" value for axis aligned block: \"{}\".", s);
-                    None
-                }
+        .and_then(|s| match s.as_str() {
+            "x" => Some(Axis3::X),
+            "y" => Some(Axis3::Y),
+            "z" => Some(Axis3::Z),
+            s => {
+                warn!("Unknown \"axis\" value for axis aligned block: \"{}\".", s);
+                None
             }
         })
         .unwrap_or_else(|| {
@@ -2868,10 +3672,7 @@ fn amethyst(properties: &Option<Value>, size: AmethystSize) -> Block {
 }
 
 fn copper_block(oxidation: Oxidation, waxed: bool) -> Block {
-    Block::BlockOfCopper {
-        oxidation,
-        waxed,
-    }
+    Block::BlockOfCopper { oxidation, waxed }
 }
 
 fn copper_slab(properties: &Option<Value>, oxidation: Oxidation, waxed: bool) -> Block {
@@ -2897,14 +3698,13 @@ fn cave_vines_plant(properties: &Option<Value>) -> Block {
 }
 
 fn cut_copper(oxidation: Oxidation, waxed: bool) -> Block {
-    Block::CutCopper {
-        oxidation,
-        waxed,
-    }
+    Block::CutCopper { oxidation, waxed }
 }
 
 fn deepslate(properties: &Option<Value>) -> Block {
-    Block::Deepslate { alignment: wood_alignment(&properties) }
+    Block::Deepslate {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn sapling(material: SaplingMaterial, properties: &Option<Value>) -> Block {
@@ -2917,7 +3717,10 @@ fn sapling(material: SaplingMaterial, properties: &Option<Value>) -> Block {
             Int0Through1::new(0).unwrap()
         });
 
-    Block::Sapling { material, growth_stage }
+    Block::Sapling {
+        material,
+        growth_stage,
+    }
 }
 
 fn water(properties: &Option<Value>) -> Block {
@@ -2993,8 +3796,8 @@ fn stripped_wood(material: WoodMaterial, properties: &Option<Value>) -> Block {
 }
 
 fn leaves(material: LeavesMaterial, properties: &Option<Value>) -> Block {
-    let distance_to_trunk = properties_lookup_string(properties, "distance")
-        .and_then(i_0_through_7);
+    let distance_to_trunk =
+        properties_lookup_string(properties, "distance").and_then(i_0_through_7);
 
     let persistent = properties_lookup_string(properties, "persistent")
         .and_then(boolean)
@@ -3003,7 +3806,11 @@ fn leaves(material: LeavesMaterial, properties: &Option<Value>) -> Block {
             false
         });
 
-    Block::Leaves { material, distance_to_trunk, persistent }
+    Block::Leaves {
+        material,
+        distance_to_trunk,
+        persistent,
+    }
 }
 
 fn noteblock(properties: &Option<Value>) -> Block {
@@ -3012,7 +3819,10 @@ fn noteblock(properties: &Option<Value>) -> Block {
         .and_then(|note_integer| Some(Pitch::from_value(note_integer)))
         .unwrap_or_else(|| {
             let pitch = Pitch::from_value(0);
-            warn!("Using fallback value \"{:?}\" for \"note\" property of note block.", pitch);
+            warn!(
+                "Using fallback value \"{:?}\" for \"note\" property of note block.",
+                pitch
+            );
             pitch
         });
 
@@ -3036,11 +3846,17 @@ fn rail(rail_type: RailType, properties: &Option<Value>) -> Block {
         })
         .unwrap_or_else(|| {
             let shape = RailShape::NorthSouth;
-            warn!("Using fallback value \"{:?}\" for \"shape\" property of rails.", shape);
+            warn!(
+                "Using fallback value \"{:?}\" for \"shape\" property of rails.",
+                shape
+            );
             shape
         });
 
-    Block::Rail { variant: rail_type, shape }
+    Block::Rail {
+        variant: rail_type,
+        shape,
+    }
 }
 
 fn piston(sticky: bool, properties: &Option<Value>) -> Block {
@@ -3088,19 +3904,29 @@ fn slab(material: SlabMaterial, properties: &Option<Value>) -> Block {
             SlabVariant::Bottom
         });
 
-    Block::Slab(Slab { material, position, waterlogged: waterlogged(properties) })
+    Block::Slab(Slab {
+        material,
+        position,
+        waterlogged: waterlogged(properties),
+    })
 }
 
 fn wall_torch(properties: &Option<Value>) -> Block {
-    Block::Torch { mounted_at: wall_torch_attached(properties) }
+    Block::Torch {
+        mounted_at: wall_torch_attached(properties),
+    }
 }
 
 fn redstone_wall_torch(properties: &Option<Value>) -> Block {
-    Block::RedstoneTorch { mounted_at: wall_torch_attached(properties) }
+    Block::RedstoneTorch {
+        mounted_at: wall_torch_attached(properties),
+    }
 }
 
 fn soul_wall_torch(properties: &Option<Value>) -> Block {
-    Block::SoulTorch { mounted_at: wall_torch_attached(properties) }
+    Block::SoulTorch {
+        mounted_at: wall_torch_attached(properties),
+    }
 }
 
 fn wall_torch_attached(properties: &Option<Value>) -> Surface5 {
@@ -3119,28 +3945,33 @@ fn wall_torch_attached(properties: &Option<Value>) -> Surface5 {
 }
 
 fn fire(properties: &Option<Value>) -> Block {
-    Block::Fire { age: age0_15(properties) }
+    Block::Fire {
+        age: age0_15(properties),
+    }
 }
 
 fn stairs(material: StairMaterial, properties: &Option<Value>) -> Block {
     let half = half_surface2(properties);
     let facing = facing_surface4(properties);
     let position = match (half, facing) {
-            (Surface2::Down, Surface4::North) => Edge8::DownNorth,
-            (Surface2::Down, Surface4::South) => Edge8::DownSouth,
-            (Surface2::Down, Surface4::East) => Edge8::DownEast,
-            (Surface2::Down, Surface4::West) => Edge8::DownWest,
-            (Surface2::Up, Surface4::North) => Edge8::UpNorth,
-            (Surface2::Up, Surface4::South) => Edge8::UpSouth,
-            (Surface2::Up, Surface4::East) => Edge8::UpEast,
-            (Surface2::Up, Surface4::West) => Edge8::UpWest,
+        (Surface2::Down, Surface4::North) => Edge8::DownNorth,
+        (Surface2::Down, Surface4::South) => Edge8::DownSouth,
+        (Surface2::Down, Surface4::East) => Edge8::DownEast,
+        (Surface2::Down, Surface4::West) => Edge8::DownWest,
+        (Surface2::Up, Surface4::North) => Edge8::UpNorth,
+        (Surface2::Up, Surface4::South) => Edge8::UpSouth,
+        (Surface2::Up, Surface4::East) => Edge8::UpEast,
+        (Surface2::Up, Surface4::West) => Edge8::UpWest,
     };
 
-    Block::Stairs(Stair { material, position, waterlogged: waterlogged(properties) })
+    Block::Stairs(Stair {
+        material,
+        position,
+        waterlogged: waterlogged(properties),
+    })
 }
 
 fn door(material: DoorMaterial, properties: &Option<Value>) -> Block {
-
     Block::Door(Door {
         material,
         facing: facing_surface4(properties),
@@ -3159,7 +3990,11 @@ fn ladder(properties: &Option<Value>) -> Block {
 
 fn lever(properties: &Option<Value>) -> Block {
     let surface_rotation = surface_rotation12(properties);
-    let on_off_state = if powered(properties) { OnOffState::On } else { OnOffState::Off };
+    let on_off_state = if powered(properties) {
+        OnOffState::On
+    } else {
+        OnOffState::Off
+    };
 
     Block::Lever(surface_rotation, on_off_state)
 }
@@ -3173,41 +4008,58 @@ fn pressure_plate(material: PressurePlateMaterial) -> Block {
 }
 
 fn snow(properties: &Option<Value>) -> Block {
-    Block::Snow { thickness: layers1_8(properties) }
+    Block::Snow {
+        thickness: layers1_8(properties),
+    }
 }
 
 fn cactus(properties: &Option<Value>) -> Block {
-    Block::Cactus { growth_stage: age0_15(properties) }
+    Block::Cactus {
+        growth_stage: age0_15(properties),
+    }
 }
 
 fn sugar_cane(properties: &Option<Value>) -> Block {
-    Block::SugarCane { growth_stage: age0_15(properties) }
+    Block::SugarCane {
+        growth_stage: age0_15(properties),
+    }
 }
 
 fn fence(material: FenceMaterial, properties: &Option<Value>) -> Block {
-    Block::Fence { material, waterlogged: waterlogged(properties) }
+    Block::Fence {
+        material,
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn carved_pumpkin(properties: &Option<Value>) -> Block {
-    Block::CarvedPumpkin { facing: facing_surface4(properties) }
+    Block::CarvedPumpkin {
+        facing: facing_surface4(properties),
+    }
 }
 
 fn jack_o_lantern(properties: &Option<Value>) -> Block {
-    Block::JackOLantern { facing: facing_surface4(properties) }
+    Block::JackOLantern {
+        facing: facing_surface4(properties),
+    }
 }
 
 fn cake(properties: &Option<Value>) -> Block {
-    Block::Cake { pieces: pieces1_7(properties) }
+    Block::Cake {
+        pieces: pieces1_7(properties),
+    }
 }
 
 fn nether_portal(properties: &Option<Value>) -> Block {
-    Block::NetherPortal { alignment: Some(portal_alignment(properties)) }
+    Block::NetherPortal {
+        alignment: Some(portal_alignment(properties)),
+    }
 }
 
 fn repeater(properties: &Option<Value>) -> Block {
     Block::RedstoneRepeater(RedstoneRepeater {
-            facing: facing_surface4(properties),
-            delay: delay1_4(properties),
+        facing: facing_surface4(properties),
+        delay: delay1_4(properties),
     })
 }
 
@@ -3221,51 +4073,78 @@ fn trapdoor(material: DoorMaterial, properties: &Option<Value>) -> Block {
 }
 
 fn brown_mushroom_block(properties: &Option<Value>) -> Block {
-    Block::BrownMushroomBlock { cap_directions: direction_flags6(properties) }
+    Block::BrownMushroomBlock {
+        cap_directions: direction_flags6(properties),
+    }
 }
 
 fn red_mushroom_block(properties: &Option<Value>) -> Block {
-    Block::RedMushroomBlock { cap_directions: direction_flags6(properties) }
+    Block::RedMushroomBlock {
+        cap_directions: direction_flags6(properties),
+    }
 }
 
 fn mushroom_stem(properties: &Option<Value>) -> Block {
-    Block::MushroomStem { stem_directions: direction_flags6(properties) }
+    Block::MushroomStem {
+        stem_directions: direction_flags6(properties),
+    }
 }
 
 fn glass_pane(properties: &Option<Value>) -> Block {
-    Block::GlassPane { colour: None, waterlogged: waterlogged(properties) }
+    Block::GlassPane {
+        colour: None,
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn pumpkin_stem(properties: &Option<Value>) -> Block {
-    Block::PumpkinStem { state: StemState::Growing(age0_7(properties)) }
+    Block::PumpkinStem {
+        state: StemState::Growing(age0_7(properties)),
+    }
 }
 
 fn attached_pumpkin_stem(properties: &Option<Value>) -> Block {
-    Block::PumpkinStem { state: StemState::Attached(facing_surface4(properties)) }
+    Block::PumpkinStem {
+        state: StemState::Attached(facing_surface4(properties)),
+    }
 }
 
 fn melon_stem(properties: &Option<Value>) -> Block {
-    Block::MelonStem { state: StemState::Growing(age0_7(properties)) }
+    Block::MelonStem {
+        state: StemState::Growing(age0_7(properties)),
+    }
 }
 
 fn attached_melon_stem(properties: &Option<Value>) -> Block {
-    Block::MelonStem { state: StemState::Attached(facing_surface4(properties)) }
+    Block::MelonStem {
+        state: StemState::Attached(facing_surface4(properties)),
+    }
 }
 
 fn vine(properties: &Option<Value>) -> Block {
-    Block::Vines(Vines { anchored_at: direction_flags5(properties) })
+    Block::Vines(Vines {
+        anchored_at: direction_flags5(properties),
+    })
 }
 
 fn fence_gate(material: WoodMaterial, properties: &Option<Value>) -> Block {
-    Block::FenceGate { material, facing: facing_surface4(properties), open: open(properties) }
+    Block::FenceGate {
+        material,
+        facing: facing_surface4(properties),
+        open: open(properties),
+    }
 }
 
 fn nether_wart(properties: &Option<Value>) -> Block {
-    Block::NetherWart { growth_stage: age0_3(properties) }
+    Block::NetherWart {
+        growth_stage: age0_3(properties),
+    }
 }
 
 fn cauldron(properties: &Option<Value>) -> Block {
-    Block::Cauldron { water_level: level0_3(properties) }
+    Block::Cauldron {
+        water_level: level0_3(properties),
+    }
 }
 
 fn end_portal_frame(properties: &Option<Value>) -> Block {
@@ -3302,7 +4181,10 @@ fn tripwire_hook(properties: &Option<Value>) -> Block {
 }
 
 fn wall(material: WallMaterial, properties: &Option<Value>) -> Block {
-    Block::Wall { material, waterlogged: waterlogged(properties) }
+    Block::Wall {
+        material,
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn potted_plant(plant: PottedPlant) -> Block {
@@ -3346,11 +4228,11 @@ fn comparator(properties: &Option<Value>) -> Block {
             false
         });
 
-        if subtract {
-            Block::RedstoneSubtractor { facing }
-        } else {
-            Block::RedstoneComparator { facing }
-        }
+    if subtract {
+        Block::RedstoneSubtractor { facing }
+    } else {
+        Block::RedstoneComparator { facing }
+    }
 }
 
 fn daylight_detector(properties: &Option<Value>) -> Block {
@@ -3369,54 +4251,65 @@ fn daylight_detector(properties: &Option<Value>) -> Block {
 }
 
 fn quartz_pillar(properties: &Option<Value>) -> Block {
-    Block::QuartzPillar { alignment: wood_alignment(&properties) }
+    Block::QuartzPillar {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn stained_glass_pane(colour: Colour, properties: &Option<Value>) -> Block {
-    Block::GlassPane { colour: Some(colour), waterlogged: waterlogged(properties) }
+    Block::GlassPane {
+        colour: Some(colour),
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn hay_bale(properties: &Option<Value>) -> Block {
-    Block::HayBale { alignment: wood_alignment(&properties) }
+    Block::HayBale {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn tall(name: &'static str, properties: &Option<Value>) -> Block {
     match name {
         "sunflower" => tall_helper(
-                Block::Flower(Flower::SunflowerTop),
-                Block::Flower(Flower::SunflowerBottom),
-                properties,
-            ),
+            Block::Flower(Flower::SunflowerTop),
+            Block::Flower(Flower::SunflowerBottom),
+            properties,
+        ),
         "lilac" => tall_helper(
-                Block::Flower(Flower::LilacTop),
-                Block::Flower(Flower::LilacBottom),
-                properties,
-            ),
+            Block::Flower(Flower::LilacTop),
+            Block::Flower(Flower::LilacBottom),
+            properties,
+        ),
         "peony" => tall_helper(
-                Block::Flower(Flower::PeonyTop),
-                Block::Flower(Flower::PeonyBottom),
-                properties,
-            ),
+            Block::Flower(Flower::PeonyTop),
+            Block::Flower(Flower::PeonyBottom),
+            properties,
+        ),
         "rose_bush" => tall_helper(
-                Block::Flower(Flower::RoseBushTop),
-                Block::Flower(Flower::RoseBushBottom),
-                properties,
-            ),
+            Block::Flower(Flower::RoseBushTop),
+            Block::Flower(Flower::RoseBushBottom),
+            properties,
+        ),
         "tall_grass" => tall_helper(
-                Block::Grass(Grass::TallGrassTop),
-                Block::Grass(Grass::TallGrassBottom),
-                properties,
-            ),
+            Block::Grass(Grass::TallGrassTop),
+            Block::Grass(Grass::TallGrassBottom),
+            properties,
+        ),
         "large_fern" => tall_helper(
-                Block::Grass(Grass::LargeFernTop),
-                Block::Grass(Grass::LargeFernBottom),
-                properties,
-            ),
+            Block::Grass(Grass::LargeFernTop),
+            Block::Grass(Grass::LargeFernBottom),
+            properties,
+        ),
         "tall_seagrass" => tall_helper(
-                Block::Seagrass { variant: Seagrass::TallSeagrassTop },
-                Block::Seagrass { variant: Seagrass::TallSeagrassBottom },
-                properties,
-            ),
+            Block::Seagrass {
+                variant: Seagrass::TallSeagrassTop,
+            },
+            Block::Seagrass {
+                variant: Seagrass::TallSeagrassBottom,
+            },
+            properties,
+        ),
         _ => unreachable!(),
     }
 }
@@ -3437,19 +4330,27 @@ fn bed(colour: Colour, properties: &Option<Value>) -> Block {
 }
 
 fn chorus_flower(properties: &Option<Value>) -> Block {
-    Block::ChorusFlower { growth_stage: age0_5(properties) }
+    Block::ChorusFlower {
+        growth_stage: age0_5(properties),
+    }
 }
 
 fn purpur_pillar(properties: &Option<Value>) -> Block {
-    Block::PurpurPillar { alignment: wood_alignment(&properties) }
+    Block::PurpurPillar {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn bone_block(properties: &Option<Value>) -> Block {
-    Block::BoneBlock { alignment: wood_alignment(&properties) }
+    Block::BoneBlock {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn observer(properties: &Option<Value>) -> Block {
-    Block::Observer { facing: facing_surface6(properties) }
+    Block::Observer {
+        facing: facing_surface6(properties),
+    }
 }
 
 fn glazed_terracotta(colour: Colour, properties: &Option<Value>) -> Block {
@@ -3468,18 +4369,18 @@ fn concrete_powder(colour: Colour) -> Block {
 }
 
 fn seagrass(variant: Seagrass) -> Block {
-    Block::Seagrass{ variant }
+    Block::Seagrass { variant }
 }
 
 fn sea_pickle(properties: &Option<Value>) -> Block {
-    Block::SeaPickle{
+    Block::SeaPickle {
         count: pickles1_4(properties),
         waterlogged: waterlogged(properties),
     }
 }
 
 fn candles(properties: &Option<Value>, colour: Option<Colour>) -> Block {
-    Block::Candle{
+    Block::Candle {
         colour: colour,
         count: candles1_4(properties),
         lit: lit(properties),
@@ -3488,51 +4389,82 @@ fn candles(properties: &Option<Value>, colour: Option<Colour>) -> Block {
 }
 
 fn kelp(properties: &Option<Value>) -> Block {
-    Block::Kelp{ growth_stage: age0_25(properties) }
+    Block::Kelp {
+        growth_stage: age0_25(properties),
+    }
 }
 
 fn twisting_vines(properties: &Option<Value>) -> Block {
-    Block::TwistingVines { growth_stage: age0_25(properties) }
+    Block::TwistingVines {
+        growth_stage: age0_25(properties),
+    }
 }
 
 fn weeping_vines(properties: &Option<Value>) -> Block {
-    Block::WeepingVines { growth_stage: age0_25(properties) }
+    Block::WeepingVines {
+        growth_stage: age0_25(properties),
+    }
 }
 
 fn basalt(properties: &Option<Value>) -> Block {
-    Block::Basalt { alignment: wood_alignment(&properties) }
+    Block::Basalt {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn polished_basalt(properties: &Option<Value>) -> Block {
-    Block::PolishedBasalt { alignment: wood_alignment(&properties) }
+    Block::PolishedBasalt {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn chain(properties: &Option<Value>) -> Block {
-    Block::Chain { alignment: wood_alignment(&properties) }
+    Block::Chain {
+        alignment: wood_alignment(&properties),
+    }
 }
 
 fn turtle_egg(properties: &Option<Value>) -> Block {
-    Block::TurtleEgg { count: eggs1_4(properties), age: age0_2(properties) }
+    Block::TurtleEgg {
+        count: eggs1_4(properties),
+        age: age0_2(properties),
+    }
 }
 
 fn scaffolding(properties: &Option<Value>) -> Block {
-    Block::Scaffolding { waterlogged: waterlogged(properties) }
+    Block::Scaffolding {
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn coral(material: CoralMaterial, properties: &Option<Value>) -> Block {
-    Block::Coral { material, dead: false, waterlogged: waterlogged(properties) }
+    Block::Coral {
+        material,
+        dead: false,
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn dead_coral(material: CoralMaterial, properties: &Option<Value>) -> Block {
-    Block::Coral { material, dead: true, waterlogged: waterlogged(properties) }
+    Block::Coral {
+        material,
+        dead: true,
+        waterlogged: waterlogged(properties),
+    }
 }
 
 fn coral_block(material: CoralMaterial) -> Block {
-    Block::CoralBlock { material, dead: false }
+    Block::CoralBlock {
+        material,
+        dead: false,
+    }
 }
 
 fn dead_coral_block(material: CoralMaterial) -> Block {
-    Block::CoralBlock { material, dead: true }
+    Block::CoralBlock {
+        material,
+        dead: true,
+    }
 }
 
 fn coral_fan(material: CoralMaterial, properties: &Option<Value>) -> Block {
@@ -3601,7 +4533,6 @@ fn soul_campfire(properties: &Option<Value>) -> Block {
     }
 }
 
-
 /*
 */
 
@@ -3617,7 +4548,9 @@ fn proto_banner(colour: Colour, properties: &Option<Value>) -> ProtoBlock {
 }
 
 fn proto_barrel(properties: &Option<Value>) -> ProtoBlock {
-    ProtoBlock::Barrel { facing: facing_surface6(properties) }
+    ProtoBlock::Barrel {
+        facing: facing_surface6(properties),
+    }
 }
 
 fn proto_beehive(properties: &Option<Value>) -> ProtoBlock {
@@ -3642,11 +4575,15 @@ fn proto_wall_banner(colour: Colour, properties: &Option<Value>) -> ProtoBlock {
 }
 
 fn proto_dispenser(properties: &Option<Value>) -> ProtoBlock {
-    ProtoBlock::Dispenser { facing: facing_surface6(properties) }
+    ProtoBlock::Dispenser {
+        facing: facing_surface6(properties),
+    }
 }
 
 fn proto_dropper(properties: &Option<Value>) -> ProtoBlock {
-    ProtoBlock::Dropper { facing: facing_surface6(properties) }
+    ProtoBlock::Dropper {
+        facing: facing_surface6(properties),
+    }
 }
 
 fn proto_chest(properties: &Option<Value>) -> ProtoBlock {
@@ -3687,7 +4624,10 @@ fn proto_smoker(properties: &Option<Value>) -> ProtoBlock {
 }
 
 fn proto_shulker_box(colour: Option<Colour>, properties: &Option<Value>) -> ProtoBlock {
-    ProtoBlock::ShulkerBox { colour, facing: facing_surface6(properties) }
+    ProtoBlock::ShulkerBox {
+        colour,
+        facing: facing_surface6(properties),
+    }
 }
 
 fn proto_sign(material: WoodMaterial, properties: &Option<Value>) -> ProtoBlock {
@@ -3707,7 +4647,9 @@ fn proto_wall_sign(material: WoodMaterial, properties: &Option<Value>) -> ProtoB
 }
 
 fn proto_hopper(properties: &Option<Value>) -> ProtoBlock {
-    ProtoBlock::Hopper { facing: facing_surface5(properties) }
+    ProtoBlock::Hopper {
+        facing: facing_surface5(properties),
+    }
 }
 
 //
@@ -3783,76 +4725,69 @@ fn floor_sign_facing_direction16(properties: &Option<Value>) -> Direction16 {
 
 /// Convert a string to an Int0Through1 value
 fn i_0_through_1(string: String) -> Option<Int0Through1> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through1::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through1::new(i))
 }
 
 /// Convert a string to an Int0Through2 value
 fn i_0_through_2(string: String) -> Option<Int0Through2> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through2::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through2::new(i))
 }
 
 /// Convert a string to an Int0Through3 value
 fn i_0_through_3(string: String) -> Option<Int0Through3> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through3::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through3::new(i))
 }
 
 /// Convert a string to an Int0Through5 value
 fn i_0_through_5(string: String) -> Option<Int0Through5> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through5::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through5::new(i))
 }
 
 /// Convert a string to an Int0Through6 value
 fn i_0_through_6(string: String) -> Option<Int0Through6> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through6::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through6::new(i))
 }
 
 /// Convert a string to an Int0Through7 value
 fn i_0_through_7(string: String) -> Option<Int0Through7> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through7::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through7::new(i))
 }
 
 /// Convert a string to an Int0Through8 value
 fn i_0_through_8(string: String) -> Option<Int0Through8> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int0Through8::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int0Through8::new(i))
 }
 
 /// Convert a string to an Int0Through15 value
 fn i_0_through_15(string: String) -> Option<Int0Through15> {
-    string.parse::<i8>().ok()
+    string
+        .parse::<i8>()
+        .ok()
         .and_then(|i| Int0Through15::new(i))
 }
 
 /// Convert a string to an Int0Through25 value
 fn i_0_through_25(string: String) -> Option<Int0Through25> {
-    string.parse::<i8>().ok()
+    string
+        .parse::<i8>()
+        .ok()
         .and_then(|i| Int0Through25::new(i))
 }
 
 /// Convert a string to an Int1Through4 value
 fn i_1_through_4(string: String) -> Option<Int1Through4> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int1Through4::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int1Through4::new(i))
 }
 
 /// Convert a string to an Int1Through8 value
 fn i_1_through_8(string: String) -> Option<Int1Through8> {
-    string.parse::<i8>().ok()
-        .and_then(|i| Int1Through8::new(i))
+    string.parse::<i8>().ok().and_then(|i| Int1Through8::new(i))
 }
 
 fn age0_2(properties: &Option<Value>) -> Int0Through2 {
     properties_lookup_string(properties, "age")
         .and_then(i_0_through_2)
-        .unwrap_or_else(|| {
-            Int0Through2::new(0).unwrap()
-        })
+        .unwrap_or_else(|| Int0Through2::new(0).unwrap())
 }
 
 fn age0_3(properties: &Option<Value>) -> Int0Through3 {
@@ -3867,7 +4802,10 @@ fn i0_3(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
     properties_lookup_string(properties, name)
         .and_then(i_0_through_3)
         .unwrap_or_else(|| {
-            warn!("Using fallback value \"{}\" for \"{}\" property of a block.", fallback, name);
+            warn!(
+                "Using fallback value \"{}\" for \"{}\" property of a block.",
+                fallback, name
+            );
             Int0Through3::new(fallback).unwrap()
         })
 }
@@ -3885,7 +4823,10 @@ fn i0_6(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
     properties_lookup_string(properties, name)
         .and_then(i_0_through_6)
         .unwrap_or_else(|| {
-            warn!("Using fallback value \"{}\" for \"{}\" property of a block.", fallback, name);
+            warn!(
+                "Using fallback value \"{}\" for \"{}\" property of a block.",
+                fallback, name
+            );
             Int0Through6::new(fallback).unwrap()
         })
 }
@@ -3898,7 +4839,10 @@ fn i0_7(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
     properties_lookup_string(properties, name)
         .and_then(i_0_through_7)
         .unwrap_or_else(|| {
-            warn!("Using fallback value \"{}\" for \"{}\" property of a block.", fallback, name);
+            warn!(
+                "Using fallback value \"{}\" for \"{}\" property of a block.",
+                fallback, name
+            );
             Int0Through7::new(fallback).unwrap()
         })
 }
@@ -3906,9 +4850,7 @@ fn i0_7(properties: &Option<Value>, name: &'static str, fallback: i8) -> Int0Thr
 fn level0_8(properties: &Option<Value>) -> Int0Through8 {
     properties_lookup_string(properties, "level")
         .and_then(i_0_through_8)
-        .unwrap_or_else(|| {
-            Int0Through8::new(0).unwrap()
-        })
+        .unwrap_or_else(|| Int0Through8::new(0).unwrap())
 }
 
 fn age0_15(properties: &Option<Value>) -> Int0Through15 {
@@ -3995,13 +4937,12 @@ fn pieces1_7(properties: &Option<Value>) -> Int1Through7 {
 }
 
 fn chest_variant(properties: &Option<Value>) -> Option<ChestVariant> {
-    properties_lookup_string(properties, "type")
-        .and_then(|variant| match variant.as_str() {
-            "single" => Some(ChestVariant::Single),
-            "left" => Some(ChestVariant::Left),
-            "right" => Some(ChestVariant::Right),
-            _ => None,
-        })
+    properties_lookup_string(properties, "type").and_then(|variant| match variant.as_str() {
+        "single" => Some(ChestVariant::Single),
+        "left" => Some(ChestVariant::Left),
+        "right" => Some(ChestVariant::Right),
+        _ => None,
+    })
 }
 
 enum Face3 {

@@ -22,24 +22,28 @@ pub enum Colour {
 
 impl fmt::Display for Colour {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Colour::White => "white",
-            Colour::Orange => "orange",
-            Colour::Magenta => "magenta",
-            Colour::LightBlue => "light_blue",
-            Colour::Yellow => "yellow",
-            Colour::Lime => "lime",
-            Colour::Pink => "pink",
-            Colour::Gray => "gray",
-            Colour::LightGray => "light_gray",
-            Colour::Cyan => "cyan",
-            Colour::Purple => "purple",
-            Colour::Blue => "blue",
-            Colour::Brown => "brown",
-            Colour::Green => "green",
-            Colour::Red => "red",
-            Colour::Black => "black",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Colour::White => "white",
+                Colour::Orange => "orange",
+                Colour::Magenta => "magenta",
+                Colour::LightBlue => "light_blue",
+                Colour::Yellow => "yellow",
+                Colour::Lime => "lime",
+                Colour::Pink => "pink",
+                Colour::Gray => "gray",
+                Colour::LightGray => "light_gray",
+                Colour::Cyan => "cyan",
+                Colour::Purple => "purple",
+                Colour::Blue => "blue",
+                Colour::Brown => "brown",
+                Colour::Green => "green",
+                Colour::Red => "red",
+                Colour::Black => "black",
+            }
+        )
     }
 }
 

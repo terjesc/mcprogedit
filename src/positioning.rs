@@ -516,10 +516,14 @@ impl Axis2 {
 
 impl fmt::Display for Axis2 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Axis2::X => "x",
-            Axis2::Z => "z",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Axis2::X => "x",
+                Axis2::Z => "z",
+            }
+        )
     }
 }
 
@@ -633,12 +637,16 @@ impl Surface4 {
 
 impl fmt::Display for Surface4 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Surface4::East => "east",
-            Surface4::North => "north",
-            Surface4::South => "south",
-            Surface4::West => "west",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Surface4::East => "east",
+                Surface4::North => "north",
+                Surface4::South => "south",
+                Surface4::West => "west",
+            }
+        )
     }
 }
 
@@ -674,13 +682,17 @@ pub enum Surface5 {
 
 impl fmt::Display for Surface5 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Surface5::Down => "down",
-            Surface5::East => "east",
-            Surface5::North => "north",
-            Surface5::South => "south",
-            Surface5::West => "west",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Surface5::Down => "down",
+                Surface5::East => "east",
+                Surface5::North => "north",
+                Surface5::South => "south",
+                Surface5::West => "west",
+            }
+        )
     }
 }
 
@@ -718,14 +730,18 @@ pub enum Surface6 {
 
 impl fmt::Display for Surface6 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Surface6::Down => "down",
-            Surface6::East => "east",
-            Surface6::North => "north",
-            Surface6::South => "south",
-            Surface6::Up => "up",
-            Surface6::West => "west",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Surface6::Down => "down",
+                Surface6::East => "east",
+                Surface6::North => "north",
+                Surface6::South => "south",
+                Surface6::Up => "up",
+                Surface6::West => "west",
+            }
+        )
     }
 }
 
@@ -767,36 +783,20 @@ pub enum Edge8 {
 impl Edge8 {
     pub fn try_closest_down_from(item: Direction) -> Result<Self, DirectionError> {
         match item {
-            Direction::DownEast
-            | Direction::East
-            | Direction::UpEast => Ok(Self::DownEast),
-            Direction::DownWest
-            | Direction::West
-            | Direction::UpWest => Ok(Self::DownWest),
-            Direction::DownSouth
-            | Direction::South
-            | Direction::UpSouth => Ok(Self::DownSouth),
-            Direction::DownNorth
-            | Direction::North
-            | Direction::UpNorth => Ok(Self::DownNorth),
+            Direction::DownEast | Direction::East | Direction::UpEast => Ok(Self::DownEast),
+            Direction::DownWest | Direction::West | Direction::UpWest => Ok(Self::DownWest),
+            Direction::DownSouth | Direction::South | Direction::UpSouth => Ok(Self::DownSouth),
+            Direction::DownNorth | Direction::North | Direction::UpNorth => Ok(Self::DownNorth),
             _ => Err(DirectionError::TryFrom(item)),
         }
     }
 
     pub fn try_closest_up_from(item: Direction) -> Result<Self, DirectionError> {
         match item {
-            Direction::DownEast
-            | Direction::East
-            | Direction::UpEast => Ok(Self::UpEast),
-            Direction::DownWest
-            | Direction::West
-            | Direction::UpWest => Ok(Self::UpWest),
-            Direction::DownSouth
-            | Direction::South
-            | Direction::UpSouth => Ok(Self::UpSouth),
-            Direction::DownNorth
-            | Direction::North
-            | Direction::UpNorth => Ok(Self::UpNorth),
+            Direction::DownEast | Direction::East | Direction::UpEast => Ok(Self::UpEast),
+            Direction::DownWest | Direction::West | Direction::UpWest => Ok(Self::UpWest),
+            Direction::DownSouth | Direction::South | Direction::UpSouth => Ok(Self::UpSouth),
+            Direction::DownNorth | Direction::North | Direction::UpNorth => Ok(Self::UpNorth),
             _ => Err(DirectionError::TryFrom(item)),
         }
     }

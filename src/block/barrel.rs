@@ -34,7 +34,7 @@ impl Barrel {
                 items: self.items.clone(),
                 loot_table: None,      // TODO
                 loot_table_seed: None, // TODO
-            }
+            },
         }
     }
 }

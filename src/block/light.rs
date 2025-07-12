@@ -107,11 +107,17 @@ impl Block {
     }
 
     pub fn is_affecting_sky_light_new(&self) -> bool {
-        !matches!(self.light_blocking_property_new(), LightBlockingProperty::Transparent)
+        !matches!(
+            self.light_blocking_property_new(),
+            LightBlockingProperty::Transparent
+        )
     }
 
     pub fn is_affecting_sky_light_old(&self) -> bool {
-        !matches!(self.light_blocking_property_old(), LightBlockingProperty::Transparent)
+        !matches!(
+            self.light_blocking_property_old(),
+            LightBlockingProperty::Transparent
+        )
     }
 
     pub fn light_blocking_property_new(&self) -> LightBlockingProperty {

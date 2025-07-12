@@ -66,11 +66,15 @@ pub enum SlabVariant {
 
 impl fmt::Display for SlabVariant {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            SlabVariant::Bottom => "bottom",
-            SlabVariant::Double => "double",
-            SlabVariant::Top => "top",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                SlabVariant::Bottom => "bottom",
+                SlabVariant::Double => "double",
+                SlabVariant::Top => "top",
+            }
+        )
     }
 }
 
@@ -111,18 +115,22 @@ pub enum RailShape {
 
 impl fmt::Display for RailShape {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            RailShape::NorthSouth => "north_south",
-            RailShape::EastWest => "east_west",
-            RailShape::NorthEast => "north_east",
-            RailShape::NorthWest => "north_west",
-            RailShape::SouthEast => "south_east",
-            RailShape::SouthWest => "south_west",
-            RailShape::AscendingNorth => "ascending_north",
-            RailShape::AscendingSouth => "ascending_south",
-            RailShape::AscendingEast => "ascending_east",
-            RailShape::AscendingWest => "ascending_west",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                RailShape::NorthSouth => "north_south",
+                RailShape::EastWest => "east_west",
+                RailShape::NorthEast => "north_east",
+                RailShape::NorthWest => "north_west",
+                RailShape::SouthEast => "south_east",
+                RailShape::SouthWest => "south_west",
+                RailShape::AscendingNorth => "ascending_north",
+                RailShape::AscendingSouth => "ascending_south",
+                RailShape::AscendingEast => "ascending_east",
+                RailShape::AscendingWest => "ascending_west",
+            }
+        )
     }
 }
 
@@ -378,8 +386,8 @@ pub enum Block {
     BlockOfNetherite,
     BlockOfQuartz,
     BlockOfRawCopper, // TODO 1.17
-    BlockOfRawGold, // TODO 1.17
-    BlockOfRawIron, // TODO 1.17
+    BlockOfRawGold,   // TODO 1.17
+    BlockOfRawIron,   // TODO 1.17
     BlockOfRedstone,
     BlockOfSlime,
     BlueIce,
@@ -410,7 +418,8 @@ pub enum Block {
         lit: bool,
         waterlogged: bool,
     },
-    Candle { // TODO 1.17
+    Candle {
+        // TODO 1.17
         colour: Option<Colour>,
         count: Int1Through4,
         lit: bool,
@@ -678,7 +687,7 @@ pub enum Block {
     MelonStem {
         state: StemState,
     },
-    Moss, // TODO 1.17
+    Moss,       // TODO 1.17
     MossCarpet, // TODO 1.17
     MossyCobblestone,
     MossyStoneBricks,
@@ -1320,7 +1329,9 @@ impl Block {
             Self::Smoker(furnace) => furnace.has_facing_of(direction),
             Self::SoulCampfire { facing, .. } => Direction::from(*facing) == direction,
             Self::SoulLantern { mounted_at, .. } => Direction::from(*mounted_at) == direction,
-            Self::SoulTorch { mounted_at, .. } => Direction::from(*mounted_at).opposite() == direction,
+            Self::SoulTorch { mounted_at, .. } => {
+                Direction::from(*mounted_at).opposite() == direction
+            }
             Self::Stairs(stair) => stair.has_facing_of(direction),
             Self::StickyPiston { facing, .. } => Direction::from(*facing) == direction,
             Self::Stonecutter { facing, .. } => Direction::from(*facing) == direction,
@@ -1747,7 +1758,10 @@ impl Block {
 
     /// Returns a oak button of the given placemnet.
     pub fn oak_button(facing: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(facing).unwrap())
+        Self::Button(
+            ButtonMaterial::Oak,
+            SurfaceRotation12::try_from(facing).unwrap(),
+        )
     }
 
     /// Returns an oak fence.
@@ -2023,24 +2037,20 @@ impl Block {
 
     /// Returns a stairs of the given direction and material.
     pub fn stairs(facing: Direction, material: Material) -> Self {
-        Self::Stairs(
-            Stair {
-                material: StairMaterial::try_from(material).unwrap(),
-                position: Edge8::try_closest_down_from(facing).unwrap(),
-                waterlogged: false,
-            }
-        )
+        Self::Stairs(Stair {
+            material: StairMaterial::try_from(material).unwrap(),
+            position: Edge8::try_closest_down_from(facing).unwrap(),
+            waterlogged: false,
+        })
     }
 
     /// Returns an upside down stairs of the given direction and material.
     pub fn stairs_inverted(facing: Direction, material: Material) -> Self {
-        Self::Stairs(
-            Stair {
-                material: StairMaterial::try_from(material).unwrap(),
-                position: Edge8::try_closest_up_from(facing).unwrap(),
-                waterlogged: false,
-            }
-        )
+        Self::Stairs(Stair {
+            material: StairMaterial::try_from(material).unwrap(),
+            position: Edge8::try_closest_up_from(facing).unwrap(),
+            waterlogged: false,
+        })
     }
 
     /// Returns a stone button of the given placemnet.
@@ -2110,7 +2120,10 @@ impl Block {
 
     /// Returns a wooden button of the given placemnet.
     pub fn wooden_button(facing: Direction) -> Self {
-        Self::Button(ButtonMaterial::Oak, SurfaceRotation12::try_from(facing).unwrap())
+        Self::Button(
+            ButtonMaterial::Oak,
+            SurfaceRotation12::try_from(facing).unwrap(),
+        )
     }
 
     /// Returns a wool block of the given colour.

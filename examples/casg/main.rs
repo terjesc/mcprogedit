@@ -12,9 +12,9 @@ extern crate rand;
 use std::collections::VecDeque;
 use std::path::Path;
 
+use crate::rand::Rng;
 use mcprogedit::block::*;
 use mcprogedit::world_excerpt::WorldExcerpt;
-use crate::rand::Rng;
 
 fn main() {
     // Read arguments
@@ -114,7 +114,11 @@ impl BoundingBox {
             // Creating the bounding boxes
             if is_width {
                 queue.push_back(BoundingBox {
-                    position: (split_me.position.0, split_me.position.1, split_me.position.2),
+                    position: (
+                        split_me.position.0,
+                        split_me.position.1,
+                        split_me.position.2,
+                    ),
                     size: (new_bound - 1, height, depth),
                 });
                 queue.push_back(BoundingBox {
@@ -127,7 +131,11 @@ impl BoundingBox {
                 });
             } else {
                 queue.push_back(BoundingBox {
-                    position: (split_me.position.0, split_me.position.1, split_me.position.2),
+                    position: (
+                        split_me.position.0,
+                        split_me.position.1,
+                        split_me.position.2,
+                    ),
                     size: (width, height, new_bound - 1),
                 });
                 queue.push_back(BoundingBox {
@@ -169,7 +177,7 @@ fn build_fence(excerpt: &mut WorldExcerpt, yard: BoundingBox) {
         for y in (miny..maxy).rev() {
             if let Some(block) = excerpt.block_at((x, y, maxz).into()) {
                 if block.is_solid() {
-                    excerpt.set_block_at((x, y+1, maxz).into(), Block::oak_fence());
+                    excerpt.set_block_at((x, y + 1, maxz).into(), Block::oak_fence());
                     break;
                 }
             }
@@ -181,7 +189,7 @@ fn build_fence(excerpt: &mut WorldExcerpt, yard: BoundingBox) {
         for y in (miny..maxy).rev() {
             if let Some(block) = excerpt.block_at((x, y, minz).into()) {
                 if block.is_solid() {
-                    excerpt.set_block_at((x, y+1, minz).into(), Block::oak_fence());
+                    excerpt.set_block_at((x, y + 1, minz).into(), Block::oak_fence());
                     break;
                 }
             }
@@ -193,7 +201,7 @@ fn build_fence(excerpt: &mut WorldExcerpt, yard: BoundingBox) {
         for y in (miny..maxy).rev() {
             if let Some(block) = excerpt.block_at((minx, y, z).into()) {
                 if block.is_solid() {
-                    excerpt.set_block_at((minx, y+1, z).into(), Block::oak_fence());
+                    excerpt.set_block_at((minx, y + 1, z).into(), Block::oak_fence());
                     break;
                 }
             }
@@ -205,7 +213,7 @@ fn build_fence(excerpt: &mut WorldExcerpt, yard: BoundingBox) {
         for y in (miny..maxy).rev() {
             if let Some(block) = excerpt.block_at((maxx, y, z).into()) {
                 if block.is_solid() {
-                    excerpt.set_block_at((maxx, y+1, z).into(), Block::oak_fence());
+                    excerpt.set_block_at((maxx, y + 1, z).into(), Block::oak_fence());
                     break;
                 }
             }
@@ -272,25 +280,25 @@ fn create_pillars(excerpt: &mut WorldExcerpt, floor: BoundingBox) -> (i64, i64, 
     let mut midpoint_floor_height = 0;
     for y in (miny..maxy).rev() {
         if excerpt.block_at((minx, y, minz).into()) != Some(&Block::Air) {
-            corner_block_starts.push((minx, y+1, minz));
+            corner_block_starts.push((minx, y + 1, minz));
             break;
         }
     }
     for y in (miny..maxy).rev() {
         if excerpt.block_at((minx, y, maxz).into()) != Some(&Block::Air) {
-            corner_block_starts.push((minx, y+1, maxz));
+            corner_block_starts.push((minx, y + 1, maxz));
             break;
         }
     }
     for y in (miny..maxy).rev() {
         if excerpt.block_at((maxx, y, minz).into()) != Some(&Block::Air) {
-            corner_block_starts.push((maxx, y+1, minz));
+            corner_block_starts.push((maxx, y + 1, minz));
             break;
         }
     }
     for y in (miny..maxy).rev() {
         if excerpt.block_at((maxx, y, maxz).into()) != Some(&Block::Air) {
-            corner_block_starts.push((maxx, y+1, maxz));
+            corner_block_starts.push((maxx, y + 1, maxz));
             break;
         }
     }

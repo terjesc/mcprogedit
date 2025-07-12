@@ -77,10 +77,14 @@ pub enum DoorHalf {
 
 impl fmt::Display for DoorHalf {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            DoorHalf::Lower => "lower",
-            DoorHalf::Upper => "upper",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                DoorHalf::Lower => "lower",
+                DoorHalf::Upper => "upper",
+            }
+        )
     }
 }
 
@@ -95,9 +99,13 @@ pub enum Hinge {
 
 impl fmt::Display for Hinge {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Hinge::Left => "left",
-            Hinge::Right => "right",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Hinge::Left => "left",
+                Hinge::Right => "right",
+            }
+        )
     }
 }

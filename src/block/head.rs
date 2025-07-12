@@ -39,7 +39,7 @@ impl Head {
                 keep_packed: false,
             },
             skull_type: None, // TODO fill for pre flattening
-            facing: None, // TODO fill for pre flattening
+            facing: None,     // TODO fill for pre flattening
         }
     }
 }

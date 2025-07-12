@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use log::warn;
+use std::collections::HashMap;
 
 use crate::block::*;
 use crate::block_cuboid::BlockCuboid;
@@ -44,15 +44,13 @@ impl Chunk {
                         Some(Block::Bed(_)) => {
                             Some(CommonTags::new_nbt("minecraft:bed", block_coordinates))
                         }
-                        Some(Block::Beehive(beehive))
-                        | Some(Block::BeeNest(beehive)) => {
+                        Some(Block::Beehive(beehive)) | Some(Block::BeeNest(beehive)) => {
                             beehive.to_block_entity(block_coordinates).to_nbt_value()
                         }
-                        Some(Block::BlastFurnace(furnace)) => {
-                            furnace.to_block_entity("minecraft:blast_furnace", block_coordinates).to_nbt_value()
-                        }
-                        Some(Block::Campfire { .. })
-                        | Some(Block::SoulCampfire { .. }) => {
+                        Some(Block::BlastFurnace(furnace)) => furnace
+                            .to_block_entity("minecraft:blast_furnace", block_coordinates)
+                            .to_nbt_value(),
+                        Some(Block::Campfire { .. }) | Some(Block::SoulCampfire { .. }) => {
                             // TODO Items, CookingTimes and CookingTotalTimes
                             Some(CommonTags::new_nbt("minecraft:campfire", block_coordinates))
                         }
@@ -65,15 +63,17 @@ impl Chunk {
                         Some(Block::Dropper(dropper)) => {
                             dropper.to_block_entity(block_coordinates).to_nbt_value()
                         }
-                        Some(Block::EnderChest { .. }) => {
-                            Some(CommonTags::new_nbt("minecraft:ender_chest", block_coordinates))
-                        }
-                        Some(Block::EndPortal) => {
-                            Some(CommonTags::new_nbt("minecraft:end_portal", block_coordinates))
-                        }
-                        Some(Block::Furnace(furnace)) => {
-                            furnace.to_block_entity("minecraft:furnace", block_coordinates).to_nbt_value()
-                        }
+                        Some(Block::EnderChest { .. }) => Some(CommonTags::new_nbt(
+                            "minecraft:ender_chest",
+                            block_coordinates,
+                        )),
+                        Some(Block::EndPortal) => Some(CommonTags::new_nbt(
+                            "minecraft:end_portal",
+                            block_coordinates,
+                        )),
+                        Some(Block::Furnace(furnace)) => furnace
+                            .to_block_entity("minecraft:furnace", block_coordinates)
+                            .to_nbt_value(),
                         Some(Block::Head(head)) => {
                             head.to_block_entity(block_coordinates).to_nbt_value()
                         }
@@ -86,18 +86,18 @@ impl Chunk {
                         Some(Block::Noteblock(noteblock)) => {
                             noteblock.to_block_entity(block_coordinates).to_nbt_value()
                         }
-                        Some(Block::ShulkerBox(shulker_box)) => {
-                            shulker_box.to_block_entity(block_coordinates).to_nbt_value()
-                        }
+                        Some(Block::ShulkerBox(shulker_box)) => shulker_box
+                            .to_block_entity(block_coordinates)
+                            .to_nbt_value(),
                         Some(Block::Sign(sign)) => {
                             sign.to_block_entity(block_coordinates).to_nbt_value()
                         }
-                        Some(Block::Smoker(furnace)) => {
-                            furnace.to_block_entity("minecraft:smoker", block_coordinates).to_nbt_value()
-                        }
-                        Some(Block::TrappedChest(trapped_chest)) => {
-                            trapped_chest.to_trapped_block_entity(block_coordinates).to_nbt_value()
-                        }
+                        Some(Block::Smoker(furnace)) => furnace
+                            .to_block_entity("minecraft:smoker", block_coordinates)
+                            .to_nbt_value(),
+                        Some(Block::TrappedChest(trapped_chest)) => trapped_chest
+                            .to_trapped_block_entity(block_coordinates)
+                            .to_nbt_value(),
                         // TODO add handling of other blocks with entities
                         //Some(block) => { println!("Block found: {:?}", block); None },
                         _ => None,
@@ -923,15 +923,15 @@ impl Chunk {
             ) {
                 //north south  east   west   top    bottom
                 (false, false, false, false, false, false) => 0, // co caps (all pores)
-                (true, false, false, true, _, false) => 1, // north west top
-                (true, false, false, false, _, false) => 2, // north top
-                (true, false, true, false, _, false) => 3, // north east top
-                (false, false, false, true, _, false) => 4, // west top
-                (false, false, false, false, true, false) => 5, // top
-                (false, false, true, false, _, false) => 6, // east top
-                (false, true, false, true, _, false) => 7, // south west top
-                (false, true, false, false, _, false) => 8, // south top
-                (false, true, true, false, _, false) => 9, // south east top
+                (true, false, false, true, _, false) => 1,       // north west top
+                (true, false, false, false, _, false) => 2,      // north top
+                (true, false, true, false, _, false) => 3,       // north east top
+                (false, false, false, true, _, false) => 4,      // west top
+                (false, false, false, false, true, false) => 5,  // top
+                (false, false, true, false, _, false) => 6,      // east top
+                (false, true, false, true, _, false) => 7,       // south west top
+                (false, true, false, false, _, false) => 8,      // south top
+                (false, true, true, false, _, false) => 9,       // south east top
                 (_, _, _, _, _, true) => 14, // all sides (only way to get bottom)
                 _ => 14, // final fallback to all caps; could perhaps be improved
             }
@@ -948,13 +948,13 @@ impl Chunk {
             ) {
                 //north south  east   west   top    bottom
                 (false, false, false, false, false, false) => 0, // no stem (all pores)
-                (true, true, true, true, false, false) => 10, // north south east west
-                (true, true, true, true, true, true) => 15, // all sides
+                (true, true, true, true, false, false) => 10,    // north south east west
+                (true, true, true, true, true, true) => 15,      // all sides
                 // fallbacks
                 (_, _, _, _, _, true) => 15, // bottom only available through pattern 15
                 (_, _, _, _, true, _) => 15, // top only available through pattern 15
                 (_, _, _, _, false, false) => 10, // best pattern for any side combo
-                //_ => 0, // fallback to all pores; could perhaps be improved
+                                              //_ => 0, // fallback to all pores; could perhaps be improved
             }
         }
 
@@ -1001,7 +1001,8 @@ impl Chunk {
             &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
-        let data = utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
+        let data =
+            utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         return blocks
             .iter()
@@ -1096,7 +1097,8 @@ impl Chunk {
             &nbt_value_lookup_byte_array(section, "Add")
                 .unwrap_or_else(|_| vec![0; blocks.len() / 2]),
         );
-        let data = utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
+        let data =
+            utils::packed_nibbles_to_bytes(&nbt_value_lookup_byte_array(section, "Data").unwrap());
 
         //let mut block_cuboid = BlockCuboid::new((16, 16, 16));
         blocks
@@ -1239,9 +1241,7 @@ impl Chunk {
                             let block_entity = block_entities.get(&coordinates).unwrap();
 
                             if let BlockEntity::Noteblock { note, .. } = block_entity {
-                                Block::Noteblock(Noteblock {
-                                    pitch: *note,
-                                })
+                                Block::Noteblock(Noteblock { pitch: *note })
                             } else {
                                 panic!("Wrong block entity variant for note block")
                             }
@@ -1310,7 +1310,7 @@ impl Chunk {
                                     // TODO give info about coordinates?
                                 );
                                 Flower::Poppy
-                            },
+                            }
                         }),
                         39 => Block::BrownMushroom,
                         40 => Block::RedMushroom,
@@ -1516,12 +1516,8 @@ impl Chunk {
                         72 => Block::PressurePlate {
                             material: PressurePlateMaterial::Oak,
                         },
-                        73 => Block::RedstoneOre {
-                            lit: false,
-                        },
-                        74 => Block::RedstoneOre {
-                            lit: true,
-                        },
+                        73 => Block::RedstoneOre { lit: false },
+                        74 => Block::RedstoneOre { lit: true },
                         75 | 76 => Block::RedstoneTorch {
                             mounted_at: facing5_xwensd(data[index]),
                         },
@@ -1860,7 +1856,9 @@ impl Chunk {
                             let block_entity = block_entities.get(&coordinates).unwrap();
 
                             match block_entity {
-                                BlockEntity::Skull { skull_type, facing, .. } => {
+                                BlockEntity::Skull {
+                                    skull_type, facing, ..
+                                } => {
                                     let facing = facing.unwrap_or(Direction16::default());
                                     let skull_type = skull_type.unwrap_or(HeadVariant::default());
                                     Block::Head(Head {
@@ -2413,12 +2411,10 @@ impl Chunk {
         // Parse relevant NBT data
         let section_y_index = nbt_value_lookup_byte(section, "Y").unwrap() as i64;
         let section_block_light = utils::packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(section, "BlockLight")
-                .unwrap_or_else(|_| vec![0; 2048]),
+            &nbt_value_lookup_byte_array(section, "BlockLight").unwrap_or_else(|_| vec![0; 2048]),
         );
         let section_sky_light = utils::packed_nibbles_to_bytes(
-            &nbt_value_lookup_byte_array(section, "SkyLight")
-                .unwrap_or_else(|_| vec![0; 2048]),
+            &nbt_value_lookup_byte_array(section, "SkyLight").unwrap_or_else(|_| vec![0; 2048]),
         );
         let local_xz_offset = BlockCoord(0, 0, 0);
 
@@ -2433,4 +2429,3 @@ impl Chunk {
         }
     }
 }
-
