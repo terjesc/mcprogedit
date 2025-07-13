@@ -21,6 +21,8 @@ static_assertions = "1.1.0"
 strum = { version = "0.27", features = ["derive"] }
 thiserror = "1.0.23"
 
+mcprogedit_internal_derive = { path = "./mcprogedit_internal_derive" }
+
 [dev-dependencies]
 clap = "2.33.3"
 rand = "0.8.0"
