@@ -66,6 +66,10 @@ pub enum BannerPattern {
 }
 ```
 
+## API functionality
+
+TODO: Clean up and extend with all required API. In particular, it is probably best to distinguish between _public_ API, for general block creation, modification and probing, and API _internal_ to the mcprogedit implementation, such as conversions needed for import/export to Minecraft save formats.
+
 Creating a `BannerPattern` from a string would significantly simplify conversion from block entity data...
 
 ```rust

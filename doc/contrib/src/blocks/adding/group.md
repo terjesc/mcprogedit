@@ -17,6 +17,10 @@ pub enum Block {
 
 For this implementation, the colour is represented with an `Option`, in order for `colour: None` to represent the clear glass block variant. The similar implementation for `Block::Concrete { colour: Colour }` doesn't have any uncoloured variant to map, and therefore uses `Colour` directly. Other block types, such as `Block::Wall { .. }`, use other fields for distinguishing between variants.
 
+## API functionality
+
+TODO
+
 ## Block export
 
 The conversion to and from block ID, while slightly more involved than for the trivial case, is still simply an act of matching between enum variants and strings.
@@ -70,5 +74,10 @@ pub(super) fn from_section(section: &nbt::Value) -> Option<Vec<PaletteItem>> {
 
 If there are no block states or other data fields, then the main implementation is complete at this point, just as for implementing trivial blocks.
 
-TODO: Link to page on helper functions, lighting categories (transparence), etc.
+Still there is some bookkeeping. In the case of _glass_ blocks, they have _colour_, and so should be added to the colour related functions of the `Block` enum itself.
 
+TODO: Show colour related bookkeeping for `Block::Glass { .. }`.
+
+Other blocks, with other properties, should be added to the `Block` API functions for those properties. Also, there is the relevant general bookkeeping needed for all new blocks.
+
+TODO: Link to page on bookkeeping.

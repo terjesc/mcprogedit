@@ -10,10 +10,6 @@ TODO: Block with more parameters. Example: Coral? CoralFan?
 
 TODO: Blocks with struct. Example: Door?
 
-## Adding remaining book-keeping, congregate functions, etc.
-
-TODO: Lighting information (transparence, etc.) Direction, material, waterlogged, etc. congregate functions (polling for traits and values). Long term goal: Automate most of these. For now: Manual work.
-
 ## Some rambling about what is found in various files
 
 TODO: See what to do with the below rambling. Probably worth some kind of general overview of different data types and the philosophy behind them.

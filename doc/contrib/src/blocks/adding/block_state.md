@@ -17,6 +17,10 @@ pub enum Block {
 
 The above definition of the `Farmland` variant shouldn't be too surprising. _Farmland_ has a hydration level which can go from 0 to 7 inclusive, and `Int0Through7` is a data type which is bounded to that range. The below conversion to block ID is also straight-forward.
 
+## API functionality
+
+TODO
+
 ## Block export
 
 Mapping _farmland_ from `Block` to block ID, in _/src/chunk/palette.rs_:
@@ -152,7 +156,6 @@ There are currently a whole mess of convenience functions for extracting values 
 
 ## Bookkeeping
 
-Just as for trivial blocks and blocks with different variants, this is the point where the main implementation of the block is complete.
+Just as for trivial blocks and blocks with different variants, this is the point where the main implementation of the block is complete, and all which remains is the general bookkeeping needed for all blocks.
 
-TODO: Link to page on helper functions, lighting categories (transparence), etc.
-
+TODO: Link to page on bookkeeping.
